@@ -67,13 +67,13 @@ def chaoxing_login_check(cookie: str):
 	return d["result"] == 1
 
 def chaoxing_checkin_url(checkin_url: str, name: str, cookie: str, uid: str, location: str):
-	"""Checkin for Qrcode-Location checkins.
+	"""Qrcode-Location checkin.
 	:param checkin_url: URL from checkin qrcode.
 	:param name: Name.
 	:param cookie: Cookie.
 	:param uid: UID.
 	:param location: Location.
-	:return: Returns 1 if login success, otherwise 0.
+	:return: Returns 1 if checkin success, otherwise 0.
 	"""
 	params_l = parse_qs(urlparse(unquote(checkin_url)).query)
 	active_id, enc = params_l["activeId"][0], params_l["enc"][0]
