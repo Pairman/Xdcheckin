@@ -20,7 +20,7 @@ def chaoxing_login(username: str, password: str):
 	"""Login to Chaoxing account.
 	:param username: Username.
 	:param password: Password.
-	:return: Login cookie and UID.
+	:return: Cookie and UID.
 	"""
 	params = {
 		"code": password,
@@ -44,8 +44,8 @@ def chaoxing_login(username: str, password: str):
 
 def chaoxing_headers_get(cookie: str):
 	"""Get chaoxing request headers.
-	:param cookie: Login cookie.
-	:return: request headers.
+	:param cookie: Cookie.
+	:return: Headers.
 	"""
 	ua = "Mozilla/5.0 (iPhone; CPU iPhone OS 14_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 com.ssreader.ChaoXingStudy/ChaoXingStudy_3_4.8_ios_phone_202012052220_56 (@Kalimdor)_12787186548451577248"
 	headers = {
@@ -58,15 +58,23 @@ def chaoxing_headers_get(cookie: str):
 
 def chaoxing_login_check(cookie: str):
 	"""Check chaoxing account login state.
-	:param cookie: Login cookie.
-	:return: 1 if login state valid else 0.
+	:param cookie: Cookie.
+	:return: Returns 1 if login is valid, otherwise 0.
 	"""
 	url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 	res = requests.get(url, headers = chaoxing_headers_get(cookie))
 	d = loads(res.text)
 	return d["result"] == 1
 
-def chaoxing_checkin_url(checkin_url: str, name, cookie, uid, location):
+def chaoxing_checkin_url(checkin_url: str, name: str, cookie: str, uid: str, location: str):
+	"""Checkin for Qrcode-Location checkins.
+	:param checkin_url: URL from checkin qrcode.
+	:param name: Name.
+	:param cookie: Cookie.
+	:param uid: UID.
+	:param location: Location.
+	:return: Returns 1 if login success, otherwise 0.
+	"""
 	params_l = parse_qs(urlparse(unquote(checkin_url)).query)
 	active_id, enc = params_l["activeId"][0], params_l["enc"][0]
 	url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
