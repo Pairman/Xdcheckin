@@ -1,5 +1,4 @@
 from json import loads
-from os import path
 import requests
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -16,10 +15,11 @@ locations = {
 	"信远": "",
 }
 
-def chaoxing_login(username: str, password: str):
+def chaoxing_login(username: str, password: str, verify: int = 0):
 	"""Login to Chaoxing account.
 	:param username: Username.
 	:param password: Password.
+	:param verify: SSL certificate verification toggle.
 	:return: Cookie and UID.
 	"""
 	params = {
@@ -30,19 +30,20 @@ def chaoxing_login(username: str, password: str):
 		"uname": username
 	}
 	url = "https://passport2-api.chaoxing.com/v11/loginregister"
-	res = session.get(url, params = params)
+	res = session.get(url, params = params, verify = verify)
 	data = requests.utils.dict_from_cookiejar(session.cookies).items()
 	cookie = "".join((key + "=" + val + ";" for key, val in data))
 	d = loads(res.text)
 	if d["mes"] == "验证通过":
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
-		res = session.get(url)
+		res = session.get(url, verify = verify)
 		d = loads(res.text)
 		if d["result"] == 1:
-			return {"cookie": cookie, "uid": str(d["msg"]["puid"])}
-	return {"cookie": "", "uid": ""}
+			name, fid, uid = str(d["msg"]["name"]), str(d["msg"]["fid"]), str(d["msg"]["puid"])
+			return {"cookie": cookie, name: name, "uid": uid, "fid": fid}
+	return {"cookie": "", name: "", "uid": "", "fid": ""}
 
-def chaoxing_headers_get(cookie: str):
+def chaoxing_headers(cookie: str):
 	"""Get chaoxing request headers.
 	:param cookie: Cookie.
 	:return: Headers.
@@ -56,27 +57,30 @@ def chaoxing_headers_get(cookie: str):
 	}
 	return headers
 
-def chaoxing_login_check(cookie: str):
+def chaoxing_login_check(cookie: str, verify: int = 0):
 	"""Check chaoxing account login state.
 	:param cookie: Cookie.
+	:param verify: SSL certificate verification toggle.
 	:return: Returns 1 if login is valid, otherwise 0.
 	"""
 	url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
-	res = requests.get(url, headers = chaoxing_headers_get(cookie))
+	res = requests.get(url, headers = chaoxing_headers(cookie), verify = verify)
 	d = loads(res.text)
 	return d["result"] == 1
 
-def chaoxing_checkin_url(checkin_url: str, name: str, cookie: str, uid: str, location: str):
+def chaoxing_checkin_url(checkin_url: str, name: str, cookie: str, uid: str, fid: str, location: str, verify: int = 0):
 	"""Qrcode-Location checkin.
 	:param checkin_url: URL from checkin qrcode.
 	:param name: Name.
 	:param cookie: Cookie.
 	:param uid: UID.
+	:param uid: FID.
 	:param location: Location.
+	:param verify: SSL certificate verification toggle.
 	:return: Returns 1 if checkin success, otherwise 0.
 	"""
 	params_l = parse_qs(urlparse(unquote(checkin_url)).query)
-	active_id, enc = params_l["activeId"][0], params_l["enc"][0]
+	active_id, enc = params_l["id"][0], params_l["enc"][0]
 	url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 	params = {
 		'enc': enc,
@@ -86,8 +90,8 @@ def chaoxing_checkin_url(checkin_url: str, name: str, cookie: str, uid: str, loc
 		'location': location,
 		'latitude': '-1',
 		'longitude': '-1',
-		'fid': '16820',
+		'fid': fid,
 		'appType': '15'
 	}
-	res = requests.get(url, params = params, headers = chaoxing_headers_get(cookie))
+	res = requests.get(url, params = params, headers = chaoxing_headers(cookie), verify = verify)
 	return res.text == "success"
