@@ -20,5 +20,5 @@ with open(path.dirname(__file__) + "/config.json", "w", encoding = "utf-8") as c
 	dump(config, config_file, indent = "\t", ensure_ascii = False)
 
 # Checkin.
-while (checkin_url := input("[xdcheckin] (checkin) input checkin url: "):
+while checkin_url := input("[xdcheckin] (checkin) input checkin url: "):
 	chaoxing_checkin_url(checkin_url, config["name"], config["cookie"], config["uid"], config["location"])
