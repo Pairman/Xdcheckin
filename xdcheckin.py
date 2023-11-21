@@ -9,7 +9,7 @@ with open(path.dirname(__file__) + "/config.json", "r", encoding = "utf-8") as c
 # Login.
 if not chaoxing_login_check(config["cookie"]):
 	ret = chaoxing_login(config["username"], config["password"])
-	config["cookie"], config["uid"] = ret["cookie"], ret["uid"]
+	config["cookie"], config["name"], config["fid"], config["uid"], config = ret["cookie"], ret["name"], ret["fid"], ret["uid"]
 	if not chaoxing_login_check(config["cookie"]):
 		exit("[xdcheckin] (login) failed.")
 	print("[xdcheckin] (login) success.")
