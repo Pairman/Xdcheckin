@@ -1,39 +1,47 @@
-from json import load, dump
-from os import path
+from cv2 import VideoCapture, imshow, waitKey, destroyAllWindows, QRCodeDetector
+from json import load
 from utils.chaoxing import *
 
-# Load config.
-with open(path.dirname(__file__) + "/config.json", "r", encoding = "utf-8") as config_file:
-	config = load(config_file)
+def scan_checkin():
+	"""QR-Location checkin via camera scan.
+	"""
+	video = VideoCapture(0)
+	qcd = QRCodeDetector()
+	decoded_data_set_old = set()
+	while True:
+		frame = video.read()[1]
+		decoded_data_set = set(qcd.detectAndDecodeMulti(frame)[1])
+		if len(decoded_data_set) and decoded_data_set != decoded_data_set_old:
+				print(decoded_data_set_old := decoded_data_set)
+				for url in decoded_data_set:
+					success = 0
+					try:
+						success = chaoxing_checkin_qrloc_checkin_url(url, config, locations["B"])
+					except Exception:
+						print(Exception)
+					print("[xdcheckin] (scan_checkin) %s" % "checkin success" if success else "checkin failed")
+		imshow("frame", frame)
+		if waitKey(1) & 0xFF == ord("q"):
+			break
+	video.release()
+	destroyAllWindows()
 
-# Login.
-if not chaoxing_login_check(config.get("cookie")):
-	ret = chaoxing_login(config["username"], config["password"])
-	config["cookie"], config["name"], config["fid"], config["uid"] = ret["cookie"], ret["name"], ret["fid"], ret["uid"]
-	if not chaoxing_login_check(config["cookie"]):
-		exit("[xdcheckin] (login) failed.")
-	print("[xdcheckin] (login) success.")
-print("[xdcheckin] (login) session retrieved.")
+def loc_checkin():
+	"""Location checkin from user input.
+	"""
+	while active_id := input():
+		try:
+			success = chaoxing_checkin_loc_checkin(active_id = active_id, userinfo = userinfo, location = locations["B"])
+		except Exception:
+			print(Exception)
+		print("[xdcheckin] (loc_checkin) %s" % "checkin success" if success else "checkin failed")
 
-# Save config.
-with open(path.dirname(__file__) + "/config.json", "w", encoding = "utf-8") as config_file:
-	dump(config, config_file, indent = "\t", ensure_ascii = False)
-
-from cv2 import VideoCapture, imshow, waitKey, destroyAllWindows, QRCodeDetector
-
-# Checkin.
-video = VideoCapture(0)
-qcd = QRCodeDetector()
-decoded_data_set_old = set()
-while True:
-	frame = video.read()[1]
-	decoded_data_set = set(qcd.detectAndDecodeMulti(frame)[1])
-	if len(decoded_data_set) and decoded_data_set != decoded_data_set_old and sum((chaoxing_checkin_url_checkurl(url) for url in decoded_data_set)):
-			print(decoded_data_set_old := decoded_data_set)
-			for url in decoded_data_set:
-				print("[xdcheckin] (checkin) %s" % "checkin success" if chaoxing_checkin_url(url, config, locations["B"]) else "checkin failed")
-	imshow("frame", frame)
-	if waitKey(1) & 0xFF == ord("q"):
-		break
-video.release()
-destroyAllWindows()
+if __name__ == "__main__":
+	# Login.
+	with open("config.json", "r", encoding = "utf-8") as config_file:
+		config = load(config_file)
+		if not (userinfo := chaoxing_login(config["username"], config["password"])):
+			exit("[xdcheckin] (login) failed.")
+		print("[xdcheckin] (login) success.")
+	# Checkin.
+	loc_checkin()
