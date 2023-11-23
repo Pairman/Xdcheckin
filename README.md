@@ -9,7 +9,10 @@ Python based Chaoxing checkin tool for XDU.
 # Usage
 For average users: <br>
     1. Installed dependencies if any unmet. <br>
-    2. Modify ```xdcheckin.py``` (call ```qr()``` for qrcode checkin or ```loc()``` for location checkin) and run.
+    2. Modify ```xdcheckin.py``` <br>
+          i. Fill ```config.json``` with your Chaoxing username and password.
+         ii. Modify location according to your need. Defaulted to ```chaoxing.locations["B"]```.
+        iii. Use ```qr()``` for qrcode checkins, otherwise ```loc()```. Defaulted to ```qr()```.
 
 For devs:
     Check ```chaoxing/chaoxing.py``` for APIs.
