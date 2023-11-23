@@ -144,7 +144,7 @@ class Chaoxing:
 			return False
 
 	def checkin_check_designatedplace(self, activity: dict[str, str] = {"active_id": ""}) -> bool:
-		"""Check if designated location is enabled. Defaults to True.
+		"""Check if designated location is enabled. Defaults to True. Must be called for all checkin types.
 		:param activity: Activity ID in dictionary.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
