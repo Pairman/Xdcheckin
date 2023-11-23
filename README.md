@@ -8,7 +8,7 @@ Python based Chaoxing checkin tool for XDU.
 
 # Usage
 For average users: <br>
-&emsp;&emsp;1. Installed dependencies if any unmet. <br>
+&nbsp;1. Installed dependencies if any unmet. <br>
 &emsp;&emsp;2. Modify ```xdcheckin.py``` <br>
           i. Fill ```config.json``` with your Chaoxing username and password. <br>
          ii. Modify location according to your need. Defaulted to ```chaoxing.locations["B"]```. <br>
