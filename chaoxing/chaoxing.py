@@ -167,7 +167,7 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		assert self.checkin_do_presign(activity = activity)
 		assert self.checkin_do_analysis(activity = activity)
-		ranged = int(self.checkin_check_designatedplace(activity = activity))
+		ranged = + self.checkin_check_designatedplace(activity = activity)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"address": location["address"] if ranged else "",
