@@ -36,7 +36,7 @@ class Chaoxing{
 				let status_code = undefined;
 				let text = undefined;
 				let response = $.ajax({
-					cache: false,
+					cache: true,
 					type: "GET",
 					async: false,
 					xhrFields: {
