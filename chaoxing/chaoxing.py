@@ -39,19 +39,17 @@ class Chaoxing:
 		}
 		url2 = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
-			res1 = self.get(url1, params1, verify = 0)
+			res1 = self.get(url1, params1)
 			assert res1.json()["status"]
 			res2 = self.get(url2, cookies = res1.cookies)
 			data = res2.json()
 			assert data["result"]
-			uid = requests.utils.dict_from_cookiejar(res1.cookies)["_uid"]
 			return {
 				"name": str(data["msg"]["name"]),
-				"uid": uid,
+				"uid": str(data["msg"]["puid"]),
 				"cookies": res1.cookies
 			}
 		except Exception:
-			print(1)
 			return False
 
 	def get_courses(self) -> dict[str, str] | bool:
