@@ -39,7 +39,7 @@ class Chaoxing:
 		}
 		url2 = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
-			res1 = self.get(url1, params1, verify = 0)
+			res1 = self.get(url1, params1)
 			assert res1.json()["status"]
 			res2 = self.get(url2, cookies = res1.cookies)
 			data = res2.json()
