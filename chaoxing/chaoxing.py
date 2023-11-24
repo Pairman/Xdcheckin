@@ -51,7 +51,6 @@ class Chaoxing:
 				"cookies": res1.cookies
 			}
 		except Exception:
-			print(1)
 			return False
 
 	def get_courses(self) -> dict[str, str] | bool:
