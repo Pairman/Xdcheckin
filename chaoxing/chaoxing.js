@@ -20,6 +20,7 @@ class Chaoxing{
 			this.uid = login["uid"];
 			/* this.cookies = login["cookies"]; */
 			this.courses = this.get_courses();
+			assert(Object.keys(this.courses).length);
 			this.logined = (login != false);
 		}
 		catch (error) {
@@ -109,6 +110,48 @@ class Chaoxing{
 		}
 	}
 
+	get_course_activities(course = {"course_id": "", "class_id": ""}) {
+		let url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist";
+		let params = {
+			"fid": 0,
+			"courseId": course["course_id"] ? course["course_id"] : this.courses[course["class_id"]],
+			"classId": course["class_id"],
+			"showNotStartedActive": 0
+		};
+		try {
+			let res = this.get(url, params);
+			let data = res.json()["data"]["activeList"];
+			let activities = [];
+			for (let i in data) {
+				let activity = data[i];
+				if (activity["status"] == 1 && (activity["otherId"] == "4" || activity["otherId"] == "2"))
+					activities.push({"active_id": activity["id"], "type": activity["otherId"], "time_left": activity["nameFour"]});
+			}
+			assert(activities.length);
+			return activities;
+		}
+		catch (error) {
+			return false;
+		}
+	}
+
+	get_activities() {
+		try {
+			let activities = {};
+			for (let class_id in this.courses) {
+				let course_id = this.courses[class_id];
+				let activity = this.get_course_activities({"course_id": course_id, "class_id": class_id});
+				if (Object.keys(activity).length)
+					activities[class_id] = activity;
+			}
+			assert(Object.keys(activities).length);
+			return activities;
+		}
+		catch (error) {
+			return false;
+		}
+	}
+
 	location_to_string(location = {"latitude": -1, "longitude": -1, "address": ""}){
 		return "{\"result\":1,\"latitude\":" + location["latitude"].toString() + ",\"longitude\":" + location["longitude"].toString() + ",\"address\":\"" + location["address"] + "\"}";
 	}
@@ -186,12 +229,11 @@ class Chaoxing{
 			"activeId": activity["active_id"]
 		};
 		try {
-			let res = this.get(url, params)
-			let s = res.text.match("\"locationRange\":(.*?),")[1]
-			return s != "null"
+			let res = this.get(url, params);
+			let s = res.text.match("\"locationRange\":(.*?),")[1];
+			return s != "null";
 		}
 		catch (error) {
-			console.log(error)
 			return true;
 		}
 	}
