@@ -69,6 +69,39 @@ class Chaoxing:
 		except Exception:
 			return False
 
+	def get_course_activities(self, course: dict[str, str] = {"course_id": "", "class_id": ""}) -> list[dict]:
+		"""Get activities of a course.
+		:param course: Course ID (unnecessary) and class ID in dictionary.
+		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time on success, otherwise False.
+		"""
+		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
+		params = {
+			"fid": 0,
+			"courseId": course["course_id"] if course["course_id"] else self.courses[course["class_id"]],
+			"classId": course["class_id"],
+			"showNotStartedActive": 0
+		}
+		try:
+			res = self.get(url, params)
+			data = res.json()["data"]["activeList"]
+			activities = [{"active_id": activity["id"], "type": activity["otherId"], "time_left": activity["nameFour"]} for activity in data if activity["otherId"] in ("2", "4") and activity["status"] == 1]
+			assert activities
+			return activities
+		except Exception:
+			return False
+
+	def get_activities(self) -> list[dict]:
+		"""Get activities of all courses.
+		:param course: Course ID (unnecessary) and class ID in dictionary.
+		:return: Dictionary of class IDs to ongoing activities if any, otherwise False.
+		"""
+		try:
+			activities = {class_id: activity for class_id, course_id in self.courses.items() if (activity := self.get_course_activities({"course_id": course_id, "class_id": class_id}))}
+			assert activities
+			return activities
+		except Exception:
+			return False
+
 	def location_to_string(self, location: dict[str, str] = {"latitude": -1, "longitude": -1, "address": ""}) -> str:
 		"""Convert location dictionary to string.
 		:param location: Address, latitude and longitude in dictionary.
