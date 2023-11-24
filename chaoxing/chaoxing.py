@@ -1,5 +1,4 @@
 from re import findall, search
-from json import dumps
 import requests
 from urllib.parse import parse_qs, unquote, urlparse
 
