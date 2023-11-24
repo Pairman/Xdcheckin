@@ -15,6 +15,7 @@ class Chaoxing:
 			login = self.login(account = {"username": username, "password": password})
 			self.name, self.uid, self.cookies = login["name"], login["uid"], login["cookies"]
 			self.courses = self.get_courses()
+			assert self.courses
 			self.logined = (login != False)
 		except Exception:
 			self.logined = False
