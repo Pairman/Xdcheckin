@@ -8,9 +8,11 @@ class Chaoxing:
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
 
-	def __init__(self, username, password):
+	def __init__(self, username: str = "", password: str = ""):
 		requests.packages.urllib3.disable_warnings()
 		try:
+			assert username
+			assert password
 			login = self.login(account = {"username": username, "password": password})
 			self.name, self.uid, self.cookies = login["name"], login["uid"], login["cookies"]
 			self.courses = self.get_courses()
