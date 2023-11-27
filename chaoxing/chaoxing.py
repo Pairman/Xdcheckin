@@ -10,7 +10,7 @@ class Chaoxing:
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
 
-	def __init__(self, username: str = "", password: str = "") -> NoneType:
+	def __init__(self, username: str = "", password: str = "") -> None:
 		requests.packages.urllib3.disable_warnings()
 		try:
 			assert username
@@ -23,12 +23,12 @@ class Chaoxing:
 		except Exception:
 			self.logined = False
 
-	def get(self, url, params: dict[str, str] = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict[str, str] = None, verify = False):
+	def get(self, url, params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify = False):
 		cookies = cookies if cookies else self.cookies
 		headers = headers if headers else self.headers
 		return requests.get(url, params = params, cookies = cookies, headers = headers, verify = False)
 
-	def login(self, account: dict[str, str] = {"username": "", "password": ""}) -> dict[str, str] | bool:
+	def login(self, account: dict = {"username": "", "password": ""}) -> dict | bool:
 		"""Log into Chaoxing account.
 		:param account: Username and password in dictionary.
 		:return: Name, UID and cookies on success, otherwise False.
@@ -56,7 +56,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def get_courses(self) -> dict[str, str] | bool:
+	def get_courses(self) -> dict | bool:
 		"""Get course IDs corresponding to class IDs.
 		:return: Dictionary of class IDs to course IDs on success, otherwise False.
 		"""
@@ -73,7 +73,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def get_course_activities(self, course: dict[str, str] = {"course_id": "", "class_id": ""}) -> list[dict] | bool:
+	def get_course_activities(self, course: dict = {"course_id": "", "class_id": ""}) -> list[dict] | bool:
 		"""Get activities of a course.
 		:param course: Course ID (unnecessary) and class ID in dictionary.
 		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time on success, otherwise False.
@@ -100,20 +100,24 @@ class Chaoxing:
 		:return: Dictionary of class IDs to ongoing activities if any, otherwise False.
 		"""
 		try:
-			activities = {class_id: activity for class_id, course_id in self.courses.items() if (activity := self.get_course_activities({"course_id": course_id, "class_id": class_id}))}
+			activities = {}
+			for class_id, course_id in self.courses.items():
+				activity = self.get_course_activities({"course_id": course_id, "class_id": class_id})
+				if activity:
+					activities[class_id] = activity
 			assert activities
 			return activities
 		except Exception:
 			return False
 
-	def location_to_string(self, location: dict[str, str] = {"latitude": -1, "longitude": -1, "address": ""}) -> str:
+	def location_to_string(self, location: dict = {"latitude": -1, "longitude": -1, "address": ""}) -> str:
 		"""Convert location dictionary to string.
 		:param location: Address, latitude and longitude in dictionary.
 		:return: Location string.
 		"""
 		return "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}"
 
-	def checkin_get_details(self, activity: dict[str, str] = {"active_id": ""}) -> dict[str, str] | bool:
+	def checkin_get_details(self, activity: dict = {"active_id": ""}) -> dict | bool:
 		"""Get checkin details
 		:param activity: Activity ID in dictionary.
 		:return: Checkin details including class ID and MSG code on success, otherwise False.
@@ -125,12 +129,13 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			assert len(details := res.json().items())
+			details = res.json().items()
+			assert len(details)
 			return {key: str(val) if val is not None else "" for key, val in details}
 		except Exception:
 			return False
 
-	def checkin_do_presign(self, activity: dict[str, str] = {"active_id": "", "class_id": ""}) -> str:
+	def checkin_do_presign(self, activity: dict = {"active_id": "", "class_id": ""}) -> str:
 		"""Do checkin pre-sign.
 		:param active_id: Activity ID and Class ID in dictionary.
 		:return: Returns True on success, otherwise False.
@@ -154,7 +159,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_do_analysis(self, activity: dict[str, str] = {"active_id": ""}) -> bool:
+	def checkin_do_analysis(self, activity: dict = {"active_id": ""}) -> bool:
 		"""Do checkin analysis.
 		:param activity: Activity ID in dictionary.
 		:return: Returns True on success, otherwise False.
@@ -178,7 +183,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_check_designatedplace(self, activity: dict[str, str] = {"active_id": ""}) -> bool:
+	def checkin_check_designatedplace(self, activity: dict = {"active_id": ""}) -> bool:
 		"""Check if designated location is enabled. Defaults to True. Must be called for all checkin types.
 		:param activity: Activity ID in dictionary.
 		"""
@@ -193,7 +198,7 @@ class Chaoxing:
 		except Exception:
 			return True
 
-	def checkin_checkin_location(self, activity: dict[str, str] = {"active_id": ""}, location: dict[str, str] = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
+	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
@@ -220,7 +225,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_checkin_qrcode(self, activity: dict[str, str] = {"active_id": "", "enc": ""}, location: dict[str, str] = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
+	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
 		"""Qrcode checkin.
 		:param active_id: Activity ID and ENC code in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
@@ -246,7 +251,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict[str, str] = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
+	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": ""}) -> bool:
 		"""Qrcode checkin.
 		:param qr_url: URL from qrcode.
 		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
