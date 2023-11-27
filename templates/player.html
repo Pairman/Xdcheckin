@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html>
+	<title>Xdclassroom</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
+	<link rel="shortcut icon" href="#"/>
+	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/skins/default/aliplayer-min.css" />
+	<script type="text/javascript" src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+	<script type="text/javascript" src="static/lib/long-press-event/long-press-event.min.js"></script>
+	<script type="text/javascript" src="static/lib/xdcheckin/locations.js"></script>
+	<script type="text/javascript" src="static/lib/jsqrcode/llqrcode.js"></script>
+	<script type="text/javascript" src="static/classrooms.js"></script>
+
+	<head>
+		<style>
+			div {font-size:22px; font-family: sans-serif;}
+			button {height: 40px; font-size: 22px; user-select: none;}
+		</style>
+	</head>
+
+	<body id="player-body" style="display: none; padding: 0; margin: 0;">
+		<p align="center">
+			<button onclick="listClassroom()">Select a Classroom</button>
+			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
+			<button onclick="extractClassroom()">Extract from LiveId or URL</button>
+			<button onclick="loadExtracted()">Load Extracted URL</button>
+		</p>
+		<div id="classrooms-list-div" style="display: none"></div>
+
+		<p align="center" id="chaoxing-buttons">
+			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
+		</p>
+		<div id="locations-list-div" style="display: none"></div>
+		<div id="activities-list-div" style="display: none"></div>
+
+		<p align="center">
+			<B id="title" style="font-size:48px; font-family: sans-serif">Xdclassoom</B>
+			<br>
+			<button onclick="play(player0); play(player1); play(player2); play(player3)">Play All</button>
+			<button onclick="stop(player0); stop(player1); stop(player2); stop(player3)">Stop All</button>
+			<button onclick="unmute(player0); unmute(player1); unmute(player2); unmute(player3)">Unmute All</button>
+			<button onclick="mute(player0); mute(player1); mute(player2); mute(player3)">Mute All</button>
+			<button onclick="sync()">Sync All</button>
+			<button onclick="resize()">Resize All</button>
+		</p>
+
+		<p align="center">
+			<B style="font-size:40px; font-family: sans-serif">PPTVideo</B>
+			&emsp;&emsp;
+			<button onclick="play(player0)">Play</button>
+			<button onclick="stop(player0)">Stop</button>
+			<button onclick="unmute(player0)">Unmute</button>
+			<button onclick="mute(player0)">Mute</button>
+			<button id="player0-button-scan" onclick="scan(player0)">Scan (Whole)</button>
+		</p>
+		<div id="player0-div"></div>
+
+		<p align="center">
+			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
+			&emsp;&emsp;
+			<button onclick="play(player1)">Play</button>
+			<button onclick="stop(player1)">Stop</button>
+			<button onclick="unmute(player1)">Unmute</button>
+			<button onclick="mute(player1)">Mute</button>
+		</p>
+		<div id="player1-div"></div>
+
+		<p align="center">
+			<B style="font-size:40px; font-family: sans-serif">TeacherFull</B>
+			&emsp;&emsp;
+			<button onclick="play(player2)">Play</button>
+			<button onclick="stop(player2)">Stop</button>
+			<button onclick="unmute(player2)">Unmute</button>
+			<button onclick="mute(player2)">Mute</button>
+		</p>
+		<div id="player2-div"></div>
+
+		<p align="center">
+			<B style="font-size:40px; font-family: sans-serif">StudentFull</B>
+			&emsp;&emsp;
+			<button onclick="play(player3)">Play</button>
+			<button onclick="stop(player3)">Stop</button>
+			<button onclick="unmute(player3)">Unmute</button>
+			<button onclick="mute(player3)">Mute</button>
+		</p>
+		<div id="player3-div"></div>
+	</body>
+
+	<script>
+		/*
+	 	 * Script.
+	   	 */
+
+		/* Check EULA state. */
+		if (('; ' + document.cookie).split(`; eula=`).pop().split(';')[0] != 1)
+			window.location.href = '../';
+		else
+			document.getElementById("player-body").style.display = "block";
+
+		/* Calculate video player dimensions. */
+		var strWidth = "", strHeight = "";
+		calculatePlayerSize();
+
+		/* Generate clasroom buttons list. */
+		var buildingsArr = [], buildingNamesArr = [];
+		const classrooms_list_div = document.getElementById("classrooms-list-div");
+		for (let buildingName in urls) {
+			let building = urls[buildingName];
+			let div = document.createElement("div");
+			div.innerText = buildingName + ": ";
+			classrooms_list_div.appendChild(div);
+			let classroomArr = [], classroomNamesArr = [];
+			for (let classroomName in building) {
+				let classroom = building[classroomName];
+				classroomArr.push(classroom);
+				classroomNamesArr.push(classroomName);
+				let button = document.createElement("button");
+				button.innerText = classroomName;
+				button.setAttribute('onclick', 'reloadClassroom(\"' + classroom + '\", \"' + classroomName + '\")');
+				classrooms_list_div.appendChild(button);
+			}
+			buildingsArr.push(classroomArr);
+			buildingNamesArr.push(classroomNamesArr);
+		}
+
+		/* Initialize classroom name and urls. */
+		var classroomName = ('; '+document.cookie).split(`; classroomName=`).pop().split(';')[0];
+		var classroom = ('; '+document.cookie).split(`; classroom=`).pop().split(';')[0];
+		var pptVideo, teacherTrack, teacherFull, studentFull;
+		if (classroom == '' || classroomName == '')
+			[classroom, classroomName] = randClassroom();
+		setClassroom(classroom, classroomName);
+
+		/* Generate location buttons list. */
+		const locations_list_div = document.getElementById("locations-list-div");
+		for (let buildingName in locations) {
+				let button = document.createElement("button");
+				button.innerText = buildingName + " (" + locations[buildingName]["address"] + ")";
+				button.setAttribute('onclick', 'location_ = ' + JSON.stringify(locations[buildingName]));
+				locations_list_div.appendChild(button);
+		}
+
+		/* Initialize Chaoxing class and location. */
+		var chaoxing;
+		var chaoxing_logining = false;
+		var chaoxing_logined = false;
+		var activities_list_loading = false;
+		var location_str = ('; '+document.cookie).split(`; location=`).pop().split(';')[0];
+		var location_ = (location_str == "") ? locations["B"] : JSON.parse(location_str);
+
+		/* Create video players. */
+		scanButtonAddEventListener("player0");
+		var player0 = new Aliplayer({
+			id: "player0-div",
+			isLive: true,
+			useH5Prism: true,
+			width: strWidth,
+			height: strHeight,
+			autoplay: true,
+			playsinline: true,
+			preload: true,
+			source: pptVideo
+		}, function(player0) {
+			player0.mute();
+			player0.play();
+			player0.on("canplay", sync);
+		});
+
+		var player1 = new Aliplayer({
+			id: "player1-div",
+			isLive: true,
+			useH5Prism: true,
+			width: strWidth,
+			height: strHeight,
+			playsinline: true,
+			source: teacherTrack
+		}, function(player1) {
+			player1.mute();
+			player1.stop();
+		});
+
+		var player2 = new Aliplayer({
+			id: "player2-div",
+			isLive: true,
+			useH5Prism: true,
+			width: strWidth,
+			height: strHeight,
+			playsinline: true,
+			source: teacherFull
+		}, function (player2) {
+			player2.mute();
+			player2.stop();
+		});
+
+		var player3 = new Aliplayer({
+			id: "player3-div",
+			isLive: true,
+			useH5Prism: true,
+			width: strWidth,
+			height: strHeight,
+			playsinline: true,
+			source: studentFull
+		}, function(player3) {
+			player3.mute();
+			player3.stop();
+		});
+
+		/*
+	 	 * Function definitions.
+	   	 */
+
+		/* Player size controls. */
+		function getScrollBarWidth() {
+			let e = document.createElement("div");
+			e.style.cssText = "overflow:scroll; visibility:hidden; position:absolute;";
+			document.body.appendChild(e);
+			let w = e.offsetWidth - e.clientWidth;
+			e.remove();
+			return w;
+		}
+
+		function calculatePlayerSize(){
+			let w = (window.innerWidth - getScrollBarWidth());
+			let h = parseInt(w / 16 * 9);
+			strWidth = w.toString() + "px";
+			strHeight = h.toString() + "px";
+		}
+
+		function resize() {
+			calculatePlayerSize();
+			player0.setPlayerSize(strWidth, strHeight);
+			player1.setPlayerSize(strWidth, strHeight);
+			player2.setPlayerSize(strWidth, strHeight);
+			player3.setPlayerSize(strWidth, strHeight);
+		}
+
+		/* Classrooms list toggle. */
+		function listClassroom() {
+			let e = document.getElementById("classrooms-list-div");
+			if (e.style.display == "none")
+				e.style.display = "block";
+			else
+				e.style.display = "none";
+		}
+
+		/* Locations list toggle. */
+		function listLocation() {
+			let e = document.getElementById("locations-list-div");
+			if (e.style.display == "none")
+				e.style.display = "block";
+			else
+				e.style.display = "none";
+		}
+
+		/* Input location. */
+		function inputLocation() {
+			let latitude = prompt("Input latitude with maximum 6 float digits:");
+			let longitude = prompt("Input longitude with maximum 6 float digits:");
+			let address = prompt("Input address:");
+			if (isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
+				alert("Invalid location.");
+				return;
+			}
+			location_ = {"latitude": latitude, "longitude": longitude, "address": address};
+			document.cookie = "location=" + JSON.stringify(location_) + "; max-age=31536000;";
+		}
+
+		/* Activities list toggle. */
+		function listActivity() {
+			if (activities_list_loading)
+				return;
+			activities_list_loading = true;
+			let e = document.getElementById("activities-list-div");
+			if (e.style.display == "none") {
+				let res = get("/chaoxing/get_activities");
+				let activities = JSON.parse(res.text);
+				if (!Object.keys(activities).length) {
+					e.innerHTML = "No ongoing activities.";
+				}
+				else {
+					e.replaceChildren();
+					for (let class_id in activities) {
+						let class_activities = activities[class_id];
+						let div = document.createElement("div");
+						div.innerText = class_id + ": ";
+						e.appendChild(div);
+						for (let i in class_activities) {
+							let activity = class_activities[i];
+							let button = document.createElement("button");
+							let type = "";
+							if (activity["type"] == "2") {
+								button.setAttribute("disabled", "");
+							}
+							else {
+								button.setAttribute('onclick', 'chaoxing.')
+							}
+							type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
+							button.innerText = type + " (" + activity["active_id"] + ", " + activity["time_left"] + ")";
+							button.setAttribute('onclick', 'chaoxingLocationCheckin(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
+							e.appendChild(button);
+						}
+					}
+				}
+				e.style.display = "block";
+			}
+			else {
+				e.style.display = "none";
+			}
+			activities_list_loading = false;
+		}
+
+		/* Video sources control. */
+		function setClassroom(urlStr, classroomNameInternal = "Unknown") {
+			let url = new URL(urlStr);
+			let params = new URLSearchParams(decodeURIComponent(url.search));
+			let info = JSON.parse(params.get("info"));
+			document.cookie = "classroomName=" + classroomNameInternal + "; max-age=31536000;";
+			document.cookie = "classroom=" + urlStr + "; max-age=31536000;";
+			document.getElementById("title").innerText = "Xdclassroom: " + classroomNameInternal;
+			classroom = urlStr;
+			classroomName = classroomNameInternal;
+			pptVideo = info.videoPath.pptVideo;
+			teacherTrack = info.videoPath.teacherTrack;
+			teacherFull = info.videoPath.teacherFull;
+			studentFull = info.videoPath.studentFull;
+		}
+
+		function reloadClassroom(urlStr, classroomName = "Unknown") {
+			setClassroom(urlStr, classroomName);
+			player0.loadByUrl(pptVideo);
+			player1.loadByUrl(teacherTrack);
+			mute(player1);
+			stop(player1);
+			player2.loadByUrl(teacherFull);
+			mute(player2);
+			stop(player2);
+			player3.loadByUrl(studentFull);
+			mute(player3);
+			stop(player3);
+		}
+
+		function extractClassroom() {
+			let input = prompt("Input liveId or livestream URL:");
+			try {
+				let url = new URL(input);
+				let params = new URLSearchParams(decodeURIComponent(url.search));
+				let liveId = JSON.parse(params.get("liveId"));
+			}
+			catch (err) {
+				if (input.length != 8 || isNaN(input)) {
+					alert("Invalid liveId.");
+					return;
+				}
+				liveId = input;
+			}
+			window.open("https://newesxidian.chaoxing.com/live/getViewUrlHls?liveId=" + liveId, '_blank').focus();
+		}
+
+		function loadExtracted() {
+			let input = prompt("Input the extracted URL result:");
+			try {
+				let url = new URL(input);
+				reloadClassroom(input, "Extracted");
+			}
+			catch (err) {
+				alert("Invalid URL.");
+			}
+		}
+
+		/* Retrieve last opened classroom if existent, otherwise randomize one. */
+		function randClassroom() {
+			let b = Math.floor(Math.random() * buildingsArr.length);
+			let c = Math.floor(Math.random() * buildingsArr[b].length);
+			return [buildingsArr[b][c], buildingNamesArr[b][c]];
+		}
+
+		/* Video player controls. */
+		function sync() {
+			t = player0.getCurrentTime();
+			if (player1.getStatus() == "playing")
+				player1.seek(t);
+			if (player2.getStatus() == "playing")
+				player2.seek(t);
+			if (player3.getStatus() == "playing")
+				player3.seek(t);
+		}
+
+		function play(player) {
+			player.initPlay();
+		}
+
+		function stop(player) {
+			player.stop();
+		}
+
+		function unmute(player) {
+			player.setVolume(1);
+		}
+
+		function mute(player) {
+			player.setVolume(0);
+		}
+
+		/* Qrcode scanning and jump if being valid signin page. */
+		function screenshot(player) {
+			let video = player.tag;
+			let canvas = document.createElement('canvas');
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			let ctx = canvas.getContext("2d");
+			ctx.save();
+			ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+			let img_src = canvas.toDataURL("image/jpeg", 1.0);
+			ctx.restore();
+			canvas.remove();
+			return img_src;
+		}
+
+		function screenshotRightHalf(player) {
+			let video = player.tag;
+			let canvas = document.createElement('canvas');
+			canvas.width = parseInt(0.56 * video.videoWidth);
+			canvas.height = video.videoHeight;
+			let ctx = canvas.getContext("2d");
+			ctx.save();
+			ctx.drawImage(video, video.videoWidth - canvas.width, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+			let img_src = canvas.toDataURL("image/jpeg", 1.0);
+			ctx.restore();
+			canvas.remove();
+			return img_src;
+		}
+
+		function scan(player) {
+			qrcode.decode(screenshot(player));
+		}
+
+		function scanRightHalf(player) {
+			qrcode.decode(screenshotRightHalf(player));
+		}
+
+		qrcode.callback = function(decodedData) {
+			/* Currently we allow Chaoxing check-ins only. */
+			/* Might remove or update restriction if other chek-in platforms used. */
+			if (decodedData.indexOf("https://mobilelearn.chaoxing.com/widget/sign") != 0)
+				return;
+			try {
+				if (chaoxing.logined) {
+					let res = get("/chaoxing/checkin_checkin_qrcode_url/{\"qr_url\": \"" + decodedData + "\", \"location\": " + JSON.stringify(location_) + "}");
+					if (res.status_code == 200)
+						alert("Checked in successfully.");
+				}
+				else {
+					window.open(decodedData, '_blank').focus();
+				}
+			}
+			catch (error) {}
+		};
+
+		/* Long press event for mode switching of scan button. */
+		function scanButtonAddEventListener (player_var_name, scan_button_id = player_var_name + "-button-scan", long_press_delay = 300) {
+			let b = document.getElementById(scan_button_id);
+			b.setAttribute('data-long-press-delay', long_press_delay);
+			b.addEventListener('long-press', function(e) {
+				if (e.target.getAttribute('data-long-press-status') != 'true') {
+					e.target.setAttribute('data-long-press-status', 'true');
+					e.target.setAttribute('onclick', 'scanRightHalf(' + player_var_name + ')');
+					e.target.innerText = "Scan (Right)";
+				}
+				else {
+					e.target.setAttribute('data-long-press-status', 'false');
+					e.target.setAttribute('onclick', 'scan(' + player_var_name + ')');
+					e.target.innerText = "Scan (Whole)";
+				}
+			});
+		}
+
+		/* Location checkin. */
+		function chaoxingLocationCheckin(activity) {
+			let res = get("/chaoxing/checkin_checkin_location/{\"active_id\": \"" + activity["active_id"] + "\", \"location\": " + JSON.stringify(location_) + "}");
+			if (res.status_code == 200)
+				alert("Checked in successfully.");
+			else
+				alert("Checkin failed.");
+		}
+
+		/* Log into Chaoxing account. */
+		function chaoxingLogin() {
+			if (chaoxing_logining)
+				return;
+			chaoxing_logining = true;
+			username = ('; '+document.cookie).split(`; username=`).pop().split(';')[0];
+			password = ('; '+document.cookie).split(`; password=`).pop().split(';')[0];
+			if (username == "" || password == "") {
+				username = prompt("Input Chaoxing username:");
+				password = prompt("Input Chaoxing password");
+			}
+			else {
+				if(!confirm("Use previously entered account " + username + "?")) {
+					username = prompt("Input Chaoxing username:");
+					password = prompt("Input Chaoxing password");
+				}
+			}
+			if (username == "" || password == "") {
+				alert("Invalid input.");
+				chaoxing_logining = false;
+				return;
+			}
+			alert("Logging in.");
+			let res  = get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+			chaoxing_logined = (res.status_code == 200);
+			if (chaoxing_logined) {
+				alert("Logged in successfully.");
+				document.cookie = "username=" + username + "; max-age=31536000;";
+				document.cookie = "password=" + password + "; max-age=31536000;";
+				let chaoxing_buttons = document.getElementById("chaoxing-buttons");
+				let button_locations = document.createElement("button");
+				let button_input_location = document.createElement("button");
+				let button_activities = document.createElement("button");
+				button_locations.innerText = "Select Location";
+				button_input_location.innerText = "Input Location";
+				button_activities.innerText = "Check Activities";
+				button_locations.setAttribute('onclick', 'listLocation()');
+				button_input_location.setAttribute('onclick', 'inputLocation()');
+				button_activities.setAttribute('onclick', 'listActivity()');
+				chaoxing_buttons.appendChild(button_locations);
+				chaoxing_buttons.appendChild(button_input_location);
+				chaoxing_buttons.appendChild(button_activities);
+				document.getElementById("chaoxing-login-button").style.display = "none";
+			}
+			else
+				alert("Login failed.");
+			chaoxing_logining = false;
+		}
+
+		function get(url = "", params = {}) {
+			class _get {
+				status_code = "";
+				text = "";
+				constructor(url, params){
+					let status_code = undefined;
+					let text = undefined;
+					let response = $.ajax({
+						cache: true,
+						type: "GET",
+						async: false,
+						xhrFields: {
+							withCredentials: true
+						},
+						url: url,
+						data: params,
+						contentType: "text/plain; charset=utf-8",
+						dataType: "text"
+					});
+					this.status_code = response.status;
+					this.text = response.responseText;
+				}
+				json(){
+					try{
+						return JSON.parse(this.text);
+					}
+					catch (error) {
+						return undefined;
+					}
+				}
+			}
+			return new _get(url, params);
+		}
+	</script>
+</html>
