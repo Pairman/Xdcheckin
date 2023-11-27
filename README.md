@@ -14,7 +14,7 @@ For average users: <br>
 &emsp;&emsp;&emsp;&emsp;ii.  Modify location according to your need. Defaulted to ```locations["B"]```. <br>
 &emsp;&emsp;&emsp;&emsp;iii. Use ```qr()``` for qrcode checkins, otherwise ```loc()```. Defaulted to ```qr()```.
 
-For advanced users:
+For advanced users: <br>
 &emsp;&emsp;Integrate with ```flask_frontend.py``` and ```Xdclassroom ```.
 
 For devs: <br>
