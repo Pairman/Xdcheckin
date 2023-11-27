@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from re import findall, search
 import requests
 from urllib.parse import parse_qs, unquote, urlparse
@@ -8,7 +10,7 @@ class Chaoxing:
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
 
-	def __init__(self, username: str = "", password: str = ""):
+	def __init__(self, username: str = "", password: str = "") -> NoneType:
 		requests.packages.urllib3.disable_warnings()
 		try:
 			assert username
@@ -71,7 +73,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def get_course_activities(self, course: dict[str, str] = {"course_id": "", "class_id": ""}) -> list[dict]:
+	def get_course_activities(self, course: dict[str, str] = {"course_id": "", "class_id": ""}) -> list[dict] | bool:
 		"""Get activities of a course.
 		:param course: Course ID (unnecessary) and class ID in dictionary.
 		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time on success, otherwise False.
@@ -92,7 +94,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def get_activities(self) -> list[dict]:
+	def get_activities(self) -> list[dict] | bool:
 		"""Get activities of all courses.
 		:param course: Course ID (unnecessary) and class ID in dictionary.
 		:return: Dictionary of class IDs to ongoing activities if any, otherwise False.
