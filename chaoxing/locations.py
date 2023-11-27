@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 locations = {
 	"A": {
 		"latitude": 34.128406,
