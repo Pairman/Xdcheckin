@@ -359,10 +359,24 @@
 		}
 
 		function loadExtracted() {
-			let input = prompt("Input the extracted URL result:");
+			let input = prompt("Input the extracted URL:");
 			try {
 				let url = new URL(input);
 				reloadClassroom(input, "Extracted");
+			}
+			catch (err) {
+				alert("Invalid URL.");
+			}
+		}
+
+		function slimExtracted() {
+			let input = prompt("Input the extracted URL:");
+			try {
+				let url = new URL(input);
+				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
+				delete info["type"]
+				delete info["liveId"];
+				prompt("Slimmed URL:", `${url.protocol}//${url.hostname}${url.pathname}` + "/info=" + encodeURIComponent(JSON.stringify(info)));
 			}
 			catch (err) {
 				alert("Invalid URL.");
