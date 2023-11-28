@@ -1,5 +1,4 @@
 # Xdcheckin
-WIP.
 Python based Chaoxing checkin tool for XDU.
 
 ## Supported Checkin types
