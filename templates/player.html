@@ -267,13 +267,13 @@
 		}
 
 		/* Activities list toggle. */
-		function listActivity() {
+		async function listActivity() {
 			if (activities_list_loading)
 				return;
 			activities_list_loading = true;
 			let e = document.getElementById("activities-list-div");
 			if (e.style.display == "none") {
-				let res = get("/chaoxing/get_activities");
+				let res = await get("/chaoxing/get_activities");
 				let activities = JSON.parse(res.text);
 				if (!Object.keys(activities).length) {
 					e.innerHTML = "No ongoing activities.";
@@ -439,14 +439,14 @@
 			qrcode.decode(screenshotRightHalf(player));
 		}
 
-		qrcode.callback = function(decodedData) {
+		qrcode.callback = async function(decodedData) {
 			/* Currently we allow Chaoxing check-ins only. */
 			/* Might remove or update restriction if other chek-in platforms used. */
 			if (decodedData.indexOf("https://mobilelearn.chaoxing.com/widget/sign") != 0)
 				return;
 			try {
 				if (chaoxing.logined) {
-					let res = get("/chaoxing/checkin_checkin_qrcode_url/{\"qr_url\": \"" + decodedData + "\", \"location\": " + JSON.stringify(location_) + "}");
+					let res = await get("/chaoxing/checkin_checkin_qrcode_url/{\"qr_url\": \"" + decodedData + "\", \"location\": " + JSON.stringify(location_) + "}");
 					if (res.status_code == 200)
 						alert("Checked in successfully.");
 				}
@@ -476,8 +476,8 @@
 		}
 
 		/* Location checkin. */
-		function chaoxingLocationCheckin(activity) {
-			let res = get("/chaoxing/checkin_checkin_location/{\"active_id\": \"" + activity["active_id"] + "\", \"location\": " + JSON.stringify(location_) + "}");
+		async function chaoxingLocationCheckin(activity) {
+			let res = await get("/chaoxing/checkin_checkin_location/{\"active_id\": \"" + activity["active_id"] + "\", \"location\": " + JSON.stringify(location_) + "}");
 			if (res.status_code == 200)
 				alert("Checked in successfully.");
 			else
@@ -485,7 +485,7 @@
 		}
 
 		/* Log into Chaoxing account. */
-		function chaoxingLogin() {
+		async function chaoxingLogin() {
 			if (chaoxing_logining)
 				return;
 			chaoxing_logining = true;
@@ -507,7 +507,7 @@
 				return;
 			}
 			alert("Logging in.");
-			let res  = get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+			let res  = await get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
 			chaoxing_logined = (res.status_code == 200);
 			if (chaoxing_logined) {
 				alert("Logged in successfully.");
@@ -533,27 +533,11 @@
 			chaoxing_logining = false;
 		}
 
-		function get(url = "", params = {}) {
+		async function get(url = "", params = {}, callback = function () {}) {
 			class _get {
-				status_code = "";
-				text = "";
-				constructor(url, params){
-					let status_code = undefined;
-					let text = undefined;
-					let response = $.ajax({
-						cache: true,
-						type: "GET",
-						async: false,
-						xhrFields: {
-							withCredentials: true
-						},
-						url: url,
-						data: params,
-						contentType: "text/plain; charset=utf-8",
-						dataType: "text"
-					});
-					this.status_code = response.status;
-					this.text = response.responseText;
+				constructor(status_code, text){
+					this.status_code = status_code;
+					this.text = text;
 				}
 				json(){
 					try{
@@ -563,8 +547,19 @@
 						return undefined;
 					}
 				}
-			}
-			return new _get(url, params);
+			};
+			return $.ajax({
+				cache: true,
+				type: "GET",
+				url: url,
+				data: params,
+				contentType: "text/plain; charset=utf-8",
+				dataType: "text"
+			}).then(function (res) {
+				return new _get(200, res);
+			}).fail(function (req, status_code, error) {
+				return new _get(status_code, "");
+			});
 		}
 	</script>
 </html>
