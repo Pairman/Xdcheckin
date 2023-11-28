@@ -1,0 +1,7 @@
+[submodule "xdcheckin_py"]
+	path = xdcheckin_py
+	url = https://github.com/Pairman/Xdcheckin
+	branch = py
+[submodule "static/xdclassroom"]
+	path = static/xdclassroom
+	url = https://github.com/Pairman/Xdclassroom

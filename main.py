@@ -1,7 +1,8 @@
 from flask import Flask, render_template, make_response, session
 from flask_session import Session
 from json import loads, dumps
-from chaoxing.chaoxing import *
+from xdcheckin_py.chaoxing.chaoxing import Chaoxing
+from xdcheckin_py.chaoxing.locations import locations
 import requests
 
 app = Flask(__name__)
@@ -11,10 +12,35 @@ Session(app)
 
 requests.packages.urllib3.disable_warnings()
 
+@app.route("/get/xdcheckin/chaoxing/locations")
+def get_xdcheckin_chaoxing_locations():
+	try:
+		res = make_response("var locations = " + dumps(locations))
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
+@app.route("/get/xdclassroom/<cmd>")
+def get_xdclassroom(cmd = ""):
+	cmd = cmd.replace("::", "/")
+	try:
+		res = requests.get("https://xdclassroom.git.pnxlr.eu.org/" + cmd)
+		assert res.status_code == 200
+		res = make_response(res.text)
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
 @app.route("/")
 @app.route("/index.html")
 def index_html():
-	return render_template("index.html")
+	return get_xdclassroom("index.html")
 
 @app.route("/player.html")
 def player_html():
