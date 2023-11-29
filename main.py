@@ -95,15 +95,15 @@ def chaoxing_checkin_checkin_location(cmd: str = "{\"active_id\": \"\", \"locati
 	finally:
 		return res
 
-@app.route("/chaoxing/checkin_checkin_qrcode_url/<cmd>")
-def chaoxing_checkin_checkin_qrcode_url(cmd: str = "{\"qr_url\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
+@app.route("/chaoxing/checkin_checkin_qrcode/<cmd>")
+def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
 		params = loads(cmd)
-		qr_url, location = params["qr_url"], params.get("location") or {"latitude": -1, "longitude": -1, "address": ""}
-		assert qr_url and location
-		assert chaoxing.checkin_checkin_qrcode_url(qr_url, location)
+		active_id, enc, location = params["active_id"], params["enc"], params.get("location") or {"latitude": -1, "longitude": -1, "address": ""}
+		assert active_id and enc and location
+		assert chaoxing.checkin_checkin_qrcode({"active_id": active_id, "enc": enc}, location)
 		res = make_response("success")
 		res.status_code = 200
 	except Exception:
