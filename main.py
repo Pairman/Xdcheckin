@@ -47,7 +47,7 @@ def player_html():
 	return render_template("player.html")
 
 @app.route("/chaoxing/login/<cmd>")
-def chaoxing_login(cmd: str = "\{\"username\": \"\", \"password\": \"\""):
+def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	try:
 		params = loads(cmd)
 		username, password = params["username"], params["password"]
