@@ -461,12 +461,11 @@
 				return;
 			try {
 				if (chaoxing.logined) {
-					let res = await get("/chaoxing/checkin_checkin_qrcode_url/{\"qr_url\": \"" + decodedData + "\", \"location\": " + JSON.stringify(location_) + "}");
+					let url = new URL(decodedData);
+					let params = new URLSearchParams(decodeURIComponent(url.search));
+					let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
 					if (res.status_code == 200)
 						alert("Checked in successfully.");
-				}
-				else {
-					window.open(decodedData, '_blank').focus();
 				}
 			}
 			catch (error) {}
@@ -548,7 +547,7 @@
 			chaoxing_logining = false;
 		}
 
-		async function get(url = "", params = {}, callback = function () {}) {
+		async function get(url = "", params = {}) {
 			class _get {
 				constructor(status_code, text){
 					this.status_code = status_code;
