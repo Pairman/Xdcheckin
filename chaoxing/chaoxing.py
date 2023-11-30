@@ -24,7 +24,7 @@ class Chaoxing:
 		except Exception:
 			self.logined = False
 
-	def get(self, url, params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify = False):
+	def get(self, url: str = "", params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify: bool = False):
 		cookies = cookies if cookies else self.cookies
 		headers = headers if headers else self.headers
 		return requests.get(url, params = params, cookies = cookies, headers = headers, verify = False)
@@ -76,7 +76,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def get_curriculum(self, week = ""):
+	def get_curriculum(self, week: str = ""):
 		"""Get curriculum.
 		:param week: Week number in string. Defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time on success, otherwise False.
