@@ -56,6 +56,9 @@
 			<button id="player0-button-scan" onclick="scan(player0)">Scan (Whole)</button>
 		</p>
 		<div id="player0-div"></div>
+		<p id="player0-scanresult-p" align="center">
+			<div id="player0-decodeddata-div"></div>
+		</p>
 
 		<p align="center">
 			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
@@ -455,15 +458,18 @@
 		}
 
 		qrcode.callback = async function(decodedData) {
+			document.getElementById("player0-decodeddata-div").innerHTML = "Scan Result: <br>" + decodedData;
 			if (decodedData.indexOf("https://mobilelearn.chaoxing.com/widget/sign") != 0)
 				return;
 			try {
-				if (chaoxing.logined) {
+				if (chaoxing_logined) {
 					let url = new URL(decodedData);
 					let params = new URLSearchParams(decodeURIComponent(url.search));
 					let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
 					if (res.status_code == 200)
 						alert("Checked in successfully.");
+					else
+						document.getElementById("player0-decodeddata-div").innerHTML = "Checkin failed: <br>" + decodedData;
 				}
 			}
 			catch (error) {}
