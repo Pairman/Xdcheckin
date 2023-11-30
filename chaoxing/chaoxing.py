@@ -19,6 +19,7 @@ class Chaoxing:
 			self.name, self.uid, self.cookies = login["name"], login["uid"], login["cookies"]
 			self.courses = self.get_courses()
 			assert self.courses
+			self.curriculum = self.get_curriculum()
 			self.logined = (login != False)
 		except Exception:
 			self.logined = False
@@ -69,7 +70,49 @@ class Chaoxing:
 		try:
 			res = self.get(url, params)
 			courses = findall(r"<.*courseId=\"(.*?)\" clazzId=\"(.*?)\" .*>", res.text)
-			return {row[1]: row[0] for row in courses}
+			courses = {row[1]: row[0] for row in courses}
+			assert courses
+			return courses
+		except Exception:
+			return False
+
+	def get_curriculum(self, week = ""):
+		"""Get curriculum.
+		:param week: Week number in string, defaulted to the current week.
+		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time on success, otherwise False.
+		"""
+		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
+		params = {
+			"week": week
+		}
+		try:
+			res = self.get(url, params)
+			data = res.json()["data"]["lessonArray"]
+			curriculum = {}
+			def add_lesson(lesson, curriculum = curriculum):
+				lesson_class_id = str(lesson["classId"])
+				lesson = {
+					"course_id": str(lesson["courseId"]),
+					"name": lesson["name"],
+					"location": lesson["location"],
+					"teacher": [lesson["teacherName"]],
+					"time":[{
+						"day": str(lesson["dayOfWeek"]),
+						"period": str(lesson["beginNumber"]) + "-" + str(lesson["beginNumber"] + lesson["length"] - 1)
+					}]
+				}
+				if not lesson_class_id in curriculum.keys():
+					curriculum[lesson_class_id] = lesson
+				if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
+					curriculum[lesson_class_id]["time"].append(lesson["time"][0])
+				if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
+					curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
+			for lesson in data:
+				add_lesson(lesson)
+				for conflict in lesson["conflictLessons"]:
+					add_lesson(conflict)
+			assert curriculum
+			return curriculum
 		except Exception:
 			return False
 
@@ -109,13 +152,6 @@ class Chaoxing:
 			return activities
 		except Exception:
 			return False
-
-	def location_to_string(self, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
-		"""Convert location dictionary to string.
-		:param location: Address, latitude and longitude in dictionary.
-		:return: Location string.
-		"""
-		return "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}"
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details
@@ -240,7 +276,7 @@ class Chaoxing:
 		params = {
 			"enc": activity["enc"],
 			"activeId": activity["active_id"],
-			"location": self.location_to_string(location) if ranged else "",
+			"location": "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}" if ranged else "",
 			"latitude": -1 if ranged else location["latitude"],
 			"longitude": -1 if ranged else location["longitude"],
 			"fid": 0
