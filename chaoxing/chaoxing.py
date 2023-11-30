@@ -78,7 +78,7 @@ class Chaoxing:
 
 	def get_curriculum(self, week = ""):
 		"""Get curriculum.
-		:param week: Week number in string, defaulted to the current week.
+		:param week: Week number in string. Defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time on success, otherwise False.
 		"""
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
