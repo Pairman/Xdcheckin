@@ -103,6 +103,7 @@ class Chaoxing:
 				}
 				if not lesson_class_id in curriculum.keys():
 					curriculum[lesson_class_id] = lesson
+					return
 				if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
 					curriculum[lesson_class_id]["time"].append(lesson["time"][0])
 				if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
