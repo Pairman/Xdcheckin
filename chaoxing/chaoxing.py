@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from re import findall, search
+from re import findall, search, DOTALL
 import requests
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -24,7 +24,7 @@ class Chaoxing:
 		except Exception:
 			self.logined = False
 
-	def get(self, url: str = "", params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify: bool = False):
+	def get(self, url, params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify = False):
 		cookies = cookies if cookies else self.cookies
 		headers = headers if headers else self.headers
 		return requests.get(url, params = params, cookies = cookies, headers = headers, verify = False)
@@ -69,16 +69,16 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			courses = findall(r"<.*courseId=\"(.*?)\" clazzId=\"(.*?)\" .*>", res.text)
-			courses = {row[1]: row[0] for row in courses}
+			courses = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"", res.text, DOTALL)
+			courses = {row[1]: {"course_id": row[0], "name": row[2], "teacher": row[3].split("，")} for row in courses}
 			assert courses
 			return courses
 		except Exception:
 			return False
 
-	def get_curriculum(self, week: str = ""):
+	def get_curriculum(self, week = ""):
 		"""Get curriculum.
-		:param week: Week number in string. Defaulted to the current week.
+		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time on success, otherwise False.
 		"""
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
@@ -124,7 +124,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
 			"fid": 0,
-			"courseId": course["course_id"] if course["course_id"] else self.courses[course["class_id"]],
+			"courseId": course["course_id"] if course["course_id"] else self.courses[course["class_id"]]["course_id"],
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
@@ -144,8 +144,8 @@ class Chaoxing:
 		"""
 		try:
 			activities = {}
-			for class_id, course_id in self.courses.items():
-				activity = self.get_course_activities({"course_id": course_id, "class_id": class_id})
+			for class_id, course in self.courses.items():
+				activity = self.get_course_activities({"course_id": course["course_id"], "class_id": class_id})
 				if activity:
 					activities[class_id] = activity
 			assert activities
@@ -178,7 +178,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
-			"courseId": self.courses.get(activity["class_id"]) or "",
+			"courseId": self.courses.get(activity["class_id"])["course_id"] or "",
 			"classId": activity["class_id"],
 			"activePrimaryId": activity["active_id"],
 			"general": "1",
