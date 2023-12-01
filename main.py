@@ -1,13 +1,15 @@
 from flask import Flask, render_template, make_response, session
 from flask_session import Session
 from json import loads, dumps
+import requests
+from tempfile import gettempdir
 from xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from xdcheckin_py.chaoxing.locations import locations
-import requests
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 Session(app)
 
 requests.packages.urllib3.disable_warnings()
