@@ -101,10 +101,10 @@ class Chaoxing{
 		};
 		try {
 			let res = this.get(url, params);
-			let arr = Array.from(res.text.matchAll("<.*courseId=\"(.*?)\" clazzId=\"(.*?)\" .*>"));
+			let arr = Array.from(res.text.matchAll(/courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"/sg));
 			let courses = {};
 			for (let i in arr) {
-				courses[arr[i][2]] = arr[i][1];
+				courses[arr[i][2]] = {"course_id": arr[i][1], "name": arr[i][3], "teacher": arr[i][4].split("，")}
 			}
 			assert(Object.keys(courses).length);
 			return courses;
