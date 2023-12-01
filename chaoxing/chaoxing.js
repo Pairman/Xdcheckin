@@ -26,6 +26,7 @@ class Chaoxing{
 			this.logined = (login != false);
 		}
 		catch (error) {
+			console.log(error);
 			this.logined = false;
 		}
 	}
@@ -87,7 +88,7 @@ class Chaoxing{
 				/* "cookies": res1.cookies */
 			}
 		} catch (error) {
-			return false;		
+			return false;
 		}
 	}
 
@@ -105,7 +106,7 @@ class Chaoxing{
 			for (let i in arr) {
 				courses[arr[i][2]] = arr[i][1];
 			}
-			assert(courses);
+			assert(Object.keys(courses).length);
 			return courses;
 		}		
 		catch (error) {
@@ -151,7 +152,7 @@ class Chaoxing{
 					add_lesson(conflict);
 				}
 			}
-			assert(curriculum);
+			assert(Object.keys(curriculum).length);
 			return curriculum;
 		}
 		catch (error) {
