@@ -124,7 +124,7 @@ class Chaoxing{
 			let curriculum = {};
 			function add_lesson(lesson) {
 				let lesson_class_id = lesson["classId"].toString();
-				let lesson = {
+				let lesson_ = {
 					"course_id": lesson["courseId"].toString(),
 					"name": lesson["name"],
 					"location": lesson["location"],
@@ -135,20 +135,20 @@ class Chaoxing{
 					}]
 				};
 				if (!(lesson_class_id in curriculum)) {
-					curriculum[lesson_class_id] = lesson;
+					curriculum[lesson_class_id] = lesson_;
 					return;
 				}
-				if (!(curriculum[lesson_class_id]["time"].includes(lesson["time"][0])))
-					curriculum[lesson_class_id]["time"].push(lesson["time"][0]);
-				if (!(curriculum[lesson_class_id]["teacher"].includes(lesson["teacher"][0])))
-					curriculum[lesson_class_id]["teacher"].push(lesson["teacher"][0]);
+				if (!(curriculum[lesson_class_id]["time"].includes(lesson_["time"][0])))
+					curriculum[lesson_class_id]["time"].push(lesson_["time"][0]);
+				if (!(curriculum[lesson_class_id]["teacher"].includes(lesson_["teacher"][0])))
+					curriculum[lesson_class_id]["teacher"].push(lesson_["teacher"][0]);
 			}
 			for (let i in data) {
 				let lesson = data[i];
-				add_lesson(lesson)
+				add_lesson(lesson);
 				for (key in lesson["conflictLessons"]) {
 					let conflict = lesson["conflictLessons"][key];
-					add_lesson(conflict)
+					add_lesson(conflict);
 				}
 			}
 			assert(curriculum);
