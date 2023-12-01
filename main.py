@@ -63,6 +63,21 @@ def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	finally:
 		return res
 
+@app.route("/chaoxing/get_courses")
+def chaoxing_get_courses():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		courses = chaoxing.courses
+		assert courses
+		res = make_response(dumps(courses))
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
 @app.route("/chaoxing/get_curriculum")
 def chaoxing_get_curriculum():
 	try:
