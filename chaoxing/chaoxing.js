@@ -8,6 +8,7 @@ class Chaoxing{
 	uid = "";
 	/* cookies = undefined; */
 	courses = {};
+	curriculum = {};
 	logined = false;
 	/* headers = {
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -21,6 +22,7 @@ class Chaoxing{
 			/* this.cookies = login["cookies"]; */
 			this.courses = this.get_courses();
 			assert(Object.keys(this.courses).length);
+			this.curriculum = this.get_curriculum();
 			this.logined = (login != false);
 		}
 		catch (error) {
@@ -103,12 +105,60 @@ class Chaoxing{
 			for (let i in arr) {
 				courses[arr[i][2]] = arr[i][1];
 			}
+			assert(courses);
 			return courses;
 		}		
 		catch (error) {
 			return false;
 		}
 	}
+
+	get_curriculum(week = "") {
+		let url = "https://kb.chaoxing.com/curriculum/getMyLessons";
+		let params = {
+			"week": week
+		};
+		try {
+			let res = this.get(url, params);
+			let data = res.json()["data"]["lessonArray"];
+			let curriculum = {};
+			function add_lesson(lesson) {
+				let lesson_class_id = lesson["classId"].toString();
+				let lesson = {
+					"course_id": lesson["courseId"].toString(),
+					"name": lesson["name"],
+					"location": lesson["location"],
+					"teacher": [lesson["teacherName"]],
+					"time":[{
+						"day": lesson["dayOfWeek"].toString(),
+						"period": lesson["beginNumber"].toString() + "-" + (lesson["beginNumber"] + lesson["length"] - 1).toString()
+					}]
+				};
+				if (!(lesson_class_id in curriculum)) {
+					curriculum[lesson_class_id] = lesson;
+					return;
+				}
+				if (!(curriculum[lesson_class_id]["time"].includes(lesson["time"][0])))
+					curriculum[lesson_class_id]["time"].push(lesson["time"][0]);
+				if (!(curriculum[lesson_class_id]["teacher"].includes(lesson["teacher"][0])))
+					curriculum[lesson_class_id]["teacher"].push(lesson["teacher"][0]);
+			}
+			for (let i in data) {
+				let lesson = data[i];
+				add_lesson(lesson)
+				for (key in lesson["conflictLessons"]) {
+					let conflict = lesson["conflictLessons"][key];
+					add_lesson(conflict)
+				}
+			}
+			assert(curriculum);
+			return curriculum;
+		}
+		catch (error) {
+			return false;
+		}
+	}
+
 
 	get_course_activities(course = {"course_id": "", "class_id": ""}) {
 		let url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist";
@@ -150,10 +200,6 @@ class Chaoxing{
 		catch (error) {
 			return false;
 		}
-	}
-
-	location_to_string(location = {"latitude": -1, "longitude": -1, "address": ""}){
-		return "{\"result\":1,\"latitude\":" + location["latitude"].toString() + ",\"longitude\":" + location["longitude"].toString() + ",\"address\":\"" + location["address"] + "\"}";
 	}
 
 	checkin_get_details(activity = {"active_id": ""}) {
@@ -273,7 +319,7 @@ class Chaoxing{
 		let params = {
 			"enc": activity["enc"],
 			"activeId": activity["active_id"],
-			"location": ranged ? this.location_to_string(location) : "",
+			"location": ranged ? "{\"result\":1,\"latitude\":" + location["latitude"].toString() + ",\"longitude\":" + location["longitude"].toString() + ",\"address\":\"" + location["address"] + "\"}" : "",
 			"latitude": ranged ? -1 : location["latitude"],
 			"longitude": ranged ? -1 : location["longitude"],
 			"fid": 0
