@@ -5,7 +5,7 @@ import requests
 from urllib.parse import parse_qs, unquote, urlparse
 
 class Chaoxing:
-	name = uid = cookies = courses = logined = None
+	name = uid = cookies = courses = curriculum = logined = None
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
