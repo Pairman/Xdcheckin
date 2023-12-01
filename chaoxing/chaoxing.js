@@ -147,7 +147,7 @@ class Chaoxing{
 			for (let i in data) {
 				let lesson = data[i];
 				add_lesson(lesson);
-				for (key in lesson["conflictLessons"]) {
+				for (let key in lesson["conflictLessons"]) {
 					let conflict = lesson["conflictLessons"][key];
 					add_lesson(conflict);
 				}
@@ -156,6 +156,7 @@ class Chaoxing{
 			return curriculum;
 		}
 		catch (error) {
+			console.log(error);
 			return false;
 		}
 	}
