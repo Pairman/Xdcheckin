@@ -166,7 +166,7 @@ class Chaoxing{
 		let url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist";
 		let params = {
 			"fid": 0,
-			"courseId": course["course_id"] ? course["course_id"] : this.courses[course["class_id"]],
+			"courseId": course["course_id"] ? course["course_id"] : this.courses[course["class_id"]]["course_id"],
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		};
@@ -191,7 +191,7 @@ class Chaoxing{
 		try {
 			let activities = {};
 			for (let class_id in this.courses) {
-				let course_id = this.courses[class_id];
+				let course_id = this.courses[class_id]["course_id"];
 				let activity = this.get_course_activities({"course_id": course_id, "class_id": class_id});
 				if (Object.keys(activity).length)
 					activities[class_id] = activity;
@@ -228,7 +228,7 @@ class Chaoxing{
 	checkin_do_presign(activity = {"active_id": "", "class_id": ""}) {
 		let url = "https://mobilelearn.chaoxing.com/newsign/preSign";
 		let params = {
-			"courseId": this.courses[activity["class_id"]] ? this.courses[activity["class_id"]] : "",
+			"courseId": this.courses[activity["class_id"]]["course_id"] ? this.courses[activity["class_id"]]["course_id"] : "",
 			"classId": activity["class_id"],
 			"activePrimaryId": activity["active_id"],
 			"general": "1",
