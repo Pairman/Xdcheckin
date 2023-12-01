@@ -327,7 +327,7 @@
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
 						let div = document.createElement("div");
-						div.innerText = class_id + ": ";
+						div.innerText = activities[class_id]["name"] + ": ";
 						e.appendChild(div);
 						for (let i in class_activities) {
 							let activity = class_activities[i];
