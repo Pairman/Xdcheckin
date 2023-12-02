@@ -1,5 +1,5 @@
 # Xdcheckin-toga-flask
-Xdcheckin with flask as backend interface and toga frontend for multiplatform support.
+[Xdcheckin-py](https://github.com/Pairman/Xdcheckin/tree/py) with flask as backend interface and toga frontend for multiplatform support.
 
 # Usage
 Checkout [Releases](https://github.com/Pairman/Xdcheckin/releases/).
