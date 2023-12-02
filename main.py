@@ -14,17 +14,6 @@ Session(app)
 
 requests.packages.urllib3.disable_warnings()
 
-@app.route("/get/xdcheckin/chaoxing/locations")
-def get_xdcheckin_chaoxing_locations():
-	try:
-		res = make_response("var locations = " + dumps(locations))
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
 @app.route("/get/xdclassroom/<cmd>")
 def get_xdclassroom(cmd = ""):
 	cmd = cmd.replace("::", "/")
