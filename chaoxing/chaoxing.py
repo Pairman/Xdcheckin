@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from re import findall, search, DOTALL
-from requests.packages.urllib3 import disable_warnings
+import requests
 from urllib.parse import parse_qs, unquote, urlparse
 
-disable_warnings()
+requests.packages.urllib3.disable_warnings()
 
 class Chaoxing:
 	name = uid = cookies = courses = curriculum = logined = None
