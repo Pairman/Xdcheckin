@@ -4,7 +4,6 @@ from json import loads, dumps
 import requests
 from tempfile import gettempdir
 from xdcheckin_py.chaoxing.chaoxing import Chaoxing
-from xdcheckin_py.chaoxing.locations import locations
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
