@@ -1,6 +1,9 @@
 # Xdcheckin-toga-flask
 Xdcheckin with flask as backend interface and toga frontend for multiplatform support.
 
+# Usage
+Checkout [Releases](https://github.com/Pairman/Xdcheckin/releases/).
+
 # Build
 1. Install beeware build tool and framework with ```pip install briefcase toga```. <br>
 2. Clone recursively with ```git clone -b toga-flask --recursive https://github.com/Pairman/Xdcheckin```. <br>
