@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from re import findall, search, DOTALL
-import requests
+from requests.packages.urllib3 import disable_warnings
 from urllib.parse import parse_qs, unquote, urlparse
+
+disable_warnings()
 
 class Chaoxing:
 	name = uid = cookies = courses = curriculum = logined = None
@@ -11,7 +13,6 @@ class Chaoxing:
 	}
 
 	def __init__(self, username: str = "", password: str = ""):
-		requests.packages.urllib3.disable_warnings()
 		try:
 			assert username
 			assert password
