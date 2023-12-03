@@ -320,13 +320,15 @@
 			activities_list_loading = true;
 			let e = document.getElementById("activities-list-div");
 			if (e.style.display == "none") {
+				e.innerHTML = "Loading activities.";
+				e.style.display = "block";
 				let res = await get("/chaoxing/get_activities");
 				let activities = JSON.parse(res.text);
 				if (!Object.keys(activities).length) {
 					e.innerHTML = "No ongoing activities.";
 				}
 				else {
-					e.replaceChildren();
+					e.innerHTML = "";
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
 						let div = document.createElement("div");
