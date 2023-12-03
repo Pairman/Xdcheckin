@@ -177,7 +177,7 @@ class Chaoxing{
 			for (let i in data) {
 				let activity = data[i];
 				if (activity["status"] == 1 && (activity["otherId"] == "4" || activity["otherId"] == "2"))
-					activities.push({"active_id": activity["id"], "type": activity["otherId"], "time_left": activity["nameFour"]});
+					activities.push({"active_id": activity["id"], "type": activity["otherId"], "name": activity["nameOne"], "time_left": activity["nameFour"]});
 			}
 			assert(activities.length);
 			return activities;
