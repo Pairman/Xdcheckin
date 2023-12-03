@@ -306,7 +306,7 @@
 			let latitude = prompt("Input latitude with maximum 6 float digits:");
 			let longitude = prompt("Input longitude with maximum 6 float digits:");
 			let address = prompt("Input address:");
-			if (isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
+			if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
 				alert("Invalid location.");
 				return;
 			}
@@ -335,7 +335,7 @@
 				}
 				else {
 					let activities = JSON.parse(res.text);
-					e.innerHTML = "";
+					e.replaceChildren();
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
 						let div = document.createElement("div");
@@ -352,7 +352,7 @@
 								button.setAttribute('onclick', 'chaoxing.')
 							}
 							type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
-							button.innerText = type + " (" + activity["active_id"] + ", " + activity["time_left"] + ")";
+							button.innerText = type + " (" + activity["name"] + ", " + activity["active_id"] + ", " + activity["time_left"] + ")";
 							button.setAttribute('onclick', 'chaoxingLocationCheckin(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
 							e.appendChild(button);
 						}
@@ -403,7 +403,7 @@
 				let liveId = JSON.parse(params.get("liveId"));
 			}
 			catch (err) {
-				if (input.length != 8 || isNaN(input)) {
+				if (!input || input.length != 8 || isNaN(input)) {
 					alert("Invalid liveId.");
 					return;
 				}
@@ -572,7 +572,7 @@
 					password = prompt("Input Chaoxing password");
 				}
 			}
-			if (username == "" || password == "") {
+			if (!username || !password) {
 				alert("Invalid input.");
 				chaoxing_logining = false;
 				return;
