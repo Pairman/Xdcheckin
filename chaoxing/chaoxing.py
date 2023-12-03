@@ -133,7 +133,7 @@ class Chaoxing:
 		try:
 			res = self.get(url, params)
 			data = res.json()["data"]["activeList"]
-			activities = [{"active_id": activity["id"], "type": activity["otherId"], "time_left": activity["nameFour"]} for activity in data if activity["otherId"] in ("2", "4") and activity["status"] == 1]
+			activities = [{"active_id": activity["id"], "type": activity["otherId"], "name": activity["nameOne"], "time_left": activity["nameFour"]} for activity in data if activity["otherId"] in ("2", "4") and activity["status"] == 1]
 			assert activities
 			return activities
 		except Exception:
