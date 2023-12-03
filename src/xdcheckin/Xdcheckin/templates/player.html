@@ -322,12 +322,18 @@
 			if (e.style.display == "none") {
 				e.innerHTML = "Loading activities.";
 				e.style.display = "block";
-				let res = await get("/chaoxing/get_activities");
-				let activities = JSON.parse(res.text);
-				if (!Object.keys(activities).length) {
+				let res;
+				try {
+					res = await get("/chaoxing/get_activities");
+				}
+				catch (error) {
+					(res = {}).status_code == 500;
+				}
+				if (res.status_code != 200) {
 					e.innerHTML = "No ongoing activities.";
 				}
 				else {
+					let activities = JSON.parse(res.text);
 					e.innerHTML = "";
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
@@ -351,7 +357,6 @@
 						}
 					}
 				}
-				e.style.display = "block";
 			}
 			else {
 				e.style.display = "none";
