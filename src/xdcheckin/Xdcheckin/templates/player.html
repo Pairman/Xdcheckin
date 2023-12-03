@@ -335,7 +335,7 @@
 				}
 				else {
 					let activities = JSON.parse(res.text);
-					e.innerHTML = "";
+					e.replaceChildren();
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
 						let div = document.createElement("div");
