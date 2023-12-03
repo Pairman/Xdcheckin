@@ -306,7 +306,7 @@
 			let latitude = prompt("Input latitude with maximum 6 float digits:");
 			let longitude = prompt("Input longitude with maximum 6 float digits:");
 			let address = prompt("Input address:");
-			if (isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
+			if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
 				alert("Invalid location.");
 				return;
 			}
@@ -403,7 +403,7 @@
 				let liveId = JSON.parse(params.get("liveId"));
 			}
 			catch (err) {
-				if (input.length != 8 || isNaN(input)) {
+				if (!input || input.length != 8 || isNaN(input)) {
 					alert("Invalid liveId.");
 					return;
 				}
@@ -572,7 +572,7 @@
 					password = prompt("Input Chaoxing password");
 				}
 			}
-			if (username == "" || password == "") {
+			if (!username || !password) {
 				alert("Invalid input.");
 				chaoxing_logining = false;
 				return;
