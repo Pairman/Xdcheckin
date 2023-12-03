@@ -3,7 +3,7 @@ from flask_session import Session
 from json import loads, dumps
 import requests
 from tempfile import gettempdir
-from xdcheckin_py.chaoxing.chaoxing import Chaoxing
+from xdcheckin.Xdcheckin.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
