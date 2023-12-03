@@ -577,7 +577,13 @@
 				return;
 			}
 			alert("Logging in.");
-			let res  = await get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+			let res;
+			try {
+				res = await get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+			}
+			catch (error) {
+				(res = {}).status_code = 500;
+			}
 			chaoxing_logined = (res.status_code == 200);
 			if (chaoxing_logined) {
 				alert("Logged in successfully.");
