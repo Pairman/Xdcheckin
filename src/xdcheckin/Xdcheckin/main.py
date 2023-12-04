@@ -1,17 +1,26 @@
 from flask import Flask, render_template, make_response, session
 from flask_session import Session
 from json import loads, dumps
+from os import listdir, remove
 import requests
 from tempfile import gettempdir
 from xdcheckin.Xdcheckin.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 
+requests.packages.urllib3.disable_warnings()
+
 app = Flask(__name__)
+
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
-Session(app)
 
-requests.packages.urllib3.disable_warnings()
+for i in listdir(app.config["SESSION_FILE_DIR"]):
+	try:
+		remove(app.config["SESSION_FILE_DIR"] + "/" + i)
+	except Exception:
+		continue
+
+Session(app)
 
 @app.route("/get/xdclassroom/<cmd>")
 def get_xdclassroom(cmd = ""):
