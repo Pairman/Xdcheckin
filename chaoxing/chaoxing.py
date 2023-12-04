@@ -59,7 +59,7 @@ class Chaoxing:
 			return False
 
 	def get_courses(self):
-		"""Get course IDs corresponding to class IDs.
+		"""Get course IDs corresponding to class IDs. Will only include courses in the root folder.
 		:return: Dictionary of class IDs to course IDs on success, otherwise False.
 		"""
 		url = "https://mooc1-1.chaoxing.com/visit/courselistdata"
