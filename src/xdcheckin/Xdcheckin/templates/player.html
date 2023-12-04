@@ -250,6 +250,28 @@
 			player3.setPlayerSize(strWidth, strHeight);
 		}
 
+		/* Prettify classroom urls. */
+		function prettifyUrls() {
+			let urls_new = {}
+			for (let building_name in urls) {
+				urls_new[building_name] = {};
+				let building_urls = urls[building_name];
+				for (let classroom_name in building_urls) {
+					let classroom_url = building_urls[classroom_name];
+					let url = new URL(classroom_url);
+					let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
+					let info_new = {"videoPath": {}};
+					info_new["videoPath"]["teacherFull"] = info["videoPath"]["teacherFull"];
+					info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"];
+					info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"];
+					info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"];
+					let classroom_url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "/info=" + encodeURIComponent(JSON.stringify(info_new));
+					urls_new[building_name][classroom_name] = classroom_url_new;
+				}
+			}
+			return urls_new;
+		}
+
 		/* Classrooms list toggle. */
 		function listClassroom() {
 			let e = document.getElementById("classrooms-list-div");
