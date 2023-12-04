@@ -415,11 +415,12 @@
 			let input = prompt("Input the extracted URL:");
 			try {
 				let url = new URL(input);
-				reloadClassroom(input, "Extracted");
 			}
 			catch (err) {
 				alert("Invalid URL.");
+				return;
 			}
+			reloadClassroom(input, "Extracted");
 		}
 
 		function slimExtracted() {
