@@ -265,7 +265,7 @@
 					info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"];
 					info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"];
 					info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"];
-					let classroom_url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "/info=" + encodeURIComponent(JSON.stringify(info_new));
+					let classroom_url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info_new));
 					urls_new[building_name][classroom_name] = classroom_url_new;
 				}
 			}
@@ -452,7 +452,7 @@
 				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
 				delete info["type"];
 				delete info["liveId"];
-				prompt("Slimmed URL:", `${url.protocol}//${url.hostname}${url.pathname}` + "/info=" + encodeURIComponent(JSON.stringify(info)));
+				prompt("Slimmed URL:", `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info)));
 			}
 			catch (err) {
 				alert("Invalid URL.");
