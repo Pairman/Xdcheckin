@@ -14,11 +14,14 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 
-for i in listdir(app.config["SESSION_FILE_DIR"]):
-	try:
-		remove(app.config["SESSION_FILE_DIR"] + "/" + i)
-	except Exception:
-		continue
+try:
+	for i in listdir(app.config["SESSION_FILE_DIR"]):
+		try:
+			remove(app.config["SESSION_FILE_DIR"] + "/" + i)
+		except Exception:
+			continue
+except Exception:
+	pass
 
 Session(app)
 
