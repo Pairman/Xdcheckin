@@ -340,7 +340,7 @@ class Chaoxing{
 			return false;
 		let params = Object.fromEntries((new URL(qr_url)).searchParams);
 		try {
-			activity = {
+			let activity = {
 				"active_id": params["id"],
 				"enc": params["enc"]
 			}
