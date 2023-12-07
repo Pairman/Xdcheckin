@@ -2,7 +2,7 @@
 [tool.briefcase]
 project_name = "Xdcheckin"
 bundle = "org.eu.pnxlr.git"
-version = "0.0.8"
+version = "0.0.9"
 url = "https://github.com/Pairman/Xdcheckin"
 license = "GNU General Public License v3 (GPLv3)"
 author = "Pairman"
