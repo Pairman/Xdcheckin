@@ -126,14 +126,14 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
 			"fid": 0,
-			"courseId": course["course_id"] if course["course_id"] else self.courses[course["class_id"]]["course_id"],
+			"courseId": course.get("course_id") if course.get("course_id") else self.courses[course["class_id"]]["course_id"],
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
 		try:
 			res = self.get(url, params)
 			data = res.json()["data"]["activeList"]
-			activities = [{"active_id": activity["id"], "type": activity["otherId"], "name": activity["nameOne"], "time_left": activity["nameFour"]} for activity in data if activity["otherId"] in ("2", "4") and activity["status"] == 1]
+			activities = [{"active_id": activity["id"], "type": activity.get("otherId"), "name": activity["nameOne"], "time_left": activity["nameFour"]} for activity in data if activity.get("otherId") in ("2", "4") and activity["status"] == 1]
 			assert activities
 			return activities
 		except Exception:
