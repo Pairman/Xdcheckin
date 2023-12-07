@@ -510,6 +510,7 @@
 
 		qrcode.callback = async function(decodedData) {
 			document.getElementById("player0-decodeddata-div").innerHTML = "Scan Result: <br>" + decodedData;
+			decodedData = decodeURIComponent(decodedData);
 			if (decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") == -1)
 				return;
 			try {
