@@ -514,13 +514,15 @@
 				return;
 			try {
 				if (chaoxing_logined) {
-					let url = new URL(decodedData);
-					let params = new URLSearchParams(decodeURIComponent(url.search));
+					let params = new URLSearchParams(decodeURIComponent((new URL(decodedData)).search));
 					let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
 					if (res.status_code == 200)
 						alert("Checked in successfully.");
 					else
 						document.getElementById("player0-decodeddata-div").innerHTML = "Checkin failed: <br>" + decodedData;
+				}
+				else {
+					document.getElementById("player0-decodeddata-div").innerHTML = "Checkin Error: <br> Not loggged in. <br>" + decodedData;
 				}
 			}
 			catch (error) {
