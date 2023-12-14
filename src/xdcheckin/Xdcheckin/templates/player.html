@@ -149,10 +149,10 @@
 		/* Generate location buttons list. */
 		const locations_list_div = document.getElementById("locations-list-div");
 		for (let buildingName in locations) {
-				let button = document.createElement("button");
-				button.innerText = buildingName + " (" + locations[buildingName]["address"] + ")";
-				button.setAttribute('onclick', 'location_ = ' + JSON.stringify(locations[buildingName]));
-				locations_list_div.appendChild(button);
+			let button = document.createElement("button");
+			button.innerText = buildingName + " (" + locations[buildingName]["latitude"] + ", " + locations[buildingName]["longitude"] + ")";
+			button.setAttribute('onclick', 'location_ = ' + JSON.stringify(locations[buildingName]));
+			locations_list_div.appendChild(button);
 		}
 
 		/* Initialize Chaoxing class and location. */
