@@ -9,10 +9,10 @@ from xdcheckin.Xdcheckin.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 requests.packages.urllib3.disable_warnings()
 
 app = Flask(__name__)
-
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
+app.config["version"] = "0.0.0"
 
 try:
 	for i in listdir(app.config["SESSION_FILE_DIR"]):
@@ -24,6 +24,39 @@ except Exception:
 	pass
 
 Session(app)
+
+@app.route("/get/xdcheckin/version")
+def get_xdcheckin_version():
+	res = make_response(app.config["version"])
+	res.status_code = 200
+	return res
+
+@app.route("/get/xdcheckin/releases/latest")
+def get_xdcheckin_latest_release():
+	try:
+		res = requests.get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
+		assert res.status_code == 200
+		data = res.json()[0]
+		res = make_response(dumps({
+			"tag_name": data["tag_name"],
+			"name": data["name"],
+			"author": data["author"]["login"],
+			"body": data["body"],
+			"published_at": data["published_at"],
+			"html_url": data["html_url"],
+			"assets": [{
+					"name": asset["name"],
+					"size": asset["size"],
+					"browser_download_url": asset["browser_download_url"]
+				} for asset in data["assets"]]
+		}))
+		res.status_code = 200
+	except Exception:
+		print(Exception)
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
 
 @app.route("/get/xdclassroom/<cmd>")
 def get_xdclassroom(cmd = ""):

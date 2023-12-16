@@ -11,6 +11,7 @@ from xdcheckin.Xdcheckin.main import *
 
 class Xdcheckin(toga_App):
 	def startup(self):
+		app.config["version"] = self.version
 		Thread(target = serve, kwargs = {"app": app, "host": "127.0.0.1", "port": 5001}).start()
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		self.main_window.content = toga_Box(

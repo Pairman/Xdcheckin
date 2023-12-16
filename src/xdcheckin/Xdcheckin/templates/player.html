@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-	<title>Xdclassroom</title>
+	<title>Xdcheckin</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
 	<link rel="shortcut icon" href="#"/>
@@ -23,6 +23,7 @@
 	</head>
 
 	<body id="player-body" style="display: none; padding: 0; margin: 0;">
+		<div id="xdcheckin-update-div" style="display: none; text-align: center; font-weight: bold;"></div>
 		<p align="center">
 			<button onclick="listClassroom()">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
@@ -40,7 +41,7 @@
 		<div id="activities-list-div" style="display: none"></div>
 
 		<p align="center">
-			<B id="title" style="font-size:48px; font-family: sans-serif">Xdclassoom</B>
+			<B id="title" style="font-size:48px; font-family: sans-serif">Xdcheckin</B>
 			<br>
 			<button onclick="play(player0); play(player1); play(player2); play(player3)">Play All</button>
 			<button onclick="stop(player0); stop(player1); stop(player2); stop(player3)">Stop All</button>
@@ -60,9 +61,7 @@
 			<button id="player0-button-scan" onclick="scan(player0)">Scan (Whole)</button>
 		</p>
 		<div id="player0-div"></div>
-		<p id="player0-scanresult-p" align="center">
-			<div id="player0-decodeddata-div" style="text-align: center"></div>
-		</p>
+		<div id="player0-decodeddata-div" style="text-align: center"></div>
 
 		<p align="center">
 			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
@@ -93,12 +92,10 @@
 			<button onclick="mute(player3)">Mute</button>
 		</p>
 		<div id="player3-div"></div>
-		<p align="center">
-			<div id="footer-div" style="text-align: center">
-				Copyright 2023 Pairman
-				<a href="https://github.com/Pairman/Xdclassroom">Source Code</a>
-			</div>
-	</p>
+		<div id="footer-div" style="text-align: center">
+			Copyright 2023 Pairman
+			<a href="https://github.com/Pairman/Xdcheckin">Source Code</a>
+		</div>
 	</body>
 
 	<script>
@@ -111,6 +108,40 @@
 			window.location.href = '../';
 		else
 			document.getElementById("player-body").style.display = "block";
+
+		/* Check updates for Xdcheckin. */
+		var xdcheckin_version = "0.0.0";
+		var xdcheckin_latest_release = {};
+		var xdcheckin_update_available = false;
+		get("/get/xdcheckin/version").then((res) => {
+			if (res.status_code != 200)
+				return;
+			xdcheckin_version = res.text;
+			get("/get/xdcheckin/releases/latest").then((res) => {
+				if (res.status_code != 200) {
+					var xdcheckin_latest_release = {
+						"tag_name": ('; '+document.cookie).split(`; xdcheckin_latest_release_tag_name=`).pop().split(';')[0],
+						"html_url": ('; '+document.cookie).split(`; xdcheckin_latest_release_html_url=`).pop().split(';')[0]
+					}
+				}
+				xdcheckin_latest_release = res.json();
+				let xdcheckin_version_arr = xdcheckin_version.split(".");
+				let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
+				for (let i = 0; i < 3; ++i) {
+					if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
+						xdcheckin_update_available = true;
+						break;
+					}
+				}
+				if (xdcheckin_update_available) {
+					document.cookie = "xdcheckin_latest_release_tag_name=" + xdcheckin_latest_release["tag_name"] + "; max-age=31536000;";
+					document.cookie = "xdcheckin_latest_release_html_url=" + xdcheckin_latest_release["html_url"] + "; max-age=31536000;";
+					let e = document.getElementById("xdcheckin-update-div");
+					e.innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">New APP version available! Download " + xdcheckin_latest_release["tag_name"] + " here.</a>";
+					e.style.display = "block";
+				}
+			}).catch((error) => {});
+		}).catch((error) => {});
 
 		/* Calculate video player dimensions. */
 		var strWidth = "", strHeight = "";
@@ -371,7 +402,7 @@
 			let info = JSON.parse(params.get("info"));
 			document.cookie = "classroomName=" + classroomNameInternal + "; max-age=31536000;";
 			document.cookie = "classroom=" + urlStr + "; max-age=31536000;";
-			document.getElementById("title").innerText = "Xdclassroom: " + classroomNameInternal;
+			document.getElementById("title").innerText = "Xdcheckin: " + classroomNameInternal;
 			classroom = urlStr;
 			classroomName = classroomNameInternal;
 			pptVideo = info.videoPath.pptVideo;
