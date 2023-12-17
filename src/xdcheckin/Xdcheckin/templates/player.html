@@ -116,7 +116,6 @@
 			if (res.status_code != 200)
 				return;
 			xdcheckin_version = res.text;
-			xdcheckin_version = "0.0.9";
 			get("/get/xdcheckin/releases/latest").then((res) => {
 				if (res.status_code != 200) {
 					var xdcheckin_latest_release = {
@@ -443,8 +442,8 @@
 					alert("Invalid liveId.");
 					return;
 				}
-				liveId = input;
 			}
+			liveId = input;
 			try {
 				let res = await get("/chaoxing/extract_url/" + liveId);
 				assert(res.status_code == 200);
