@@ -177,5 +177,20 @@ def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \
 	finally:
 		return res
 
+@app.route("/chaoxing/extract_url/<cmd>")
+def chaoxing_extract_url(cmd: str = ""):
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls?liveId=" + cmd)
+		assert res.status_code == 200
+		res = make_response(res.text)
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
 if __name__ == "__main__":
 	app.run(host = "0.0.0.0", port=5001)
