@@ -236,17 +236,17 @@ class Chaoxing:
 		except Exception:
 			return True
 
-	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
+	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
-		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
+		:param location: Address, latitude, longitude and range enforcement in dictionary. Unused if designated place not enabled or not enforced.
 		:return: Returns True on success, otherwise False.
 		"""
 		sign_details = self.checkin_get_details(activity = activity)
 		activity["class_id"] = sign_details["clazzId"]
 		assert self.checkin_do_presign(activity = activity)
 		assert self.checkin_do_analysis(activity = activity)
-		ranged = + self.checkin_check_designatedplace(activity = activity)
+		ranged = (not not location["ranged"]) + self.checkin_check_designatedplace(activity = activity)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"address": location["address"] if ranged else "",
@@ -263,17 +263,17 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
+	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param active_id: Activity ID and ENC code in dictionary.
-		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
+		:param location: Address, latitude, longitude and range enforcement in dictionary. Unused if designated place not enabled or not enforced.
 		:return: Returns True on success, otherwise False.
 		"""
 		sign_details = self.checkin_get_details(activity = activity)
 		activity["class_id"] = sign_details["clazzId"]
 		assert self.checkin_do_presign(activity = activity)
 		assert self.checkin_do_analysis(activity = activity)
-		ranged = + self.checkin_check_designatedplace(activity = activity)
+		ranged = (not not location["ranged"]) + self.checkin_check_designatedplace(activity = activity)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
@@ -289,10 +289,10 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
+	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param qr_url: URL from qrcode.
-		:param location: Address, latitude and longitude in dictionary. Unused if designated place not enabled.
+		:param location: Address, latitude, longitude and range enforcement in dictionary. Unused if designated place not enabled or not enforced.
 		:return: Returns True on success, otherwise False.
 		"""
 		if qr_url.find("https://mobilelearn.chaoxing.com/widget/sign/e"):
