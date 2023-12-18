@@ -15,6 +15,7 @@ long_description = """More details about the app should go here.
 """
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
+    "src/backend",
     "src/xdcheckin",
 ]
 test_sources = [

@@ -9,34 +9,34 @@ from backend.xdcheckin_py.chaoxing.locations import locations
 
 requests.packages.urllib3.disable_warnings()
 
-app = Flask(__name__)
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
-app.config["version"] = "0.0.0"
+server = Flask(__name__)
+server.config["SESSION_PERMANENT"] = False
+server.config["SESSION_TYPE"] = "filesystem"
+server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
+server.config["version"] = "0.0.0"
 
 try:
-	for i in listdir(app.config["SESSION_FILE_DIR"]):
+	for i in listdir(server.config["SESSION_FILE_DIR"]):
 		try:
-			remove(app.config["SESSION_FILE_DIR"] + "/" + i)
+			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
 		except Exception:
 			continue
 except Exception:
 	pass
 
-Session(app)
+Session(server)
 
-@app.route("/get/xdcheckin/locations.js")
+@server.route("/get/xdcheckin/locations.js")
 def get_xdcheckin_locations_js():
 	res = make_response("var locations = " + dumps(locations).encode("ascii").decode("unicode-escape") + ";")
 	res.status_code = 200
 	return res
 
-@app.route("/get/xdcheckin/classrooms.js")
+@server.route("/get/xdcheckin/classrooms.js")
 def get_xdcheckin_classrooms_js(cmd = ""):
 	cmd = cmd.replace("::", "/")
 	try:
-		res = requests.get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
+		res = requests.get("https://xdcheckin.git.pnxlr.eu.org/src/server/static/classrooms.js")
 		assert res.status_code == 200
 		res = make_response(res.text)
 		res.status_code = 200
@@ -46,13 +46,13 @@ def get_xdcheckin_classrooms_js(cmd = ""):
 	finally:
 		return res
 
-@app.route("/get/xdcheckin/version")
+@server.route("/get/xdcheckin/version")
 def get_xdcheckin_version():
-	res = make_response(app.config["version"])
+	res = make_response(server.config["version"])
 	res.status_code = 200
 	return res
 
-@app.route("/get/xdcheckin/releases/latest")
+@server.route("/get/xdcheckin/releases/latest")
 def get_xdcheckin_latest_release():
 	try:
 		res = requests.get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
@@ -79,17 +79,17 @@ def get_xdcheckin_latest_release():
 	finally:
 		return res
 
-@app.route("/")
-@app.route("/index.html")
+@server.route("/")
+@server.route("/index.html")
 def index_html():
 	return render_template("index.html")
 
-@app.route("/player.html")
+@server.route("/player.html")
 def player_html():
 	print("-----PLAYER.HTML")
 	return render_template("player.html")
 
-@app.route("/chaoxing/login/<cmd>")
+@server.route("/chaoxing/login/<cmd>")
 def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	try:
 		params = loads(cmd)
@@ -106,7 +106,7 @@ def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	finally:
 		return res
 
-@app.route("/chaoxing/get_courses")
+@server.route("/chaoxing/get_courses")
 def chaoxing_get_courses():
 	try:
 		chaoxing = session["chaoxing"]
@@ -121,7 +121,7 @@ def chaoxing_get_courses():
 	finally:
 		return res
 
-@app.route("/chaoxing/get_curriculum")
+@server.route("/chaoxing/get_curriculum")
 def chaoxing_get_curriculum():
 	try:
 		chaoxing = session["chaoxing"]
@@ -136,7 +136,7 @@ def chaoxing_get_curriculum():
 	finally:
 		return res
 
-@app.route("/chaoxing/get_activities")
+@server.route("/chaoxing/get_activities")
 def chaoxing_get_activities():
 	try:
 		chaoxing = session["chaoxing"]
@@ -151,7 +151,7 @@ def chaoxing_get_activities():
 	finally:
 		return res
 
-@app.route("/chaoxing/checkin_checkin_location/<cmd>")
+@server.route("/chaoxing/checkin_checkin_location/<cmd>")
 def chaoxing_checkin_checkin_location(cmd: str = "{\"active_id\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
 	try:
 		chaoxing = session["chaoxing"]
@@ -168,7 +168,7 @@ def chaoxing_checkin_checkin_location(cmd: str = "{\"active_id\": \"\", \"locati
 	finally:
 		return res
 
-@app.route("/chaoxing/checkin_checkin_qrcode/<cmd>")
+@server.route("/chaoxing/checkin_checkin_qrcode/<cmd>")
 def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
 	try:
 		chaoxing = session["chaoxing"]
@@ -185,7 +185,7 @@ def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \
 	finally:
 		return res
 
-@app.route("/chaoxing/extract_url/<cmd>")
+@server.route("/chaoxing/extract_url/<cmd>")
 def chaoxing_extract_url(cmd: str = ""):
 	try:
 		chaoxing = session["chaoxing"]
@@ -201,4 +201,4 @@ def chaoxing_extract_url(cmd: str = ""):
 		return res
 
 if __name__ == "__main__":
-	app.run(host = "0.0.0.0", port=5001)
+	server.run(host = "0.0.0.0", port=5001)
