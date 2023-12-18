@@ -73,7 +73,6 @@ def get_xdcheckin_latest_release():
 		}))
 		res.status_code = 200
 	except Exception:
-		print(Exception)
 		res = make_response("")
 		res.status_code = 500
 	finally:
@@ -86,7 +85,6 @@ def index_html():
 
 @server.route("/player.html")
 def player_html():
-	print("-----PLAYER.HTML")
 	return render_template("player.html")
 
 @server.route("/chaoxing/login/<cmd>")
