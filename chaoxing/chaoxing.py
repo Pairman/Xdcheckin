@@ -246,7 +246,7 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		assert self.checkin_do_presign(activity = activity)
 		assert self.checkin_do_analysis(activity = activity)
-		ranged = (not not location["ranged"]) + self.checkin_check_designatedplace(activity = activity)
+		ranged = (not not location.get("ranged")) + self.checkin_check_designatedplace(activity = activity)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"address": location["address"] if ranged else "",
@@ -273,7 +273,7 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		assert self.checkin_do_presign(activity = activity)
 		assert self.checkin_do_analysis(activity = activity)
-		ranged = (not not location["ranged"]) + self.checkin_check_designatedplace(activity = activity)
+		ranged = (not not location.get("ranged")) + self.checkin_check_designatedplace(activity = activity)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
