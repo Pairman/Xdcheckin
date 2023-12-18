@@ -26,13 +26,13 @@ except Exception:
 
 Session(server)
 
-@server.route("/get/xdcheckin/locations.js")
+@server.route("/xdcheckin/get/locations.js")
 def get_xdcheckin_locations_js():
 	res = make_response("var locations = " + dumps(locations).encode("ascii").decode("unicode-escape") + ";")
 	res.status_code = 200
 	return res
 
-@server.route("/get/xdcheckin/classrooms.js")
+@server.route("/xdcheckin/get/classrooms.js")
 def get_xdcheckin_classrooms_js(cmd = ""):
 	cmd = cmd.replace("::", "/")
 	try:
@@ -46,13 +46,13 @@ def get_xdcheckin_classrooms_js(cmd = ""):
 	finally:
 		return res
 
-@server.route("/get/xdcheckin/version")
+@server.route("/xdcheckin/get/version")
 def get_xdcheckin_version():
 	res = make_response(server.config["version"])
 	res.status_code = 200
 	return res
 
-@server.route("/get/xdcheckin/releases/latest")
+@server.route("/xdcheckin/get/releases/latest")
 def get_xdcheckin_latest_release():
 	try:
 		res = requests.get("https://api.github.com/repos/Pairman/Xdcheckin/releases")

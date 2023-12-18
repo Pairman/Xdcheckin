@@ -10,8 +10,8 @@
 	<script type="text/javascript" src="static/lib/long-press-event/long-press-event.min.js"></script>
 	<script type="text/javascript" src="static/lib/jsqrcode/llqrcode.js"></script>
 	<script type="text/javascript" src="static/classrooms.js"></script>
-	<script type="text/javascript" src="get/xdcheckin/classrooms.js"></script>
-	<script type="text/javascript" src="get/xdcheckin/locations.js"></script>
+	<script type="text/javascript" src="xdcheckin/get/classrooms.js"></script>
+	<script type="text/javascript" src="xdcheckin/get/locations.js"></script>
 
 	<head>
 		<style>
@@ -27,8 +27,8 @@
 		<p align="center">
 			<button onclick="listClassroom()">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
-			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
 			<button onclick="loadExtracted()">Load URL</button>
+			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
 		</p>
 		<div id="classrooms-list-div" style="display: none"></div>
 
@@ -112,11 +112,11 @@
 		var xdcheckin_version = "0.0.0";
 		var xdcheckin_latest_release = {};
 		var xdcheckin_update_available = false;
-		get("/get/xdcheckin/version").then((res) => {
+		get("/xdcheckin/get/version").then((res) => {
 			if (res.status_code != 200)
 				return;
 			xdcheckin_version = res.text;
-			get("/get/xdcheckin/releases/latest").then((res) => {
+			get("/xdcheckin/get/releases/latest").then((res) => {
 				if (res.status_code != 200) {
 					var xdcheckin_latest_release = {
 						"tag_name": ('; '+document.cookie).split(`; xdcheckin_latest_release_tag_name=`).pop().split(';')[0],
@@ -654,7 +654,7 @@
 				if (res.status_code == 200)
 					curriculum = JSON.parse(res.text);
 				tablifyCurriculum();
-				document.getElementById("extract-classroom-button").style.display = "block";
+				document.getElementById("extract-classroom-button").style.display = "inline";
 				let chaoxing_buttons = document.getElementById("chaoxing-buttons");
 				let button_curriculum = document.createElement("button");
 				let button_locations = document.createElement("button");
