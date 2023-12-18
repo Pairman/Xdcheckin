@@ -570,6 +570,7 @@
 			try {
 				if (chaoxing_logined) {
 					let params = new URLSearchParams(new URL(decodedData).search);
+					location_["ranged"] = "1";
 					let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
 					if (res.status_code == 200)
 						alert("Checked in successfully.");
@@ -605,6 +606,7 @@
 
 		/* Location checkin. */
 		async function chaoxingLocationCheckin(activity) {
+			location_["ranged"] = "1";
 			let res = await get("/chaoxing/checkin_checkin_location/{\"active_id\": \"" + activity["active_id"] + "\", \"location\": " + JSON.stringify(location_) + "}");
 			if (res.status_code == 200)
 				alert("Checked in successfully.");
