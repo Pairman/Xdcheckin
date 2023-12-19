@@ -445,8 +445,8 @@
 					alert("Invalid liveId.");
 					return;
 				}
+				liveId = input;
 			}
-			liveId = input;
 			try {
 				let res = await get("/chaoxing/extract_url/" + liveId);
 				assert(res.status_code == 200);
