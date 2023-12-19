@@ -60,7 +60,7 @@
 			<button id="player0-button-scan" onclick="scan(player0)">Scan (Whole)</button>
 		</p>
 		<div id="player0-div"></div>
-		<div id="player0-decodeddata-div" style="text-align: center"></div>
+		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
 		<p align="center">
 			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
@@ -145,6 +145,8 @@
 		/* Calculate video player dimensions. */
 		var strWidth = "", strHeight = "";
 		calculatePlayerSize();
+		document.getElementById("player0-decodeddata-div").style.width = strWidth;
+		
 
 		/* Generate clasroom buttons list. */
 		var buildingsArr = [], buildingNamesArr = [];
@@ -280,6 +282,7 @@
 
 		function resize() {
 			calculatePlayerSize();
+			document.getElementById("player0-decodeddata-div").style.width = strWidth;
 			player0.setPlayerSize(strWidth, strHeight);
 			player1.setPlayerSize(strWidth, strHeight);
 			player2.setPlayerSize(strWidth, strHeight);
