@@ -36,7 +36,7 @@ def get_xdcheckin_locations_js():
 def get_xdcheckin_classrooms_js(cmd = ""):
 	cmd = cmd.replace("::", "/")
 	try:
-		res = requests.get("https://xdcheckin.git.pnxlr.eu.org/src/server/static/classrooms.js")
+		res = requests.get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
 		assert res.status_code == 200
 		res = make_response(res.text)
 		res.status_code = 200
