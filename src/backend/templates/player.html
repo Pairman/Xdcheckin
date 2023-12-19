@@ -23,7 +23,8 @@
 	</head>
 
 	<body id="player-body" style="display: none; padding: 0; margin: 0;">
-		<div id="xdcheckin-update-div" style="display: none; text-align: center; font-weight: bold;"></div>
+		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold; display: none;"></div>
+		<div id="xdcheckin-update-body-div" style="text-align: center; display: none;"></div>
 		<p align="center">
 			<button onclick="listClassroom()">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
@@ -103,7 +104,7 @@
 	   	 */
 
 		/* Check EULA state. */
-		if (('; ' + document.cookie).split(`; eula=`).pop().split(';')[0] != 1)
+		if (get_cookie("eula") != 1)
 			window.location.href = '../';
 		else
 			document.getElementById("player-body").style.display = "block";
@@ -113,17 +114,9 @@
 		var xdcheckin_latest_release = {};
 		var xdcheckin_update_available = false;
 		get("/xdcheckin/get/version").then((res) => {
-			if (res.status_code != 200)
-				return;
-			xdcheckin_version = res.text;
+			assert(xdcheckin_version = res.text);
 			get("/xdcheckin/get/releases/latest").then((res) => {
-				if (res.status_code != 200) {
-					var xdcheckin_latest_release = {
-						"tag_name": ('; '+document.cookie).split(`; xdcheckin_latest_release_tag_name=`).pop().split(';')[0],
-						"html_url": ('; '+document.cookie).split(`; xdcheckin_latest_release_html_url=`).pop().split(';')[0]
-					}
-				}
-				xdcheckin_latest_release = res.json();
+				assert(Object.keys(xdcheckin_latest_release = res.json()).length);
 				let xdcheckin_version_arr = xdcheckin_version.split(".");
 				let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
 				for (let i = 0; i < 3; ++i) {
@@ -133,10 +126,11 @@
 					}
 				}
 				if (xdcheckin_update_available) {
-					document.cookie = "xdcheckin_latest_release_tag_name=" + xdcheckin_latest_release["tag_name"] + "; max-age=31536000;";
-					document.cookie = "xdcheckin_latest_release_html_url=" + xdcheckin_latest_release["html_url"] + "; max-age=31536000;";
 					let e = document.getElementById("xdcheckin-update-div");
-					e.innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">New APP version available! Download " + xdcheckin_latest_release["tag_name"] + " here.</a>";
+					e.innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">New APP version available! <br> Download " + xdcheckin_latest_release["tag_name"] + " here.</a>";
+					e.style.display = "block";
+					e = document.getElementById("xdcheckin-update-body-div");
+					e.innerText = xdcheckin_latest_release["body"];
 					e.style.display = "block";
 				}
 			}).catch((error) => {});
@@ -171,8 +165,8 @@
 		}
 
 		/* Initialize classroom name and urls. */
-		var classroomName = ('; '+document.cookie).split(`; classroomName=`).pop().split(';')[0];
-		var classroom = ('; '+document.cookie).split(`; classroom=`).pop().split(';')[0];
+		var classroomName = get_cookie("classroomName");
+		var classroom = get_cookie("classroom");
 		var pptVideo, teacherTrack, teacherFull, studentFull;
 		if (classroom == '' || classroomName == '')
 			[classroom, classroomName] = randClassroom();
@@ -194,7 +188,7 @@
 		var courses = {};
 		var curriculum = {};
 		var activities_list_loading = false;
-		var location_str = ('; '+document.cookie).split(`; location=`).pop().split(';')[0];
+		var location_str = get_cookie("location");
 		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
 
 		/* Create video players. */
@@ -261,6 +255,14 @@
 		function assert(condition, message) {
 			if (!condition)
 				throw new Error(message ||"Assertion failed");
+		}
+
+		function get_cookie(name) {
+			return ('; '+document.cookie).split("; " + name + "=").pop().split(";")[0];
+		}
+
+		function set_cookie(name, val, age = "31536000") {
+			document.cookie = name + "=" + val + "; max-age=" + age + ";";
 		}
 
 		/* Player size controls. */
@@ -349,7 +351,7 @@
 				return;
 			}
 			location_ = {"latitude": latitude, "longitude": longitude, "address": address};
-			document.cookie = "location=" + JSON.stringify(location_) + "; max-age=31536000;";
+			set_cookie("location", JSON.stringify(location_));
 		}
 
 		/* Activities list toggle. */
@@ -359,7 +361,7 @@
 			activities_list_loading = true;
 			let e = document.getElementById("activities-list-div");
 			if (e.style.display == "none") {
-				e.innerHTML = "Loading activities.";
+				e.innerText = "Loading activities.";
 				e.style.display = "block";
 				let res;
 				try {
@@ -369,10 +371,10 @@
 					(res = {}).status_code == 500;
 				}
 				if (res.status_code != 200) {
-					e.innerHTML = "No ongoing activities.";
+					e.innerText = "No ongoing activities.";
 				}
 				else {
-					let activities = JSON.parse(res.text);
+					let activities = res.json();
 					e.replaceChildren();
 					for (let class_id in activities) {
 						let class_activities = activities[class_id];
@@ -408,8 +410,8 @@
 			let url = new URL(urlStr);
 			let params = new URLSearchParams(decodeURIComponent(url.search));
 			let info = JSON.parse(params.get("info"));
-			document.cookie = "classroomName=" + classroomNameInternal + "; max-age=31536000;";
-			document.cookie = "classroom=" + urlStr + "; max-age=31536000;";
+			set_cookie("classroomName", classroomNameInternal);
+			set_cookie("classroom", urlStr);
 			document.getElementById("title").innerText = "Xdcheckin: " + classroomNameInternal;
 			classroom = urlStr;
 			classroomName = classroomNameInternal;
@@ -558,14 +560,14 @@
 		}
 
 		qrcode.callback = async function(decodedData) {
-			document.getElementById("player0-decodeddata-div").innerHTML = "Scan result: <br>" + decodedData;
+			document.getElementById("player0-decodeddata-div").innerText = "Scan result: <br>" + decodedData;
 			assert(decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") != -1, "Not a qrcode checkin URL.")
 			try {
 				decodeURIComponent(decodedData);
 			}
 			catch (error) {
 				decodedData = fixMalformedDecodedData(decodedData);
-				document.getElementById("player0-decodeddata-div").innerHTML = "Scan result (fixed): <br>" + decodedData;
+				document.getElementById("player0-decodeddata-div").innerText = "Scan result (fixed): <br>" + decodedData;
 			}
 			try {
 				let params = new URLSearchParams(new URL(decodedData).search);
@@ -574,10 +576,10 @@
 				if (res.status_code == 200)
 					alert("Checked in successfully.");
 				else
-					document.getElementById("player0-decodeddata-div").innerHTML = "Checkin failed: <br>" + decodedData;
+					document.getElementById("player0-decodeddata-div").innerText = "Checkin failed: <br>" + decodedData;
 			}
 			catch (error) {
-				document.getElementById("player0-decodeddata-div").innerHTML = "Checkin error: <br>" + error.message + " <br>" + decodedData;
+				document.getElementById("player0-decodeddata-div").innerText = "Checkin error: <br>" + error.message + " <br>" + decodedData;
 			}
 		};
 
@@ -614,8 +616,8 @@
 			if (chaoxing_logining)
 				return;
 			chaoxing_logining = true;
-			username = ('; '+document.cookie).split(`; username=`).pop().split(';')[0];
-			password = ('; '+document.cookie).split(`; password=`).pop().split(';')[0];
+			username = get_cookie("username");
+			password = get_cookie("password");
 			if (username == "" || password == "") {
 				username = prompt("Input Chaoxing username:");
 				password = prompt("Input Chaoxing password");
@@ -642,14 +644,14 @@
 			chaoxing_logined = (res.status_code == 200);
 			if (chaoxing_logined) {
 				alert("Logged in successfully.");
-				document.cookie = "username=" + username + "; max-age=31536000;";
-				document.cookie = "password=" + password + "; max-age=31536000;";
+				set_cookie("username", username);
+				set_cookie("password", password);
 				let res = await get("/chaoxing/get_courses");
 				if (res.status_code == 200)
-					courses = JSON.parse(res.text);
+					courses = res.json();
 				res = await get("/chaoxing/get_curriculum");
 				if (res.status_code == 200)
-					curriculum = JSON.parse(res.text);
+					curriculum = res.json();
 				tablifyCurriculum();
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				let chaoxing_buttons = document.getElementById("chaoxing-buttons");
