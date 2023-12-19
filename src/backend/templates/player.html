@@ -558,31 +558,25 @@
 		}
 
 		qrcode.callback = async function(decodedData) {
-			document.getElementById("player0-decodeddata-div").innerHTML = "Scan result: <br>" + decodedData;
-			if (decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") == -1) {
-				document.getElementById("player0-decodeddata-div").innerHTML = "Scan result: <br>Not a qrcode checkin URL. <br>" + decodedData;
+			if (!chaoxing_logined)
 				return;
-			}
+			document.getElementById("player0-decodeddata-div").innerHTML = "Scan result: <br>" + decodedData;
+			assert(decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") != -1, "Not a qrcode checkin URL.")
 			try {
 				decodeURIComponent(decodedData);
 			}
 			catch (error) {
 				decodedData = fixMalformedDecodedData(decodedData);
-				document.getElementById("player0-decodeddata-div").innerHTML = "Fixed scan result: <br>" + decodedData;
+				document.getElementById("player0-decodeddata-div").innerHTML = "Scan result (fixed): <br>" + decodedData;
 			}
 			try {
-				if (chaoxing_logined) {
-					let params = new URLSearchParams(new URL(decodedData).search);
-					location_["ranged"] = "1";
-					let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
-					if (res.status_code == 200)
-						alert("Checked in successfully.");
-					else
-						document.getElementById("player0-decodeddata-div").innerHTML = "Checkin failed: <br>" + decodedData;
-				}
-				else {
-					document.getElementById("player0-decodeddata-div").innerHTML = "Checkin error: <br> Not loggged in. <br>" + decodedData;
-				}
+				let params = new URLSearchParams(new URL(decodedData).search);
+				location_["ranged"] = "1";
+				let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
+				if (res.status_code == 200)
+					alert("Checked in successfully.");
+				else
+					document.getElementById("player0-decodeddata-div").innerHTML = "Checkin failed: <br>" + decodedData;
 			}
 			catch (error) {
 				document.getElementById("player0-decodeddata-div").innerHTML = "Checkin error: <br>" + error.message + " <br>" + decodedData;
