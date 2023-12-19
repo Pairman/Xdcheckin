@@ -3,8 +3,8 @@
 
 # Usage
 Checkout [Releases](https://github.com/Pairman/Xdcheckin/releases/).
-## Notes
-### Android
+### Notes
+##### Android
 Currently, APP webview is broken on Android and awaits upstream fix. Hence do not try to use this app directly. You must open the app as an backend server and visit ```http://127.0.0.1:5001/``` in your browser.
 
 # Build
