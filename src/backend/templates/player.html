@@ -558,8 +558,6 @@
 		}
 
 		qrcode.callback = async function(decodedData) {
-			if (!chaoxing_logined)
-				return;
 			document.getElementById("player0-decodeddata-div").innerHTML = "Scan result: <br>" + decodedData;
 			assert(decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") != -1, "Not a qrcode checkin URL.")
 			try {
