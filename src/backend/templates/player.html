@@ -343,16 +343,25 @@
 
 		/* Input location. */
 		function inputLocation() {
-			let latitude = prompt("Input latitude with maximum 6 float digits:");
-			let longitude = prompt("Input longitude with maximum 6 float digits:");
-			let address = prompt("Input address:");
-			if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude) || /[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)) {
-				alert("Invalid location.");
-				return;
+			try {
+				let latitude = prompt("Input latitude (maximum 6 float digits):");
+				if (latitude === null)
+					return;
+				assert(latitude !== "" || !isNaN(latitude));
+				let longitude = prompt("Input longitude (maximum 6 float digits):");
+				if (longitude === null)
+					return;
+				assert(longitude !== "" || !isNaN(longitude));
+				let address = prompt("Input address:"));
+				if (address === null)
+					return;
+				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
+				location_ = {"latitude": latitude, "longitude": longitude, "address": address};
+				set_cookie("location", JSON.stringify(location_));
 			}
-			location_ = {"latitude": latitude, "longitude": longitude, "address": address};
-			set_cookie("location", JSON.stringify(location_));
-		}
+			catch (err) {
+				alert("Invalid input.");
+			}
 
 		/* Activities list toggle. */
 		async function listActivity() {
@@ -437,6 +446,12 @@
 
 		async function extractClassroom() {
 			let input = prompt("Input liveId or livestream URL:");
+			if (input === null)
+				return;
+			if (input === "") {
+				alert("Invalid input.");
+				return;
+			}
 			try {
 				let url = new URL(input);
 				let params = new URLSearchParams(decodeURIComponent(url.search));
@@ -470,6 +485,12 @@
 
 		function loadExtracted() {
 			let input = prompt("Input the extracted URL:");
+			if (input === null)
+				return;
+			if (input === "") {
+				alert("Invalid input.");
+				return;
+			}
 			try {
 				let url = new URL(input);
 			}
@@ -611,6 +632,23 @@
 				alert("Checkin failed.");
 		}
 
+		function chaoxingInputAccount() {
+			try {
+				let username = prompt("Input Chaoxing username:");
+				if (username === null)
+					return;
+				assert(username !== "");
+				let password = prompt("Input Chaoxing password");
+				if (password === null)
+					return;
+				assert(password !== "");
+				return [username, password];
+			}
+			catch (err) {
+				alert("Invalid input.");
+			}
+		}
+
 		/* Log into Chaoxing account. */
 		async function chaoxingLogin() {
 			if (chaoxing_logining)
@@ -619,19 +657,24 @@
 			username = get_cookie("username");
 			password = get_cookie("password");
 			if (username == "" || password == "") {
-				username = prompt("Input Chaoxing username:");
-				password = prompt("Input Chaoxing password");
+				input = chaoxingInputAccount();
+				if (input) {
+					username = input[0];
+					password = input[1];
+				}
+				else
+					return;
 			}
 			else {
 				if(!confirm("Use previously entered account " + username + "?")) {
-					username = prompt("Input Chaoxing username:");
-					password = prompt("Input Chaoxing password");
+					input = chaoxingInputAccount();
+					if (input) {
+						username = input[0];
+						password = input[1];
+					}
+					else
+						return;
 				}
-			}
-			if (!username || !password) {
-				alert("Invalid input.");
-				chaoxing_logining = false;
-				return;
 			}
 			alert("Logging in.");
 			let res;
