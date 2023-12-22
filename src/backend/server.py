@@ -104,6 +104,21 @@ def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	finally:
 		return res
 
+@server.route("/chaoxing/get_fid")
+def chaoxing_get_fid():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		fid = chaoxing.fid
+		assert fid
+		res = make_response(fid)
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
 @server.route("/chaoxing/get_courses")
 def chaoxing_get_courses():
 	try:

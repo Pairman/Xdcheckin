@@ -15,84 +15,90 @@
 
 	<head>
 		<style>
-			div {font-size:22px; font-family: sans-serif;}
+			div {font-size:22px; font-family: sans-serif; width: 100%; display: flex; justify-content: center;}
 			button {height: 40px; font-size: 22px; user-select: none;}
 			table, th, td {border: 1px solid black; border-collapse: collapse; text-align: center;}
 			table {width: 100%;}
 		</style>
 	</head>
 
-	<body id="player-body" style="display: none; padding: 0; margin: 0;">
+	<body id="main-body" style="display: block; padding: 0; margin: 0;">
 		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold; display: none;"></div>
 		<div id="xdcheckin-update-body-div" style="text-align: center; display: none;"></div>
-		<p align="center">
+
+		<div id="chaoxing-div">
+			<div id="chaoxing-buttons">
+				<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
+				<button id="chaoxing-curriculum-button" onclick="listCurriculum()" style="display: none">Show Curriculum</button>
+				<button id="chaoxing-locations-button" onclick="listLocation()" style="display: none">Select Location</button>
+				<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
+				<button id="chaoxing-activities-button" onclick="listActivity()" style="display: none">Check Activities</button>
+			</div>
+			<div id="curriculum-list-div" style="display: none"></div>
+			<div id="locations-list-div" style="display: none"></div>
+			<div id="activities-list-div" style="display: none"></div>
+		</div>
+
+		<div id="classrooms-buttons-div" style="display: none;">
 			<button onclick="listClassroom()">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
 			<button onclick="loadExtracted()">Load URL</button>
 			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
-		</p>
-		<div id="classrooms-list-div" style="display: none"></div>
+			<div id="classrooms-list-div" style="display: none;"></div>
+		</div>
 
-		<p align="center" id="chaoxing-buttons">
-			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
-		</p>
-		<div id="curriculum-list-div" style="display: none"></div>
-		<div id="locations-list-div" style="display: none"></div>
-		<div id="activities-list-div" style="display: none"></div>
-
-		<p align="center">
-			<B id="title" style="font-size:48px; font-family: sans-serif">Xdcheckin</B>
-			<br>
+		<div id="xdcheckin-title-div" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
+		<div id="players-buttons-div" style="display: none;">
 			<button onclick="play(player0); play(player1); play(player2); play(player3)">Play All</button>
 			<button onclick="stop(player0); stop(player1); stop(player2); stop(player3)">Stop All</button>
 			<button onclick="unmute(player0); unmute(player1); unmute(player2); unmute(player3)">Unmute All</button>
 			<button onclick="mute(player0); mute(player1); mute(player2); mute(player3)">Mute All</button>
-			<button onclick="sync()">Sync All</button>
 			<button onclick="resize()">Resize All</button>
-		</p>
+		</div>
 
-		<p align="center">
-			<B style="font-size:40px; font-family: sans-serif">PPTVideo</B>
-			&emsp;&emsp;
+		<div id="player0-buttons-div" style="display: none; width: auto;">
+			<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
+			&emsp;
 			<button onclick="play(player0)">Play</button>
 			<button onclick="stop(player0)">Stop</button>
 			<button onclick="unmute(player0)">Unmute</button>
 			<button onclick="mute(player0)">Mute</button>
 			<button id="player0-button-scan" onclick="scan(player0)">Scan (Whole)</button>
-		</p>
-		<div id="player0-div"></div>
+		</div>
+		<div id="player0-div" style="display: block;"></div>
 		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
-		<p align="center">
-			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
-			&emsp;&emsp;
+		<div id="player1-buttons-div" style="display: none; width: auto;">
+			<B style="font-size:40px; font-family: sans-serif;">TeacherTrack</B>
+			&emsp;
 			<button onclick="play(player1)">Play</button>
 			<button onclick="stop(player1)">Stop</button>
 			<button onclick="unmute(player1)">Unmute</button>
 			<button onclick="mute(player1)">Mute</button>
-		</p>
-		<div id="player1-div"></div>
+		</div>
+		<div id="player1-div" style="display: block;"></div>
 
-		<p align="center">
-			<B style="font-size:40px; font-family: sans-serif">TeacherFull</B>
-			&emsp;&emsp;
+		<div id="player2-buttons-div" style="display: none; width: auto;">
+			<B style="font-size:40px; font-family: sans-serif;">TeacherFull</B>
+			&emsp;
 			<button onclick="play(player2)">Play</button>
 			<button onclick="stop(player2)">Stop</button>
 			<button onclick="unmute(player2)">Unmute</button>
 			<button onclick="mute(player2)">Mute</button>
-		</p>
-		<div id="player2-div"></div>
+		</div>
+		<div id="player2-div" style="display: block;"></div>
 
-		<p align="center">
-			<B style="font-size:40px; font-family: sans-serif">StudentFull</B>
-			&emsp;&emsp;
+		<div id="player3-buttons-div" style="display: none; width: auto;">
+			<B style="font-size:40px; font-family: sans-serif;">StudentFull</B>
+			&emsp;
 			<button onclick="play(player3)">Play</button>
 			<button onclick="stop(player3)">Stop</button>
 			<button onclick="unmute(player3)">Unmute</button>
 			<button onclick="mute(player3)">Mute</button>
-		</p>
-		<div id="player3-div"></div>
-		<div id="footer-div" style="text-align: center">
+		</div>
+		<div id="player3-div" style="display: block;"></div>
+
+		<div id="footer-div" style="text-align: center; display: block;">
 			Copyright 2023 Pairman
 			<a href="https://github.com/Pairman/Xdcheckin">Source Code</a>
 		</div>
@@ -101,15 +107,15 @@
 	<script>
 		/*
 	 	 * Script.
-	   	 */
+		 */
 
 		/* Check EULA state. */
 		if (get_cookie("eula") != 1)
-			window.location.href = '../';
+			window.location.href = "../";
 		else
-			document.getElementById("player-body").style.display = "block";
+			document.getElementById("main-body").style.display = "block";
 
-		/* Check updates for Xdcheckin. */
+		/* Check APP updates. */
 		var xdcheckin_version = "0.0.0";
 		var xdcheckin_latest_release = {};
 		var xdcheckin_update_available = false;
@@ -136,11 +142,21 @@
 			}).catch((error) => {});
 		}).catch((error) => {});
 
+		/* Chaoxing login related. */
+		var chaoxing;
+		var chaoxing_logining = false;
+		var chaoxing_logined = false;
+		var courses = {};
+		var curriculum = {};
+		var activities_list_loading = false;
+		var location_str = get_cookie("location");
+		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
+
+		/* Players related. */
 		/* Calculate video player dimensions. */
 		var strWidth = "", strHeight = "";
 		calculatePlayerSize();
 		document.getElementById("player0-decodeddata-div").style.width = strWidth;
-		
 
 		/* Generate clasroom buttons list. */
 		var buildingsArr = [], buildingNamesArr = [];
@@ -181,75 +197,83 @@
 			locations_list_div.appendChild(button);
 		}
 
-		/* Initialize Chaoxing class and location. */
-		var chaoxing;
-		var chaoxing_logining = false;
-		var chaoxing_logined = false;
-		var courses = {};
-		var curriculum = {};
-		var activities_list_loading = false;
-		var location_str = get_cookie("location");
-		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
-
-		/* Create video players. */
-		scanButtonAddEventListener("player0");
-		var player0 = new Aliplayer({
-			id: "player0-div",
-			isLive: true,
-			useH5Prism: true,
-			width: strWidth,
-			height: strHeight,
-			autoplay: true,
-			playsinline: true,
-			source: pptVideo
-		}, function(player0) {
-			player0.mute();
-			player0.play();
-			player0.on("canplay", sync);
-		});
-
-		var player1 = new Aliplayer({
-			id: "player1-div",
-			isLive: true,
-			useH5Prism: true,
-			width: strWidth,
-			height: strHeight,
-			playsinline: true,
-			source: teacherTrack
-		}, function(player1) {
-			player1.mute();
-			player1.stop();
-		});
-
-		var player2 = new Aliplayer({
-			id: "player2-div",
-			isLive: true,
-			useH5Prism: true,
-			width: strWidth,
-			height: strHeight,
-			playsinline: true,
-			source: teacherFull
-		}, function (player2) {
-			player2.mute();
-			player2.stop();
-		});
-
-		var player3 = new Aliplayer({
-			id: "player3-div",
-			isLive: true,
-			useH5Prism: true,
-			width: strWidth,
-			height: strHeight,
-			playsinline: true,
-			source: studentFull
-		}, function(player3) {
-			player3.mute();
-			player3.stop();
-		});
+		var player0 = undefined, player1 = undefined, player2 = undefined, player3 = undefined;
+		var players_enabled = false;
+		enable_players();
 
 		/*
-	 	 * Function definitions.
-	   	 */
+		 * Function definitions.
+		 */
+
+		/* Enable players for XDUers. */
+		function enable_players() {
+			/* Classroom livestreams for XDUers only. */
+			if (players_enabled || !(get_cookie("chaoxing_fid") == "16820"))
+				return;
+			document.getElementById("classrooms-buttons-div").style.display = "flex";
+			document.getElementById("xdcheckin-title-div").style.display = "flex";
+			document.getElementById("players-buttons-div").style.display = "flex";
+			document.getElementById("player0-buttons-div").style.display = "flex";
+			document.getElementById("player1-buttons-div").style.display = "flex";
+			document.getElementById("player2-buttons-div").style.display = "flex";
+			document.getElementById("player3-buttons-div").style.display = "flex";
+
+			/* Create video players. */
+			scanButtonAddEventListener("player0");
+			player0 = new Aliplayer({
+				id: "player0-div",
+				isLive: true,
+				useH5Prism: true,
+				width: strWidth,
+				height: strHeight,
+				autoplay: true,
+				playsinline: true,
+				source: pptVideo
+			}, function(player0) {
+				player0.mute();
+				player0.play();
+				player0.on("canplay", sync);
+			});
+
+			player1 = new Aliplayer({
+				id: "player1-div",
+				isLive: true,
+				useH5Prism: true,
+				width: strWidth,
+				height: strHeight,
+				playsinline: true,
+				source: teacherTrack
+			}, function(player1) {
+				player1.mute();
+				player1.stop();
+			});
+
+			player2 = new Aliplayer({
+				id: "player2-div",
+				isLive: true,
+				useH5Prism: true,
+				width: strWidth,
+				height: strHeight,
+				playsinline: true,
+				source: teacherFull
+			}, function (player2) {
+				player2.mute();
+				player2.stop();
+			});
+
+			player3 = new Aliplayer({
+				id: "player3-div",
+				isLive: true,
+				useH5Prism: true,
+				width: strWidth,
+				height: strHeight,
+				playsinline: true,
+				source: studentFull
+			}, function(player3) {
+				player3.mute();
+				player3.stop();
+			});
+		}
 
 		/* Assertion. */
 		function assert(condition, message) {
@@ -422,7 +446,7 @@
 			let info = JSON.parse(params.get("info"));
 			set_cookie("classroomName", classroomNameInternal);
 			set_cookie("classroom", urlStr);
-			document.getElementById("title").innerText = "Xdcheckin: " + classroomNameInternal;
+			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomNameInternal;
 			classroom = urlStr;
 			classroomName = classroomNameInternal;
 			pptVideo = info.videoPath.pptVideo;
@@ -690,6 +714,10 @@
 			alert("Logged in successfully.");
 			set_cookie("username", username);
 			set_cookie("password", password);
+			res = await get("/chaoxing/get_fid");
+			if (res.status_code == 200)
+				set_cookie("chaoxing_fid", res.text);
+			enable_players();
 			res = await get("/chaoxing/get_courses");
 			if (res.status_code == 200)
 				courses = res.json();
@@ -698,24 +726,11 @@
 				curriculum = res.json();
 			tablifyCurriculum();
 			document.getElementById("extract-classroom-button").style.display = "inline";
-			let chaoxing_buttons = document.getElementById("chaoxing-buttons");
-			let button_curriculum = document.createElement("button");
-			let button_locations = document.createElement("button");
-			let button_input_location = document.createElement("button");
-			let button_activities = document.createElement("button");
-			button_curriculum.innerText = "Show Curriculum";
-			button_locations.innerText = "Select Location";
-			button_input_location.innerText = "Input Location";
-			button_activities.innerText = "Check Activities";
-			button_curriculum.setAttribute('onclick', 'listCurriculum()');
-			button_locations.setAttribute('onclick', 'listLocation()');
-			button_input_location.setAttribute('onclick', 'inputLocation()');
-			button_activities.setAttribute('onclick', 'listActivity()');
-			chaoxing_buttons.appendChild(button_curriculum);
-			chaoxing_buttons.appendChild(button_locations);
-			chaoxing_buttons.appendChild(button_input_location);
-			chaoxing_buttons.appendChild(button_activities);
 			document.getElementById("chaoxing-login-button").style.display = "none";
+			document.getElementById("chaoxing-curriculum-button").style.display = "block";
+			document.getElementById("chaoxing-locations-button").style.display = "block";
+			document.getElementById("chaoxing-input-location-button").style.display = "block";
+			document.getElementById("chaoxing-activities-button").style.display = "block";
 			chaoxing_logining = false;
 		}
 
