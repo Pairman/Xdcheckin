@@ -174,9 +174,9 @@ class Chaoxing:
 			return False
 
 	def checkin_do_presign(self, activity: dict = {"active_id": "", "class_id": ""}):
-		"""Do checkin pre-sign.
+		"""Do checkin pre-sign and get location.
 		:param active_id: Activity ID and Class ID in dictionary.
-		:return: Returns True on success, otherwise False.
+		:return: Returns checkin location including address, latitude, longitude and range enforcement if not checked-in or True if checked-in on success, otherwise False.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
@@ -193,7 +193,15 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			return res.status_code == 200
+			assert res.status_code == 200
+			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
+			return {
+				"address": s.group(2),
+				"latitude": s.group(3),
+				"longitude": s.group(4),
+				"ranged": s.group(1),
+				"range": s.group(5)
+			} if s else True
 		except Exception:
 			return False
 
@@ -222,7 +230,7 @@ class Chaoxing:
 			return False
 
 	def checkin_check_designatedplace(self, activity: dict = {"active_id": ""}):
-		"""Check if designated location is enabled. Defaults to True. Must be called for all checkin types.
+		"""Check if designated location is enabled. Defaults to True. Must be called for all checkin types, even if you don't care.
 		:param activity: Activity ID in dictionary.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
