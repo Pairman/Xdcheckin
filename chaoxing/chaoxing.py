@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 requests.packages.urllib3.disable_warnings()
 
 class Chaoxing:
-	name = uid = cookies = courses = curriculum = logined = None
+	name = uid = fid = cookies = courses = curriculum = logined = None
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
@@ -17,7 +17,7 @@ class Chaoxing:
 			assert username
 			assert password
 			login = self.login(account = {"username": username, "password": password})
-			self.name, self.uid, self.cookies = login["name"], login["uid"], login["cookies"]
+			self.name, self.uid, self.fid, self.cookies = login["name"], login["uid"], login["fid"], login["cookies"]
 			self.courses = self.get_courses()
 			assert self.courses
 			self.curriculum = self.get_curriculum()
@@ -53,6 +53,7 @@ class Chaoxing:
 			return {
 				"name": str(data["msg"]["name"]),
 				"uid": str(data["msg"]["puid"]),
+				"fid": str(data["msg"]["fid"]),
 				"cookies": res1.cookies
 			}
 		except Exception:
