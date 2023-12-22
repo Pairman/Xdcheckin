@@ -229,8 +229,8 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_check_designatedplace(self, activity: dict = {"active_id": ""}):
-		"""Check if designated location is enabled. Defaults to True. Must be called for all checkin types, even if you don't care.
+	def checkin_check_getpptactiveinfo(self, activity: dict = {"active_id": ""}):
+		"""Do checkin get PPT activity info.
 		:param activity: Activity ID in dictionary.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
@@ -239,25 +239,25 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			s = search(r"\"locationRange\":(.*?),", res.text)
-			return s.group(1) != "null"
+			return res.status_code == 200
 		except Exception:
-			return True
+			return False
 
 	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
-		:param location: Address, latitude, longitude and range enforcement in dictionary. Overriden by server-side location. Unused if designated place not enabled or not enforced.
+		:param location: Address, latitude, longitude and range enforcement in dictionary. Overriden by server-side location. Unused if designated place not enabled.
 		:return: Returns True on success, otherwise False.
 		"""
 		sign_details = self.checkin_get_details(activity = activity)
 		activity["class_id"] = sign_details["clazzId"]
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
+		assert self.checkin_do_analysis(activity = activity)
+		assert self.checkin_check_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
-		assert self.checkin_do_analysis(activity = activity)
-		ranged = (not not location.get("ranged")) or self.checkin_check_designatedplace(activity = activity)
+		ranged = not not location.get("ranged") or True
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"address": location["address"] if ranged else "",
@@ -284,10 +284,11 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
+		assert self.checkin_do_analysis(activity = activity)
+		assert self.checkin_check_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
-		assert self.checkin_do_analysis(activity = activity)
-		ranged = (not not location.get("ranged")) or self.checkin_check_designatedplace(activity = activity)
+		ranged = not not location.get("ranged") or True
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
