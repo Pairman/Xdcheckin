@@ -229,7 +229,7 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_check_getpptactiveinfo(self, activity: dict = {"active_id": ""}):
+	def checkin_do_getpptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Do checkin get PPT activity info.
 		:param activity: Activity ID in dictionary.
 		"""
@@ -254,7 +254,7 @@ class Chaoxing:
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
 		assert self.checkin_do_analysis(activity = activity)
-		assert self.checkin_check_getpptactiveinfo(activity = activity)
+		assert self.checkin_do_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
 		ranged = not not location.get("ranged") or True
@@ -285,7 +285,7 @@ class Chaoxing:
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
 		assert self.checkin_do_analysis(activity = activity)
-		assert self.checkin_check_getpptactiveinfo(activity = activity)
+		assert self.checkin_do_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
 		ranged = not not location.get("ranged") or True
