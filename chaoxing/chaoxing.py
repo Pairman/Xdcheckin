@@ -253,8 +253,7 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
-		assert self.checkin_do_analysis(activity = activity)
-		assert self.checkin_do_getpptactiveinfo(activity = activity)
+		assert self.checkin_do_analysis(activity = activity) & self.checkin_do_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
 		ranged = not not location.get("ranged") or True
@@ -284,8 +283,7 @@ class Chaoxing:
 		activity["class_id"] = sign_details["clazzId"]
 		presign = self.checkin_do_presign(activity = activity)
 		assert presign
-		assert self.checkin_do_analysis(activity = activity)
-		assert self.checkin_do_getpptactiveinfo(activity = activity)
+		assert self.checkin_do_analysis(activity = activity) & self.checkin_do_getpptactiveinfo(activity = activity)
 		if type(presign) is dict:
 			location = presign
 		ranged = not not location.get("ranged") or True
