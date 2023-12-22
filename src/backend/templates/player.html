@@ -352,7 +352,7 @@
 				if (longitude === null)
 					return;
 				assert(longitude !== "" || !isNaN(longitude));
-				let address = prompt("Input address:"));
+				let address = prompt("Input address:");
 				if (address === null)
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
@@ -362,6 +362,7 @@
 			catch (err) {
 				alert("Invalid input.");
 			}
+		}
 
 		/* Activities list toggle. */
 		async function listActivity() {
@@ -663,7 +664,7 @@
 					password = input[1];
 				}
 				else
-					return;
+					return chaoxing_logining = false;
 			}
 			else {
 				if(!confirm("Use previously entered account " + username + "?")) {
@@ -673,51 +674,48 @@
 						password = input[1];
 					}
 					else
-						return;
+						return chaoxing_logining = false;
 				}
 			}
 			alert("Logging in.");
 			let res;
 			try {
 				res = await get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+				assert(chaoxing_logined = (res.status_code == 200));
 			}
-			catch (error) {
-				(res = {}).status_code = 500;
-			}
-			chaoxing_logined = (res.status_code == 200);
-			if (chaoxing_logined) {
-				alert("Logged in successfully.");
-				set_cookie("username", username);
-				set_cookie("password", password);
-				let res = await get("/chaoxing/get_courses");
-				if (res.status_code == 200)
-					courses = res.json();
-				res = await get("/chaoxing/get_curriculum");
-				if (res.status_code == 200)
-					curriculum = res.json();
-				tablifyCurriculum();
-				document.getElementById("extract-classroom-button").style.display = "inline";
-				let chaoxing_buttons = document.getElementById("chaoxing-buttons");
-				let button_curriculum = document.createElement("button");
-				let button_locations = document.createElement("button");
-				let button_input_location = document.createElement("button");
-				let button_activities = document.createElement("button");
-				button_curriculum.innerText = "Show Curriculum";
-				button_locations.innerText = "Select Location";
-				button_input_location.innerText = "Input Location";
-				button_activities.innerText = "Check Activities";
-				button_curriculum.setAttribute('onclick', 'listCurriculum()');
-				button_locations.setAttribute('onclick', 'listLocation()');
-				button_input_location.setAttribute('onclick', 'inputLocation()');
-				button_activities.setAttribute('onclick', 'listActivity()');
-				chaoxing_buttons.appendChild(button_curriculum);
-				chaoxing_buttons.appendChild(button_locations);
-				chaoxing_buttons.appendChild(button_input_location);
-				chaoxing_buttons.appendChild(button_activities);
-				document.getElementById("chaoxing-login-button").style.display = "none";
-			}
-			else
+			catch (err) {
 				alert("Login failed.");
+				return chaoxing_logining = false;
+			}
+			alert("Logged in successfully.");
+			set_cookie("username", username);
+			set_cookie("password", password);
+			res = await get("/chaoxing/get_courses");
+			if (res.status_code == 200)
+				courses = res.json();
+			res = await get("/chaoxing/get_curriculum");
+			if (res.status_code == 200)
+				curriculum = res.json();
+			tablifyCurriculum();
+			document.getElementById("extract-classroom-button").style.display = "inline";
+			let chaoxing_buttons = document.getElementById("chaoxing-buttons");
+			let button_curriculum = document.createElement("button");
+			let button_locations = document.createElement("button");
+			let button_input_location = document.createElement("button");
+			let button_activities = document.createElement("button");
+			button_curriculum.innerText = "Show Curriculum";
+			button_locations.innerText = "Select Location";
+			button_input_location.innerText = "Input Location";
+			button_activities.innerText = "Check Activities";
+			button_curriculum.setAttribute('onclick', 'listCurriculum()');
+			button_locations.setAttribute('onclick', 'listLocation()');
+			button_input_location.setAttribute('onclick', 'inputLocation()');
+			button_activities.setAttribute('onclick', 'listActivity()');
+			chaoxing_buttons.appendChild(button_curriculum);
+			chaoxing_buttons.appendChild(button_locations);
+			chaoxing_buttons.appendChild(button_input_location);
+			chaoxing_buttons.appendChild(button_activities);
+			document.getElementById("chaoxing-login-button").style.display = "none";
 			chaoxing_logining = false;
 		}
 
