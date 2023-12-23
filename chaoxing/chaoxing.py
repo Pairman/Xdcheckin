@@ -202,7 +202,7 @@ class Chaoxing:
 				"longitude": s.group(4),
 				"ranged": s.group(1),
 				"range": s.group(5)
-			} if s else True
+			} if s and s.group(1) == "1" else True
 		except Exception:
 			return False
 
