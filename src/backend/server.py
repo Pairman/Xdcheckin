@@ -139,7 +139,7 @@ def chaoxing_get_curriculum():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		curriculum = chaoxing.curriculum
+		curriculum = chaoxing.get_curriculum()
 		assert curriculum
 		res = make_response(dumps(curriculum))
 		res.status_code = 200
