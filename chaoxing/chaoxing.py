@@ -1,34 +1,33 @@
 # -*- coding: utf-8 -*-
 
 from re import findall, search, DOTALL
-import requests
+from requests import get
 from urllib.parse import parse_qs, unquote, urlparse
+from urllib3 import disable_warnings
 
-requests.packages.urllib3.disable_warnings()
+disable_warnings()
 
 class Chaoxing:
-	name = uid = fid = cookies = courses = curriculum = logined = None
+	name = uid = fid = cookies = courses = logined = None
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
 
 	def __init__(self, username: str = "", password: str = ""):
 		try:
-			assert username
-			assert password
+			assert username and password
 			login = self.login(account = {"username": username, "password": password})
+			assert login
 			self.name, self.uid, self.fid, self.cookies = login["name"], login["uid"], login["fid"], login["cookies"]
 			self.courses = self.get_courses()
-			assert self.courses
-			self.curriculum = self.get_curriculum()
-			self.logined = (login != False)
+			self.logined = True
 		except Exception:
 			self.logined = False
 
-	def get(self, url, params: dict = {}, cookies: requests.cookies.RequestsCookieJar = None, headers: dict = None, verify = False):
+	def get(self, url, params: dict = {}, cookies = None, headers: dict = None, verify = False):
 		cookies = cookies if cookies else self.cookies
 		headers = headers if headers else self.headers
-		return requests.get(url, params = params, cookies = cookies, headers = headers, verify = False)
+		return get(url, params = params, cookies = cookies, headers = headers, verify = False)
 
 	def login(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account.
@@ -72,9 +71,14 @@ class Chaoxing:
 		try:
 			res = self.get(url, params)
 			courses = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"", res.text, DOTALL)
-			courses = {row[1]: {"course_id": row[0], "name": row[2], "teacher": row[3].split("，")} for row in courses}
-			assert courses
-			return courses
+			courses = {
+				row[1]: {
+					"course_id": row[0],
+					"name": row[2],
+					"teacher": row[3].split("，")
+				} for row in courses
+			}
+			return courses or False
 		except Exception:
 			return False
 
@@ -114,8 +118,7 @@ class Chaoxing:
 				add_lesson(lesson)
 				for conflict in lesson["conflictLessons"]:
 					add_lesson(conflict)
-			assert curriculum
-			return curriculum
+			return curriculum or None
 		except Exception:
 			return False
 
@@ -134,9 +137,15 @@ class Chaoxing:
 		try:
 			res = self.get(url, params)
 			data = res.json()["data"]["activeList"]
-			activities = [{"active_id": activity["id"], "type": activity.get("otherId"), "name": activity["nameOne"], "time_left": activity["nameFour"]} for activity in data if activity.get("otherId") in ("2", "4") and activity["status"] == 1]
-			assert activities
-			return activities
+			activities = [
+				{
+					"active_id": activity["id"],
+					"type": activity.get("otherId"),
+					"name": activity["nameOne"],
+					"time_left": activity["nameFour"]
+				} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
+			]
+			return activities or False
 		except Exception:
 			return False
 
@@ -151,15 +160,14 @@ class Chaoxing:
 				activity = self.get_course_activities({"course_id": course["course_id"], "class_id": class_id})
 				if activity:
 					activities[class_id] = activity
-			assert activities
-			return activities
+			return activities or False
 		except Exception:
 			return False
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details
 		:param activity: Activity ID in dictionary.
-		:return: Checkin details including class ID and MSG code on success, otherwise False.
+		:return: Checkin details including class ID and MSG code for on success, otherwise False.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {
@@ -168,21 +176,18 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			details = res.json().items()
-			assert len(details)
-			return {key: str(val) if val is not None else "" for key, val in details}
+			return {key: str(val) if not val is None else "" for key, val in res.json().items()}
 		except Exception:
 			return False
 
-	def checkin_do_presign(self, activity: dict = {"active_id": "", "class_id": ""}):
+	def checkin_do_presign(self, activity: dict = {"active_id": ""}):
 		"""Do checkin pre-sign and get location.
 		:param active_id: Activity ID and Class ID in dictionary.
 		:return: Returns checkin location including address, latitude, longitude and range enforcement if not checked-in or True if checked-in on success, otherwise False.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
-			"courseId": self.courses.get(activity["class_id"])["course_id"] or "",
-			"classId": activity["class_id"],
+			"classId": "",
 			"activePrimaryId": activity["active_id"],
 			"general": "1",
 			"sys": "1",
@@ -193,8 +198,11 @@ class Chaoxing:
 			"ut": "s"
 		}
 		try:
+			details = self.checkin_get_details(activity = activity)
+			assert details["status"] == "1" and details["isDelete"] == "0"
+			params["class_id"] = details["clazzId"]
 			res = self.get(url, params)
-			assert res.status_code == 200
+			assert res.status_code == 200 and not "无此签到活动" in res.text and not "活动已被删除" in res.text
 			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
 			return {
 				"address": s.group(2),
@@ -230,45 +238,29 @@ class Chaoxing:
 		except Exception:
 			return False
 
-	def checkin_do_getpptactiveinfo(self, activity: dict = {"active_id": ""}):
-		"""Do checkin get PPT activity info.
-		:param activity: Activity ID in dictionary.
-		"""
-		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
-		params = {
-			"activeId": activity["active_id"]
-		}
-		try:
-			res = self.get(url, params)
-			return res.status_code == 200
-		except Exception:
-			return False
-
 	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
 		:param location: Address, latitude, longitude and range enforcement in dictionary. Overriden by server-side location. Unused if designated place not enabled.
 		:return: Returns True on success, otherwise False.
 		"""
-		sign_details = self.checkin_get_details(activity = activity)
-		activity["class_id"] = sign_details["clazzId"]
-		presign = self.checkin_do_presign(activity = activity)
-		assert presign
-		assert self.checkin_do_analysis(activity = activity) & self.checkin_do_getpptactiveinfo(activity = activity)
-		if type(presign) is dict:
-			location = presign
-		ranged = not not location.get("ranged") or True
-		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		params = {
-			"address": location["address"] if ranged else "",
-			"activeId": activity["active_id"],
-			"latitude": location["latitude"] if ranged else -1,
-			"longitude": location["longitude"] if ranged else -1,
-			"fid": 0,
-			"appType": 15,
-			"ifTiJiao": ranged
-		}
 		try:
+			assert self.checkin_do_analysis(activity = activity)
+			presign = self.checkin_do_presign(activity = activity)
+			assert presign
+			if type(presign) is dict:
+				location = presign
+			ranged = not not location.get("ranged") or True
+			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+			params = {
+				"address": location["address"] if ranged else "",
+				"activeId": activity["active_id"],
+				"latitude": location["latitude"] if ranged else -1,
+				"longitude": location["longitude"] if ranged else -1,
+				"fid": 0,
+				"appType": 15,
+				"ifTiJiao": ranged
+			}
 			res = self.get(url, params)
 			return res.text in ("success", "您已签到过了")
 		except Exception:
@@ -280,24 +272,22 @@ class Chaoxing:
 		:param location: The same as checkin_checkin_location().
 		:return: Returns True on success, otherwise False.
 		"""
-		sign_details = self.checkin_get_details(activity = activity)
-		activity["class_id"] = sign_details["clazzId"]
-		presign = self.checkin_do_presign(activity = activity)
-		assert presign
-		assert self.checkin_do_analysis(activity = activity) & self.checkin_do_getpptactiveinfo(activity = activity)
-		if type(presign) is dict:
-			location = presign
-		ranged = not not location.get("ranged") or True
-		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		params = {
-			"enc": activity["enc"],
-			"activeId": activity["active_id"],
-			"location": "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}" if ranged else "",
-			"latitude": -1 if ranged else location["latitude"],
-			"longitude": -1 if ranged else location["longitude"],
-			"fid": 0
-		}
 		try:
+			assert self.checkin_do_analysis(activity = activity)
+			presign = self.checkin_do_presign(activity = activity)
+			assert presign
+			if type(presign) is dict:
+				location = presign
+			ranged = not not location.get("ranged") or True
+			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+			params = {
+				"enc": activity["enc"],
+				"activeId": activity["active_id"],
+				"location": "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}" if ranged else "",
+				"latitude": -1 if ranged else location["latitude"],
+				"longitude": -1 if ranged else location["longitude"],
+				"fid": 0
+			}
 			res = self.get(url, params)
 			return res.text in ("success", "您已签到过了")
 		except Exception:
@@ -309,10 +299,9 @@ class Chaoxing:
 		:param location: The same as checkin_checkin_location().
 		:return: Returns True on success, otherwise False.
 		"""
-		if qr_url.find("https://mobilelearn.chaoxing.com/widget/sign/e"):
-			return False
-		params = parse_qs(urlparse(unquote(qr_url)).query)
 		try:
+			qr_url.find("mobilelearn.chaoxing.com/widget/sign/e") == -1
+			params = parse_qs(urlparse(unquote(qr_url)).query)
 			activity = {
 				"active_id": params["id"][0],
 				"enc": params["enc"][0]
