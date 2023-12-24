@@ -130,7 +130,7 @@
 						break;
 					}
 				}
-				if (1 || xdcheckin_update_available) {
+				if (xdcheckin_update_available) {
 					let e = document.getElementById("xdcheckin-update-div");
 					e.innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">New APP version available!<br>Download " + xdcheckin_latest_release["tag_name"] + " here.</a>";
 					e.style.display = "block";
