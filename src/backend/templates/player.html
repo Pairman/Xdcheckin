@@ -197,7 +197,7 @@
 		}
 
 		var player0 = undefined, player1 = undefined, player2 = undefined, player3 = undefined;
-		var players_enabled = false;
+		var players_enabled = false, players_enabling = false;
 		enable_players();
 
 		/*
@@ -207,8 +207,9 @@
 		/* Enable players for XDUers. */
 		function enable_players() {
 			/* Classroom livestreams for XDUers only. */
-			if (players_enabled || !(get_cookie("chaoxing_fid") == "16820"))
+			if (players_enabled || players_enabling || !(get_cookie("chaoxing_fid") == "16820"))
 				return;
+			players_enabling = true;
 			document.getElementById("classrooms-buttons-div").style.display = "flex";
 			document.getElementById("xdcheckin-title-div").style.display = "flex";
 			document.getElementById("players-buttons-div").style.display = "flex";
@@ -272,6 +273,8 @@
 				player3.mute();
 				player3.stop();
 			});
+			players_enabled = true;
+			players_enabling = false;
 		}
 
 		/* Assertion. */
