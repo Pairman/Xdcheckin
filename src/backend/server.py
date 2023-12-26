@@ -2,12 +2,13 @@ from flask import Flask, render_template, make_response, session
 from flask_session import Session
 from json import loads, dumps
 from os import listdir, remove
-import requests
+from requests import get
 from tempfile import gettempdir
+from urllib3 import disable_warnings
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
-requests.packages.urllib3.disable_warnings()
+disable_warnings()
 
 server = Flask(__name__)
 server.config["SESSION_PERMANENT"] = False
@@ -36,7 +37,7 @@ def get_xdcheckin_locations_js():
 def get_xdcheckin_classrooms_js(cmd = ""):
 	cmd = cmd.replace("::", "/")
 	try:
-		res = requests.get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
+		res = get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
 		assert res.status_code == 200
 		res = make_response(res.text)
 		res.status_code = 200
@@ -55,7 +56,7 @@ def get_xdcheckin_version():
 @server.route("/xdcheckin/get/releases/latest")
 def get_xdcheckin_latest_release():
 	try:
-		res = requests.get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
+		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
 		assert res.status_code == 200
 		data = res.json()[0]
 		res = make_response(dumps({
