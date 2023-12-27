@@ -15,6 +15,8 @@ class Chaoxing:
 
 	def __init__(self, username: str = "", password: str = "", cookies: None):
 		try:
+			if self.logined:
+				return
 			assert username and password
 			login = self.login(account = {"username": username, "password": password, "cookies": cookies})
 			assert login
