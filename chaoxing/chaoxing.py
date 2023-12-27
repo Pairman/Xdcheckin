@@ -13,10 +13,10 @@ class Chaoxing:
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
 
-	def __init__(self, username: str = "", password: str = ""):
+	def __init__(self, username: str = "", password: str = "", cookies: None):
 		try:
 			assert username and password
-			login = self.login(account = {"username": username, "password": password})
+			login = self.login(account = {"username": username, "password": password, "cookies": cookies})
 			assert login
 			self.name, self.uid, self.fid, self.cookies = login["name"], login["uid"], login["fid"], login["cookies"]
 			self.courses = self.get_courses()
