@@ -29,31 +29,36 @@ class Chaoxing:
 		headers = headers if headers else self.headers
 		return get(url, params = params, cookies = cookies, headers = headers, verify = False)
 
-	def login(self, account: dict = {"username": "", "password": ""}):
+	def login(self, account: dict = {"username": "", "password": "", "cookies": None}):
 		"""Log into Chaoxing account.
-		:param account: Username and password in dictionary.
+		:param account: Username, password and cookies in dictionary. Username and password are unused if cookies are present.
 		:return: Name, UID and cookies on success, otherwise False.
 		"""
+		cookies = None
 		url1 = "https://passport2-api.chaoxing.com/v11/loginregister"
 		params1 = {
-			"code": account["password"],
+			"code": account.get("password"),
 			"cx_xxt_passport": "json",
-			"uname": account["username"],
+			"uname": account.get("username"),
 			"loginType": 1,
 			"roleSelect": "true"
 		}
 		url2 = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
-			res1 = self.get(url1, params1)
-			assert res1.json()["status"]
-			res2 = self.get(url2, cookies = res1.cookies)
+			if account.get("cookies"):
+				cookies = account.get("cookies")
+			else:
+				res1 = self.get(url1, params1)
+				assert res1.json()["status"]
+				cookies = res1.cookies
+			res2 = self.get(url2, cookies = cookies)
 			data = res2.json()
 			assert data["result"]
 			return {
 				"name": str(data["msg"]["name"]),
 				"uid": str(data["msg"]["puid"]),
 				"fid": str(data["msg"]["fid"]),
-				"cookies": res1.cookies
+				"cookies": cookies
 			}
 		except Exception:
 			return False
