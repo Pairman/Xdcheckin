@@ -663,7 +663,7 @@
 				if (password === null)
 					return;
 				assert(password !== "");
-				return [username, password];
+				return [username, encodeURIComponent(password)];
 			}
 			catch (err) {
 				alert("Invalid input");
