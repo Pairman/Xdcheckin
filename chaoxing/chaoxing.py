@@ -249,7 +249,7 @@ class Chaoxing:
 	def checkin_do_presign(self, activity: dict = {"active_id": ""}):
 		"""Do checkin pre-sign and get location.
 		:param active_id: Activity ID and Class ID in dictionary.
-		:return: Checkin location including address, latitude, longitude and range enforcement if not checked-in or 2 if checked-in or 1 if successfully pre-signed on success, otherwise False.
+		:return: Checkin location including address, latitude, longitude and range enforcement if not checked-in or 2 if checked-in or 1 if pre-signed on success, otherwise False.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
