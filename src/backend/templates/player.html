@@ -662,11 +662,11 @@
 				let password = prompt("Input Chaoxing password");
 				if (password === null)
 					return;
-				assert(password !== "");
-				return [username, encodeURIComponent(password)];
+				assert(/^(((?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^\s0-9a-zA-Z])|(?=.*[a-zA-Z])(?=.*[^\s0-9a-zA-Z]))[^\s\u4e00-\u9fa5]+)$/.test(password));
+				return [username, encodeURIComponent(password.replaceAll("/", " "))];
 			}
 			catch (err) {
-				alert("Invalid input");
+				alert("Invalid input.");
 			}
 		}
 
