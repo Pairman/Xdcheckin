@@ -93,7 +93,7 @@ def player_html():
 def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	try:
 		params = loads(cmd)
-		username, password = params["username"], unquote(params["password"])
+		username, password = params["username"], unquote(params["password"]).replace(" ", "/")
 		assert username and password
 		chaoxing = Chaoxing(username, password)
 		assert chaoxing.logined
