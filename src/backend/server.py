@@ -4,6 +4,7 @@ from json import loads, dumps
 from os import listdir, remove
 from requests import get
 from tempfile import gettempdir
+from urllib.parse import unquote
 from urllib3 import disable_warnings
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
@@ -92,7 +93,7 @@ def player_html():
 def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 	try:
 		params = loads(cmd)
-		username, password = params["username"], params["password"]
+		username, password = params["username"], unquote(params["password"])
 		assert username and password
 		chaoxing = Chaoxing(username, password)
 		assert chaoxing.logined
