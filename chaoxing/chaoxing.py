@@ -25,7 +25,7 @@ class Chaoxing:
 		self.name, self.uid, self.fid, self.cookies, self.logined = self.login(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
-	def get(self, url, params: dict = {}, cookies = None, headers: dict = None, verify = False):
+	def get(self, url, params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
 		"""Wrapper for requests.get.
 		:param url: URL.
 		:param params: Parameters.
@@ -103,7 +103,7 @@ class Chaoxing:
 		except Exception:
 			return {}
 
-	def get_course_course_id(self, course = {"course_id": "", "class_id": ""}):
+	def get_course_course_id(self, course: dict = {"course_id": "", "class_id": ""}):
 		"""Get course ID of a course.
 		:param course: Course ID (picked if given, otherwise filled later) and clsss ID in dictionary.
 		:return: Course ID corresponding to the class ID.
@@ -125,7 +125,7 @@ class Chaoxing:
 		except Exception:
 			return "0"
 
-	def get_curriculum(self, week = ""):
+	def get_curriculum(self, week: str = ""):
 		"""Get curriculum.
 		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time.
