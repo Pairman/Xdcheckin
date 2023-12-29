@@ -24,7 +24,7 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -84,7 +84,7 @@ class Chaoxing:
 				"logined": False
 			}
 
-	def login_fanya(self, account: dict = {"username": "", "password": ""}):
+	def login_username_fanya(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via Fanya API.
 		:param account: Same as login_reg().
 		:return: Same as login_reg().
