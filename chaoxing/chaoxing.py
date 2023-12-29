@@ -24,7 +24,7 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -57,7 +57,7 @@ class Chaoxing:
 	def login_username_v11(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via V11 API.
 		:param account: Username and password in dictionary.
-		:return: UID, FID, cookies and login state.
+		:return: Name (placeholder), UID, FID, cookies and login state.
 		"""
 		url = "https://passport2-api.chaoxing.com/v11/loginregister"
 		params = {
@@ -71,6 +71,7 @@ class Chaoxing:
 			res = self.get(url, params)
 			assert res.json()["status"]
 			return {
+				"name": "",
 				"uid": res.cookies["UID"],
 				"fid": res.cookies["fid"],
 				"cookies": res.cookies,
@@ -78,6 +79,7 @@ class Chaoxing:
 			}
 		except Exception:
 			return {
+				"name": "",
 				"uid": "",
 				"fid": "",
 				"cookies": None,
@@ -109,6 +111,7 @@ class Chaoxing:
 			res = self.post(url, data)
 			assert res.json()["status"]
 			return {
+				"name": "",
 				"uid": res.cookies["UID"],
 				"fid": res.cookies["fid"],
 				"cookies": res.cookies,
@@ -116,6 +119,7 @@ class Chaoxing:
 			}
 		except Exception:
 			return {
+				"name": "",
 				"uid": "",
 				"fid": "",
 				"cookies": None,
@@ -125,7 +129,7 @@ class Chaoxing:
 	def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
-		:return: Same as login_username_v11().
+		:return: Name, UID, FID, cookies and login state.
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
@@ -133,6 +137,7 @@ class Chaoxing:
 			data = res2.json()
 			assert data["result"]
 			return {
+				"name": data["msg"]["name"],
 				"uid": account["cookies"]["UID"],
 				"fid": account["cookies"]["fid"],
 				"cookies": account["cookies"],
@@ -140,6 +145,7 @@ class Chaoxing:
 			}
 		except Exception:
 			return {
+				"name": "",
 				"uid": "",
 				"fid": "",
 				"cookies": None,
