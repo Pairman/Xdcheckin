@@ -232,7 +232,7 @@ class Chaoxing:
 					curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
 			for lesson in data:
 				add_lesson(lesson)
-				for conflict in lesson["conflictLessons"]:
+				for conflict in lesson.get("conflictLessons") or {}:
 					add_lesson(conflict)
 			return curriculum
 		except Exception:
