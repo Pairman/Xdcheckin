@@ -205,7 +205,7 @@ class Chaoxing:
 			res = self.get(url, params)
 			data = res.json()["data"]["lessonArray"]
 			curriculum = {}
-			def add_lesson(lesson, curriculum = curriculum):
+			def add_lesson(lesson: dict = {}, curriculum = curriculum):
 				lesson_class_id = str(lesson["classId"])
 				lesson = {
 					"course_id": str(lesson["courseId"]),
