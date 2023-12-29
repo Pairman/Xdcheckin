@@ -27,6 +27,7 @@ requires = [
 	"flask",
 	"flask-session",
 	"waitress"
+	"pycryptodome"
 ]
 test_requires = [
     "pytest",

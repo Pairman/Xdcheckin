@@ -3,6 +3,7 @@ from flask_session import Session
 from json import loads, dumps
 from os import listdir, remove
 from requests import get
+from requests.utils import add_dict_to_cookiejar
 from tempfile import gettempdir
 from urllib.parse import unquote
 from urllib3 import disable_warnings
@@ -95,7 +96,23 @@ def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 		params = loads(cmd)
 		username, password = params["username"], unquote(params["password"]).replace(" ", "/")
 		assert username and password
-		chaoxing = Chaoxing(username, password)
+		chaoxing = Chaoxing(username = username, password = password)
+		assert chaoxing.logined
+		session["chaoxing"] = chaoxing
+		res = make_response("success")
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
+@server.route("/chaoxing/login_cookies/<cmd>")
+def chaoxing_login_cookies(cmd: str = ""):
+	try:
+		cookies = add_dict_to_cookiejar(None, loads(cmd))
+		assert cookies
+		chaoxing = Chaoxing(cookies = cookies)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
 		res = make_response("success")
@@ -110,10 +127,21 @@ def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
 def chaoxing_get_fid():
 	try:
 		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
-		fid = chaoxing.fid
-		assert fid
-		res = make_response(fid)
+		assert chaoxing.logined and chaoxing.fid
+		res = make_response(chaoxing.fid)
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
+@server.route("/chaoxing/get_cookies")
+def chaoxing_get_cookies():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined and chaoxing.cookies
+		res = make_response(dumps(dict(chaoxing.cookies)))
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
@@ -125,10 +153,8 @@ def chaoxing_get_fid():
 def chaoxing_get_courses():
 	try:
 		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
-		courses = chaoxing.courses
-		assert courses
-		res = make_response(dumps(courses))
+		assert chaoxing.logined and chaoxing.courses
+		res = make_response(dumps(chaoxing.courses))
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
