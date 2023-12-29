@@ -86,8 +86,8 @@ class Chaoxing:
 
 	def login_username_fanya(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via Fanya API.
-		:param account: Same as login_reg().
-		:return: Same as login_reg().
+		:param account: Same as login_username_v11().
+		:return: Same as login_username_v11().
 		"""
 		def encrypt_aes(msg: str = "", key: str = "u2oh6Vu^HWe4_AES"):
 			pad_pkcs7 = lambda s: s + (chr(AES_block_size - len(s) % AES_block_size) * (AES_block_size - len(s) % AES_block_size)).encode("utf-8")
@@ -125,7 +125,7 @@ class Chaoxing:
 	def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
-		:return: Same as login_reg().
+		:return: Same as login_username_v11().
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
