@@ -16,15 +16,15 @@ class Chaoxing:
 	}
 
 	def __init__(self, username: str = "", password: str = "", cookies = None):
-		"""Create a Chaoxing instance.
+		"""Create a Chaoxing instance and login.
 		:param username: Chaoxing username. Unused if cookies are given.
 		:param password: Chaoxing password. Unused if cookies are given.
-		:param cookies: Cookies from previous login. Unnecessary, overrides username and password if given.
+		:param cookies: Cookies from previous login. Overrides username and password if given.
 		:return: None.
 		"""
 		if self.logined:
 			return
-		self.uid, self.fid, self.cookies, self.logined = self.login_fanya(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -54,8 +54,8 @@ class Chaoxing:
 		headers = headers if headers else self.headers
 		return post(url, data = data, params = params, cookies = cookies, headers = headers, verify = False)
 
-	def login_v11(self, account: dict = {"username": "", "password": ""}):
-		"""Log into Chaoxing account via V11 API.
+	def login_username_v11(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account with username and password via V11 API.
 		:param account: Username and password in dictionary.
 		:return: UID, FID, cookies and login state.
 		"""
@@ -85,7 +85,7 @@ class Chaoxing:
 			}
 
 	def login_fanya(self, account: dict = {"username": "", "password": ""}):
-		"""Log into Chaoxing account via Fanya API.
+		"""Log into Chaoxing account with username and password via Fanya API.
 		:param account: Same as login_reg().
 		:return: Same as login_reg().
 		"""
@@ -125,7 +125,7 @@ class Chaoxing:
 	def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
-		:return: UID, FID, cookies and login state.
+		:return: Same as login_reg().
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
