@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from base64 import b64encode
+from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from re import findall, search, DOTALL
-from requests import get
+from requests import get, post
 from urllib.parse import parse_qs, unquote, urlparse
 from urllib3 import disable_warnings
 
@@ -22,11 +24,11 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.name, self.uid, self.fid, self.cookies, self.logined = self.login(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.uid, self.fid, self.cookies, self.logined = self.login_fanya(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
-	def get(self, url, params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
-		"""Wrapper for requests.get.
+	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
+		"""Wrapper for requests.get().
 		:param url: URL.
 		:param params: Parameters.
 		:cookies: Cookies. Overrides existing cookies.
@@ -38,41 +40,106 @@ class Chaoxing:
 		headers = headers if headers else self.headers
 		return get(url, params = params, cookies = cookies, headers = headers, verify = False)
 
-	def login(self, account: dict = {"username": "", "password": "", "cookies": None}):
-		"""Log into Chaoxing account.
-		:param account: Username, password and cookies in dictionary. Username and password are overriden if cookies are given.
-		:return: Name, UID, FID, cookies and login state.
+	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
+		"""Wrapper for requests.post().
+		:param url: URL.
+		:param data: Data.
+		:param params: Parameters.
+		:cookies: Cookies. Overrides existing cookies.
+		:headers: Headers. Overrides existing headers.
+		:verify: SSL certificate verification toggle. False by default.
+		:return: Response object.
 		"""
-		url1 = "https://passport2-api.chaoxing.com/v11/loginregister"
-		params1 = {
-			"code": account.get("password"),
+		cookies = cookies if cookies else self.cookies
+		headers = headers if headers else self.headers
+		return post(url, data = data, params = params, cookies = cookies, headers = headers, verify = False)
+
+	def login_v11(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account via V11 API.
+		:param account: Username and password in dictionary.
+		:return: UID, FID, cookies and login state.
+		"""
+		url = "https://passport2-api.chaoxing.com/v11/loginregister"
+		params = {
+			"uname": account["username"],
+			"code": account["password"],
 			"cx_xxt_passport": "json",
-			"uname": account.get("username"),
 			"loginType": 1,
-			"roleSelect": "true"
+			"roleSelect": True
 		}
-		url2 = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
-		cookies = None
 		try:
-			if account.get("cookies"):
-				cookies = account.get("cookies")
-			else:
-				res1 = self.get(url1, params1)
-				assert res1.json()["status"]
-				cookies = res1.cookies
-			res2 = self.get(url2, cookies = cookies)
-			data = res2.json()
-			assert data["result"]
+			res = self.get(url, params)
+			assert res.json()["status"]
 			return {
-				"name": str(data["msg"]["name"]),
-				"uid": str(data["msg"]["puid"]),
-				"fid": str(data["msg"]["fid"]),
-				"cookies": cookies,
+				"uid": res.cookies["UID"],
+				"fid": res.cookies["fid"],
+				"cookies": res.cookies,
 				"logined": True
 			}
 		except Exception:
 			return {
-				"name": "",
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
+	def login_fanya(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account via Fanya API.
+		:param account: Same as login_reg().
+		:return: Same as login_reg().
+		"""
+		def encrypt_aes(msg: str = "", key: str = "u2oh6Vu^HWe4_AES"):
+			pad_pkcs7 = lambda s: s + (chr(AES_block_size - len(s) % AES_block_size) * (AES_block_size - len(s) % AES_block_size)).encode("utf-8")
+			enc = AES_new(key = key.encode("utf-8"), mode = AES_MODE_CBC, iv = key.encode("utf-8")).encrypt(pad_pkcs7(msg.encode("utf-8")))
+			return b64encode(enc).decode("utf-8")
+		url = "https://passport2.chaoxing.com/fanyalogin"
+		data = {
+				'fid': "-1",
+				'uname': encrypt_aes(msg = account["username"]),
+				'password': encrypt_aes(msg = account["password"]),
+				't': True,
+				'validate': "",
+				'forbidotherlogin': 0,
+				'doubleFactorLogin': 0,
+				'independentId': 0,
+				'independentNameId': 0
+			}
+		try:
+			res = self.post(url, data)
+			assert res.json()["status"]
+			return {
+				"uid": res.cookies["UID"],
+				"fid": res.cookies["fid"],
+				"cookies": res.cookies,
+				"logined": True
+			}
+		except Exception:
+			return {
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
+	def login_cookies(self, account: dict = {"cookies": None}):
+		"""Log into Chaoxing account with cookies.
+		:param account: Cookies in dictionary.
+		:return: UID, FID, cookies and login state.
+		"""
+		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
+		try:
+			res2 = self.get(url, cookies = account["cookies"])
+			data = res2.json()
+			assert data["result"]
+			return {
+				"uid": account["cookies"]["UID"],
+				"fid": account["cookies"]["fid"],
+				"cookies": account["cookies"],
+				"logined": True
+			}
+		except Exception:
+			return {
 				"uid": "",
 				"fid": "",
 				"cookies": None,
@@ -313,7 +380,7 @@ class Chaoxing:
 	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param active_id: Activity ID and ENC code in dictionary.
-		:param location: The same as checkin_checkin_location().
+		:param location: Same as checkin_checkin_location().
 		:return: True on success, otherwise False.
 		"""
 		try:
@@ -342,7 +409,7 @@ class Chaoxing:
 	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param qr_url: URL from qrcode.
-		:param location: The same as checkin_checkin_location().
+		:param location: Same as checkin_checkin_location().
 		:return: True on success, otherwise False.
 		"""
 		try:
