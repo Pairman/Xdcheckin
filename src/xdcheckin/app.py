@@ -1,8 +1,6 @@
 from threading import Thread
-from toga import App as toga_App
-from toga import Box as toga_Box, MainWindow as toga_MainWindow
+from toga import App as toga_App, Box as toga_Box, MainWindow as toga_MainWindow, WebView as toga_WebView
 from toga.style import Pack as toga_style_Pack
-from toga import WebView as toga_WebView
 from waitress import serve
 from backend.server import server
 
