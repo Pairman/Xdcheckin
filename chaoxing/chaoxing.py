@@ -97,7 +97,7 @@ class Chaoxing:
 			return b64encode(enc).decode("utf-8")
 		url = "https://passport2.chaoxing.com/fanyalogin"
 		data = {
-				'fid': "-1",
+				'fid': -1,
 				'uname': encrypt_aes(msg = account["username"]),
 				'password': encrypt_aes(msg = account["password"]),
 				't': True,
@@ -287,7 +287,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {
 			"activePrimaryId": activity["active_id"],
-			"type": "1"
+			"type": 1
 		}
 		try:
 			res = self.get(url, params)
@@ -302,7 +302,7 @@ class Chaoxing:
 		"""
 		url1 = "https://mobilelearn.chaoxing.com/pptSign/analysis"
 		params1 = {
-			"vs": "1",
+			"vs": 1,
 			"DB_STRATEGY": "RANDOM",
 			"aid": activity["active_id"]
 		}
@@ -328,10 +328,10 @@ class Chaoxing:
 		params = {
 			"classId": "",
 			"activePrimaryId": activity["active_id"],
-			"general": "1",
-			"sys": "1",
-			"ls": "1",
-			"appType": "15",
+			"general": 1,
+			"sys": 1,
+			"ls": 1,
+			"appType": 15,
 			"tid": "",
 			"uid": self.uid,
 			"ut": "s"
