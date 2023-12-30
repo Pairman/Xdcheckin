@@ -410,12 +410,10 @@
 						let activity = class_activities[i];
 						let button = document.createElement("button");
 						let type = "";
-						if (activity["type"] == "2") {
+						if (activity["type"] == "2")
 							button.setAttribute("disabled", "");
-						}
-						else {
-							button.setAttribute('onclick', 'chaoxing.')
-						}
+						else
+							button.setAttribute('onclick', 'chaoxing.');
 						type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
 						button.innerText = type + " (" + activity["name"] + ", " + activity["active_id"] + ", " + activity["time_left"] + ")";
 						button.setAttribute('onclick', 'chaoxingLocationCheckin(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
@@ -522,17 +520,6 @@
 			let b = Math.floor(Math.random() * buildingsArr.length);
 			let c = Math.floor(Math.random() * buildingsArr[b].length);
 			return [buildingsArr[b][c], buildingNamesArr[b][c]];
-		}
-
-		/* Video player controls. */
-		function sync() {
-			t = player0.getCurrentTime();
-			if (player1.getStatus() == "playing")
-				player1.seek(t);
-			if (player2.getStatus() == "playing")
-				player2.seek(t);
-			if (player3.getStatus() == "playing")
-				player3.seek(t);
 		}
 
 		function play(player) {
