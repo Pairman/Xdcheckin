@@ -286,7 +286,7 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url = url, params = params)
-			return {key: str(val) if not val is None else "" for key, val in res.json().items()}
+			return res.json()
 		except Exception:
 			return {}
 
@@ -333,8 +333,8 @@ class Chaoxing:
 		}
 		try:
 			details = self.checkin_get_details(activity = activity)
-			assert details["status"] == "1" and details["isDelete"] == "0"
-			params["class_id"] = details["clazzId"]
+			assert details["status"] == 1 and details["isDelete"] == 0
+			params["class_id"] = str(details["clazzId"])
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
 			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
