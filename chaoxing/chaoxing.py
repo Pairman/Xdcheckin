@@ -5,9 +5,6 @@ from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE
 from re import findall, search, DOTALL
 from requests import get, post
 from urllib.parse import parse_qs, unquote, urlparse
-from urllib3 import disable_warnings
-
-disable_warnings()
 
 class Chaoxing:
 	name = uid = fid = cookies = courses = logined = None
