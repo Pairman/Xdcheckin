@@ -333,7 +333,7 @@ class Chaoxing:
 		}
 		try:
 			details = self.checkin_get_details(activity = activity)
-			assert details["status"] == 1 and details["isDelete"] == 0
+			assert details["status"] and not details["isDelete"]
 			params["class_id"] = str(details["clazzId"])
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
