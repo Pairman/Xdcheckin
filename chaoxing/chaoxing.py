@@ -263,7 +263,6 @@ class Chaoxing:
 
 	def get_activities(self):
 		"""Get activities of all courses.
-		:param course: Course ID (unnecessary) and class ID in dictionary.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
 		try:
