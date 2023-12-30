@@ -1,16 +1,12 @@
-from flask import Flask, render_template, make_response, session
+from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from json import loads, dumps
 from os import listdir, remove
 from requests import get
 from requests.utils import add_dict_to_cookiejar
 from tempfile import gettempdir
-from urllib.parse import unquote
-from urllib3 import disable_warnings
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
-
-disable_warnings()
 
 server = Flask(__name__)
 server.config["SESSION_PERMANENT"] = False
@@ -29,6 +25,15 @@ except Exception:
 
 Session(server)
 
+@server.route("/")
+@server.route("/index.html")
+def index_html():
+	return render_template("index.html")
+
+@server.route("/player.html")
+def player_html():
+	return render_template("player.html")
+
 @server.route("/xdcheckin/get/locations.js")
 def get_xdcheckin_locations_js():
 	res = make_response("var locations = " + dumps(locations).encode("ascii").decode("unicode-escape") + ";")
@@ -36,8 +41,7 @@ def get_xdcheckin_locations_js():
 	return res
 
 @server.route("/xdcheckin/get/classrooms.js")
-def get_xdcheckin_classrooms_js(cmd = ""):
-	cmd = cmd.replace("::", "/")
+def get_xdcheckin_classrooms_js():
 	try:
 		res = get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
 		assert res.status_code == 200
@@ -81,38 +85,15 @@ def get_xdcheckin_latest_release():
 	finally:
 		return res
 
-@server.route("/")
-@server.route("/index.html")
-def index_html():
-	return render_template("index.html")
-
-@server.route("/player.html")
-def player_html():
-	return render_template("player.html")
-
-@server.route("/chaoxing/login/<cmd>")
-def chaoxing_login(cmd: str = "{\"username\": \"\", \"password\": \"\"}"):
+@server.route("/chaoxing/login", methods = ["POST"])
+def chaoxing_login():
 	try:
-		params = loads(cmd)
-		username, password = params["username"], unquote(params["password"]).replace(" ", "/")
-		assert username and password
-		chaoxing = Chaoxing(username = username, password = password)
-		assert chaoxing.logined
-		session["chaoxing"] = chaoxing
-		res = make_response("success")
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
-@server.route("/chaoxing/login_cookies/<cmd>")
-def chaoxing_login_cookies(cmd: str = ""):
-	try:
-		cookies = add_dict_to_cookiejar(None, loads(cmd))
-		assert cookies
-		chaoxing = Chaoxing(cookies = cookies)
+		data = request.get_json(force = True)
+		username, password, cookies = data["username"], data["password"], data["cookies"]
+		assert (username and password) or cookies
+		chaoxing = Chaoxing(username = username, password = password, cookies = add_dict_to_cookiejar(None, loads(cookies)) if cookies else None)
+		if not chaoxing.logined:
+			chaoxing = Chaoxing(username = username, password = password)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
 		res = make_response("success")
@@ -131,7 +112,7 @@ def chaoxing_get_fid():
 		res = make_response(chaoxing.fid)
 		res.status_code = 200
 	except Exception:
-		res = make_response("")
+		res = make_response("0")
 		res.status_code = 500
 	finally:
 		return res
@@ -153,11 +134,11 @@ def chaoxing_get_cookies():
 def chaoxing_get_courses():
 	try:
 		chaoxing = session["chaoxing"]
-		assert chaoxing.logined and chaoxing.courses
+		assert chaoxing.logined
 		res = make_response(dumps(chaoxing.courses))
 		res.status_code = 200
 	except Exception:
-		res = make_response("")
+		res = make_response("{}")
 		res.status_code = 500
 	finally:
 		return res
@@ -167,12 +148,10 @@ def chaoxing_get_curriculum():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		curriculum = chaoxing.get_curriculum()
-		assert curriculum
-		res = make_response(dumps(curriculum))
+		res = make_response(dumps(chaoxing.get_curriculum()))
 		res.status_code = 200
 	except Exception:
-		res = make_response("")
+		res = make_response("{}")
 		res.status_code = 500
 	finally:
 		return res
@@ -183,24 +162,22 @@ def chaoxing_get_activities():
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
 		activities = chaoxing.get_activities()
-		assert activities
 		res = make_response(dumps(activities))
 		res.status_code = 200
 	except Exception:
-		res = make_response("")
+		res = make_response("{}")
 		res.status_code = 500
 	finally:
 		return res
 
-@server.route("/chaoxing/checkin_checkin_location/<cmd>")
-def chaoxing_checkin_checkin_location(cmd: str = "{\"active_id\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
+@server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
+def chaoxing_checkin_checkin_location():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		params = loads(cmd)
-		active_id, location = params["active_id"], params.get("location") or {"latitude": -1, "longitude": -1, "address": ""}
-		assert active_id and location
-		assert chaoxing.checkin_checkin_location({"active_id": active_id}, location)
+		data = request.get_json(force = True)
+		assert data["activity"]["active_id"]
+		assert chaoxing.checkin_checkin_location(activity = data["activity"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
 		res = make_response("success")
 		res.status_code = 200
 	except Exception:
@@ -209,15 +186,14 @@ def chaoxing_checkin_checkin_location(cmd: str = "{\"active_id\": \"\", \"locati
 	finally:
 		return res
 
-@server.route("/chaoxing/checkin_checkin_qrcode/<cmd>")
-def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \"\", \"location\": {\"latitude\": -1, \"longitude\": -1, \"address\": \"\"}}"):
+@server.route("/chaoxing/checkin_checkin_qrcode", methods = ["POST"])
+def chaoxing_checkin_checkin_qrcode():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		params = loads(cmd)
-		active_id, enc, location = params["active_id"], params["enc"], params.get("location") or {"latitude": -1, "longitude": -1, "address": ""}
-		assert active_id and enc and location
-		assert chaoxing.checkin_checkin_qrcode({"active_id": active_id, "enc": enc}, location)
+		data = request.get_json(force = True)
+		assert data["activity"]["active_id"] and data["activity"]["enc"]
+		assert chaoxing.checkin_checkin_qrcode(activity = data["activity"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
 		res = make_response("success")
 		res.status_code = 200
 	except Exception:
@@ -226,12 +202,14 @@ def chaoxing_checkin_checkin_qrcode(cmd: str = "{\"active_id\": \"\", \"enc\": \
 	finally:
 		return res
 
-@server.route("/chaoxing/extract_url/<cmd>")
-def chaoxing_extract_url(cmd: str = ""):
+@server.route("/chaoxing/extract_url", methods = ["POST"])
+def chaoxing_extract_url():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls?liveId=" + cmd)
+		data = request.get_json(force = True)
+		assert data
+		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls", params = {"liveId": data})
 		assert res.status_code == 200
 		res = make_response(res.text)
 		res.status_code = 200
@@ -242,4 +220,4 @@ def chaoxing_extract_url(cmd: str = ""):
 		return res
 
 if __name__ == "__main__":
-	server.run(host = "0.0.0.0", port=5001)
+	server.run(host = "0.0.0.0", port = 5001)

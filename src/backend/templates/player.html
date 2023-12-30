@@ -138,8 +138,8 @@
 					e.innerText = xdcheckin_latest_release["body"];
 					e.style.display = "block";
 				}
-			}).catch((error) => {});
-		}).catch((error) => {});
+			}).catch((err) => {});
+		}).catch((err) => {});
 
 		/* Chaoxing login related. */
 		var chaoxing;
@@ -399,39 +399,34 @@
 			if (e.style.display == "none") {
 				e.innerText = "Loading activities.";
 				e.style.display = "block";
-				let res = await get("/chaoxing/get_activities");
-				if (res.status_code != 200) {
-					e.innerText = "No ongoing activities.";
-				}
-				else {
-					let activities = res.json();
-					e.replaceChildren();
-					for (let class_id in activities) {
-						let class_activities = activities[class_id];
-						let div = document.createElement("div");
-						div.innerText = courses[class_id]["name"] + ": ";
-						e.appendChild(div);
-						for (let i in class_activities) {
-							let activity = class_activities[i];
-							let button = document.createElement("button");
-							let type = "";
-							if (activity["type"] == "2") {
-								button.setAttribute("disabled", "");
-							}
-							else {
-								button.setAttribute('onclick', 'chaoxing.')
-							}
-							type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
-							button.innerText = type + " (" + activity["name"] + ", " + activity["active_id"] + ", " + activity["time_left"] + ")";
-							button.setAttribute('onclick', 'chaoxingLocationCheckin(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
-							e.appendChild(button);
+				let activities = (await get("/chaoxing/get_activities")).json();
+				e.replaceChildren();
+				for (let class_id in activities) {
+					let class_activities = activities[class_id];
+					let div = document.createElement("div");
+					div.innerText = courses[class_id]["name"] + ": ";
+					e.appendChild(div);
+					for (let i in class_activities) {
+						let activity = class_activities[i];
+						let button = document.createElement("button");
+						let type = "";
+						if (activity["type"] == "2") {
+							button.setAttribute("disabled", "");
 						}
+						else {
+							button.setAttribute('onclick', 'chaoxing.')
+						}
+						type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
+						button.innerText = type + " (" + activity["name"] + ", " + activity["active_id"] + ", " + activity["time_left"] + ")";
+						button.setAttribute('onclick', 'chaoxingLocationCheckin(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
+						e.appendChild(button);
 					}
 				}
+				if (!Object.keys(activities).length)
+					e.innerText = "No ongoing activities.";
 			}
-			else {
+			else
 				e.style.display = "none";
-			}
 			activities_list_loading = false;
 		}
 
@@ -486,7 +481,7 @@
 				liveId = input;
 			}
 			try {
-				let res = await get("/chaoxing/extract_url/" + liveId);
+				let res = await post("/chaoxing/extract_url", data = liveId);
 				assert(res.status_code == 200);
 				let url = new URL(res.text);
 				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
@@ -600,31 +595,6 @@
 				decodedData = decodedData.replaceAll(key, map_decodedData[key]);
 			return decodedData;
 		}
-
-		qrcode.callback = async function(decodedData) {
-			document.getElementById("player0-decodeddata-div").innerText = "Scan result:\n" + decodedData;
-			assert(decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") != -1, "Not a qrcode checkin URL.")
-			try {
-				decodeURIComponent(decodedData);
-			}
-			catch (error) {
-				decodedData = fixMalformedDecodedData(decodedData);
-				document.getElementById("player0-decodeddata-div").innerText = "Scan result (fixed):\n" + decodedData;
-			}
-			try {
-				let params = new URLSearchParams(new URL(decodedData).search);
-				location_["ranged"] = "1";
-				let res = await get("/chaoxing/checkin_checkin_qrcode/{\"active_id\": \"" + params.get("id") + "\", \"enc\": \"" + params.get("enc") + "\", \"location\": " + JSON.stringify(location_) + "}");
-				if (res.status_code == 200)
-					alert("Checked in successfully.");
-				else
-					document.getElementById("player0-decodeddata-div").innerText = "Checkin failed:\n" + decodedData;
-			}
-			catch (error) {
-				document.getElementById("player0-decodeddata-div").innerText = "Checkin error:\n" + error.message + "\n" + decodedData;
-			}
-		};
-
 		/* Long press event for mode switching of scan button. */
 		function scanButtonAddEventListener (player_var_name, scan_button_id = player_var_name + "-button-scan", long_press_delay = 300) {
 			let b = document.getElementById(scan_button_id);
@@ -643,10 +613,35 @@
 			});
 		}
 
+		/* Qrcode checkin. */
+		qrcode.callback = async function(decodedData) {
+			document.getElementById("player0-decodeddata-div").innerText = "Scan result:\n" + decodedData;
+			assert(decodedData.indexOf("mobilelearn.chaoxing.com/widget/sign") != -1, "Not a qrcode checkin URL.")
+			try {
+				decodeURIComponent(decodedData);
+			}
+			catch (err) {
+				decodedData = fixMalformedDecodedData(decodedData);
+				document.getElementById("player0-decodeddata-div").innerText = "Scan result (fixed):\n" + decodedData;
+			}
+			try {
+				let params = new URLSearchParams(new URL(decodedData).search);
+				location_["ranged"] = 1;
+				let res = await post("/chaoxing/checkin_checkin_qrcode", data = {"activity": {"active_id": params.get("id"), "enc": params.get("enc")}, "location": location_})
+				if (res.status_code == 200)
+					alert("Checked in successfully.");
+				else
+					document.getElementById("player0-decodeddata-div").innerText = "Checkin failed:\n" + decodedData;
+			}
+			catch (err) {
+				document.getElementById("player0-decodeddata-div").innerText = "Checkin error:\n" + err.message + "\n" + decodedData;
+			}
+		};
+
 		/* Location checkin. */
 		async function chaoxingLocationCheckin(activity) {
-			location_["ranged"] = "1";
-			let res = await get("/chaoxing/checkin_checkin_location/{\"active_id\": \"" + activity["active_id"] + "\", \"location\": " + JSON.stringify(location_) + "}");
+			location_["ranged"] = 1;
+			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": location_});
 			if (res.status_code == 200)
 				alert("Checked in successfully.");
 			else
@@ -663,7 +658,7 @@
 				if (password === null)
 					return;
 				assert(/^(((?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^\s0-9a-zA-Z])|(?=.*[a-zA-Z])(?=.*[^\s0-9a-zA-Z]))[^\s\u4e00-\u9fa5]+)$/.test(password));
-				return [username, encodeURIComponent(password.replaceAll("/", " "))];
+				return [username, password];
 			}
 			catch (err) {
 				alert("Invalid input.");
@@ -686,16 +681,17 @@
 			else {
 				if(!confirm("Use previously entered account " + username + "?")) {
 					input = chaoxingInputAccount();
-					if (input)
+					if (input) {
 						[username, password] = input;
+						set_cookie("cookies", "");
+					}
 					else
 						return chaoxing_logining = false;
 				}
 			}
 			alert("Logging in.");
-			let res;
 			try {
-				res = await get("/chaoxing/login/{\"username\": \"" + username + "\", \"password\": \"" + password + "\"}");
+				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": get_cookie("cookies")});
 				assert(chaoxing_logined = (res.status_code == 200));
 			}
 			catch (err) {
@@ -705,16 +701,11 @@
 			alert("Logged in successfully.");
 			set_cookie("username", username);
 			set_cookie("password", password);
-			res = await get("/chaoxing/get_fid");
-			if (res.status_code == 200)
-				set_cookie("chaoxing_fid", res.text);
+			set_cookie("cookies", (await get("/chaoxing/get_cookies")).text);
+			set_cookie("chaoxing_fid", (await get("/chaoxing/get_fid")).text);
 			enable_players();
-			res = await get("/chaoxing/get_courses");
-			if (res.status_code == 200)
-				courses = res.json();
-			res = await get("/chaoxing/get_curriculum");
-			if (res.status_code == 200)
-				curriculum = res.json();
+			courses = (await get("/chaoxing/get_courses")).json();
+			curriculum = (await get("/chaoxing/get_curriculum")).json();
 			tablifyCurriculum();
 			document.getElementById("extract-classroom-button").style.display = "inline";
 			document.getElementById("chaoxing-login-button").style.display = "none";
@@ -725,7 +716,7 @@
 			chaoxing_logining = false;
 		}
 
-		class _get {
+		class _res {
 			constructor(status_code, text){
 				this.status_code = status_code;
 				this.text = text;
@@ -734,7 +725,7 @@
 				try{
 					return JSON.parse(this.text);
 				}
-				catch (error) {
+				catch (err) {
 					return undefined;
 				}
 			}
@@ -748,16 +739,33 @@
 					type: "GET",
 					url: url,
 					data: params,
-					contentType: "text/plain; charset=utf-8",
-					dataType: "text"
-				}).done(function(data, status_text, res){
-					[status_code, text] = [res.status, data];
+					contentType: "text/plain; charset=utf-8"
+				}).done(function(data_, status_text, res){
+					[status_code, text] = [res.status, data_];
 				});
-				return new _get(status_code, text);
+				return new _res(status_code, text);
 			}
 			catch (err) {
+				return new _res(404, "");
+			}
+		}
 
-				return new _get(404, "");
+		async function post(url = "", data = {}) {
+			try {
+				let status_code = 404, text = "";
+				await $.ajax({
+					cache: true,
+					type: "POST",
+					url: url,
+					data: JSON.stringify(data),
+					contentType: "application/json; charset=utf-8"
+				}).done(function(data_, status_text, res){
+					[status_code, text] = [res.status, data_];
+				});
+				return new _res(status_code, text);
+			}
+			catch (err) {
+				return new _res(404, "");
 			}
 		}
 	</script>

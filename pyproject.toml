@@ -2,7 +2,7 @@
 [tool.briefcase]
 project_name = "Xdcheckin"
 bundle = "org.eu.pnxlr.git"
-version = "0.0.16"
+version = "0.0.17"
 url = "https://github.com/Pairman/Xdcheckin"
 license = "GNU General Public License v3 (GPLv3)"
 author = "Pairman"
@@ -26,7 +26,7 @@ requires = [
 	"requests",
 	"flask",
 	"flask-session",
-	"waitress"
+	"waitress",
 	"pycryptodome"
 ]
 test_requires = [
