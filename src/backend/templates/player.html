@@ -538,6 +538,16 @@
 			player.setVolume(0);
 		}
 
+		function sync() {
+			t = player0.getCurrentTime();
+			if (player1.getStatus() == "playing")
+				player1.seek(t);
+			if (player2.getStatus() == "playing")
+				player2.seek(t);
+			if (player3.getStatus() == "playing")
+				player3.seek(t);
+		}
+
 		/* Qrcode scanning and jump if being valid signin page. */
 		function screenshot(player) {
 			let video = player.tag;
