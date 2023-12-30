@@ -65,7 +65,7 @@ class Chaoxing:
 			"roleSelect": True
 		}
 		try:
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			assert res.json()["status"]
 			return {
 				"name": "",
@@ -105,7 +105,7 @@ class Chaoxing:
 				'independentNameId': 0
 			}
 		try:
-			res = self.post(url, data)
+			res = self.post(url = url, data = data)
 			assert res.json()["status"]
 			return {
 				"name": "",
@@ -130,7 +130,7 @@ class Chaoxing:
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		try:
-			res2 = self.get(url, cookies = account["cookies"])
+			res2 = self.get(url = url, cookies = account["cookies"])
 			data = res2.json()
 			assert data["result"]
 			return {
@@ -160,14 +160,13 @@ class Chaoxing:
 			"courseFolderSize": 0
 		}
 		try:
-			res = self.get(url, params)
-			courses = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"", res.text, DOTALL)
+			res = self.get(url = url, params = params)
 			courses = {
 				row[1]: {
 					"course_id": row[0],
 					"name": row[2],
 					"teacher": row[3].split("，")
-				} for row in courses
+				} for row in findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"", res.text, DOTALL)
 			}
 			return courses
 		except Exception:
@@ -187,7 +186,7 @@ class Chaoxing:
 		course_id = course.get("course_id") or self.courses.get(course["class_id"])["course_id"] if self.courses.get(course["class_id"]) else None
 		try:
 			if not course_id:
-				res = self.get(url, params)
+				res = self.get(url = url, params = params)
 				d = res.json()
 				assert d["result"]
 				course_id = str(d["data"]["courseid"])
@@ -205,7 +204,7 @@ class Chaoxing:
 			"week": week
 		}
 		try:
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			lessons = res.json()["data"]["lessonArray"]
 			curriculum = {}
 			def add_lesson(lesson: dict = {}, curriculum = curriculum):
@@ -248,7 +247,7 @@ class Chaoxing:
 			"showNotStartedActive": 0
 		}
 		try:
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			data = res.json()["data"]["activeList"]
 			return [
 				{
@@ -268,12 +267,12 @@ class Chaoxing:
 		try:
 			activities = {}
 			for class_id, course in self.courses.items():
-				activity = self.get_course_activities(course = {"course_id": course["course_id"], "class_id": class_id})
-				if activity:
-					activities[class_id] = activity
+				course_activities = self.get_course_activities({"course_id": course["course_id"], "class_id": class_id})
+				if course_activities:
+					activities[class_id] = course_activities
 			return activities
 		except Exception:
-			return {}
+			return {}	
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details
@@ -286,7 +285,7 @@ class Chaoxing:
 			"type": 1
 		}
 		try:
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			return {key: str(val) if not val is None else "" for key, val in res.json().items()}
 		except Exception:
 			return {}
@@ -308,9 +307,9 @@ class Chaoxing:
 			"code": ""
 		}
 		try:
-			res1 = self.get(url1, params1)
+			res1 = self.get(url = url1, params = params1)
 			params2["code"] = search(r"code=\'\+\'(.*?)\'", res1.text).group(1)
-			res2 = self.get(url2, params2)
+			res2 = self.get(url = url2, params = params2)
 			return res2.text == "success"
 		except Exception:
 			return False
@@ -336,15 +335,15 @@ class Chaoxing:
 			details = self.checkin_get_details(activity = activity)
 			assert details["status"] == "1" and details["isDelete"] == "0"
 			params["class_id"] = details["clazzId"]
-			res = self.get(url, params)
-			assert res.status_code == 200 and not "无此签到活动" in res.text and not "活动已被删除" in res.text
+			res = self.get(url = url, params = params)
+			assert res.status_code == 200
 			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
 			return {
 				"address": s.group(2),
 				"latitude": s.group(3),
 				"longitude": s.group(4),
 				"ranged": s.group(1),
-				"range": s.group(5),
+				"range": s.group(5)
 			} if s and s.group(1) == "1" else 2 if "zsign_success" in res.text else 1
 		except Exception:
 			return 0
@@ -374,7 +373,7 @@ class Chaoxing:
 				"appType": 15,
 				"ifTiJiao": ranged
 			}
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			return res.text in ("success", "您已签到过了")
 		except Exception:
 			return False
@@ -403,7 +402,7 @@ class Chaoxing:
 				"longitude": -1 if ranged else location["longitude"],
 				"fid": 0
 			}
-			res = self.get(url, params)
+			res = self.get(url = url, params = params)
 			return res.text in ("success", "您已签到过了")
 		except Exception:
 			return False
