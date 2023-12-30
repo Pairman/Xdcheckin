@@ -24,7 +24,7 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_v11)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -73,7 +73,7 @@ class Chaoxing:
 			return {
 				"name": "",
 				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "",
+				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
@@ -113,7 +113,7 @@ class Chaoxing:
 			return {
 				"name": "",
 				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "",
+				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
@@ -139,7 +139,7 @@ class Chaoxing:
 			return {
 				"name": data["msg"]["name"],
 				"uid": account["cookies"]["UID"],
-				"fid": account["cookies"].get("fid") or "",
+				"fid": account["cookies"].get("fid") or "0",
 				"cookies": account["cookies"],
 				"logined": True
 			}
@@ -209,7 +209,7 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url, params)
-			data = res.json()["data"]["lessonArray"]
+			lessons = res.json()["data"]["lessonArray"]
 			curriculum = {}
 			def add_lesson(lesson: dict = {}, curriculum = curriculum):
 				lesson_class_id = str(lesson["classId"])
@@ -230,7 +230,7 @@ class Chaoxing:
 					curriculum[lesson_class_id]["time"].append(lesson["time"][0])
 				if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
 					curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
-			for lesson in data:
+			for lesson in lessons:
 				add_lesson(lesson)
 				for conflict in lesson.get("conflictLessons") or {}:
 					add_lesson(conflict)
@@ -360,11 +360,11 @@ class Chaoxing:
 		:return: True on success, otherwise False.
 		"""
 		try:
-			assert self.checkin_do_analysis(activity = activity)
 			presign = self.checkin_do_presign(activity = activity)
 			assert presign
 			if presign == 2:
 				return True
+			assert self.checkin_do_analysis(activity = activity)
 			if type(presign) is dict:
 				location = presign
 			ranged = not not location.get("ranged") or True
@@ -390,11 +390,11 @@ class Chaoxing:
 		:return: True on success, otherwise False.
 		"""
 		try:
-			assert self.checkin_do_analysis(activity = activity)
 			presign = self.checkin_do_presign(activity = activity)
 			assert presign
 			if presign == 2:
 				return True
+			assert self.checkin_do_analysis(activity = activity)
 			if type(presign) is dict:
 				location = presign
 			ranged = not not location.get("ranged") or True
