@@ -24,7 +24,7 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_v11)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -73,7 +73,7 @@ class Chaoxing:
 			return {
 				"name": "",
 				"uid": res.cookies["UID"],
-				"fid": res.cookies["fid"],
+				"fid": res.cookies.get("fid") or "",
 				"cookies": res.cookies,
 				"logined": True
 			}
@@ -113,7 +113,7 @@ class Chaoxing:
 			return {
 				"name": "",
 				"uid": res.cookies["UID"],
-				"fid": res.cookies["fid"],
+				"fid": res.cookies.get("fid") or "",
 				"cookies": res.cookies,
 				"logined": True
 			}
@@ -139,7 +139,7 @@ class Chaoxing:
 			return {
 				"name": data["msg"]["name"],
 				"uid": account["cookies"]["UID"],
-				"fid": account["cookies"]["fid"],
+				"fid": account["cookies"].get("fid") or "",
 				"cookies": account["cookies"],
 				"logined": True
 			}
