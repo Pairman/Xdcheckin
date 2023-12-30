@@ -268,7 +268,7 @@ class Chaoxing:
 		try:
 			activities = {}
 			for class_id, course in self.courses.items():
-				activity = self.get_course_activities({"course_id": course["course_id"], "class_id": class_id})
+				activity = self.get_course_activities(course = {"course_id": course["course_id"], "class_id": class_id})
 				if activity:
 					activities[class_id] = activity
 			return activities
