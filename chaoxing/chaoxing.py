@@ -2,8 +2,11 @@
 
 from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
+from Crypto.Util.Padding import pad as pad_pkcs7
 from re import findall, search, DOTALL
 from requests import get, post
+from threading import Thread
+from time import sleep
 from urllib.parse import parse_qs, unquote, urlparse
 
 class Chaoxing:
@@ -89,8 +92,7 @@ class Chaoxing:
 		:return: Same as login_username_v11().
 		"""
 		def encrypt_aes(msg: str = "", key: str = "u2oh6Vu^HWe4_AES"):
-			pad_pkcs7 = lambda s: s + (chr(AES_block_size - len(s) % AES_block_size) * (AES_block_size - len(s) % AES_block_size)).encode("utf-8")
-			enc = AES_new(key = key.encode("utf-8"), mode = AES_MODE_CBC, iv = key.encode("utf-8")).encrypt(pad_pkcs7(msg.encode("utf-8")))
+			enc = AES_new(key.encode("utf-8"), AES_MODE_CBC, key.encode("utf-8")).encrypt(pad_pkcs7(msg.encode("utf-8"), AES_block_size, "pkcs7"))
 			return b64encode(enc).decode("utf-8")
 		url = "https://passport2.chaoxing.com/fanyalogin"
 		data = {
@@ -264,12 +266,20 @@ class Chaoxing:
 		"""Get activities of all courses.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
+		def wrapper(course: dict = {}, activities: dict = {}, lock: list = []):
+			lock[0] += 1
+			course_activities = self.get_course_activities(course = course)
+			if course_activities:
+				activities[course["class_id"]] = course_activities
+			lock[0] -= 1
+		courses, courses_len = tuple(self.courses.items()), len(self.courses)
 		try:
-			activities = {}
-			for class_id, course in self.courses.items():
-				course_activities = self.get_course_activities({"course_id": course["course_id"], "class_id": class_id})
-				if course_activities:
-					activities[class_id] = course_activities
+			step, interval, lock, activities = 32, 0.2, [0], {}
+			for j in range(0, len(courses), step):
+				for i in range(j, min(j + step, courses_len)):
+					Thread(target = wrapper, kwargs = {"course": {"course_id": courses[i][1]["course_id"], "class_id": courses[i][0]}, "activities": activities, "lock": lock}).start()
+				while lock[0]:
+					sleep(interval)
 			return activities
 		except Exception:
 			return {}	
@@ -286,7 +296,7 @@ class Chaoxing:
 		}
 		try:
 			res = self.get(url = url, params = params)
-			return res.json()
+			return {key: str(val) if not val is None else "" for key, val in res.json().items()}
 		except Exception:
 			return {}
 
@@ -333,8 +343,8 @@ class Chaoxing:
 		}
 		try:
 			details = self.checkin_get_details(activity = activity)
-			assert details["status"] and not details["isDelete"]
-			params["class_id"] = str(details["clazzId"])
+			assert details["status"] == "1" and details["isDelete"] == "0"
+			params["class_id"] = details["clazzId"]
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
 			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
@@ -374,7 +384,7 @@ class Chaoxing:
 				"ifTiJiao": ranged
 			}
 			res = self.get(url = url, params = params)
-			return res.text in ("success", "您已签到过了")
+			return res.text == "success"
 		except Exception:
 			return False
 
@@ -403,7 +413,7 @@ class Chaoxing:
 				"fid": 0
 			}
 			res = self.get(url = url, params = params)
-			return res.text in ("success", "您已签到过了")
+			return res.text == "success"
 		except Exception:
 			return False
 
