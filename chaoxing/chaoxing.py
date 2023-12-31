@@ -257,37 +257,37 @@ class Chaoxing:
 		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time.
 		"""
+		def add_lesson(lesson: dict = {}, curriculum: dict = {}):
+			lesson_class_id = str(lesson["classId"])
+			lesson = {
+				"course_id": str(lesson["courseId"]),
+				"name": lesson["name"],
+				"location": lesson["location"],
+				"teacher": [lesson["teacherName"]],
+				"time":[{
+					"day": str(lesson["dayOfWeek"]),
+					"period": [str(lesson["beginNumber"]), str(lesson["beginNumber"] + lesson["length"] - 1)]
+				}]
+			}
+			if not lesson_class_id in curriculum.keys():
+				curriculum[lesson_class_id] = lesson
+				return
+			if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
+				curriculum[lesson_class_id]["time"].append(lesson["time"][0])
+			if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
+				curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
 		params = {
 			"week": week
 		}
+		curriculum = {}
 		try:
 			res = self.get(url = url, params = params)
 			lessons = res.json()["data"]["lessonArray"]
-			curriculum = {}
-			def add_lesson(lesson: dict = {}, curriculum = curriculum):
-				lesson_class_id = str(lesson["classId"])
-				lesson = {
-					"course_id": str(lesson["courseId"]),
-					"name": lesson["name"],
-					"location": lesson["location"],
-					"teacher": [lesson["teacherName"]],
-					"time":[{
-						"day": str(lesson["dayOfWeek"]),
-						"period": [str(lesson["beginNumber"]), str(lesson["beginNumber"] + lesson["length"] - 1)]
-					}]
-				}
-				if not lesson_class_id in curriculum.keys():
-					curriculum[lesson_class_id] = lesson
-					return
-				if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
-					curriculum[lesson_class_id]["time"].append(lesson["time"][0])
-				if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
-					curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
 			for lesson in lessons:
-				add_lesson(lesson)
+				add_lesson(lesson = lesson, curriculum = curriculum)
 				for conflict in lesson.get("conflictLessons") or {}:
-					add_lesson(conflict)
+					add_lesson(lesson = conflict, curriculum = curriculum)
 			return curriculum
 		except Exception:
 			return {}
