@@ -54,6 +54,36 @@ class Chaoxing:
 		headers = headers if headers else self.headers
 		return post(url, data = data, params = params, cookies = cookies, headers = headers, verify = False)
 
+	def login_username_v2(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account with username and password via V2 API.
+		:param account: Username and password in dictionary.
+		:return: Name, UID, FID, cookies and login state.
+		"""
+		url = "https://passport2-api.chaoxing.com/api/v2/loginbypwd"
+		params = {
+			"name": account["username"],
+			"pwd": account["password"]
+		}
+		try:
+			res = self.get(url = url, params = params)
+			data = res.json()
+			assert data["result"]
+			return {
+				"name": data["realname"],
+				"uid": res.cookies["UID"],
+				"fid": res.cookies.get("fid") or "0",
+				"cookies": res.cookies,
+				"logined": True
+			}
+		except Exception:
+			return {
+				"name": "",
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
 	def login_username_v11(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via V11 API.
 		:param account: Username and password in dictionary.
