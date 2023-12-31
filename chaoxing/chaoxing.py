@@ -62,10 +62,7 @@ class Chaoxing:
 		url = "https://passport2-api.chaoxing.com/v11/loginregister"
 		params = {
 			"uname": account["username"],
-			"code": account["password"],
-			"cx_xxt_passport": "json",
-			"loginType": 1,
-			"roleSelect": True
+			"code": account["password"]
 		}
 		try:
 			res = self.get(url = url, params = params)
