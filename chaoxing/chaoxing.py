@@ -384,7 +384,7 @@ class Chaoxing:
 				"ifTiJiao": ranged
 			}
 			res = self.get(url = url, params = params)
-			return res.text == "success"
+			return res.text in ("success", "您已签到过了")
 		except Exception:
 			return False
 
@@ -413,7 +413,7 @@ class Chaoxing:
 				"fid": 0
 			}
 			res = self.get(url = url, params = params)
-			return res.text == "success"
+			return res.text in ("success", "您已签到过了")
 		except Exception:
 			return False
 
