@@ -334,7 +334,7 @@ class Chaoxing:
 			for j in range(0, len(courses), step):
 				for i in range(j, min(j + step, courses_len)):
 					Thread(target = wrapper, kwargs = {"course": {"course_id": courses[i][1]["course_id"], "class_id": courses[i][0]}, "activities": activities, "lock": lock}).start()
-				while lock[0]:
+				while lock[0] > step // 4:
 					sleep(interval)
 			return activities
 		except Exception:
