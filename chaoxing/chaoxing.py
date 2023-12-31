@@ -113,6 +113,35 @@ class Chaoxing:
 				"logined": False
 			}
 
+	def login_username_v3(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account with username and password via V3 API.
+		:param account: Same as login_username_v11().
+		:return: Same as login_username_v11().
+		"""
+		url = "https://passport2.chaoxing.com/fanyalogin"
+		data = {
+			"userNumber": account["username"],
+			"passWord": account["password"]
+		}
+		try:
+			res = self.post(url = url, data = data)
+			assert res.json()["status"]
+			return {
+				"name": "",
+				"uid": res.cookies["UID"],
+				"fid": res.cookies.get("fid") or "0",
+				"cookies": res.cookies,
+				"logined": True
+			}
+		except Exception:
+			return {
+				"name": "",
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
 	def login_username_fanya(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via Fanya API.
 		:param account: Same as login_username_v11().
