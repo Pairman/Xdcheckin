@@ -118,7 +118,7 @@ class Chaoxing:
 		:param account: Same as login_username_v11().
 		:return: Same as login_username_v11().
 		"""
-		url = "https://passport2.chaoxing.com/fanyalogin"
+		url = "http://v3.chaoxing.com/vLogin"
 		data = {
 			"userNumber": account["username"],
 			"passWord": account["password"]
