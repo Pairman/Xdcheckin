@@ -1,6 +1,9 @@
+from base64 import b64decode
+from cv2 import imdecode, QRCodeDetector, IMREAD_COLOR
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from json import loads, dumps
+from numpy import frombuffer, uint8
 from os import listdir, remove
 from requests import get
 from requests.utils import add_dict_to_cookiejar
@@ -13,6 +16,8 @@ server.config["SESSION_PERMANENT"] = False
 server.config["SESSION_TYPE"] = "filesystem"
 server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 server.config["version"] = "0.0.0"
+
+qrcode_detector = QRCodeDetector()
 
 try:
 	for i in listdir(server.config["SESSION_FILE_DIR"]):
@@ -78,6 +83,23 @@ def get_xdcheckin_latest_release():
 					"browser_download_url": asset["browser_download_url"]
 				} for asset in data["assets"]]
 		}))
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
+@server.route("/chaoxing/extract_url", methods = ["POST"])
+def chaoxing_extract_url():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		data = request.get_json(force = True)
+		assert data
+		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls", params = {"liveId": data})
+		assert res.status_code == 200
+		res = make_response(res.text)
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
@@ -186,14 +208,13 @@ def chaoxing_checkin_checkin_location():
 	finally:
 		return res
 
-@server.route("/chaoxing/checkin_checkin_qrcode", methods = ["POST"])
-def chaoxing_checkin_checkin_qrcode():
+@server.route("/chaoxing/checkin_checkin_qrcode_url", methods = ["POST"])
+def chaoxing_checkin_checkin_qrcode_url():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
 		data = request.get_json(force = True)
-		assert data["activity"]["active_id"] and data["activity"]["enc"]
-		assert chaoxing.checkin_checkin_qrcode(activity = data["activity"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		assert data["qr_url"] and chaoxing.checkin_checkin_qrcode_url(qr_url = data["qr_url"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
 		res = make_response("success")
 		res.status_code = 200
 	except Exception:
@@ -202,20 +223,24 @@ def chaoxing_checkin_checkin_qrcode():
 	finally:
 		return res
 
-@server.route("/chaoxing/extract_url", methods = ["POST"])
-def chaoxing_extract_url():
+@server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
+def chaoxing_checkin_checkin_qrcode_img():
 	try:
 		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
+		assert chaoxing.logined, "Not logged in."
 		data = request.get_json(force = True)
-		assert data
-		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls", params = {"liveId": data})
-		assert res.status_code == 200
-		res = make_response(res.text)
+		assert data["img_src"], "No image given."
+		img_src = data["img_src"].split(",")[1]
+		assert img_src, "No image given."
+		img = imdecode(frombuffer(b64decode(), uint8), IMREAD_COLOR)
+		qr_urls = [s for s in qrcode_detector.detectAndDecodeMulti(img)[1] if "mobilelearn.chaoxing.com/widget/sign" in s]
+		assert qr_urls, "No checkin url found.\n" + qr_urls[0]
+		assert chaoxing.checkin_checkin_qrcode_url(qr_url = qr_urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""}), "Checkin failed.\n" + qr_urls[0]
+		res = make_response("Checked in successfully.\n" + qr_urls[0])
 		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
+	except Exception as e:
+		res = make_response(str(e))
+		res.status_code = 200
 	finally:
 		return res
 
