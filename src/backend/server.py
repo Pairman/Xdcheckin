@@ -219,7 +219,7 @@ def chaoxing_checkin_checkin_qrcode_img():
 		assert img_src, "No image given."
 		img = imdecode(frombuffer(b64decode(img_src), uint8), IMREAD_COLOR)
 		qr_urls = [s for s in qrcode_detector.detectAndDecodeMulti(img)[1] if "mobilelearn.chaoxing.com/widget/sign" in s]
-		assert qr_urls, "No checkin url found.\n" + qr_urls[0]
+		assert qr_urls, "No checkin url found."
 		assert chaoxing.checkin_checkin_qrcode_url(qr_url = qr_urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""}), "Checkin failed.\n" + qr_urls[0]
 		res = make_response("Checked in successfully.\n" + qr_urls[0])
 		res.status_code = 200
