@@ -208,21 +208,6 @@ def chaoxing_checkin_checkin_location():
 	finally:
 		return res
 
-@server.route("/chaoxing/checkin_checkin_qrcode_url", methods = ["POST"])
-def chaoxing_checkin_checkin_qrcode_url():
-	try:
-		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
-		data = request.get_json(force = True)
-		assert data["qr_url"] and chaoxing.checkin_checkin_qrcode_url(qr_url = data["qr_url"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
-		res = make_response("success")
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
 @server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
 def chaoxing_checkin_checkin_qrcode_img():
 	try:
