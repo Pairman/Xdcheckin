@@ -60,7 +60,7 @@
 			<button onclick="stop(player0)">Stop</button>
 			<button onclick="unmute(player0)">Unmute</button>
 			<button onclick="mute(player0)">Mute</button>
-			<button id="player0-button-scan" onclick="chaoxingCheckinQrcode()">Scan</button>
+			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode()" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
 		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
@@ -645,6 +645,7 @@
 			document.getElementById("chaoxing-locations-button").style.display = "block";
 			document.getElementById("chaoxing-input-location-button").style.display = "block";
 			document.getElementById("chaoxing-activities-button").style.display = "block";
+			document.getElementById("player0-scan-button").style.display = "block";
 			chaoxing_logining = false;
 		}
 

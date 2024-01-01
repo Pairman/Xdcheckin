@@ -25,15 +25,13 @@ test_sources = [
 requires = [
 	"flask",
 	"flask-session",
-	"numpy",
-	"opencv-python",
+	"pillow",
 	"pycryptodome",
+	"pyzbar",
 	"requests",
 	"waitress"
 ]
-test_requires = [
-    "pytest",
-]
+test_requires = []
 
 [tool.briefcase.app.xdcheckin.macOS]
 universal_build = true

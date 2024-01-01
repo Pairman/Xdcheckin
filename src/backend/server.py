@@ -1,10 +1,11 @@
 from base64 import b64decode
-from cv2 import imdecode, QRCodeDetector, IMREAD_COLOR
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
+from io import BytesIO
 from json import loads, dumps
-from numpy import frombuffer, uint8
 from os import listdir, remove
+from PIL.Image import open as Image_open
+from pyzbar.pyzbar import decode
 from requests import get
 from requests.utils import add_dict_to_cookiejar
 from tempfile import gettempdir
@@ -16,8 +17,6 @@ server.config["SESSION_PERMANENT"] = False
 server.config["SESSION_TYPE"] = "filesystem"
 server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 server.config["version"] = "0.0.0"
-
-qrcode_detector = QRCodeDetector()
 
 try:
 	for i in listdir(server.config["SESSION_FILE_DIR"]):
@@ -217,14 +216,13 @@ def chaoxing_checkin_checkin_qrcode_img():
 		assert data["img_src"], "No image given."
 		img_src = data["img_src"].split(",")[1]
 		assert img_src, "No image given."
-		img = imdecode(frombuffer(b64decode(img_src), uint8), IMREAD_COLOR)
-		qr_urls = [s for s in qrcode_detector.detectAndDecodeMulti(img)[1] if "mobilelearn.chaoxing.com/widget/sign" in s]
+		qr_urls = [s.data.decode("utf-8") for s in decode(Image_open(BytesIO(b64decode(img_src)))) if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
 		assert qr_urls, "No checkin url found."
 		assert chaoxing.checkin_checkin_qrcode_url(qr_url = qr_urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""}), "Checkin failed.\n" + qr_urls[0]
 		res = make_response("Checked in successfully.\n" + qr_urls[0])
 		res.status_code = 200
 	except Exception as e:
-		res = make_response(str(e))
+		res = make_response("Checkin Error:\n" + str(e))
 		res.status_code = 200
 	finally:
 		return res
