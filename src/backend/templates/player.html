@@ -123,10 +123,10 @@
 				let xdcheckin_version_arr = xdcheckin_version.split(".");
 				let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
 				for (let i = 0; i < 3; ++i) {
-					if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
-						xdcheckin_update_available = true;
+					if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
 						break;
-					}
+					if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i]))
+						xdcheckin_update_available = true;
 				}
 				if (xdcheckin_update_available) {
 					let e = document.getElementById("xdcheckin-update-div");
