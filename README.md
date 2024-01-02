@@ -15,4 +15,4 @@ Pyzbar on Windows needs [Visual C++ Redistributable Packages for Visual Studio 2
 2. Clone recursively with ```git clone -b toga-flask --recursive https://github.com/Pairman/Xdcheckin```. <br>
 3. Cd into the cloned repo. <br>
 4. Run ```breifcase create``` to create project skeleton. <br>
-5. Run ```briefcase update -r && briefcase build && briefcase package <platform>``` to build and generate packages, where ```<platform>``` can be ```windows```, ```android``` or etc.
+5. Run ```briefcase update -r && briefcase package <platform>``` to build and generate packages, where ```<platform>``` can be ```windows```, ```android``` or etc.
