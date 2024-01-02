@@ -152,15 +152,9 @@ class Chaoxing:
 			return b64encode(enc).decode("utf-8")
 		url = "https://passport2.chaoxing.com/fanyalogin"
 		data = {
-				'fid': -1,
-				'uname': encrypt_aes(msg = account["username"]),
-				'password': encrypt_aes(msg = account["password"]),
-				't': True,
-				'validate': "",
-				'forbidotherlogin': 0,
-				'doubleFactorLogin': 0,
-				'independentId': 0,
-				'independentNameId': 0
+				"uname": encrypt_aes(msg = account["username"]),
+				"password": encrypt_aes(msg = account["password"]),
+				"t": True
 			}
 		try:
 			res = self.post(url = url, data = data)
@@ -257,7 +251,7 @@ class Chaoxing:
 		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time.
 		"""
-		def add_lesson(lesson: dict = {}, curriculum: dict = {}):
+		def add_lesson(lesson: dict = {}):
 			lesson_class_id = str(lesson["classId"])
 			lesson = {
 				"course_id": str(lesson["courseId"]),
@@ -285,9 +279,9 @@ class Chaoxing:
 			res = self.get(url = url, params = params)
 			lessons = res.json()["data"]["lessonArray"]
 			for lesson in lessons:
-				add_lesson(lesson = lesson, curriculum = curriculum)
+				add_lesson(lesson = lesson)
 				for conflict in lesson.get("conflictLessons") or {}:
-					add_lesson(lesson = conflict, curriculum = curriculum)
+					add_lesson(lesson = conflict)
 			return curriculum
 		except Exception:
 			return {}
@@ -322,19 +316,20 @@ class Chaoxing:
 		"""Get activities of all courses.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
-		def wrapper(course: dict = {}, activities: dict = {}, lock: list = []):
-			lock[0] += 1
+		def wrapper(course: dict = {}):
+			nonlocal lock
+			lock += 1
 			course_activities = self.get_course_activities(course = course)
 			if course_activities:
 				activities[course["class_id"]] = course_activities
-			lock[0] -= 1
+			lock -= 1
+		step, interval, lock, activities = 32, 0.2, 0, {}
 		courses, courses_len = tuple(self.courses.items()), len(self.courses)
 		try:
-			step, interval, lock, activities = 32, 0.2, [0], {}
-			for j in range(0, len(courses), step):
+			for j in range(0, courses_len, step):
 				for i in range(j, min(j + step, courses_len)):
-					Thread(target = wrapper, kwargs = {"course": {"course_id": courses[i][1]["course_id"], "class_id": courses[i][0]}, "activities": activities, "lock": lock}).start()
-				while lock[0] > step // 4:
+					Thread(target = wrapper, kwargs = {"course": {"course_id": courses[i][1]["course_id"], "class_id": courses[i][0]}}).start()
+				while lock:
 					sleep(interval)
 			return activities
 		except Exception:
