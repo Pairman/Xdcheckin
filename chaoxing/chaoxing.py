@@ -62,13 +62,69 @@ class Chaoxing:
 		url = "https://passport2-api.chaoxing.com/v11/loginregister"
 		params = {
 			"uname": account["username"],
-			"code": account["password"],
-			"cx_xxt_passport": "json",
-			"loginType": 1,
-			"roleSelect": True
+			"code": account["password"]
 		}
 		try:
 			res = self.get(url = url, params = params)
+			assert res.json()["status"]
+			return {
+				"name": "",
+				"uid": res.cookies["UID"],
+				"fid": res.cookies.get("fid") or "0",
+				"cookies": res.cookies,
+				"logined": True
+			}
+		except Exception:
+			return {
+				"name": "",
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
+	def login_username_v2(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account with username and password via V2 API.
+		:param account: Same as login_username_v11().
+		:return: Name, UID, FID, cookies and login state.
+		"""
+		url = "https://passport2-api.chaoxing.com/api/v2/loginbypwd"
+		params = {
+			"name": account["username"],
+			"pwd": account["password"]
+		}
+		try:
+			res = self.get(url = url, params = params)
+			data = res.json()
+			assert data["result"]
+			return {
+				"name": data["realname"],
+				"uid": res.cookies["UID"],
+				"fid": res.cookies.get("fid") or "0",
+				"cookies": res.cookies,
+				"logined": True
+			}
+		except Exception:
+			return {
+				"name": "",
+				"uid": "",
+				"fid": "",
+				"cookies": None,
+				"logined": False
+			}
+
+	def login_username_v3(self, account: dict = {"username": "", "password": ""}):
+		"""Log into Chaoxing account with username and password via V3 API.
+		:param account: Same as login_username_v11().
+		:return: Same as login_username_v11().
+		"""
+		url = "http://v3.chaoxing.com/vLogin"
+		data = {
+			"userNumber": account["username"],
+			"passWord": account["password"]
+		}
+		try:
+			res = self.post(url = url, data = data)
 			assert res.json()["status"]
 			return {
 				"name": "",
@@ -201,37 +257,37 @@ class Chaoxing:
 		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time.
 		"""
+		def add_lesson(lesson: dict = {}, curriculum: dict = {}):
+			lesson_class_id = str(lesson["classId"])
+			lesson = {
+				"course_id": str(lesson["courseId"]),
+				"name": lesson["name"],
+				"location": lesson["location"],
+				"teacher": [lesson["teacherName"]],
+				"time":[{
+					"day": str(lesson["dayOfWeek"]),
+					"period": [str(lesson["beginNumber"]), str(lesson["beginNumber"] + lesson["length"] - 1)]
+				}]
+			}
+			if not lesson_class_id in curriculum.keys():
+				curriculum[lesson_class_id] = lesson
+				return
+			if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
+				curriculum[lesson_class_id]["time"].append(lesson["time"][0])
+			if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
+				curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
 		params = {
 			"week": week
 		}
+		curriculum = {}
 		try:
 			res = self.get(url = url, params = params)
 			lessons = res.json()["data"]["lessonArray"]
-			curriculum = {}
-			def add_lesson(lesson: dict = {}, curriculum = curriculum):
-				lesson_class_id = str(lesson["classId"])
-				lesson = {
-					"course_id": str(lesson["courseId"]),
-					"name": lesson["name"],
-					"location": lesson["location"],
-					"teacher": [lesson["teacherName"]],
-					"time":[{
-						"day": str(lesson["dayOfWeek"]),
-						"period": [str(lesson["beginNumber"]), str(lesson["beginNumber"] + lesson["length"] - 1)]
-					}]
-				}
-				if not lesson_class_id in curriculum.keys():
-					curriculum[lesson_class_id] = lesson
-					return
-				if not lesson["time"][0] in curriculum[lesson_class_id]["time"]:
-					curriculum[lesson_class_id]["time"].append(lesson["time"][0])
-				if not lesson["teacher"][0] in curriculum[lesson_class_id]["teacher"]:
-					curriculum[lesson_class_id]["teacher"].append(lesson["teacher"][0])
 			for lesson in lessons:
-				add_lesson(lesson)
+				add_lesson(lesson = lesson, curriculum = curriculum)
 				for conflict in lesson.get("conflictLessons") or {}:
-					add_lesson(conflict)
+					add_lesson(lesson = conflict, curriculum = curriculum)
 			return curriculum
 		except Exception:
 			return {}
@@ -278,7 +334,7 @@ class Chaoxing:
 			for j in range(0, len(courses), step):
 				for i in range(j, min(j + step, courses_len)):
 					Thread(target = wrapper, kwargs = {"course": {"course_id": courses[i][1]["course_id"], "class_id": courses[i][0]}, "activities": activities, "lock": lock}).start()
-				while lock[0]:
+				while lock[0] > step // 4:
 					sleep(interval)
 			return activities
 		except Exception:
