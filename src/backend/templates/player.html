@@ -412,7 +412,7 @@
 						else
 							button.setAttribute('onclick', 'chaoxing.');
 						type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
-						button.innerText = type + " (" + activity["name"] + ", " + activity["active_id"] + ", " + activity["time_left"] + ")";
+						button.innerText = type + " (" + activity["name"] + ", " + activity["time_left"] + ")";
 						button.setAttribute('onclick', 'chaoxingCheckinLocation(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
 						e.appendChild(button);
 					}
