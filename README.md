@@ -1,9 +1,4 @@
-# Xdcheckin
-Python based Chaoxing checkin tool for XDU.
-
-## Supported Checkin types
-1. Location (with or without designated place enabled). <br>
-2. Qrcode (with or without designated place enabled).
+# Xdcheckin_py
 
 # Usage
 For devs: <br>
