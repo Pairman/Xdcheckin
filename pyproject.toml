@@ -11,16 +11,14 @@ author_email = "pairmanxlr@gmail.com"
 [tool.briefcase.app.xdcheckin]
 formal_name = "Xdcheckin"
 description = "Chaoxing Checkin Tool for XDU."
-long_description = """More details about the app should go here.
+long_description = """Chaoxing Checkin Tool for XDU.
 """
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/backend",
     "src/xdcheckin",
 ]
-test_sources = [
-    "tests",
-]
+test_sources = []
 
 requires = [
 	"flask",
