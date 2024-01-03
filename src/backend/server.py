@@ -211,6 +211,3 @@ def chaoxing_checkin_checkin_qrcode_img():
 	finally:
 		res.status_code = 200
 		return res
-
-if __name__ == "__main__":
-	server.run(host = "0.0.0.0", port = 5001)
