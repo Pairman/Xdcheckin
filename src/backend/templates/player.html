@@ -46,20 +46,20 @@
 
 		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
 		<div id="players-buttons-div" class="div-center" style="display: none;">
-			<button onclick="play(player0); play(player1); play(player2); play(player3)">Play All</button>
-			<button onclick="stop(player0); stop(player1); stop(player2); stop(player3)">Stop All</button>
-			<button onclick="unmute(player0); unmute(player1); unmute(player2); unmute(player3)">Unmute All</button>
-			<button onclick="mute(player0); mute(player1); mute(player2); mute(player3)">Mute All</button>
+			<button onclick="player0.initPlay(); player1.initPlay(); player2.initPlay(); player3.initPlay();">Play All</button>
+			<button onclick="player0.stop(); player1.stop(); player2.stop(); player3.stop();">Stop All</button>
+			<button onclick="player0.unmute(); player1.unmute(); player2.unmute(); player3.unmute();">Unmute All</button>
+			<button onclick="player0.mute(); player1.mute(); player2.mute(); player3.mute();">Mute All</button>
 			<button onclick="resize()">Resize All</button>
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
 			&emsp;
-			<button onclick="play(player0)">Play</button>
-			<button onclick="stop(player0)">Stop</button>
-			<button onclick="unmute(player0)">Unmute</button>
-			<button onclick="mute(player0)">Mute</button>
+			<button onclick="player0.initPlay();">Play</button>
+			<button onclick="player0.stop();">Stop</button>
+			<button onclick="player0.unmute();">Unmute</button>
+			<button onclick="player0.mute();;">Mute</button>
 			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode()" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
@@ -68,30 +68,30 @@
 		<div id="player1-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">TeacherTrack</B>
 			&emsp;
-			<button onclick="play(player1)">Play</button>
-			<button onclick="stop(player1)">Stop</button>
-			<button onclick="unmute(player1)">Unmute</button>
-			<button onclick="mute(player1)">Mute</button>
+			<button onclick="player1.initPlay();">Play</button>
+			<button onclick="player1.stop();">Stop</button>
+			<button onclick="player1.unmute();">Unmute</button>
+			<button onclick="player1.mute();;">Mute</button>
 		</div>
 		<div id="player1-div"></div>
 
 		<div id="player2-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">TeacherFull</B>
 			&emsp;
-			<button onclick="play(player2)">Play</button>
-			<button onclick="stop(player2)">Stop</button>
-			<button onclick="unmute(player2)">Unmute</button>
-			<button onclick="mute(player2)">Mute</button>
+			<button onclick="player2.initPlay();">Play</button>
+			<button onclick="player2.stop();">Stop</button>
+			<button onclick="player2.unmute();">Unmute</button>
+			<button onclick="player2.mute();">Mute</button>
 		</div>
 		<div id="player2-div"></div>
 
 		<div id="player3-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">StudentFull</B>
 			&emsp;
-			<button onclick="play(player3)">Play</button>
-			<button onclick="stop(player3)">Stop</button>
-			<button onclick="unmute(player3)">Unmute</button>
-			<button onclick="mute(player3)">Mute</button>
+			<button onclick="player3.initPlay();">Play</button>
+			<button onclick="player3.stop();">Stop</button>
+			<button onclick="player3.unmute();">Unmute</button>
+			<button onclick="player3.mute();">Mute</button>
 		</div>
 		<div id="player3-div"></div>
 
@@ -229,7 +229,15 @@
 			}, function(player0) {
 				player0.mute();
 				player0.play();
-				player0.on("canplay", sync);
+				player0.on("canplay", function () {
+					let t = player0.getCurrentTime();
+					if (player1.getStatus() == "playing")
+						player1.seek(t);
+					if (player2.getStatus() == "playing")
+						player2.seek(t);
+					if (player3.getStatus() == "playing")
+						player3.seek(t);
+				})
 			});
 
 			player1 = new Aliplayer({
@@ -441,18 +449,25 @@
 			studentFull = info.videoPath.studentFull;
 		}
 
+		/* Randomize classroom. */
+		function randClassroom() {
+			let b = Math.floor(Math.random() * buildingsArr.length);
+			let c = Math.floor(Math.random() * buildingsArr[b].length);
+			return [buildingsArr[b][c], buildingNamesArr[b][c]];
+		}
+
 		function reloadClassroom(urlStr, classroomName = "Unknown") {
 			setClassroom(urlStr, classroomName);
 			player0.loadByUrl(pptVideo);
 			player1.loadByUrl(teacherTrack);
-			mute(player1);
-			stop(player1);
+			player1.mute();
+			player1.stop();
 			player2.loadByUrl(teacherFull);
-			mute(player2);
-			stop(player2);
+			player2.mute();
+			player2.stop();
 			player3.loadByUrl(studentFull);
-			mute(player3);
-			stop(player3);
+			player3.mute();
+			player3.stop();
 		}
 
 		async function extractClassroom() {
@@ -510,39 +525,6 @@
 				return;
 			}
 			reloadClassroom(input, "Extracted");
-		}
-
-		/* Retrieve last opened classroom if existent, otherwise randomize one. */
-		function randClassroom() {
-			let b = Math.floor(Math.random() * buildingsArr.length);
-			let c = Math.floor(Math.random() * buildingsArr[b].length);
-			return [buildingsArr[b][c], buildingNamesArr[b][c]];
-		}
-
-		function play(player) {
-			player.initPlay();
-		}
-
-		function stop(player) {
-			player.stop();
-		}
-
-		function unmute(player) {
-			player.setVolume(1);
-		}
-
-		function mute(player) {
-			player.setVolume(0);
-		}
-
-		function sync() {
-			t = player0.getCurrentTime();
-			if (player1.getStatus() == "playing")
-				player1.seek(t);
-			if (player2.getStatus() == "playing")
-				player2.seek(t);
-			if (player3.getStatus() == "playing")
-				player3.seek(t);
 		}
 
 		/* Take screenshot of a player. */
