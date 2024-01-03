@@ -8,7 +8,7 @@ Checkout [Releases](https://github.com/Pairman/Xdcheckin/releases/).
 Currently, APP webview is broken on Android and awaits upstream fix. Hence do not try to use this app directly. You must open the app as an backend server and visit ```http://127.0.0.1:5001/``` in your browser.
 
 #### Windows
-For Xdcheckin 1.0.1+, Pyzbar on Windows needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). If you encounter any ```ImportError``` about Pyzbar, please install ```vcredist_x64.exe```.
+For Xdcheckin 1.0.1+, Pyzbar on Windows needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). If you encounter any ```ImportError``` about Pyzbar, please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
 
 # Build
 1. Install beeware build tool and framework with ```pip install briefcase toga```. <br>
