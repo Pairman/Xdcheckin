@@ -18,14 +18,11 @@ server.config["SESSION_TYPE"] = "filesystem"
 server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 server.config["version"] = "0.0.0"
 
-try:
-	for i in listdir(server.config["SESSION_FILE_DIR"]):
-		try:
-			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
-		except Exception:
-			continue
-except Exception:
-	pass
+for i in listdir(server.config["SESSION_FILE_DIR"]):
+	try:	
+		remove(server.config["SESSION_FILE_DIR"] + "/" + i)
+	except Exception:	
+		continue
 
 Session(server)
 
