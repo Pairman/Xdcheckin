@@ -44,19 +44,6 @@ def get_xdcheckin_locations_js():
 	res.status_code = 200
 	return res
 
-@server.route("/xdcheckin/get/classrooms.js")
-def get_xdcheckin_classrooms_js():
-	try:
-		res = get("https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js")
-		assert res.status_code == 200
-		res = make_response(res.text)
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
 @server.route("/xdcheckin/get/version")
 def get_xdcheckin_version():
 	res = make_response(server.config["version"])
