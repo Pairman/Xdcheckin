@@ -423,7 +423,7 @@ class Chaoxing:
 			assert self.checkin_do_analysis(activity = activity)
 			if type(presign) is dict:
 				location = presign
-			ranged = not not location.get("ranged") or True
+			ranged = 1 if location.get("ranged") is None else location.get("ranged")
 			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 			params = {
 				"address": location["address"] if ranged else "",
@@ -453,7 +453,7 @@ class Chaoxing:
 			assert self.checkin_do_analysis(activity = activity)
 			if type(presign) is dict:
 				location = presign
-			ranged = not not location.get("ranged") or True
+			ranged = 1 if location.get("ranged") is None else location.get("ranged")
 			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 			params = {
 				"enc": activity["enc"],
