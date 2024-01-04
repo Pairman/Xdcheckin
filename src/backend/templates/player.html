@@ -27,8 +27,8 @@
 
 		<div id="chaoxing-buttons" class="div-center">
 			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
-			<button id="chaoxing-curriculum-button" onclick="listDiv(this.id)" style="display: none">Show Curriculum</button>
-			<button id="chaoxing-locations-button" onclick="listDiv(this.id)" style="display: none">Select Location</button>
+			<button id="chaoxing-curriculum-button" onclick="listDiv('curriculum-list-div')" style="display: none">Show Curriculum</button>
+			<button id="chaoxing-locations-button" onclick="listDiv('locations-list-div')" style="display: none">Select Location</button>
 			<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
 			<button id="chaoxing-activities-button" onclick="listActivity()" style="display: none">Check Activities</button>
 		</div>
@@ -37,7 +37,7 @@
 		<div id="activities-list-div" style="display: none"></div>
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
-			<button onclick="listDiv(this.id)">Select Classroom</button>
+			<button onclick="listDiv('classrooms-list-div')">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
 			<button onclick="loadExtracted()">Load URL</button>
 			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
