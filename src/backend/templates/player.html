@@ -6,7 +6,6 @@
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/skins/default/aliplayer-min.css" />
 	<script type="text/javascript" src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js"></script>
-	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 	<script type="text/javascript" src="static/classrooms.js"></script>
 	<script type="text/javascript" src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js"></script>
 	<script type="text/javascript" src="xdcheckin/get/locations.js"></script>
@@ -604,16 +603,18 @@
 		}
 
 		async function get(url = "", params = {}) {
+			let url_p = new URL(url);
+			Object.keys(params).forEach(key => url_p.searchParams.append(key, params[key]));
 			let status_code = 404, text = "";
 			try {
-				await $.ajax({
-					cache: true,
-					type: "GET",
-					url: url,
-					data: params,
-					contentType: "text/plain; charset=utf-8"
-				}).done(function (data_, status_text, res){
-					[status_code, text] = [res.status, data_];
+				[status_code, text] = await new Promise((resolve, reject) => {
+					let xhr = new XMLHttpRequest();
+					xhr.open("GET", url_p.toString(), true);
+					xhr.onreadystatechange = function () {
+						if (xhr.readyState == 4)
+							resolve([xhr.status, xhr.responseText]);
+					};
+					xhr.send();
 				});
 			}
 			catch (err) {}
@@ -623,14 +624,14 @@
 		async function post(url = "", data = {}) {
 			let status_code = 404, text = "";
 			try {
-				await $.ajax({
-					cache: true,
-					type: "POST",
-					url: url,
-					data: JSON.stringify(data),
-					contentType: "application/json; charset=utf-8"
-				}).done(function(data_, status_text, res){
-					[status_code, text] = [res.status, data_];
+				[status_code, text] = await new Promise((resolve, reject) => {
+					let xhr = new XMLHttpRequest();
+					xhr.open("POST", url, true);
+					xhr.onreadystatechange = function () {
+						if (xhr.readyState == 4)
+							resolve([xhr.status, xhr.responseText]);
+					};
+					xhr.send(JSON.stringify(data));
 				});
 			}
 			catch (err) {}
