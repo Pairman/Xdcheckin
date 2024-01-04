@@ -60,7 +60,7 @@
 			<button onclick="player0.stop();">Stop</button>
 			<button onclick="player0.unmute();">Unmute</button>
 			<button onclick="player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(); onclickCooldown('player0-scan-button');" style="display: none;">Scan</button>
+			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
 		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
@@ -394,10 +394,11 @@
 					for (let i in class_activities) {
 						let activity = class_activities[i];
 						let button = document.createElement("button");
+						button.id = "chaoxing-activity-" + activity["active_id"] + "-button";
 						if (activity["type"] == "2")
 							button.setAttribute("disabled", "");
 						else
-							button.setAttribute('onclick', 'chaoxingCheckinLocation(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
+							button.setAttribute("onclick", "chaoxingCheckinLocation(" + JSON.stringify({"active_id": activity["active_id"]}) + "); onclickCooldown(this.id, 5000);");
 						button.innerText = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin") + " (" + activity["name"] + ", " + activity["time_left"] + ")";
 						e.appendChild(button);
 					}
