@@ -60,7 +60,7 @@
 			<button onclick="player0.stop();">Stop</button>
 			<button onclick="player0.unmute();">Unmute</button>
 			<button onclick="player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode()" style="display: none;">Scan</button>
+			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(); onclickCooldown('player0-scan-button');" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
 		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
@@ -325,6 +325,15 @@
 			let e = document.getElementById(div_id);
 			e.style.display = ((e.style.display == "none") ? "block" : "none");
 		}
+
+		/* Onclick cooldown. */
+		function onclickCooldown(e_id, time = 1000) {
+			let e = document.getElementById(e_id);
+			e.style.pointerEvents = "none";
+			setTimeout(function() {
+				e.style.pointerEvents = "auto";
+			}, time);
+		};
 
 		function tablifyCurriculum() {
 			let table = document.createElement("table");
