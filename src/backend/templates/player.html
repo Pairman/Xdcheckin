@@ -140,7 +140,6 @@
 		}).catch((err) => {});
 
 		/* Chaoxing login related. */
-		var chaoxing;
 		var chaoxing_logined = false;
 		var courses = {};
 		var curriculum = {};
@@ -193,7 +192,6 @@
 		}
 
 		var player0 = undefined, player1 = undefined, player2 = undefined, player3 = undefined;
-		var players_enabled = false, players_enabling = false;
 		enable_players();
 
 		/*
@@ -201,11 +199,11 @@
 		 */
 
 		/* Enable players for XDUers. */
-		function enable_players() {
+		function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
-			if (players_enabled || players_enabling || !(get_cookie("chaoxing_fid") == "16820"))
+			if (enablePlayers.done || enablePlayers.calling || !(get_cookie("chaoxing_fid") == "16820"))
 				return;
-			players_enabling = true;
+			enablePlayers.calling = true;
 			document.getElementById("classrooms-buttons-div").style.display = "flex";
 			document.getElementById("xdcheckin-title-div").style.display = "flex";
 			document.getElementById("players-buttons-div").style.display = "flex";
@@ -213,7 +211,6 @@
 			document.getElementById("player1-buttons-div").style.display = "flex";
 			document.getElementById("player2-buttons-div").style.display = "flex";
 			document.getElementById("player3-buttons-div").style.display = "flex";
-
 			/* Create video players. */
 			player0 = new Aliplayer({
 				id: "player0-div",
@@ -237,7 +234,6 @@
 						player3.seek(t);
 				})
 			});
-
 			player1 = new Aliplayer({
 				id: "player1-div",
 				isLive: true,
@@ -250,7 +246,6 @@
 				player1.mute();
 				player1.stop();
 			});
-
 			player2 = new Aliplayer({
 				id: "player2-div",
 				isLive: true,
@@ -263,7 +258,6 @@
 				player2.mute();
 				player2.stop();
 			});
-
 			player3 = new Aliplayer({
 				id: "player3-div",
 				isLive: true,
@@ -276,8 +270,8 @@
 				player3.mute();
 				player3.stop();
 			});
-			players_enabled = true;
-			players_enabling = false;
+			enablePlayers.done = true;
+			enablePlayers.calling = false;
 		}
 
 		/* Assertion. */
