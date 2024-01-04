@@ -27,8 +27,8 @@
 
 		<div id="chaoxing-buttons" class="div-center">
 			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
-			<button id="chaoxing-curriculum-button" onclick="listCurriculum()" style="display: none">Show Curriculum</button>
-			<button id="chaoxing-locations-button" onclick="listLocation()" style="display: none">Select Location</button>
+			<button id="chaoxing-curriculum-button" onclick="listDiv('curriculum-list-div')" style="display: none">Show Curriculum</button>
+			<button id="chaoxing-locations-button" onclick="listDiv('locations-list-div')" style="display: none">Select Location</button>
 			<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
 			<button id="chaoxing-activities-button" onclick="listActivity()" style="display: none">Check Activities</button>
 		</div>
@@ -37,7 +37,7 @@
 		<div id="activities-list-div" style="display: none"></div>
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
-			<button onclick="listClassroom()">Select Classroom</button>
+			<button onclick="listDiv('classrooms-list-div')">Select Classroom</button>
 			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
 			<button onclick="loadExtracted()">Load URL</button>
 			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
@@ -285,7 +285,7 @@
 		/* Assertion. */
 		function assert(condition, message) {
 			if (!condition)
-				throw new Error(message ||"Assertion failed");
+				throw new Error(message || "Assertion failed");
 		}
 
 		function get_cookie(name) {
@@ -322,13 +322,10 @@
 			player3.setPlayerSize(strWidth, strHeight);
 		}
 
-		/* Classrooms list toggle. */
-		function listClassroom() {
+		/* Div listing toggle. */
+		function listDiv(div_id) {
 			let e = document.getElementById("classrooms-list-div");
-			if (e.style.display == "none")
-				e.style.display = "block";
-			else
-				e.style.display = "none";
+			e.style.display = ((e.style.display == "none") ? "block" : "none");
 		}
 
 		function tablifyCurriculum() {
@@ -353,23 +350,6 @@
 			}
 			table.appendChild(tableBody);
 			document.getElementById("curriculum-list-div").appendChild(table);
-		}
-
-		function listCurriculum() {
-			let e = document.getElementById("curriculum-list-div");
-			if (e.style.display == "none")
-				e.style.display = "block";
-			else
-				e.style.display = "none";
-		}
-
-		/* Locations list toggle. */
-		function listLocation() {
-			let e = document.getElementById("locations-list-div");
-			if (e.style.display == "none")
-				e.style.display = "block";
-			else
-				e.style.display = "none";
 		}
 
 		/* Input location. */
@@ -414,14 +394,11 @@
 					for (let i in class_activities) {
 						let activity = class_activities[i];
 						let button = document.createElement("button");
-						let type = "";
 						if (activity["type"] == "2")
 							button.setAttribute("disabled", "");
 						else
-							button.setAttribute('onclick', 'chaoxing.');
-						type = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin");
-						button.innerText = type + " (" + activity["name"] + ", " + activity["time_left"] + ")";
-						button.setAttribute('onclick', 'chaoxingCheckinLocation(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
+							button.setAttribute('onclick', 'chaoxingCheckinLocation(' + JSON.stringify({"active_id": activity["active_id"]}) + ')');
+						button.innerText = ((activity["type"] == "2") ? "Qrcode Checkin" : "Location Checkin") + " (" + activity["name"] + ", " + activity["time_left"] + ")";
 						e.appendChild(button);
 					}
 				}
@@ -434,15 +411,14 @@
 		}
 
 		/* Video sources control. */
-		function setClassroom(urlStr, classroomNameInternal = "Unknown") {
-			let url = new URL(urlStr);
-			let params = new URLSearchParams(decodeURIComponent(url.search));
+		function setClassroom(url, classroomName_ = "Unknown") {
+			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let info = JSON.parse(params.get("info"));
-			set_cookie("classroomName", classroomNameInternal);
-			set_cookie("classroom", urlStr);
-			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomNameInternal;
-			classroom = urlStr;
-			classroomName = classroomNameInternal;
+			set_cookie("classroomName", classroomName_);
+			set_cookie("classroom", url);
+			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName_;
+			classroom = url;
+			classroomName = classroomName_;
 			pptVideo = info.videoPath.pptVideo;
 			teacherTrack = info.videoPath.teacherTrack;
 			teacherFull = info.videoPath.teacherFull;
@@ -456,8 +432,8 @@
 			return [buildingsArr[b][c], buildingNamesArr[b][c]];
 		}
 
-		function reloadClassroom(urlStr, classroomName = "Unknown") {
-			setClassroom(urlStr, classroomName);
+		function reloadClassroom(url, classroomName = "Unknown") {
+			setClassroom(url, classroomName);
 			player0.loadByUrl(pptVideo);
 			player1.loadByUrl(teacherTrack);
 			player1.mute();
@@ -555,10 +531,7 @@
 		async function chaoxingCheckinLocation(activity) {
 			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": location_});
-			if (res.status_code == 200)
-				alert("Checked in successfully.");
-			else
-				alert("Checkin failed.");
+			alert((res.status_code == 200) ? "Checked in successfully." : "Checkin failed.");
 		}
 
 		function chaoxingInputAccount() {
@@ -631,11 +604,10 @@
 		}
 
 		class _res {
-			constructor(status_code, text){
-				this.status_code = status_code;
-				this.text = text;
+			constructor(status_code, text) {
+				[this.status_code, this.text] = [status_code, text];
 			}
-			json(){
+			json() {
 				try{
 					return JSON.parse(this.text);
 				}
