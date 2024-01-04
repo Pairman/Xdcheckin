@@ -192,7 +192,7 @@
 		}
 
 		var player0 = undefined, player1 = undefined, player2 = undefined, player3 = undefined;
-		enable_players();
+		enablePlayers();
 
 		/*
 		 * Function definitions.
@@ -590,7 +590,7 @@
 			set_cookie("password", password);
 			set_cookie("cookies", (await get("/chaoxing/get_cookies")).text);
 			set_cookie("chaoxing_fid", (await get("/chaoxing/get_fid")).text);
-			enable_players();
+			enablePlayers();
 			courses = (await get("/chaoxing/get_courses")).json();
 			curriculum = (await get("/chaoxing/get_curriculum")).json();
 			tablifyCurriculum();
