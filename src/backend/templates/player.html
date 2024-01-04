@@ -140,7 +140,6 @@
 		}).catch((err) => {});
 
 		/* Chaoxing login related. */
-		var chaoxing_logined = false;
 		var courses = {};
 		var curriculum = {};
 		var location_str = get_cookie("location");
@@ -579,7 +578,7 @@
 			alert("Logging in.");
 			try {
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": get_cookie("cookies")});
-				assert(chaoxing_logined = (res.status_code == 200));
+				assert(chaoxingLogin.done = (res.status_code == 200));
 			}
 			catch (err) {
 				alert("Login failed.");
