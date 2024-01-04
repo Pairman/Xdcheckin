@@ -544,12 +544,11 @@
 
 		/* Qrcode checkin. */
 		async function chaoxingCheckinQrcode() {
-			let e = document.getElementById("player0-decodeddata-div");
-			e.innerText = "Checking in.";
+			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(player0), "location": location_});
-			e.innerText = res.text || "Checkin error:\nBackend error."
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
+			document.getElementById("player0-decodeddata-div").innerText = res.text || "Checkin error:\nBackend error.";
 		};
 
 		/* Location checkin. */
