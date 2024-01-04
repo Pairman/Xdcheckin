@@ -142,7 +142,7 @@
 		/* Chaoxing login related. */
 		var courses = {};
 		var curriculum = {};
-		var location_str = localStorage.getItem("location");
+		var location_str = localStorage.getItem("location_");
 		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
 
 		/* Players related. */
@@ -360,7 +360,7 @@
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
 				location_ = {"latitude": latitude, "longitude": longitude, "address": address};
-				set_cookie("location", JSON.stringify(location_));
+				localStorage.setItem("location_", JSON.stringify(location_));
 			}
 			catch (err) {
 				alert("Invalid input.");
@@ -549,7 +549,7 @@
 			if (chaoxingLogin.calling)
 				return;
 			chaoxingLogin.calling = true;
-			[username, password] = [localStorage.getItem("username"), localStorage.getItem("password")];
+			[username, password] = [localStorage.getItem("chaoxing_username"), localStorage.getItem("chaoxing_password")];
 			if (username == "" || password == "") {
 				input = chaoxingInputAccount();
 				if (input)
@@ -562,7 +562,7 @@
 					input = chaoxingInputAccount();
 					if (input) {
 						[username, password] = input;
-						localStorage.setItem("cookies", "");
+						localStorage.setItem("chaoxing_cookies", "");
 					}
 					else
 						return chaoxingLogin.calling = false;
@@ -570,7 +570,7 @@
 			}
 			alert("Logging in.");
 			try {
-				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("cookies")});
+				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(chaoxingLogin.done = (res.status_code == 200));
 			}
 			catch (err) {
@@ -578,9 +578,9 @@
 				return chaoxingLogin.calling = false;
 			}
 			alert("Logged in successfully.");
-			localStorage.setItem("username", username);
-			localStorage.setItem("password", password);
-			localStorage.setItem("cookies", (await get("/chaoxing/get_cookies")).text);
+			localStorage.setItem("chaoxing_username", username);
+			localStorage.setItem("chaoxing_password", password);
+			localStorage.setItem("chaoxing_cookies", (await get("/chaoxing/get_cookies")).text);
 			localStorage.setItem("chaoxing_fid", (await get("/chaoxing/get_fid")).text);
 			enablePlayers();
 			courses = (await get("/chaoxing/get_courses")).json();
