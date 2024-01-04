@@ -142,7 +142,7 @@
 		/* Chaoxing login related. */
 		var courses = {};
 		var curriculum = {};
-		var location_str = get_cookie("location");
+		var location_str = localStorage.getItem("location");
 		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
 
 		/* Players related. */
@@ -174,8 +174,8 @@
 		}
 
 		/* Initialize classroom name and urls. */
-		var classroomName = get_cookie("classroomName");
-		var classroom = get_cookie("classroom");
+		var classroomName = localStorage.getItem("classroomName");
+		var classroom = localStorage.getItem("classroom");
 		var pptVideo, teacherTrack, teacherFull, studentFull;
 		if (classroom == "" || classroomName == "")
 			[classroom, classroomName] = randClassroom();
@@ -200,7 +200,7 @@
 		/* Enable players for XDUers. */
 		function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
-			if (enablePlayers.done || enablePlayers.calling || !(get_cookie("chaoxing_fid") == "16820"))
+			if (enablePlayers.done || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
 				return;
 			enablePlayers.calling = true;
 			document.getElementById("classrooms-buttons-div").style.display = "flex";
@@ -277,14 +277,6 @@
 		function assert(condition, message) {
 			if (!condition)
 				throw new Error(message || "Assertion failed");
-		}
-
-		function get_cookie(name) {
-			return ('; '+document.cookie).split("; " + name + "=").pop().split(";")[0];
-		}
-
-		function set_cookie(name, val, age = "31536000") {
-			document.cookie = name + "=" + val + "; max-age=" + age + ";";
 		}
 
 		/* Player size controls. */
@@ -415,8 +407,8 @@
 		function setClassroom(url, classroomName_ = "Unknown") {
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let info = JSON.parse(params.get("info"));
-			set_cookie("classroomName", classroomName_);
-			set_cookie("classroom", url);
+			localStorage.setItem("classroomName", classroomName_);
+			localStorage.setItem("classroom", url);
 			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName_;
 			classroom = url;
 			classroomName = classroomName_;
@@ -557,7 +549,7 @@
 			if (chaoxingLogin.calling)
 				return;
 			chaoxingLogin.calling = true;
-			[username, password] = [get_cookie("username"), get_cookie("password")];
+			[username, password] = [localStorage.getItem("username"), localStorage.getItem("password")];
 			if (username == "" || password == "") {
 				input = chaoxingInputAccount();
 				if (input)
@@ -570,7 +562,7 @@
 					input = chaoxingInputAccount();
 					if (input) {
 						[username, password] = input;
-						set_cookie("cookies", "");
+						localStorage.setItem("cookies", "");
 					}
 					else
 						return chaoxingLogin.calling = false;
@@ -578,7 +570,7 @@
 			}
 			alert("Logging in.");
 			try {
-				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": get_cookie("cookies")});
+				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("cookies")});
 				assert(chaoxingLogin.done = (res.status_code == 200));
 			}
 			catch (err) {
@@ -586,10 +578,10 @@
 				return chaoxingLogin.calling = false;
 			}
 			alert("Logged in successfully.");
-			set_cookie("username", username);
-			set_cookie("password", password);
-			set_cookie("cookies", (await get("/chaoxing/get_cookies")).text);
-			set_cookie("chaoxing_fid", (await get("/chaoxing/get_fid")).text);
+			localStorage.setItem("username", username);
+			localStorage.setItem("password", password);
+			localStorage.setItem("cookies", (await get("/chaoxing/get_cookies")).text);
+			localStorage.setItem("chaoxing_fid", (await get("/chaoxing/get_fid")).text);
 			enablePlayers();
 			courses = (await get("/chaoxing/get_courses")).json();
 			curriculum = (await get("/chaoxing/get_curriculum")).json();
