@@ -27,6 +27,7 @@ for i in listdir(server.config["SESSION_FILE_DIR"]):
 Session(server)
 
 @server.route("/")
+@server.route("/player.html")
 def player_html():
 	return render_template("player.html")
 
