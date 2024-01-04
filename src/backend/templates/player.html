@@ -141,11 +141,9 @@
 
 		/* Chaoxing login related. */
 		var chaoxing;
-		var chaoxing_logining = false;
 		var chaoxing_logined = false;
 		var courses = {};
 		var curriculum = {};
-		var activities_list_loading = false;
 		var location_str = get_cookie("location");
 		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
 
@@ -181,7 +179,7 @@
 		var classroomName = get_cookie("classroomName");
 		var classroom = get_cookie("classroom");
 		var pptVideo, teacherTrack, teacherFull, studentFull;
-		if (classroom == '' || classroomName == '')
+		if (classroom == "" || classroomName == "")
 			[classroom, classroomName] = randClassroom();
 		setClassroom(classroom, classroomName);
 
@@ -190,7 +188,7 @@
 		for (let buildingName in locations) {
 			let button = document.createElement("button");
 			button.innerText = buildingName;
-			button.setAttribute('onclick', 'location_ = ' + JSON.stringify(locations[buildingName]));
+			button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
 			locations_list_div.appendChild(button);
 		}
 
@@ -377,9 +375,9 @@
 
 		/* Activities list toggle. */
 		async function listActivity() {
-			if (activities_list_loading)
+			if (listActivity.calling)
 				return;
-			activities_list_loading = true;
+			listActivity.calling = true;
 			let e = document.getElementById("activities-list-div");
 			if (e.style.display == "none") {
 				e.innerText = "Loading activities.";
@@ -407,7 +405,7 @@
 			}
 			else
 				e.style.display = "none";
-			activities_list_loading = false;
+			listActivity.calling = false;
 		}
 
 		/* Video sources control. */
@@ -553,16 +551,16 @@
 
 		/* Log into Chaoxing account. */
 		async function chaoxingLogin() {
-			if (chaoxing_logining)
+			if (chaoxingLogin.calling)
 				return;
-			chaoxing_logining = true;
+			chaoxingLogin.calling = true;
 			[username, password] = [get_cookie("username"), get_cookie("password")];
 			if (username == "" || password == "") {
 				input = chaoxingInputAccount();
 				if (input)
 					[username, password] = input;
 				else
-					return chaoxing_logining = false;
+					return chaoxingLogin.calling = false;
 			}
 			else {
 				if(!confirm("Use previously entered account " + username + "?")) {
@@ -572,7 +570,7 @@
 						set_cookie("cookies", "");
 					}
 					else
-						return chaoxing_logining = false;
+						return chaoxingLogin.calling = false;
 				}
 			}
 			alert("Logging in.");
@@ -582,7 +580,7 @@
 			}
 			catch (err) {
 				alert("Login failed.");
-				return chaoxing_logining = false;
+				return chaoxingLogin.calling = false;
 			}
 			alert("Logged in successfully.");
 			set_cookie("username", username);
@@ -600,7 +598,7 @@
 			document.getElementById("chaoxing-input-location-button").style.display = "block";
 			document.getElementById("chaoxing-activities-button").style.display = "block";
 			document.getElementById("player0-scan-button").style.display = "block";
-			chaoxing_logining = false;
+			chaoxingLogin.calling = false;
 		}
 
 		class _res {
