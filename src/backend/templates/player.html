@@ -150,7 +150,7 @@
 		var courses = {};
 		var curriculum = {};
 		var location_str = localStorage.getItem("location_");
-		var location_ = (location_str == "") ? locations["B楼"] : JSON.parse(location_str);
+		var location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
 
 		/* Players related. */
 		/* Calculate video player dimensions. */
@@ -184,7 +184,7 @@
 		var classroomName = localStorage.getItem("classroomName");
 		var classroom = localStorage.getItem("classroom");
 		var pptVideo, teacherTrack, teacherFull, studentFull;
-		if (classroom == "" || classroomName == "")
+		if (!classroom || !classroomName)
 			[classroom, classroomName] = randClassroom();
 		setClassroom(classroom, classroomName);
 
@@ -557,7 +557,7 @@
 				return;
 			chaoxingLogin.calling = true;
 			[username, password] = [localStorage.getItem("chaoxing_username"), localStorage.getItem("chaoxing_password")];
-			if (username == "" || password == "") {
+			if (!username || !password) {
 				input = chaoxingInputAccount();
 				if (input)
 					[username, password] = input;
