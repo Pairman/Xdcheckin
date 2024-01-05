@@ -188,6 +188,49 @@
 		 * Function definitions.
 		 */
 
+		/* Assertion. */
+		function assert(condition, message) {
+			if (!condition)
+				throw new Error(message || "Assertion failed");
+		}
+
+		/* Get request. */
+		async function get(url = "", params = {}) {
+			let qstr = new URLSearchParams(params).toString();
+			let status_code = 404, text = "";
+			try {
+				let res = await fetch(qstr ? `${url}?${qstr}` : url);
+				[status_code, text] = [res.status, await res.text()];
+				
+			} catch (err) {}
+			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
+		}
+
+		/* Post request. */
+		async function post(url = "", data = {}) {
+			let status_code = 404, text = "";
+			try {
+				let res = await fetch(url, {method: "POST", body: JSON.stringify(data)});
+				[status_code, text] = [res.status, await res.text()];
+			} catch (err) {}
+			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
+		}
+
+		/* Div listing toggle. */
+		function displayDiv(e_id) {
+			let e = document.getElementById(e_id);
+			e.style.display = ((e.style.display == "none") ? "block" : "none");
+		}
+
+		/* Onclick cooldown. */
+		function onclickCooldown(e_id, time = 1000) {
+			let e = document.getElementById(e_id);
+			e.style.pointerEvents = "none";
+			setTimeout(function() {
+				e.style.pointerEvents = "auto";
+			}, time);
+		};
+
 		/* Enable players for XDUers. */
 		function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
@@ -265,12 +308,6 @@
 			enablePlayers.calling = false;
 		}
 
-		/* Assertion. */
-		function assert(condition, message) {
-			if (!condition)
-				throw new Error(message || "Assertion failed");
-		}
-
 		/* Player resize. */
 		function resizePlayers() {
 			let e = document.createElement("div");
@@ -327,34 +364,51 @@
 			let input = prompt("Input the extracted URL:");
 			if (input === null)
 				return;
-			if (input === "") {
-				alert("Invalid input.");
-				return;
-			}
+			if (input === "")
+				return alert("Invalid input.");
 			try {
 				let url = new URL(input);
 			}
 			catch (err) {
-				alert("Invalid URL.");
-				return;
+				return alert("Invalid URL.");
 			}
 			reloadClassroom(input, "Extracted");
 		}
 
-		/* Div listing toggle. */
-		function displayDiv(e_id) {
-			let e = document.getElementById(e_id);
-			e.style.display = ((e.style.display == "none") ? "block" : "none");
+		async function extractClassroom() {
+			let input = prompt("Input liveId or livestream URL:");
+			if (input === null)
+				return;
+			if (input === "")
+				return alert("Invalid input.");
+			try {
+				let url = new URL(input);
+				let params = new URLSearchParams(decodeURIComponent(url.search));
+				let liveId = JSON.parse(params.get("liveId"));
+			}
+			catch (err) {
+				if (!input || input.length != 8 || isNaN(input))
+					return alert("Invalid liveId.");
+				liveId = input;
+			}
+			try {
+				let res = await post("/chaoxing/extract_url", data = liveId);
+				assert(res.status_code == 200);
+				let url = new URL(res.text);
+				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
+				assert(!("msg" in info["videoPath"]));
+				let info_new = {"videoPath": {}};
+				info_new["videoPath"]["teacherFull"] = info["videoPath"]["teacherFull"];
+				info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"];
+				info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"];
+				info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"];
+				let url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info_new));
+				prompt("Extracted URL:", url_new);
+			}
+			catch (err) {
+				alert("Failed to extract URL.")
+			}
 		}
-
-		/* Onclick cooldown. */
-		function onclickCooldown(e_id, time = 1000) {
-			let e = document.getElementById(e_id);
-			e.style.pointerEvents = "none";
-			setTimeout(function() {
-				e.style.pointerEvents = "auto";
-			}, time);
-		};
 
 		/* Chaoxing related. */
 		function chaoxingInputAccount() {
@@ -379,26 +433,18 @@
 			if (chaoxingLogin.calling)
 				return;
 			chaoxingLogin.calling = true;
-			let input, username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password");
-			if (!username || !password) {
-				if (input = chaoxingInputAccount())
-					[username, password] = input;
-				else
+			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, valid, data;
+			if (!username || !password || !confirm("Use previously entered account " + username + "?")) {
+				if (!(input = chaoxingInputAccount()))
 					return chaoxingLogin.calling = false;
+				[username, password] = input;
+				localStorage.setItem("chaoxing_cookies", "");
+				valid = true;
 			}
-			else if(!confirm("Use previously entered account " + username + "?")) {
-				if (input = chaoxingInputAccount()) {
-					[username, password] = input;
-					localStorage.setItem("chaoxing_cookies", "");
-				}
-				else
-					return chaoxingLogin.calling = false;
-			}
-			alert("Logging in.");
 			try {
-				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
-				assert(res.status_code == 200);
-				data = res.json();
+				assert(valid);
+				alert("Logging in.");
+				assert(data = (await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")})).json());
 				localStorage.setItem("chaoxing_username", username);
 				localStorage.setItem("chaoxing_password", password);
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
@@ -498,48 +544,8 @@
 			}
 		}
 
-		async function extractClassroom() {
-			let input = prompt("Input liveId or livestream URL:");
-			if (input === null)
-				return;
-			if (input === "") {
-				alert("Invalid input.");
-				return;
-			}
-			try {
-				let url = new URL(input);
-				let params = new URLSearchParams(decodeURIComponent(url.search));
-				let liveId = JSON.parse(params.get("liveId"));
-			}
-			catch (err) {
-				if (!input || input.length != 8 || isNaN(input)) {
-					alert("Invalid liveId.");
-					return;
-				}
-				liveId = input;
-			}
-			try {
-				let res = await post("/chaoxing/extract_url", data = liveId);
-				assert(res.status_code == 200);
-				let url = new URL(res.text);
-				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
-				assert(!("msg" in info["videoPath"]));
-				let info_new = {"videoPath": {}};
-				info_new["videoPath"]["teacherFull"] = info["videoPath"]["teacherFull"];
-				info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"];
-				info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"];
-				info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"];
-				let url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info_new));
-				prompt("Extracted URL:", url_new);
-			}
-			catch (err) {
-				alert("Failed to extract URL.")
-			}
-		}
-
-		/* Take screenshot of a player. */
-		function screenshot(player) {
-			let video = player.tag;
+		/* Take video screenshot. */
+		function screenshot(video) {
 			let canvas = document.createElement('canvas');
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
@@ -555,7 +561,7 @@
 		/* Qrcode checkin. */
 		async function chaoxingCheckinQrcode() {
 			location_["ranged"] = 1;
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(player0), "location": location_});
+			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(player0.tag), "location": location_});
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
 			document.getElementById("player0-decodeddata-div").innerText = res.text || "Checkin error:\nBackend error.";
@@ -566,26 +572,6 @@
 			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": location_});
 			alert((res.status_code == 200) ? "Checked in successfully." : "Checkin failed.");
-		}
-
-		async function get(url = "", params = {}) {
-			let qstr = new URLSearchParams(params).toString();
-			let status_code = 404, text = "";
-			try {
-				let res = await fetch(qstr ? `${url}?${qstr}` : url);
-				[status_code, text] = [res.status, await res.text()];
-				
-			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
-		}
-
-		async function post(url = "", data = {}) {
-			let status_code = 404, text = "";
-			try {
-				let res = await fetch(url, {method: "POST", body: JSON.stringify(data)});
-				[status_code, text] = [res.status, await res.text()];
-			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
 		}
 	</script>
 </html>
