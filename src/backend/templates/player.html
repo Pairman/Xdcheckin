@@ -118,9 +118,7 @@
 			document.getElementById("main-body").style.display = "block";
 
 		/* Check APP updates. */
-		var xdcheckin_version = "0.0.0";
-		var xdcheckin_latest_release = {};
-		var xdcheckin_update_available = false;
+		var xdcheckin_version = "0.0.0", xdcheckin_latest_release = {}, xdcheckin_update_available = false;
 		post("/xdcheckin/get/version").then((res) => {
 			assert(xdcheckin_version = res.text);
 			post("/xdcheckin/get/releases/latest").then((res) => {
@@ -138,9 +136,16 @@
 			});
 		});
 
-		/* Chaoxing login related. */
+		/* Locations related. */
 		var location_str = localStorage.getItem("location_");
 		var location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
+		const locations_list_div = document.getElementById("locations-list-div");
+		for (let buildingName in locations) {
+			let button = document.createElement("button");
+			button.innerText = buildingName;
+			button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
+			locations_list_div.appendChild(button);
+		}
 
 		/* Generate clasroom buttons list. */
 		var buildingsArr = [], buildingNamesArr = [];
@@ -152,12 +157,9 @@
 			classrooms_list_div.appendChild(div);
 			let classroomArr = [], classroomNamesArr = [];
 			for (let classroomName in building) {
-				let classroom = building[classroomName];
-				classroomArr.push(classroom);
-				classroomNamesArr.push(classroomName);
 				let button = document.createElement("button");
 				button.innerText = classroomName;
-				button.setAttribute('onclick', 'reloadClassroom(\"' + classroom + '\", \"' + classroomName + '\")');
+				button.setAttribute("onclick", "reloadClassroom(" + building[classroomName] + ", " + classroomName + ")");
 				classrooms_list_div.appendChild(button);
 			}
 			buildingsArr.push(classroomArr);
@@ -165,22 +167,11 @@
 		}
 
 		/* Initialize classroom name and urls. */
-		var classroomName = localStorage.getItem("classroomName");
-		var classroom = localStorage.getItem("classroom");
+		var classroomName = localStorage.getItem("classroomName"), classroom = localStorage.getItem("classroom");
 		var pptVideo, teacherTrack, teacherFull, studentFull;
 		if (!classroom || !classroomName)
 			[classroom, classroomName] = randClassroom();
 		setClassroom(classroom, classroomName);
-
-		/* Generate location buttons list. */
-		const locations_list_div = document.getElementById("locations-list-div");
-		for (let buildingName in locations) {
-			let button = document.createElement("button");
-			button.innerText = buildingName;
-			button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
-			locations_list_div.appendChild(button);
-		}
-
 		var player0, player1, player2, player3;
 		enablePlayers();
 
@@ -553,7 +544,6 @@
 			ctx.save();
 			ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 			let img_src = canvas.toDataURL("image/jpeg", 1.0);
-			ctx.restore();
 			canvas.remove();
 			return img_src;
 		}
