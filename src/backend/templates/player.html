@@ -603,39 +603,23 @@
 		}
 
 		async function get(url = "", params = {}) {
-			let url_p = new URL(url);
-			Object.keys(params).forEach(key => url_p.searchParams.append(key, params[key]));
+			let qstr = new URLSearchParams(params).toString();
 			let status_code = 404, text = "";
 			try {
-				[status_code, text] = await new Promise((resolve, reject) => {
-					let xhr = new XMLHttpRequest();
-					xhr.open("GET", url_p.toString(), true);
-					xhr.onreadystatechange = function () {
-						if (xhr.readyState == 4)
-							resolve([xhr.status, xhr.responseText]);
-					};
-					xhr.send();
-				});
-			}
-			catch (err) {}
-			return {status_code: status_code, text: text, json: function () {try {return JSON.parse(this.text);} catch (err) {return undefined;}}};
+				let res = await fetch(qstr ? `${url}?${qstr}` : url);
+				[status_code, text] = [res.status, await res.text()];
+				
+			} catch (err) {}
+			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
 		}
 
 		async function post(url = "", data = {}) {
 			let status_code = 404, text = "";
 			try {
-				[status_code, text] = await new Promise((resolve, reject) => {
-					let xhr = new XMLHttpRequest();
-					xhr.open("POST", url, true);
-					xhr.onreadystatechange = function () {
-						if (xhr.readyState == 4)
-							resolve([xhr.status, xhr.responseText]);
-					};
-					xhr.send(JSON.stringify(data));
-				});
-			}
-			catch (err) {}
-			return {status_code: status_code, text: text, json: function () {try {return JSON.parse(this.text);} catch (err) {return undefined;}}};
+				let res = await fetch(url, {method: "POST", body: JSON.stringify(data)});
+				[status_code, text] = [res.status, await res.text()];
+			} catch (err) {}
+			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
 		}
 	</script>
 </html>
