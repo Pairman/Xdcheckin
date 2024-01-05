@@ -37,13 +37,13 @@ def get_xdcheckin_locations_js():
 	res.status_code = 200
 	return res
 
-@server.route("/xdcheckin/get/version")
+@server.route("/xdcheckin/get/version", methods = ["POST"])
 def get_xdcheckin_version():
 	res = make_response(server.config["version"])
 	res.status_code = 200
 	return res
 
-@server.route("/xdcheckin/get/releases/latest")
+@server.route("/xdcheckin/get/releases/latest", methods = ["POST"])
 def get_xdcheckin_latest_release():
 	try:
 		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
@@ -105,7 +105,7 @@ def chaoxing_login():
 	finally:
 		return res
 
-@server.route("/chaoxing/get_fid")
+@server.route("/chaoxing/get_fid", methods = ["POST"])
 def chaoxing_get_fid():
 	try:
 		chaoxing = session["chaoxing"]
@@ -118,7 +118,7 @@ def chaoxing_get_fid():
 	finally:
 		return res
 
-@server.route("/chaoxing/get_cookies")
+@server.route("/chaoxing/get_cookies", methods = ["POST"])
 def chaoxing_get_cookies():
 	try:
 		chaoxing = session["chaoxing"]
@@ -131,7 +131,7 @@ def chaoxing_get_cookies():
 	finally:
 		return res
 
-@server.route("/chaoxing/get_courses")
+@server.route("/chaoxing/get_courses", methods = ["POST"])
 def chaoxing_get_courses():
 	try:
 		chaoxing = session["chaoxing"]
@@ -144,7 +144,7 @@ def chaoxing_get_courses():
 	finally:
 		return res
 
-@server.route("/chaoxing/get_curriculum")
+@server.route("/chaoxing/get_curriculum", methods = ["POST"])
 def chaoxing_get_curriculum():
 	try:
 		chaoxing = session["chaoxing"]
@@ -157,7 +157,7 @@ def chaoxing_get_curriculum():
 	finally:
 		return res
 
-@server.route("/chaoxing/get_activities")
+@server.route("/chaoxing/get_activities", methods = ["POST"])
 def chaoxing_get_activities():
 	try:
 		chaoxing = session["chaoxing"]
