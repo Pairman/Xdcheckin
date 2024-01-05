@@ -379,8 +379,7 @@
 			if (chaoxingLogin.calling)
 				return;
 			chaoxingLogin.calling = true;
-			let input;
-			[username, password] = [localStorage.getItem("chaoxing_username"), localStorage.getItem("chaoxing_password")];
+			let input, username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password");
 			if (!username || !password) {
 				if (input = chaoxingInputAccount())
 					[username, password] = input;
@@ -397,33 +396,34 @@
 			}
 			alert("Logging in.");
 			try {
-				assert(chaoxingLogin.done = ((await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")})).status_code == 200));
+				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
+				assert(res.status_code == 200);
+				data = res.json();
+				localStorage.setItem("chaoxing_username", username);
+				localStorage.setItem("chaoxing_password", password);
+				localStorage.setItem("chaoxing_cookies", data["cookies"]);
+				localStorage.setItem("chaoxing_fid", data["fid"]);
+				chaoxingLogin.courses = data["courses"];
+				chaoxingLogin.curriculum = data["curriculum"];
+				alert("Logged in successfully.");
+				enablePlayers();
+				tablifyCurriculum();
+				document.getElementById("extract-classroom-button").style.display = "inline";
+				document.getElementById("chaoxing-login-button").style.display = "none";
+				document.getElementById("chaoxing-curriculum-button").style.display = "block";
+				document.getElementById("chaoxing-locations-button").style.display = "block";
+				document.getElementById("chaoxing-input-location-button").style.display = "block";
+				document.getElementById("chaoxing-activities-button").style.display = "block";
+				document.getElementById("player0-scan-button").style.display = "block";
 			}
 			catch (err) {
 				alert("Login failed.");
-				return chaoxingLogin.calling = false;
 			}
-			alert("Logged in successfully.");
-			localStorage.setItem("chaoxing_username", username);
-			localStorage.setItem("chaoxing_password", password);
-			localStorage.setItem("chaoxing_cookies", (await post("/chaoxing/get_cookies")).text);
-			localStorage.setItem("chaoxing_fid", (await post("/chaoxing/get_fid")).text);
-			enablePlayers();
-			chaoxingLogin.courses = (await post("/chaoxing/get_courses")).json() or {};
-			chaoxingLogin.curriculum = (await post("/chaoxing/get_curriculum")).json() or {};
-			getCurriculum();
-			document.getElementById("extract-classroom-button").style.display = "inline";
-			document.getElementById("chaoxing-login-button").style.display = "none";
-			document.getElementById("chaoxing-curriculum-button").style.display = "block";
-			document.getElementById("chaoxing-locations-button").style.display = "block";
-			document.getElementById("chaoxing-input-location-button").style.display = "block";
-			document.getElementById("chaoxing-activities-button").style.display = "block";
-			document.getElementById("player0-scan-button").style.display = "block";
 			chaoxingLogin.calling = false;
 		}
 
 		/* Get curriculum. */
-		function getCurriculum() {
+		function tablifyCurriculum() {
 			let table = document.createElement("table");
 			table.border = "1";
 			let tableBody = document.createElement("tbody");
