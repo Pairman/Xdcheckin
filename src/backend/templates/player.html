@@ -563,16 +563,14 @@
 				else
 					return chaoxingLogin.calling = false;
 			}
-			else {
-				if(!confirm("Use previously entered account " + username + "?")) {
-					input = chaoxingInputAccount();
-					if (input) {
-						[username, password] = input;
-						localStorage.setItem("chaoxing_cookies", "");
-					}
-					else
-						return chaoxingLogin.calling = false;
+			else if(!confirm("Use previously entered account " + username + "?")) {
+				input = chaoxingInputAccount();
+				if (input) {
+					[username, password] = input;
+					localStorage.setItem("chaoxing_cookies", "");
 				}
+				else
+					return chaoxingLogin.calling = false;
 			}
 			alert("Logging in.");
 			try {
