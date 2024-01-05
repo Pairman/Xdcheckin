@@ -97,7 +97,7 @@ def chaoxing_login():
 			chaoxing = Chaoxing(username = username, password = password)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
-		res = make_response(dumps({"fid": chaoxing.fid, "courses": chaoxing.courses, "curriculum": chaoxing.get_curriculum(), "cookies": chaoxing.cookies}))
+		res = make_response(dumps({"fid": chaoxing.fid, "courses": chaoxing.courses, "curriculum": chaoxing.get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
