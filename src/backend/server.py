@@ -31,20 +31,20 @@ Session(server)
 def player_html():
 	return render_template("player.html")
 
-@server.route("/xdcheckin/get/locations.js")
-def get_xdcheckin_locations_js():
+@server.route("/xdcheckin/static/locations.js")
+def xdcheckin_static_locations_js():
 	res = make_response("var locations = " + dumps(locations).encode("ascii").decode("unicode-escape") + ";")
 	res.status_code = 200
 	return res
 
 @server.route("/xdcheckin/get/version", methods = ["POST"])
-def get_xdcheckin_version():
+def xdcheckin_get_version():
 	res = make_response(server.config["version"])
 	res.status_code = 200
 	return res
 
 @server.route("/xdcheckin/get/releases/latest", methods = ["POST"])
-def get_xdcheckin_latest_release():
+def xdcheckin_get_latest_release():
 	try:
 		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
 		assert res.status_code == 200
@@ -97,62 +97,10 @@ def chaoxing_login():
 			chaoxing = Chaoxing(username = username, password = password)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
-		res = make_response("success")
+		res = make_response(dumps({"fid": chaoxing.fid, "courses": chaoxing.courses, "curriculum": chaoxing.get_curriculum(), "cookies": chaoxing.cookies}))
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
-@server.route("/chaoxing/get_fid", methods = ["POST"])
-def chaoxing_get_fid():
-	try:
-		chaoxing = session["chaoxing"]
-		assert chaoxing.logined and chaoxing.fid
-		res = make_response(chaoxing.fid)
-		res.status_code = 200
-	except Exception:
-		res = make_response("0")
-		res.status_code = 500
-	finally:
-		return res
-
-@server.route("/chaoxing/get_cookies", methods = ["POST"])
-def chaoxing_get_cookies():
-	try:
-		chaoxing = session["chaoxing"]
-		assert chaoxing.logined and chaoxing.cookies
-		res = make_response(dumps(dict(chaoxing.cookies)))
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
-@server.route("/chaoxing/get_courses", methods = ["POST"])
-def chaoxing_get_courses():
-	try:
-		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
-		res = make_response(dumps(chaoxing.courses))
-		res.status_code = 200
-	except Exception:
-		res = make_response("{}")
-		res.status_code = 500
-	finally:
-		return res
-
-@server.route("/chaoxing/get_curriculum", methods = ["POST"])
-def chaoxing_get_curriculum():
-	try:
-		chaoxing = session["chaoxing"]
-		assert chaoxing.logined
-		res = make_response(dumps(chaoxing.get_curriculum()))
-		res.status_code = 200
-	except Exception:
-		res = make_response("{}")
 		res.status_code = 500
 	finally:
 		return res
