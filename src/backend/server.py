@@ -3,7 +3,8 @@ from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from io import BytesIO
 from json import loads, dumps
-from os import listdir, remove
+from os import listdir, remove, makedirs
+from os.path import exists
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
@@ -18,11 +19,15 @@ server.config["SESSION_TYPE"] = "filesystem"
 server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
 server.config["version"] = "0.0.0"
 
-for i in listdir(server.config["SESSION_FILE_DIR"]):
-	try:	
-		remove(server.config["SESSION_FILE_DIR"] + "/" + i)
-	except Exception:	
-		continue
+
+if not exists(server.config["SESSION_FILE_DIR"]):
+	os.makedirs(server.config["SESSION_FILE_DIR"])
+else:
+	for i in listdir(server.config["SESSION_FILE_DIR"]):
+		try:	
+			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
+		except Exception:	
+			continue
 
 Session(server)
 
