@@ -517,11 +517,11 @@
 		/* Input location. */
 		function inputLocation() {
 			try {
-				let latitude = prompt("Input latitude (maximum 6 float digits):");
+				let latitude = prompt("Input latitude:");
 				if (latitude === null)
 					return;
 				assert(latitude !== "" || !isNaN(latitude));
-				let longitude = prompt("Input longitude (maximum 6 float digits):");
+				let longitude = prompt("Input longitude:");
 				if (longitude === null)
 					return;
 				assert(longitude !== "" || !isNaN(longitude));
