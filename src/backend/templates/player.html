@@ -58,10 +58,10 @@
 			<button onclick="enablePlayers.player0.stop();">Stop</button>
 			<button onclick="enablePlayers.player0.unmute();">Unmute</button>
 			<button onclick="enablePlayers.player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(); onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(screenshot(enablePlayers.player0.tag), 'player0-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
-		<div id="player0-decodeddata-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
+		<div id="player0-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
 		<div id="player1-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">TeacherTrack</B>
@@ -92,6 +92,18 @@
 			<button onclick="enablePlayers.player3.mute();">Mute</button>
 		</div>
 		<div id="player3-div"></div>
+
+		<div id="camera-buttons-div" class="div-center" style="display: block;">
+			<B style="font-size:40px; font-family: sans-serif;">Camera</B>
+			&emsp;
+			<button onclick="cameraOn();">On</button>
+			<button onclick="cameraOff();">Off</button>
+			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode(screenshot(document.getElementById('camera-video')), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
+		</div>
+		<div id="camera-div">
+			<video id="camera-video" width="640" height="480" autoplay></video>
+		</div>
+		<div id="camera-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
 		<div id="footer-div" class="div-center">
 			(C) 2024 Pairman&emsp;
@@ -287,20 +299,23 @@
 			}
 		}
 
-		/* Player resize. */
+		/* Players and camera resize. */
 		function resizePlayers() {
 			let e = document.createElement("div");
 			e.style.cssText = "overflow: scroll; visibility: hidden; position: absolute;";
 			let w = (window.innerWidth - e.offsetWidth + e.clientWidth);
 			e.remove();
 			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
-			document.getElementById("player0-decodeddata-div").style.width = resizePlayers.w;
+			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
+			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
 			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
 				enablePlayers.player0.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				enablePlayers.player1.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				enablePlayers.player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
 			}
+			e = document.getElementById("camera-video");
+			[e.width, e.height] = [resizePlayers.w, resizePlayers.h];
 		}
 
 		/* Video sources control. */
@@ -380,6 +395,33 @@
 			catch (err) {
 				alert("Failed to extract URL.")
 			}
+		}
+
+		function cameraOn() {
+			let e = document.getElementById("camera-video");
+			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+				return;
+			navigator.mediaDevices.getUserMedia({
+				audio: false,
+				video: {
+					width: {ideal: 2048},
+					height: {ideal: 1536},
+					facingMode: {exact: "environment"},
+			},
+			}).then((stream) => {
+				e.srcObject = stream;
+				e.play();
+			});
+		}
+
+		function cameraOff() {
+			let e = document.getElementById("camera-video");
+			if (!e.srcObject)
+				return;
+			e.srcObject.getTracks().forEach((track) => {
+				track.stop();
+			});
+			e.srcObject = null;
 		}
 
 		/* Chaoxing related. */
@@ -541,14 +583,14 @@
 		}
 
 		/* Qrcode checkin. */
-		async function chaoxingCheckinQrcode() {
+		async function chaoxingCheckinQrcode(img_src, div_id) {
 			let location_str = localStorage.getItem("location_");
 			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
 			location_["ranged"] = 1;
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(enablePlayers.player0.tag), "location": location_});
+			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": location_});
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
-			document.getElementById("player0-decodeddata-div").innerText = res.text || "Checkin error:\nBackend error.";
+			document.getElementById(div_id).innerText = res.text || "Checkin error:\nBackend error.";
 		};
 
 		/* Location checkin. */
