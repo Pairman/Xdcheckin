@@ -120,6 +120,7 @@
 		checkEula();
 		listifyLocations();
 		listifyClassrooms();
+		resizePlayers();
 		enablePlayers();
 		xdcheckinCheckUpdates();
 
@@ -214,7 +215,6 @@
 			document.getElementById("player3-buttons-div").style.display = "flex";
 			document.getElementById("camera-resize-button").style.display = "none";
 			/* Create video players. */
-			resizePlayers();
 			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
 			enablePlayers.player0 = new Aliplayer({
 				id: "player0-div",
@@ -308,6 +308,8 @@
 			let w = (window.innerWidth - e.offsetWidth + e.clientWidth);
 			e.remove();
 			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
+			e = document.getElementById("camera-video");
+			[e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
 			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
 			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
 			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
@@ -316,8 +318,6 @@
 				enablePlayers.player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
 			}
-			e = document.getElementById("camera-video");
-			[e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
 		}
 
 		/* Video sources control. */
