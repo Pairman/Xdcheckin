@@ -217,9 +217,7 @@
 		function onclickCooldown(e_id, time = 1000) {
 			let e = document.getElementById(e_id);
 			e.style.pointerEvents = "none";
-			setTimeout(function() {
-				e.style.pointerEvents = "auto";
-			}, time);
+			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
 		};
 
 		/* Enable players for XDUers. */
