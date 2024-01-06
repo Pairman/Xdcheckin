@@ -435,7 +435,9 @@
 			try {
 				assert(valid);
 				alert("Logging in.");
-				assert(data = (await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")})).json());
+				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
+				assert(chaoxingLogin.success = (res.status_code == 200));
+				data = res.json();
 				localStorage.setItem("chaoxing_username", username);
 				localStorage.setItem("chaoxing_password", password);
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
