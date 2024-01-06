@@ -21,7 +21,7 @@ server.config["version"] = "0.0.0"
 
 
 if not exists(server.config["SESSION_FILE_DIR"]):
-	os.makedirs(server.config["SESSION_FILE_DIR"])
+	makedirs(server.config["SESSION_FILE_DIR"])
 else:
 	for i in listdir(server.config["SESSION_FILE_DIR"]):
 		try:	
