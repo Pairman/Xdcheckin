@@ -20,7 +20,7 @@
 		</style>
 	</head>
 
-	<body id="main-body" padding: 0; margin: 0;">
+	<body id="main-body" style="padding: 0; margin: 0;">
 		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold;"></div>
 
 		<div id="chaoxing-buttons" class="div-center">
@@ -28,7 +28,7 @@
 			<button id="chaoxing-curriculum-button" onclick="displayDiv('curriculum-list-div')" style="display: none">Show Curriculum</button>
 			<button id="chaoxing-locations-button" onclick="displayDiv('locations-list-div')" style="display: none">Select Location</button>
 			<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
-			<button id="chaoxing-activities-button" onclick="getActivities().then(() => {if (getActivities.success) displayDiv('activities-list-div');});" style="display: none">Check Activities</button>
+			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') getActivities().then(displayDiv('activities-list-div')); else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
 		</div>
 		<div id="curriculum-list-div" style="display: none"></div>
 		<div id="locations-list-div" style="display: none"></div>
@@ -44,20 +44,20 @@
 
 		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
 		<div id="players-buttons-div" class="div-center" style="display: none;">
-			<button onclick="player0.initPlay(); player1.initPlay(); player2.initPlay(); player3.initPlay();">Play All</button>
-			<button onclick="player0.stop(); player1.stop(); player2.stop(); player3.stop();">Stop All</button>
-			<button onclick="player0.unmute(); player1.unmute(); player2.unmute(); player3.unmute();">Unmute All</button>
-			<button onclick="player0.mute(); player1.mute(); player2.mute(); player3.mute();">Mute All</button>
+			<button onclick="enablePlayers.player0.initPlay(); enablePlayers.player1.initPlay(); enablePlayers.player2.initPlay(); enablePlayers.player3.initPlay();">Play All</button>
+			<button onclick="enablePlayers.player0.stop(); enablePlayers.player1.stop(); enablePlayers.player2.stop(); enablePlayers.player3.stop();">Stop All</button>
+			<button onclick="enablePlayers.player0.unmute(); enablePlayers.player1.unmute(); enablePlayers.player2.unmute(); enablePlayers.player3.unmute();">Unmute All</button>
+			<button onclick="enablePlayers.player0.mute(); enablePlayers.player1.mute(); enablePlayers.player2.mute(); enablePlayers.player3.mute();">Mute All</button>
 			<button onclick="resizePlayers()">Resize All</button>
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
 			&emsp;
-			<button onclick="player0.initPlay();">Play</button>
-			<button onclick="player0.stop();">Stop</button>
-			<button onclick="player0.unmute();">Unmute</button>
-			<button onclick="player0.mute();;">Mute</button>
+			<button onclick="enablePlayers.player0.initPlay();">Play</button>
+			<button onclick="enablePlayers.player0.stop();">Stop</button>
+			<button onclick="enablePlayers.player0.unmute();">Unmute</button>
+			<button onclick="enablePlayers.player0.mute();;">Mute</button>
 			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
@@ -66,30 +66,30 @@
 		<div id="player1-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">TeacherTrack</B>
 			&emsp;
-			<button onclick="player1.initPlay();">Play</button>
-			<button onclick="player1.stop();">Stop</button>
-			<button onclick="player1.unmute();">Unmute</button>
-			<button onclick="player1.mute();;">Mute</button>
+			<button onclick="enablePlayers.player1.initPlay();">Play</button>
+			<button onclick="enablePlayers.player1.stop();">Stop</button>
+			<button onclick="enablePlayers.player1.unmute();">Unmute</button>
+			<button onclick="enablePlayers.player1.mute();;">Mute</button>
 		</div>
 		<div id="player1-div"></div>
 
 		<div id="player2-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">TeacherFull</B>
 			&emsp;
-			<button onclick="player2.initPlay();">Play</button>
-			<button onclick="player2.stop();">Stop</button>
-			<button onclick="player2.unmute();">Unmute</button>
-			<button onclick="player2.mute();">Mute</button>
+			<button onclick="enablePlayers.player2.initPlay();">Play</button>
+			<button onclick="enablePlayers.player2.stop();">Stop</button>
+			<button onclick="enablePlayers.player2.unmute();">Unmute</button>
+			<button onclick="enablePlayers.player2.mute();">Mute</button>
 		</div>
 		<div id="player2-div"></div>
 
 		<div id="player3-buttons-div" class="div-center" style="display: none;">
 			<B style="font-size:40px; font-family: sans-serif;">StudentFull</B>
 			&emsp;
-			<button onclick="player3.initPlay();">Play</button>
-			<button onclick="player3.stop();">Stop</button>
-			<button onclick="player3.unmute();">Unmute</button>
-			<button onclick="player3.mute();">Mute</button>
+			<button onclick="enablePlayers.player3.initPlay();">Play</button>
+			<button onclick="enablePlayers.player3.stop();">Stop</button>
+			<button onclick="enablePlayers.player3.unmute();">Unmute</button>
+			<button onclick="enablePlayers.player3.mute();">Mute</button>
 		</div>
 		<div id="player3-div"></div>
 
@@ -104,71 +104,11 @@
 	 	 * Script.
 		 */
 
-		/* Check EULA state. */
-		if (!localStorage.getItem("xdcheckin_eula"))
-			if (confirm("This APP provides utilities for Chaoxing check-ins and classroom livestreams exclusively for XDUers.\n\n" +
-				    "By confirming you agree to the following terms:\n" +
-				    "    1. This APP is for study use only.\n" +
-				    "    2. This work comes with absolutely no warranty.\n\n" +
-				    "You have been warned.")) {
-				localStorage.setItem("xdcheckin_eula", "1");
-				document.getElementById("main-body").style.display = "block";
-			}
-		else
-			document.getElementById("main-body").style.display = "block";
-
-		/* Check APP updates. */
-		var xdcheckin_version = "0.0.0", xdcheckin_latest_release = {}, xdcheckin_update_available = false;
-		post("/xdcheckin/get/version").then((res) => {
-			assert(xdcheckin_version = res.text);
-			post("/xdcheckin/get/releases/latest").then((res) => {
-				assert(Object.keys(xdcheckin_latest_release = res.json()).length);
-				let xdcheckin_version_arr = xdcheckin_version.split(".");
-				let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
-				for (let i = 0; i < 3; ++i) {
-					if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
-						break;
-					if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i]))
-						xdcheckin_update_available = true;
-				}
-				if (xdcheckin_update_available)
-					document.getElementById("xdcheckin-update-div").innerHTML = "<a href='https://github.com/Pairman/Xdcheckin/releases/latest'>" + xdcheckin_latest_release["body"];
-			});
-		});
-
-		/* Locations related. */
-		var location_str = localStorage.getItem("location_");
-		var location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
-		const locations_list_div = document.getElementById("locations-list-div");
-		for (let buildingName in locations) {
-			let button = document.createElement("button");
-			button.innerText = buildingName;
-			button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
-			locations_list_div.appendChild(button);
-		}
-
-		/* Generate clasroom buttons list. */
-		var buildingsArr = [], buildingNamesArr = [];
-		const classrooms_list_div = document.getElementById("classrooms-list-div");
-		for (let buildingName in urls) {
-			let building = urls[buildingName];
-			let div = document.createElement("div");
-			div.innerText = buildingName + ": ";
-			classrooms_list_div.appendChild(div);
-			let classroomArr = [], classroomNamesArr = [];
-			for (let classroomName in building) {
-				let button = document.createElement("button");
-				button.innerText = classroomName;
-				button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', " + classroomName + ")");
-				classrooms_list_div.appendChild(button);
-			}
-			buildingsArr.push(classroomArr);
-			buildingNamesArr.push(classroomNamesArr);
-		}
-
-		/* Initialize classroom name and urls. */
-		var player0, player1, player2, player3;
+		checkEula();
+		listifyLocations();
+		listifyClassrooms();
 		enablePlayers();
+		xdcheckinCheckUpdates();
 
 		/*
 		 * Function definitions.
@@ -215,6 +155,37 @@
 			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
 		};
 
+		/* Check EULA state. */
+		function checkEula() {
+			if (localStorage.getItem("xdcheckin_eula"))
+				document.getElementById("main-body").style.display = "block";
+			else if (confirm("This APP provides utilities for Chaoxing check-ins and classroom livestreams exclusively for XDUers.\n\n" +
+					 "By confirming you agree to the following terms:\n" +
+					 "    1. This APP is for study use only.\n" +
+					 "    2. This work comes with absolutely no warranty.\n\n" +
+					 "You have been warned.")) {
+				localStorage.setItem("xdcheckin_eula", "1");
+				document.getElementById("main-body").style.display = "block";
+			}
+		}
+
+		/* Check APP updates. */
+		async function xdcheckinCheckUpdates() {
+			let xdcheckin_version, xdcheckin_latest_release;
+			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_version = (await post("/xdcheckin/get/releases/latest")).json()).length)
+				return;
+			let xdcheckin_version_arr = xdcheckin_version.split(".");
+			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
+			for (let i = 0; i < 3; ++i) {
+				if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
+					return;
+				if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
+					document.getElementById("xdcheckin-update-div").innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">Version " + xdcheckin_latest_release["tag_name"] + " released.</a><br>" + xdcheckin_latest_release["body"].replaceAll("\r\n", "<br>");
+					return;
+				}
+			}
+		}
+
 		/* Enable players for XDUers. */
 		function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
@@ -229,9 +200,9 @@
 			document.getElementById("player2-buttons-div").style.display = "flex";
 			document.getElementById("player3-buttons-div").style.display = "flex";
 			/* Create video players. */
-			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
 			resizePlayers();
-			player0 = new Aliplayer({
+			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
+			enablePlayers.player0 = new Aliplayer({
 				id: "player0-div",
 				isLive: true,
 				useH5Prism: true,
@@ -240,20 +211,20 @@
 				autoplay: true,
 				playsinline: true,
 				source: setClassroom.pptVideo
-			}, (player) => {
-				player0.mute();
-				player0.play();
-				player0.on("canplay", function () {
-					let t = player0.getCurrentTime();
-					if (player1.getStatus() == "playing")
-						player1.seek(t);
-					if (player2.getStatus() == "playing")
-						player2.seek(t);
-					if (player3.getStatus() == "playing")
-						player3.seek(t);
+			}, () => {
+				enablePlayers.player0.mute();
+				enablePlayers.player0.play();
+				enablePlayers.player0.on("canplay", () => {
+					let t = enablePlayers.player0.getCurrentTime();
+					if (enablePlayers.player1.getStatus() == "playing")
+						enablePlayers.player1.seek(t);
+					if (enablePlayers.player2.getStatus() == "playing")
+						enablePlayers.player2.seek(t);
+					if (enablePlayers.player3.getStatus() == "playing")
+						enablePlayers.player3.seek(t);
 				})
 			});
-			player1 = new Aliplayer({
+			enablePlayers.player1 = new Aliplayer({
 				id: "player1-div",
 				isLive: true,
 				useH5Prism: true,
@@ -261,11 +232,11 @@
 				height: resizePlayers.h,
 				playsinline: true,
 				source: setClassroom.teacherTrack
-			}, (player) => {
-				player1.mute();
-				player1.stop();
+			}, () => {
+				enablePlayers.player1.mute();
+				enablePlayers.player1.stop();
 			});
-			player2 = new Aliplayer({
+			enablePlayers.player2 = new Aliplayer({
 				id: "player2-div",
 				isLive: true,
 				useH5Prism: true,
@@ -273,11 +244,11 @@
 				height: resizePlayers.h,
 				playsinline: true,
 				source: setClassroom.teacherFull
-			}, (player) => {
-				player2.mute();
-				player2.stop();
+			}, () => {
+				enablePlayers.player2.mute();
+				enablePlayers.player2.stop();
 			});
-			player3 = new Aliplayer({
+			enablePlayers.player3 = new Aliplayer({
 				id: "player3-div",
 				isLive: true,
 				useH5Prism: true,
@@ -285,12 +256,35 @@
 				height: resizePlayers.h,
 				playsinline: true,
 				source: setClassroom.studentFull
-			}, (player) => {
-				player3.mute();
-				player3.stop();
+			}, () => {
+				enablePlayers.player3.mute();
+				enablePlayers.player3.stop();
 			});
 			enablePlayers.success = true;
 			enablePlayers.calling = false;
+		}
+
+		/* Listify classrooms. */
+		function listifyClassrooms() {
+			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
+			const classrooms_list_div = document.getElementById("classrooms-list-div");
+			for (let buildingName in urls) {
+				let building = urls[buildingName];
+				let div = document.createElement("div");
+				div.innerText = buildingName + ": ";
+				classrooms_list_div.appendChild(div);
+				let classroomArr = [], classroomNamesArr = [];
+				for (let classroomName in building) {
+					let button = document.createElement("button");
+					button.innerText = classroomName;
+					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
+					classrooms_list_div.appendChild(button);
+					classroomArr.push(building[classroomName]);
+					classroomNamesArr.push(classroomName)
+				}
+				listifyClassrooms.buildingsArr.push(classroomArr);
+				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
+			}
 		}
 
 		/* Player resize. */
@@ -298,14 +292,14 @@
 			let e = document.createElement("div");
 			e.style.cssText = "overflow: scroll; visibility: hidden; position: absolute;";
 			let w = (window.innerWidth - e.offsetWidth + e.clientWidth);
-			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
 			e.remove();
+			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
 			document.getElementById("player0-decodeddata-div").style.width = resizePlayers.w;
-			if (player0 && player1 && player2 && player3) {
-				player0.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				player1.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
+			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
+				enablePlayers.player0.setPlayerSize(resizePlayers.w, resizePlayers.h);
+				enablePlayers.player1.setPlayerSize(resizePlayers.w, resizePlayers.h);
+				enablePlayers.player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
+				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
 			}
 		}
 
@@ -315,27 +309,27 @@
 			let info = JSON.parse(params.get("info"));
 			localStorage.setItem("classroomName", classroomName);
 			localStorage.setItem("classroom", url);
-			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName_;
+			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName;
 			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [info.videoPath.pptVideo, info.videoPath.teacherTrack, info.videoPath.teacherFull, info.videoPath.studentFull];
-			if (player0 && player1 && player2 && player3) {
-				player0.loadByUrl(setClassroom.pptVideo);
-				player1.loadByUrl(setClassroom.teacherTrack);
-				player1.mute();
-				player1.stop();
-				player2.loadByUrl(setClassroom.teacherFull);
-				player2.mute();
-				player2.stop();
-				player3.loadByUrl(setClassroom.studentFull);
-				player3.mute();
-				player3.stop();
+			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
+				enablePlayers.player0.loadByUrl(setClassroom.pptVideo);
+				enablePlayers.player1.loadByUrl(setClassroom.teacherTrack);
+				enablePlayers.player1.mute();
+				enablePlayers.player1.stop();
+				enablePlayers.player2.loadByUrl(setClassroom.teacherFull);
+				enablePlayers.player2.mute();
+				enablePlayers.player2.stop();
+				enablePlayers.player3.loadByUrl(setClassroom.studentFull);
+				enablePlayers.player3.mute();
+				enablePlayers.player3.stop();
 			}
 		}
 
 		/* Randomize classroom. */
 		function randClassroom() {
-			let b = Math.floor(Math.random() * buildingsArr.length);
-			let c = Math.floor(Math.random() * buildingsArr[b].length);
-			setClassroom(buildingsArr[b][c], buildingNamesArr[b][c]);
+			let b = Math.floor(Math.random() * listifyClassrooms.buildingsArr.length);
+			let c = Math.floor(Math.random() * listifyClassrooms.buildingsArr[b].length);
+			setClassroom(listifyClassrooms.buildingsArr[b][c], listifyClassrooms.buildingNamesArr[b][c]);
 		}
 
 		function inputClassroom() {
@@ -411,16 +405,15 @@
 			if (chaoxingLogin.calling)
 				return;
 			chaoxingLogin.calling = true;
-			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, valid, data;
-			if (!username || !password || !confirm("Use previously entered account " + username + "?")) {
+			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, conf, data;
+			if (!username || !password || !(conf = confirm("Use previously entered account " + username + "?"))) {
 				if (!(input = chaoxingInputAccount()))
 					return chaoxingLogin.calling = false;
 				[username, password] = input;
 				localStorage.setItem("chaoxing_cookies", "");
-				valid = true;
 			}
 			try {
-				assert(valid);
+				assert((username && password) || conf);
 				alert("Logging in.");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(chaoxingLogin.success = (res.status_code == 200));
@@ -475,7 +468,7 @@
 		async function getActivities() {
 			if (getActivities.calling)
 				return;
-			[getActivities.calling, getActivities.success] = [true, false];
+			getActivities.calling = true;
 			let e = document.getElementById("activities-list-div");
 			let activities = (await post("/chaoxing/get_activities")).json() || {};
 			e.replaceChildren();
@@ -498,7 +491,18 @@
 			}
 			if (!Object.keys(activities).length)
 				e.innerText = "No ongoing activities.";
-			[getActivities.calling, getActivities.success] = [false, true];
+			getActivities.calling = false;
+		}
+
+		/* Listify locations. */
+		function listifyLocations() {
+			let e = document.getElementById("locations-list-div");
+			for (let buildingName in locations) {
+				let button = document.createElement("button");
+				button.innerText = buildingName;
+				button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
+				e.appendChild(button);
+			}
 		}
 
 		/* Input location. */
@@ -516,8 +520,7 @@
 				if (address === null)
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
-				location_ = {"latitude": latitude, "longitude": longitude, "address": address};
-				localStorage.setItem("location_", JSON.stringify(location_));
+				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address}));
 			}
 			catch (err) {
 				alert("Invalid input.");
@@ -539,8 +542,10 @@
 
 		/* Qrcode checkin. */
 		async function chaoxingCheckinQrcode() {
+			let location_str = localStorage.getItem("location_");
+			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
 			location_["ranged"] = 1;
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(player0.tag), "location": location_});
+			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": screenshot(enablePlayers.player0.tag), "location": location_});
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
 			document.getElementById("player0-decodeddata-div").innerText = res.text || "Checkin error:\nBackend error.";
@@ -548,6 +553,8 @@
 
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
+			let location_str = localStorage.getItem("location_");
+			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
 			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": location_});
 			alert((res.status_code == 200) ? "Checked in successfully." : "Checkin failed.");
