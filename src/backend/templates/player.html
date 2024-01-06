@@ -45,7 +45,7 @@
 		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
 		<div id="players-buttons-div" class="div-center" style="display: none;">
 			<button onclick="enablePlayers.player0.initPlay(); enablePlayers.player1.initPlay(); enablePlayers.player2.initPlay(); enablePlayers.player3.initPlay();">Play All</button>
-			<button onclick="enablePlayers.player0.stop(); enablePlayers.player1.stop(); enablePlayers.player2.stop(); enablePlayers.player3.stop();">Stop All</button>
+			<button onclick="enablePlayers.player0.stop(); enablePlayers.player1.stop(); enablePlayers.player2.stop(); enablePlayers.player3.stop(); cameraOff();">Stop All</button>
 			<button onclick="enablePlayers.player0.unmute(); enablePlayers.player1.unmute(); enablePlayers.player2.unmute(); enablePlayers.player3.unmute();">Unmute All</button>
 			<button onclick="enablePlayers.player0.mute(); enablePlayers.player1.mute(); enablePlayers.player2.mute(); enablePlayers.player3.mute();">Mute All</button>
 			<button onclick="resizePlayers()">Resize All</button>
@@ -93,12 +93,13 @@
 		</div>
 		<div id="player3-div"></div>
 
-		<div id="camera-buttons-div" class="div-center" style="display: block;">
+		<div id="camera-buttons-div" class="div-center">
 			<B style="font-size:40px; font-family: sans-serif;">Camera</B>
 			&emsp;
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
 			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode(screenshot(document.getElementById('camera-video')), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
 		</div>
 		<div id="camera-div">
 			<video id="camera-video" width="640" height="480" autoplay></video>
@@ -211,6 +212,7 @@
 			document.getElementById("player1-buttons-div").style.display = "flex";
 			document.getElementById("player2-buttons-div").style.display = "flex";
 			document.getElementById("player3-buttons-div").style.display = "flex";
+			document.getElementById("camera-resize-button").style.display = "none";
 			/* Create video players. */
 			resizePlayers();
 			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
@@ -315,7 +317,7 @@
 				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
 			}
 			e = document.getElementById("camera-video");
-			[e.width, e.height] = [resizePlayers.w, resizePlayers.h];
+			[e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
 		}
 
 		/* Video sources control. */
@@ -476,6 +478,7 @@
 				document.getElementById("chaoxing-input-location-button").style.display = "block";
 				document.getElementById("chaoxing-activities-button").style.display = "block";
 				document.getElementById("player0-scan-button").style.display = "block";
+				document.getElementById("camera-scan-button").style.display = "block";
 			}
 			catch (err) {
 				alert("Login failed.");
