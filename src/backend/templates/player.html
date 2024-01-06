@@ -301,15 +301,18 @@
 			}
 		}
 
-		/* Players and camera resize. */
-		function resizePlayers() {
+		function getScrollBarWidth() {
 			let e = document.createElement("div");
 			e.style.cssText = "overflow: scroll; visibility: hidden; position: absolute;";
-			let w =  (window.innerWidth - e.offsetWidth + e.clientWidth);
+			let w = e.offsetWidth - e.clientWidth;
 			e.remove();
+			return w;
+		}
+
+		/* Players and camera resize. */
+		function resizePlayers(w = 0) {
+			w = w || window.innerWidth - getScrollBarWidth();
 			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
-			e = document.getElementById("camera-video");
-			[e.width, e.height] = [w.toString(), parseInt(w * (e.videoHeight / e.videoWidth || 4 / 3)).toString()];
 			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
 			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
 			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
@@ -318,6 +321,14 @@
 				enablePlayers.player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
 			}
+			resizeCamera(w);
+		}
+
+		function resizeCamera(w = 0) {
+			w = w || window.innerWidth - getScrollBarWidth();
+			let e = document.getElementById("camera-video");
+			[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
+			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
 		}
 
 		/* Video sources control. */
@@ -412,6 +423,8 @@
 			},
 			}).then((stream) => {
 				e.srcObject = stream;
+				if (!e.height)
+					resizeCamera(e.width);
 				e.play();
 			});
 		}
