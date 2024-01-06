@@ -98,8 +98,8 @@
 			&emsp;
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
-			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode(screenshot(document.getElementById('camera-video')), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
+			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode(screenshot(document.getElementById('camera-video')), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="camera-div">
 			<video id="camera-video" width="640" height="480" autoplay></video>
@@ -327,7 +327,10 @@
 		function resizeCamera(w = 0) {
 			w = w || window.innerWidth - getScrollBarWidth();
 			let e = document.getElementById("camera-video");
-			[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
+			try {
+				[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
+			}
+			catch (err) {}
 			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
 		}
 
@@ -424,8 +427,10 @@
 			}).then((stream) => {
 				e.srcObject = stream;
 				e.play();
-				if (!e.height)
-					resizeCamera(e.width);
+				e.addEventListener("playing", () => {
+					if (!e.height)
+						resizeCamera();
+				});
 			});
 		}
 
