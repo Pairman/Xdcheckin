@@ -304,7 +304,7 @@
 			let w = (window.innerWidth - e.offsetWidth + e.clientWidth);
 			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
 			e.remove();
-			document.getElementById("player0-decodeddata-div").style.width = strWidth;
+			document.getElementById("player0-decodeddata-div").style.width = resizePlayers.w;
 			if (player0 && player1 && player2 && player3) {
 				player0.setPlayerSize(resizePlayers.w, resizePlayers.h);
 				player1.setPlayerSize(resizePlayers.w, resizePlayers.h);
