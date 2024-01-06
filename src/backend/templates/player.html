@@ -132,7 +132,7 @@
 						xdcheckin_update_available = true;
 				}
 				if (xdcheckin_update_available)
-					let e = document.getElementById("xdcheckin-update-div").innerHTML = "<a href='https://github.com/Pairman/Xdcheckin/releases/latest'>" + xdcheckin_latest_release["body"];
+					document.getElementById("xdcheckin-update-div").innerHTML = "<a href='https://github.com/Pairman/Xdcheckin/releases/latest'>" + xdcheckin_latest_release["body"];
 			});
 		});
 
@@ -490,7 +490,7 @@
 				return;
 			[getActivities.calling, getActivities.success] = [true, false];
 			let e = document.getElementById("activities-list-div");
-			let activities = (await post("/chaoxing/get_activities")).json() or {};
+			let activities = (await post("/chaoxing/get_activities")).json() || {};
 			e.replaceChildren();
 			for (let class_id in activities) {
 				let class_activities = activities[class_id];
