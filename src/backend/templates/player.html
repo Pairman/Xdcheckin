@@ -36,8 +36,8 @@
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
 			<button onclick="displayDiv('classrooms-list-div')">Select Classroom</button>
-			<button onclick="reloadClassroom(...randClassroom())">I'm Feeling Lucky</button>
-			<button onclick="loadClassroom()">Load URL</button>
+			<button onclick="randClassroom()">I'm Feeling Lucky</button>
+			<button onclick="inputClassroom()">Load URL</button>
 			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
 		</div>
 		<div id="classrooms-list-div" style="display: none;"></div>
@@ -159,7 +159,7 @@
 			for (let classroomName in building) {
 				let button = document.createElement("button");
 				button.innerText = classroomName;
-				button.setAttribute("onclick", "reloadClassroom(" + building[classroomName] + ", " + classroomName + ")");
+				button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', " + classroomName + ")");
 				classrooms_list_div.appendChild(button);
 			}
 			buildingsArr.push(classroomArr);
@@ -167,11 +167,6 @@
 		}
 
 		/* Initialize classroom name and urls. */
-		var classroomName = localStorage.getItem("classroomName"), classroom = localStorage.getItem("classroom");
-		var pptVideo, teacherTrack, teacherFull, studentFull;
-		if (!classroom || !classroomName)
-			[classroom, classroomName] = randClassroom();
-		setClassroom(classroom, classroomName);
 		var player0, player1, player2, player3;
 		enablePlayers();
 
@@ -223,7 +218,7 @@
 		/* Enable players for XDUers. */
 		function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
-			if (enablePlayers.done || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
+			if (enablePlayers.success || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
 				return;
 			enablePlayers.calling = true;
 			document.getElementById("classrooms-buttons-div").style.display = "flex";
@@ -234,6 +229,7 @@
 			document.getElementById("player2-buttons-div").style.display = "flex";
 			document.getElementById("player3-buttons-div").style.display = "flex";
 			/* Create video players. */
+			(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
 			resizePlayers();
 			player0 = new Aliplayer({
 				id: "player0-div",
@@ -243,8 +239,8 @@
 				height: resizePlayers.h,
 				autoplay: true,
 				playsinline: true,
-				source: pptVideo
-			}, function(player0) {
+				source: setClassroom.pptVideo
+			}, (player) => {
 				player0.mute();
 				player0.play();
 				player0.on("canplay", function () {
@@ -264,8 +260,8 @@
 				width: resizePlayers.w,
 				height: resizePlayers.h,
 				playsinline: true,
-				source: teacherTrack
-			}, function(player1) {
+				source: setClassroom.teacherTrack
+			}, (player) => {
 				player1.mute();
 				player1.stop();
 			});
@@ -276,8 +272,8 @@
 				width: resizePlayers.w,
 				height: resizePlayers.h,
 				playsinline: true,
-				source: teacherFull
-			}, function (player2) {
+				source: setClassroom.teacherFull
+			}, (player) => {
 				player2.mute();
 				player2.stop();
 			});
@@ -288,12 +284,12 @@
 				width: resizePlayers.w,
 				height: resizePlayers.h,
 				playsinline: true,
-				source: studentFull
-			}, function(player3) {
+				source: setClassroom.studentFull
+			}, (player) => {
 				player3.mute();
 				player3.stop();
 			});
-			enablePlayers.done = true;
+			enablePlayers.success = true;
 			enablePlayers.calling = false;
 		}
 
@@ -314,42 +310,35 @@
 		}
 
 		/* Video sources control. */
-		function setClassroom(url, classroomName_ = "Unknown") {
+		function setClassroom(url, classroomName = "Unknown") {
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let info = JSON.parse(params.get("info"));
-			localStorage.setItem("classroomName", classroomName_);
+			localStorage.setItem("classroomName", classroomName);
 			localStorage.setItem("classroom", url);
 			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName_;
-			classroom = url;
-			classroomName = classroomName_;
-			pptVideo = info.videoPath.pptVideo;
-			teacherTrack = info.videoPath.teacherTrack;
-			teacherFull = info.videoPath.teacherFull;
-			studentFull = info.videoPath.studentFull;
+			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [info.videoPath.pptVideo, info.videoPath.teacherTrack, info.videoPath.teacherFull, info.videoPath.studentFull];
+			if (player0 && player1 && player2 && player3) {
+				player0.loadByUrl(setClassroom.pptVideo);
+				player1.loadByUrl(setClassroom.teacherTrack);
+				player1.mute();
+				player1.stop();
+				player2.loadByUrl(setClassroom.teacherFull);
+				player2.mute();
+				player2.stop();
+				player3.loadByUrl(setClassroom.studentFull);
+				player3.mute();
+				player3.stop();
+			}
 		}
 
 		/* Randomize classroom. */
 		function randClassroom() {
 			let b = Math.floor(Math.random() * buildingsArr.length);
 			let c = Math.floor(Math.random() * buildingsArr[b].length);
-			return [buildingsArr[b][c], buildingNamesArr[b][c]];
+			setClassroom(buildingsArr[b][c], buildingNamesArr[b][c]);
 		}
 
-		function reloadClassroom(url, classroomName = "Unknown") {
-			setClassroom(url, classroomName);
-			player0.loadByUrl(pptVideo);
-			player1.loadByUrl(teacherTrack);
-			player1.mute();
-			player1.stop();
-			player2.loadByUrl(teacherFull);
-			player2.mute();
-			player2.stop();
-			player3.loadByUrl(studentFull);
-			player3.mute();
-			player3.stop();
-		}
-
-		function loadClassroom() {
+		function inputClassroom() {
 			let input = prompt("Input the extracted URL:");
 			if (input === null)
 				return;
@@ -361,7 +350,7 @@
 			catch (err) {
 				return alert("Invalid URL.");
 			}
-			reloadClassroom(input, "Extracted");
+			setClassroom(input, "Extracted");
 		}
 
 		async function extractClassroom() {
