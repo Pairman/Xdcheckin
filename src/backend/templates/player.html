@@ -229,7 +229,7 @@
 			document.getElementById("player2-buttons-div").style.display = "flex";
 			document.getElementById("player3-buttons-div").style.display = "flex";
 			/* Create video players. */
-			(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
+			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
 			resizePlayers();
 			player0 = new Aliplayer({
 				id: "player0-div",
