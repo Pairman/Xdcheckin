@@ -423,9 +423,9 @@
 			},
 			}).then((stream) => {
 				e.srcObject = stream;
+				e.play();
 				if (!e.height)
 					resizeCamera(e.width);
-				e.play();
 			});
 		}
 
