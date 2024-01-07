@@ -29,7 +29,7 @@ class Chaoxing:
 			self.name, self.uid, self.fid, self.cookies, self.logined = self.login_username_v11(account = {"username": username, "password": password}).values()
 		if not self.logined:
 			self.name, self.uid, self.fid, self.cookies, self.logined = self.login_username_v2(account = {"username": username, "password": password}).values()
-		self.courses = self.get_courses() if self.logined else {}
+		self.courses = self.courses_get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
 		"""Wrapper for requests.get().
@@ -205,7 +205,7 @@ class Chaoxing:
 				"logined": False
 			}
 
-	def get_courses(self):
+	def course_get_courses(self):
 		"""Get course IDs corresponding to class IDs. Will only include courses in the root folder.
 		:return: Dictionary of class IDs to course IDs.
 		"""
@@ -228,9 +228,9 @@ class Chaoxing:
 		except Exception:
 			return {}
 
-	def get_course_course_id(self, course: dict = {"course_id": "", "class_id": ""}):
+	def course_get_course_id(self, course: dict = {"course_id": "", "class_id": ""}):
 		"""Get course ID of a course.
-		:param course: Course ID (picked if given, otherwise filled later) and clsss ID in dictionary.
+		:param course: Course ID (will be filled if not given) and clsss ID in dictionary.
 		:return: Course ID corresponding to the class ID.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
@@ -250,7 +250,7 @@ class Chaoxing:
 		except Exception:
 			return "0"
 
-	def get_curriculum(self, week: str = ""):
+	def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum.
 		:param week: Week number in string, defaulted to the current week.
 		:return: Dictionary of class IDs to courses on the curriculum in dictionaries including course IDs, names, classroom locations, teachers and time.
@@ -290,7 +290,7 @@ class Chaoxing:
 		except Exception:
 			return {}
 
-	def get_course_location_log(self, course: dict = {"course_id": "", "class_id": ""}):
+	def course_get_location_log(self, course: dict = {"course_id": "", "class_id": ""}):
 		"""Get activities of a course.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
 		:return: Dictionary of activity IDs to checkin locations used by the course.
@@ -299,7 +299,7 @@ class Chaoxing:
 		params = {
 			"DB_STRATEGY": "COURSEID",
 			"STRATEGY_PARA": "courseId",
-			"courseId": self.get_course_course_id(course = course),
+			"courseId": self.course_get_course_id(course = course),
 			"classId": course["class_id"]
 		}
 		try:
@@ -317,7 +317,7 @@ class Chaoxing:
 		except Exception:
 			return {}
 
-	def get_course_activities(self, course: dict = {"course_id": "", "class_id": ""}):
+	def course_get_course_activities(self, course: dict = {"course_id": "", "class_id": ""}):
 		"""Get activities of a course.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
 		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time.
@@ -325,7 +325,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
 			"fid": 0,
-			"courseId": self.get_course_course_id(course = course),
+			"courseId": self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
@@ -343,14 +343,14 @@ class Chaoxing:
 		except Exception:
 			return []
 
-	def get_activities(self):
+	def course_get_activities(self):
 		"""Get activities of all courses.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
 		def wrapper(course: dict = {}):
 			nonlocal lock
 			lock += 1
-			course_activities = self.get_course_activities(course = course)
+			course_activities = self.course_get_course_activities(course = course)
 			if course_activities:
 				activities[course["class_id"]] = course_activities
 			lock -= 1
@@ -442,7 +442,7 @@ class Chaoxing:
 						"ranged": s.group(1),
 						"range": s.group(5)
 					}
-			locations = self.get_course_location_log(course = {"class_id": details["clazzId"]})
+			locations = self.course_get_location_log(course = {"class_id": details["clazzId"]})
 			return locations.get(activity["active_id"]) or tuple(locations.values())[0] if locations else 1
 		except Exception:
 			return 0
