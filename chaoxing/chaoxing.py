@@ -25,6 +25,10 @@ class Chaoxing:
 		if self.logined:
 			return
 		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		if not self.logined:
+			self.name, self.uid, self.fid, self.cookies, self.logined = self.login_username_v11(account = {"username": username, "password": password}).values()
+		if not self.logined:
+			self.name, self.uid, self.fid, self.cookies, self.logined = self.login_username_v2(account = {"username": username, "password": password}).values()
 		self.courses = self.get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -426,15 +430,18 @@ class Chaoxing:
 			assert res.status_code == 200
 			if "zsign_success" in res.text:
 				return 2
-			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
+			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
 			if s:
-				return {
-					"address": s.group(2),
-					"latitude": s.group(3),
-					"longitude": s.group(4),
-					"ranged": s.group(1),
-					"range": s.group(5)
-				}
+				if s.group(1) == "0":
+					return 1
+				elif s.lastindex == 5:
+					return {
+						"address": s.group(2),
+						"latitude": s.group(3),
+						"longitude": s.group(4),
+						"ranged": s.group(1),
+						"range": s.group(5)
+					}
 			locations = self.get_course_location_log(course = {"class_id": details["clazzId"]})
 			return locations.get(activity["active_id"]) or tuple(locations.values())[0] if locations else 1
 		except Exception:
