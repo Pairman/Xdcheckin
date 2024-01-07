@@ -115,7 +115,7 @@ def chaoxing_get_activities():
 	try:
 		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
-		activities = chaoxing.get_activities()
+		activities = chaoxing.course_get_activities()
 		res = make_response(dumps(activities))
 		res.status_code = 200
 	except Exception:
