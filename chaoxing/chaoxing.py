@@ -286,6 +286,33 @@ class Chaoxing:
 		except Exception:
 			return {}
 
+	def get_course_location_log(self, course: dict = {"course_id": "", "class_id": ""}):
+		"""Get activities of a course.
+		:param course: Course ID (will be filled if not given) and class ID in dictionary.
+		:return: Dictionary of activity IDs to checkin locations used by the course.
+		"""
+		url = "https://mobilelearn.chaoxing.com/v2/apis/sign/getLocationLog"
+		params = {
+			"DB_STRATEGY": "COURSEID",
+			"STRATEGY_PARA": "courseId",
+			"courseId": self.get_course_course_id(course = course),
+			"classId": course["class_id"]
+		}
+		try:
+			res = self.get(url = url, params = params)
+			data = res.json()["data"]
+			return {
+				location["activeid"]: {
+					"address": location["address"],
+					"latitude": location["latitude"],
+					"longitude": location["longitude"],
+					"ranged": + (not not location.get("locationrange")),
+					"range": location.get("locationrange") or 0
+				} for location in data
+			}
+		except Exception:
+			return {}
+
 	def get_course_activities(self, course: dict = {"course_id": "", "class_id": ""}):
 		"""Get activities of a course.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
@@ -395,17 +422,21 @@ class Chaoxing:
 		try:
 			details = self.checkin_get_details(activity = activity)
 			assert details["status"] == "1" and details["isDelete"] == "0"
-			params["class_id"] = details["clazzId"]
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
+			if "zsign_success" in res.text:
+				return 2
 			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\"", res.text, DOTALL)
-			return {
-				"address": s.group(2),
-				"latitude": s.group(3),
-				"longitude": s.group(4),
-				"ranged": s.group(1),
-				"range": s.group(5)
-			} if s and s.group(1) == "1" else 2 if "zsign_success" in res.text else 1
+			if s:
+				return {
+					"address": s.group(2),
+					"latitude": s.group(3),
+					"longitude": s.group(4),
+					"ranged": s.group(1),
+					"range": s.group(5)
+				}
+			locations = self.get_course_location_log(course = {"class_id": details["clazzId"]})
+			return locations.get(activity["active_id"]) or tuple(locations.values())[0] if locations else 1
 		except Exception:
 			return 0
 
