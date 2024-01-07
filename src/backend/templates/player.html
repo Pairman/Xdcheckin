@@ -186,7 +186,7 @@
 		/* Check APP updates. */
 		async function xdcheckinCheckUpdates() {
 			let xdcheckin_version, xdcheckin_latest_release;
-			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_version = (await post("/xdcheckin/get/releases/latest")).json()).length)
+			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json()).length)
 				return;
 			let xdcheckin_version_arr = xdcheckin_version.split(".");
 			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
@@ -560,7 +560,7 @@
 				let button = document.createElement("button");
 				button.innerText = buildingName;
 				locations[buildingName]["ranged"] = 1;
-				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName])) + "'");
+				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "')");
 				e.appendChild(button);
 			}
 		}
