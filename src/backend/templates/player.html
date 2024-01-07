@@ -427,10 +427,7 @@
 			}).then((stream) => {
 				e.srcObject = stream;
 				e.play();
-				e.addEventListener("playing", () => {
-					if (!e.height)
-						resizeCamera();
-				});
+				e.addEventListener("playing", () => {if (!e.height) resizeCamera();});
 			});
 		}
 
