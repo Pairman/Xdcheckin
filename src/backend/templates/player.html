@@ -559,7 +559,8 @@
 			for (let buildingName in locations) {
 				let button = document.createElement("button");
 				button.innerText = buildingName;
-				button.setAttribute("onclick", "location_ = " + JSON.stringify(locations[buildingName]));
+				locations[buildingName]["ranged"] = 1;
+				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName])) + "'");
 				e.appendChild(button);
 			}
 		}
@@ -579,7 +580,7 @@
 				if (address === null)
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
-				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address}));
+				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
 			}
 			catch (err) {
 				alert("Invalid input.");
@@ -601,7 +602,6 @@
 		async function chaoxingCheckinQrcode(img_src, div_id) {
 			let location_str = localStorage.getItem("location_");
 			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
-			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": location_});
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
@@ -612,7 +612,6 @@
 		async function chaoxingCheckinLocation(activity) {
 			let location_str = localStorage.getItem("location_");
 			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
-			location_["ranged"] = 1;
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": location_});
 			alert((res.status_code == 200) ? "Checked in successfully." : "Checkin failed.");
 		}
