@@ -603,9 +603,9 @@
 			let location_str = localStorage.getItem("location_");
 			let location_ = (!location_str) ? locations["B楼"] : JSON.parse(location_str);
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": location_});
+			document.getElementById(div_id).innerText = res.text || "Checkin error:\nBackend error.";
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert("Checked in successfully.");
-			document.getElementById(div_id).innerText = res.text || "Checkin error:\nBackend error.";
 		};
 
 		/* Location checkin. */
