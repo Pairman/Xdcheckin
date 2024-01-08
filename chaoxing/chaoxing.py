@@ -425,10 +425,10 @@ class Chaoxing:
 			assert details["status"] == "1" and details["isDelete"] == "0"
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
-			if "zsign_success" in res.text:
-				return 2
-			s = search(r"\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
+			s = search(r"((zsign_success)|\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
 			if s:
+				if s.group(1) == "zsign_success":
+					return 2
 				if s.group(1) == "0":
 					return 1
 				elif s.lastindex == 5:
