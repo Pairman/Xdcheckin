@@ -98,11 +98,9 @@ def chaoxing_login():
 		username, password, cookies = data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies
 		chaoxing = Chaoxing(username = username, password = password, cookies = add_dict_to_cookiejar(None, loads(cookies)) if cookies else None)
-		if not chaoxing.logined:
-			chaoxing = Chaoxing(username = username, password = password)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
-		res = make_response(dumps({"fid": chaoxing.fid, "courses": chaoxing.courses, "curriculum": chaoxing.get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
+		res = make_response(dumps({"fid": chaoxing.fid, "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
@@ -135,6 +133,7 @@ def chaoxing_checkin_checkin_location():
 		res = make_response("success")
 		res.status_code = 200
 	except Exception:
+		print("EXCEPTION")
 		res = make_response("")
 		res.status_code = 500
 	finally:
