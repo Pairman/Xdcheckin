@@ -364,7 +364,7 @@ class Chaoxing:
 			return {}	
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
-		"""Get checkin details
+		"""Get checkin details.
 		:param activity: Activity ID in dictionary.
 		:return: Checkin details including class ID and MSG code on success.
 		"""
