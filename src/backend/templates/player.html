@@ -1,617 +1,159 @@
-<!DOCTYPE html>
-<html>
-	<title>Xdcheckin</title>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
-	<link rel="shortcut icon" href="#"/>
-	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/skins/default/aliplayer-min.css" />
-	<script type="text/javascript" src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js"></script>
-	<script type="text/javascript" src="xdcheckin/static/locations.js"></script>
-	<script type="text/javascript" src="static/classrooms.js"></script>
-	<script type="text/javascript" src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js"></script>
+from base64 import b64decode
+from flask import Flask, render_template, make_response, request, session
+from flask_session import Session
+from io import BytesIO
+from json import loads, dumps
+from os import listdir, remove, makedirs
+from os.path import exists
+from PIL.Image import open as Image_open
+from pyzbar.pyzbar import decode
+from requests import get
+from requests.utils import add_dict_to_cookiejar
+from tempfile import gettempdir
+from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
+from backend.xdcheckin_py.chaoxing.locations import locations
 
-	<head>
-		<style>
-			div {font-size:22px; font-family: sans-serif;}
-			.div-center {width: 100%; display: flex; justify-content: center; align-items: center;}
-			button {height: 40px; font-size: 22px; user-select: none;}
-			table, th, td {border: 1px solid black; border-collapse: collapse; text-align: center;}
-			table {width: 100%;}
-		</style>
-	</head>
+server = Flask(__name__)
+server.config["SESSION_PERMANENT"] = False
+server.config["SESSION_TYPE"] = "filesystem"
+server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
+server.config["version"] = "0.0.0"
 
-	<body id="main-body" style="padding: 0; margin: 0;">
-		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold;"></div>
 
-		<div id="chaoxing-buttons" class="div-center">
-			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
-			<button id="chaoxing-curriculum-button" onclick="displayDiv('curriculum-list-div')" style="display: none">Show Curriculum</button>
-			<button id="chaoxing-locations-button" onclick="displayDiv('locations-list-div')" style="display: none">Select Location</button>
-			<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
-			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') getActivities().then(displayDiv('activities-list-div')); else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
-		</div>
-		<div id="curriculum-list-div" style="display: none"></div>
-		<div id="locations-list-div" style="display: none"></div>
-		<div id="activities-list-div" style="display: none"></div>
+if not exists(server.config["SESSION_FILE_DIR"]):
+	makedirs(server.config["SESSION_FILE_DIR"])
+else:
+	for i in listdir(server.config["SESSION_FILE_DIR"]):
+		try:	
+			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
+		except Exception:	
+			continue
 
-		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
-			<button onclick="displayDiv('classrooms-list-div')">Select Classroom</button>
-			<button onclick="randClassroom()">I'm Feeling Lucky</button>
-			<button onclick="inputClassroom()">Load URL</button>
-			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
-		</div>
-		<div id="classrooms-list-div" style="display: none;"></div>
+Session(server)
 
-		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
-		<div id="players-buttons-div" class="div-center" style="display: none;">
-			<button onclick="enablePlayers.player0.initPlay(); enablePlayers.player1.initPlay(); enablePlayers.player2.initPlay(); enablePlayers.player3.initPlay();">Play All</button>
-			<button onclick="enablePlayers.player0.stop(); enablePlayers.player1.stop(); enablePlayers.player2.stop(); enablePlayers.player3.stop(); cameraOff();">Stop All</button>
-			<button onclick="enablePlayers.player0.unmute(); enablePlayers.player1.unmute(); enablePlayers.player2.unmute(); enablePlayers.player3.unmute();">Unmute All</button>
-			<button onclick="enablePlayers.player0.mute(); enablePlayers.player1.mute(); enablePlayers.player2.mute(); enablePlayers.player3.mute();">Mute All</button>
-			<button onclick="resizePlayers()">Resize All</button>
-		</div>
+@server.route("/")
+@server.route("/player.html")
+def player_html():
+	return render_template("player.html")
 
-		<div id="player0-buttons-div" class="div-center" style="display: none;">
-			<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
-			&emsp;
-			<button onclick="enablePlayers.player0.initPlay();">Play</button>
-			<button onclick="enablePlayers.player0.stop();">Stop</button>
-			<button onclick="enablePlayers.player0.unmute();">Unmute</button>
-			<button onclick="enablePlayers.player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode(screenshot(enablePlayers.player0.tag), 'player0-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
-		</div>
-		<div id="player0-div"></div>
-		<div id="player0-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
+@server.route("/xdcheckin/static/locations.js")
+def xdcheckin_static_locations_js():
+	res = make_response("var locations = " + dumps(locations).encode("ascii").decode("unicode-escape") + ";")
+	res.status_code = 200
+	return res
 
-		<div id="player1-buttons-div" class="div-center" style="display: none;">
-			<B style="font-size:40px; font-family: sans-serif;">TeacherTrack</B>
-			&emsp;
-			<button onclick="enablePlayers.player1.initPlay();">Play</button>
-			<button onclick="enablePlayers.player1.stop();">Stop</button>
-			<button onclick="enablePlayers.player1.unmute();">Unmute</button>
-			<button onclick="enablePlayers.player1.mute();;">Mute</button>
-		</div>
-		<div id="player1-div"></div>
+@server.route("/xdcheckin/get/version", methods = ["POST"])
+def xdcheckin_get_version():
+	res = make_response(server.config["version"])
+	res.status_code = 200
+	return res
 
-		<div id="player2-buttons-div" class="div-center" style="display: none;">
-			<B style="font-size:40px; font-family: sans-serif;">TeacherFull</B>
-			&emsp;
-			<button onclick="enablePlayers.player2.initPlay();">Play</button>
-			<button onclick="enablePlayers.player2.stop();">Stop</button>
-			<button onclick="enablePlayers.player2.unmute();">Unmute</button>
-			<button onclick="enablePlayers.player2.mute();">Mute</button>
-		</div>
-		<div id="player2-div"></div>
+@server.route("/xdcheckin/get/releases/latest", methods = ["POST"])
+def xdcheckin_get_latest_release():
+	try:
+		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
+		assert res.status_code == 200
+		data = res.json()[0]
+		res = make_response(dumps({
+			"tag_name": data["tag_name"],
+			"name": data["name"],
+			"author": data["author"]["login"],
+			"body": data["body"],
+			"published_at": data["published_at"],
+			"html_url": data["html_url"],
+			"assets": [{
+					"name": asset["name"],
+					"size": asset["size"],
+					"browser_download_url": asset["browser_download_url"]
+				} for asset in data["assets"]]
+		}))
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
 
-		<div id="player3-buttons-div" class="div-center" style="display: none;">
-			<B style="font-size:40px; font-family: sans-serif;">StudentFull</B>
-			&emsp;
-			<button onclick="enablePlayers.player3.initPlay();">Play</button>
-			<button onclick="enablePlayers.player3.stop();">Stop</button>
-			<button onclick="enablePlayers.player3.unmute();">Unmute</button>
-			<button onclick="enablePlayers.player3.mute();">Mute</button>
-		</div>
-		<div id="player3-div"></div>
+@server.route("/chaoxing/extract_url", methods = ["POST"])
+def chaoxing_extract_url():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		data = request.get_json(force = True)
+		assert data
+		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls", params = {"liveId": data})
+		assert res.status_code == 200
+		res = make_response(res.text)
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
 
-		<div id="camera-buttons-div" class="div-center">
-			<B style="font-size:40px; font-family: sans-serif;">Camera</B>
-			&emsp;
-			<button onclick="cameraOn();">On</button>
-			<button onclick="cameraOff();">Off</button>
-			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
-			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode(screenshot(document.getElementById('camera-video'), 0.6), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
-		</div>
-		<div id="camera-div">
-			<video id="camera-video" width="640" height="480" autoplay></video>
-		</div>
-		<div id="camera-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
+@server.route("/chaoxing/login", methods = ["POST"])
+def chaoxing_login():
+	try:
+		data = request.get_json(force = True)
+		username, password, cookies = data["username"], data["password"], data["cookies"]
+		assert (username and password) or cookies
+		chaoxing = Chaoxing(username = username, password = password, cookies = add_dict_to_cookiejar(None, loads(cookies)) if cookies else None)
+		assert chaoxing.logined
+		session["chaoxing"] = chaoxing
+		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
 
-		<div id="footer-div" class="div-center">
-			(C) 2024 Pairman&emsp;
-			<a href="https://github.com/Pairman/Xdcheckin">Source Code</a>
-		</div>
-	</body>
+@server.route("/chaoxing/get_activities", methods = ["POST"])
+def chaoxing_get_activities():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined
+		activities = chaoxing.course_get_activities()
+		res = make_response(dumps(activities))
+		res.status_code = 200
+	except Exception:
+		res = make_response("{}")
+		res.status_code = 500
+	finally:
+		return res
 
-	<script>
-		/*
-	 	 * Script.
-		 */
+@server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
+def chaoxing_checkin_checkin_location():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined, "Not logged in."
+		data = request.get_json(force = True)
+		assert data["activity"]["active_id"], "No activity ID given."
+		result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		res = make_response(result[1])
+	except Exception as e:
+		res = make_response("Checkin error. (" + str(e) + ")")
+	finally:
+		res.status_code = 200
+		return res
 
-		checkEula();
-		listifyLocations();
-		listifyClassrooms();
-		resizePlayers();
-		enablePlayers();
-		xdcheckinCheckUpdates();
-
-		/*
-		 * Function definitions.
-		 */
-
-		/* Assertion. */
-		function assert(condition, message) {
-			if (!condition)
-				throw new Error(message || "Assertion failed");
-		}
-
-		/* Get request. */
-		async function get(url = "", params = {}) {
-			let qstr = new URLSearchParams(params).toString();
-			let status_code = 404, text = "";
-			try {
-				let res = await fetch(qstr ? `${url}?${qstr}` : url);
-				[status_code, text] = [res.status, await res.text()];
-				
-			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
-		}
-
-		/* Post request. */
-		async function post(url = "", data = {}) {
-			let status_code = 404, text = "";
-			try {
-				let res = await fetch(url, {method: "POST", body: JSON.stringify(data)});
-				[status_code, text] = [res.status, await res.text()];
-			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
-		}
-
-		/* Div listing toggle. */
-		function displayDiv(e_id) {
-			let e = document.getElementById(e_id);
-			e.style.display = ((e.style.display == "none") ? "block" : "none");
-		}
-
-		/* Onclick cooldown. */
-		function onclickCooldown(e_id, time = 1000) {
-			let e = document.getElementById(e_id);
-			e.style.pointerEvents = "none";
-			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
-		};
-
-		/* Check EULA state. */
-		function checkEula() {
-			if (localStorage.getItem("xdcheckin_eula"))
-				document.getElementById("main-body").style.display = "block";
-			else if (confirm("This APP provides utilities for Chaoxing check-ins and classroom livestreams exclusively for XDUers.\n\n" +
-					 "By confirming you agree to the following terms:\n" +
-					 "    1. This APP is for study use only.\n" +
-					 "    2. This work comes with absolutely no warranty.\n\n" +
-					 "You have been warned.")) {
-				localStorage.setItem("xdcheckin_eula", "1");
-				document.getElementById("main-body").style.display = "block";
-			}
-		}
-
-		/* Check APP updates. */
-		async function xdcheckinCheckUpdates() {
-			let xdcheckin_version, xdcheckin_latest_release;
-			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json()).length)
-				return;
-			let xdcheckin_version_arr = xdcheckin_version.split(".");
-			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
-			for (let i = 0; i < 3; ++i) {
-				if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
-					return;
-				if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
-					document.getElementById("xdcheckin-update-div").innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">Version " + xdcheckin_latest_release["tag_name"] + " released.</a><br>" + xdcheckin_latest_release["body"].replaceAll("\r\n", "<br>");
-					return;
-				}
-			}
-		}
-
-		/* Enable players for XDUers. */
-		function enablePlayers() {
-			/* Classroom livestreams for XDUers only. */
-			if (enablePlayers.success || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
-				return;
-			enablePlayers.calling = true;
-			document.getElementById("classrooms-buttons-div").style.display = "flex";
-			document.getElementById("xdcheckin-title-div").style.display = "flex";
-			document.getElementById("players-buttons-div").style.display = "flex";
-			document.getElementById("player0-buttons-div").style.display = "flex";
-			document.getElementById("player1-buttons-div").style.display = "flex";
-			document.getElementById("player2-buttons-div").style.display = "flex";
-			document.getElementById("player3-buttons-div").style.display = "flex";
-			document.getElementById("camera-resize-button").style.display = "none";
-			/* Create video players. */
-			(localStorage.getItem("classroom") && localStorage.getItem("classroomName")) ? setClassroom(localStorage.getItem("classroom"), localStorage.getItem("classroomName")) : randClassroom();
-			enablePlayers.player0 = new Aliplayer({
-				id: "player0-div",
-				isLive: true,
-				useH5Prism: true,
-				width: resizePlayers.w,
-				height: resizePlayers.h,
-				autoplay: true,
-				playsinline: true,
-				source: setClassroom.pptVideo
-			}, () => {
-				enablePlayers.player0.mute();
-				enablePlayers.player0.play();
-				enablePlayers.player0.on("canplay", () => {
-					let t = enablePlayers.player0.getCurrentTime();
-					if (enablePlayers.player1.getStatus() == "playing")
-						enablePlayers.player1.seek(t);
-					if (enablePlayers.player2.getStatus() == "playing")
-						enablePlayers.player2.seek(t);
-					if (enablePlayers.player3.getStatus() == "playing")
-						enablePlayers.player3.seek(t);
-				})
-			});
-			enablePlayers.player1 = new Aliplayer({
-				id: "player1-div",
-				isLive: true,
-				useH5Prism: true,
-				width: resizePlayers.w,
-				height: resizePlayers.h,
-				playsinline: true,
-				source: setClassroom.teacherTrack
-			}, () => {
-				enablePlayers.player1.mute();
-				enablePlayers.player1.stop();
-			});
-			enablePlayers.player2 = new Aliplayer({
-				id: "player2-div",
-				isLive: true,
-				useH5Prism: true,
-				width: resizePlayers.w,
-				height: resizePlayers.h,
-				playsinline: true,
-				source: setClassroom.teacherFull
-			}, () => {
-				enablePlayers.player2.mute();
-				enablePlayers.player2.stop();
-			});
-			enablePlayers.player3 = new Aliplayer({
-				id: "player3-div",
-				isLive: true,
-				useH5Prism: true,
-				width: resizePlayers.w,
-				height: resizePlayers.h,
-				playsinline: true,
-				source: setClassroom.studentFull
-			}, () => {
-				enablePlayers.player3.mute();
-				enablePlayers.player3.stop();
-			});
-			enablePlayers.success = true;
-			enablePlayers.calling = false;
-		}
-
-		/* Listify classrooms. */
-		function listifyClassrooms() {
-			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
-			const classrooms_list_div = document.getElementById("classrooms-list-div");
-			for (let buildingName in urls) {
-				let building = urls[buildingName];
-				let div = document.createElement("div");
-				div.innerText = buildingName + ": ";
-				classrooms_list_div.appendChild(div);
-				let classroomArr = [], classroomNamesArr = [];
-				for (let classroomName in building) {
-					let button = document.createElement("button");
-					button.innerText = classroomName;
-					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
-					classrooms_list_div.appendChild(button);
-					classroomArr.push(building[classroomName]);
-					classroomNamesArr.push(classroomName)
-				}
-				listifyClassrooms.buildingsArr.push(classroomArr);
-				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
-			}
-		}
-
-		function getScrollBarWidth() {
-			let e = document.createElement("div");
-			e.style.cssText = "overflow: scroll; visibility: hidden; position: absolute;";
-			let w = e.offsetWidth - e.clientWidth;
-			e.remove();
-			return w;
-		}
-
-		/* Players and camera resize. */
-		function resizePlayers(w = 0) {
-			w = w || window.innerWidth - getScrollBarWidth();
-			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
-			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
-			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
-			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
-				enablePlayers.player0.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				enablePlayers.player1.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				enablePlayers.player2.setPlayerSize(resizePlayers.w, resizePlayers.h);
-				enablePlayers.player3.setPlayerSize(resizePlayers.w, resizePlayers.h);
-			}
-			resizeCamera(w);
-		}
-
-		function resizeCamera(w = 0) {
-			w = w || window.innerWidth - getScrollBarWidth();
-			let e = document.getElementById("camera-video");
-			try {
-				[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
-			}
-			catch (err) {}
-			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
-		}
-
-		/* Video sources control. */
-		function setClassroom(url, classroomName = "Unknown") {
-			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
-			let info = JSON.parse(params.get("info"));
-			localStorage.setItem("classroomName", classroomName);
-			localStorage.setItem("classroom", url);
-			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName;
-			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [info.videoPath.pptVideo, info.videoPath.teacherTrack, info.videoPath.teacherFull, info.videoPath.studentFull];
-			if (enablePlayers.player0 && enablePlayers.player1 && enablePlayers.player2 && enablePlayers.player3) {
-				enablePlayers.player0.loadByUrl(setClassroom.pptVideo);
-				enablePlayers.player1.loadByUrl(setClassroom.teacherTrack);
-				enablePlayers.player1.mute();
-				enablePlayers.player1.stop();
-				enablePlayers.player2.loadByUrl(setClassroom.teacherFull);
-				enablePlayers.player2.mute();
-				enablePlayers.player2.stop();
-				enablePlayers.player3.loadByUrl(setClassroom.studentFull);
-				enablePlayers.player3.mute();
-				enablePlayers.player3.stop();
-			}
-		}
-
-		/* Randomize classroom. */
-		function randClassroom() {
-			let b = Math.floor(Math.random() * listifyClassrooms.buildingsArr.length);
-			let c = Math.floor(Math.random() * listifyClassrooms.buildingsArr[b].length);
-			setClassroom(listifyClassrooms.buildingsArr[b][c], listifyClassrooms.buildingNamesArr[b][c]);
-		}
-
-		function inputClassroom() {
-			let input = prompt("Input the extracted URL:");
-			if (input === null)
-				return;
-			if (input === "")
-				return alert("Invalid input.");
-			try {
-				let url = new URL(input);
-			}
-			catch (err) {
-				return alert("Invalid URL.");
-			}
-			setClassroom(input, "Extracted");
-		}
-
-		async function extractClassroom() {
-			let input = prompt("Input liveId or livestream URL:");
-			if (input === null)
-				return;
-			if (input === "")
-				return alert("Invalid input.");
-			try {
-				let url = new URL(input);
-				let params = new URLSearchParams(decodeURIComponent(url.search));
-				let liveId = JSON.parse(params.get("liveId"));
-			}
-			catch (err) {
-				if (!input || input.length != 8 || isNaN(input))
-					return alert("Invalid liveId.");
-				liveId = input;
-			}
-			try {
-				let res = await post("/chaoxing/extract_url", data = liveId);
-				assert(res.status_code == 200);
-				let url = new URL(res.text);
-				let info = JSON.parse((new URLSearchParams(decodeURIComponent(url.search))).get("info"));
-				assert(!("msg" in info["videoPath"]));
-				let info_new = {"videoPath": {}};
-				info_new["videoPath"]["teacherFull"] = info["videoPath"]["teacherFull"];
-				info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"];
-				info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"];
-				info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"];
-				let url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info_new));
-				prompt("Extracted URL:", url_new);
-			}
-			catch (err) {
-				alert("Failed to extract URL.")
-			}
-		}
-
-		function cameraOn() {
-			let e = document.getElementById("camera-video");
-			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
-				return;
-			navigator.mediaDevices.getUserMedia({
-				audio: false,
-				video: {
-					width: {ideal: 2048},
-					height: {ideal: 1536},
-					facingMode: {exact: "environment"},
-			},
-			}).then((stream) => {
-				e.srcObject = stream;
-				e.play();
-				e.addEventListener("playing", () => {if (!e.height) resizeCamera();});
-			});
-		}
-
-		function cameraOff() {
-			let e = document.getElementById("camera-video");
-			if (!e.srcObject)
-				return;
-			e.srcObject.getTracks().forEach((track) => {
-				track.stop();
-			});
-			e.srcObject = null;
-		}
-
-		/* Chaoxing related. */
-		function chaoxingInputAccount() {
-			try {
-				let username = prompt("Input Chaoxing username:");
-				if (username === null)
-					return;
-				assert(username !== "");
-				let password = prompt("Input Chaoxing password");
-				if (password === null)
-					return;
-				assert(/^(((?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^\s0-9a-zA-Z])|(?=.*[a-zA-Z])(?=.*[^\s0-9a-zA-Z]))[^\s\u4e00-\u9fa5]+)$/.test(password));
-				return [username, password];
-			}
-			catch (err) {
-				alert("Invalid input.");
-			}
-		}
-
-		/* Log into Chaoxing account. */
-		async function chaoxingLogin() {
-			if (chaoxingLogin.calling)
-				return;
-			chaoxingLogin.calling = true;
-			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, conf, data;
-			if (!username || !password || !(conf = confirm("Use previously entered account " + username + "?"))) {
-				if (!(input = chaoxingInputAccount()))
-					return chaoxingLogin.calling = false;
-				[username, password] = input;
-				localStorage.setItem("chaoxing_cookies", "");
-			}
-			try {
-				assert((username && password) || conf);
-				alert("Logging in.");
-				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
-				assert(chaoxingLogin.success = (res.status_code == 200));
-				data = res.json();
-				localStorage.setItem("chaoxing_username", username);
-				localStorage.setItem("chaoxing_password", password);
-				localStorage.setItem("chaoxing_cookies", data["cookies"]);
-				localStorage.setItem("chaoxing_fid", data["fid"]);
-				chaoxingLogin.courses = data["courses"];
-				chaoxingLogin.curriculum = data["curriculum"];
-				alert("Logged in successfully.");
-				enablePlayers();
-				tablifyCurriculum();
-				document.getElementById("extract-classroom-button").style.display = "inline";
-				document.getElementById("chaoxing-login-button").style.display = "none";
-				document.getElementById("chaoxing-curriculum-button").style.display = "block";
-				document.getElementById("chaoxing-locations-button").style.display = "block";
-				document.getElementById("chaoxing-input-location-button").style.display = "block";
-				document.getElementById("chaoxing-activities-button").style.display = "block";
-				document.getElementById("player0-scan-button").style.display = "block";
-				document.getElementById("camera-scan-button").style.display = "block";
-			}
-			catch (err) {
-				alert("Login failed.");
-			}
-			chaoxingLogin.calling = false;
-		}
-
-		/* Tablify curriculum. */
-		function tablifyCurriculum() {
-			let table = document.createElement("table");
-			table.border = "1";
-			let tableBody = document.createElement("tbody");
-			for (let class_id in chaoxingLogin.curriculum) {
-				let lesson = chaoxingLogin.curriculum[class_id];
-				let tr = document.createElement("tr"), td = document.createElement("td");
-				td.appendChild(document.createTextNode(lesson["name"]));
-				tr.appendChild(td);
-				td = document.createElement("td");
-				lesson["teacher"].forEach((teacher) => {td.appendChild(document.createTextNode(teacher + " "))});
-				tr.appendChild(td);
-				td = document.createElement("td");
-				td.appendChild(document.createTextNode(lesson["location"]));
-				tr.appendChild(td);
-				tableBody.appendChild(tr);
-			}
-			table.appendChild(tableBody);
-			document.getElementById("curriculum-list-div").replaceChildren(table);
-		}
-
-		/* Get activities. */
-		async function getActivities() {
-			if (getActivities.calling)
-				return;
-			getActivities.calling = true;
-			let e = document.getElementById("activities-list-div");
-			let activities = (await post("/chaoxing/get_activities")).json() || {};
-			e.replaceChildren();
-			for (let class_id in activities) {
-				let class_activities = activities[class_id];
-				let div = document.createElement("div");
-				div.innerText = chaoxingLogin.courses[class_id]["name"] + ": ";
-				e.appendChild(div);
-				for (let i in class_activities) {
-					let activity = class_activities[i];
-					let button = document.createElement("button");
-					button.id = "chaoxing-activity-" + activity["active_id"] + "-button";
-					if (activity["type"] == "2")
-						button.setAttribute("disabled", "");
-					else
-						button.setAttribute("onclick", "chaoxingCheckinLocation(" + JSON.stringify({"active_id": activity["active_id"]}) + "); onclickCooldown(this.id, 5000);");
-					button.innerText = ((activity["type"] == "2") ? "Qrcode" : "Location") + " Checkin (" + activity["name"] + ", " + activity["time_left"] + ")";
-					e.appendChild(button);
-				}
-			}
-			if (!Object.keys(activities).length)
-				e.innerText = "No ongoing activities.";
-			getActivities.calling = false;
-		}
-
-		/* Listify locations. */
-		function listifyLocations() {
-			let e = document.getElementById("locations-list-div");
-			for (let buildingName in locations) {
-				let button = document.createElement("button");
-				button.innerText = buildingName;
-				locations[buildingName]["ranged"] = 1;
-				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "')");
-				e.appendChild(button);
-			}
-		}
-
-		/* Input location. */
-		function inputLocation() {
-			try {
-				let latitude = prompt("Input latitude:");
-				if (latitude === null)
-					return;
-				assert(latitude !== "" || !isNaN(latitude));
-				let longitude = prompt("Input longitude:");
-				if (longitude === null)
-					return;
-				assert(longitude !== "" || !isNaN(longitude));
-				let address = prompt("Input address:");
-				if (address === null)
-					return;
-				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
-				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
-			}
-			catch (err) {
-				alert("Invalid input.");
-			}
-		}
-
-		/* Take video screenshot. */
-		function screenshot(video, quality = 1) {
-			let canvas = document.createElement("canvas");
-			canvas.width = video.videoWidth;
-			canvas.height = video.videoHeight;
-			canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-			let img_src = canvas.toDataURL("image/jpeg", quality);
-			canvas.remove();
-			return img_src;
-		}
-
-		/* Qrcode checkin. */
-		async function chaoxingCheckinQrcode(img_src, div_id) {
-			let location_str = localStorage.getItem("location_");
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			document.getElementById(div_id).innerText = res.text || "Checkin error. (Backend error)";
-			if (res.status_code == 200 && res.text.indexOf("success") != -1)
-				alert(res.text);
-		};
-
-		/* Location checkin. */
-		async function chaoxingCheckinLocation(activity) {
-			let location_str = localStorage.getItem("location_");
-			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			alert((res.status_code == 200) ? res.text : "Checkin error. (Backend error)");
-		}
-	</script>
-</html>
+@server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
+def chaoxing_checkin_checkin_qrcode_img():
+	try:
+		chaoxing = session["chaoxing"]
+		assert chaoxing.logined, "Not logged in."
+		data = request.get_json(force = True)
+		assert data["img_src"], "No image given."
+		img_src = data["img_src"].split(",")[1]
+		assert img_src, "No image given."
+		urls = decode(Image_open(BytesIO(b64decode(img_src))))
+		assert urls, "No Qrcode detected."
+		qr_urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
+		assert qr_urls, "No checkin URL found."
+		result = chaoxing.checkin_checkin_qrcode_url(qr_url = qr_urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		res = make_response(result[1][:-1] + ", " + qr_urls[0] + ")")
+	except Exception as e:
+		res = make_response("Checkin error. (" + str(e) + ")")
+	finally:
+		res.status_code = 200
+		return res
