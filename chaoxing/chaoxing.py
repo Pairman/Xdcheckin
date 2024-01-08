@@ -398,7 +398,7 @@ class Chaoxing:
 			"sys": 1,
 			"ls": 1,
 			"appType": 15,
-			"tid": self.cookies["_tid"],
+			"tid": "",
 			"uid": self.cookies["UID"],
 			"ut": "s"
 		}
@@ -408,7 +408,7 @@ class Chaoxing:
 			params["classId"], params["courseId"] = details["clazzId"], self.course_get_course_id(course = {"class_id": details["clazzId"]})
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
-			s = search(r"((zsign_success)|\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
+			s = search(r"(zsign_success)|\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
 			if s:
 				if s.group(1) == "zsign_success":
 					return 2
@@ -451,7 +451,7 @@ class Chaoxing:
 			presign = self.checkin_do_presign(activity = activity)
 			assert presign, "Presign failure. (" + dumps(activity) + ")"
 			if presign == 2:
-				return True
+				return True, "Checkin success. (Already checked in.)"
 			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ")"
 			if type(presign) is dict:
 				location = presign
@@ -486,7 +486,7 @@ class Chaoxing:
 			presign = self.checkin_do_presign(activity = activity)
 			assert presign, "Presign failure. (" + dumps(activity) + ")"
 			if presign == 2:
-				return True
+				return True, "Checkin success. (Already checked in.)"
 			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ")"
 			if type(presign) is dict:
 				location = presign
