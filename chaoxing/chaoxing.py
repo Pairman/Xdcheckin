@@ -3,6 +3,7 @@
 from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad as pad_pkcs7
+from json import dumps
 from re import findall, search, DOTALL
 from requests import get, post
 from threading import Thread
@@ -10,7 +11,7 @@ from time import sleep
 from urllib.parse import parse_qs, unquote, urlparse
 
 class Chaoxing:
-	name = uid = fid = cookies = courses = logined = None
+	name = cookies = courses = logined = None
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
 	}
@@ -24,7 +25,7 @@ class Chaoxing:
 		"""
 		if self.logined:
 			return
-		self.name, self.uid, self.fid, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
+		self.name, self.cookies, self.logined = (self.login_cookies if cookies else self.login_username_fanya)(account = {"username": username, "password": password, "cookies": cookies}).values()
 		self.courses = self.course_get_courses() if self.logined else {}
 
 	def get(self, url: str = "", params: dict = {}, cookies = None, headers: dict = None, verify: bool = False):
@@ -57,7 +58,7 @@ class Chaoxing:
 	def login_username_v2(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via V2 API.
 		:param account: Username and password in dictionary.
-		:return: Name, UID, FID, cookies and login state.
+		:return: Name, cookies and login state.
 		"""
 		url = "https://passport2-api.chaoxing.com/api/v2/loginbypwd"
 		params = {
@@ -70,16 +71,12 @@ class Chaoxing:
 			assert data["result"]
 			return {
 				"name": data["realname"],
-				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
 		except Exception:
 			return {
 				"name": "",
-				"uid": "",
-				"fid": "",
 				"cookies": None,
 				"logined": False
 			}
@@ -87,7 +84,7 @@ class Chaoxing:
 	def login_username_v3(self, account: dict = {"username": "", "password": ""}):
 		"""Log into Chaoxing account with username and password via V3 API.
 		:param account: Same as login_username_v2().
-		:return: Name (placeholder), UID, FID, cookies and login state.
+		:return: Name (placeholder), cookies and login state.
 		"""
 		url = "http://v3.chaoxing.com/vLogin"
 		data = {
@@ -99,16 +96,12 @@ class Chaoxing:
 			assert res.json()["status"]
 			return {
 				"name": "",
-				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
 		except Exception:
 			return {
 				"name": "",
-				"uid": "",
-				"fid": "",
 				"cookies": None,
 				"logined": False
 			}
@@ -128,16 +121,12 @@ class Chaoxing:
 			assert res.json()["status"]
 			return {
 				"name": "",
-				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
 		except Exception:
 			return {
 				"name": "",
-				"uid": "",
-				"fid": "",
 				"cookies": None,
 				"logined": False
 			}
@@ -161,16 +150,12 @@ class Chaoxing:
 			assert res.json()["status"]
 			return {
 				"name": "",
-				"uid": res.cookies["UID"],
-				"fid": res.cookies.get("fid") or "0",
 				"cookies": res.cookies,
 				"logined": True
 			}
 		except Exception:
 			return {
 				"name": "",
-				"uid": "",
-				"fid": "",
 				"cookies": None,
 				"logined": False
 			}
@@ -187,16 +172,12 @@ class Chaoxing:
 			assert data["result"]
 			return {
 				"name": data["msg"]["name"],
-				"uid": account["cookies"]["UID"],
-				"fid": account["cookies"].get("fid") or "0",
 				"cookies": account["cookies"],
 				"logined": True
 			}
 		except Exception:
 			return {
 				"name": "",
-				"uid": "",
-				"fid": "",
 				"cookies": None,
 				"logined": False
 			}
@@ -271,7 +252,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
 		params = {
-			"fid": "",
+			"fid": self.cookies.get("fid") or 0,
 			"courseId": "",
 			"classId": course["class_id"]
 		}
@@ -304,10 +285,10 @@ class Chaoxing:
 			return {
 				location["activeid"]: {
 					"address": location["address"],
-					"latitude": location["latitude"],
-					"longitude": location["longitude"],
-					"ranged": + (not not location.get("locationrange")),
-					"range": location.get("locationrange") or 0
+					"latitude": str(location["latitude"]),
+					"longitude": str(location["longitude"]),
+					"ranged": str(+ (not not location["locationrange"])),
+					"range": str(location["locationrange"])
 				} for location in data
 			}
 		except Exception:
@@ -320,7 +301,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"fid": 0,
+			"fid": self.cookies.get("fid") or 0,
 			"courseId": self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
@@ -410,19 +391,21 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
+			"courseId": "",
 			"classId": "",
 			"activePrimaryId": activity["active_id"],
 			"general": 1,
 			"sys": 1,
 			"ls": 1,
 			"appType": 15,
-			"tid": "",
-			"uid": self.uid,
+			"tid": self.cookies["_tid"],
+			"uid": self.cookies["UID"],
 			"ut": "s"
 		}
 		try:
 			details = self.checkin_get_details(activity = activity)
 			assert details["status"] == "1" and details["isDelete"] == "0"
+			params["classId"], params["courseId"] = details["clazzId"], self.course_get_course_id(course = {"class_id": details["clazzId"]})
 			res = self.get(url = url, params = params)
 			assert res.status_code == 200
 			s = search(r"((zsign_success)|\"ifopenAddress\" value=\"(.*?)\".*?(?:\"locationText\" value=\"(.*?)\".*?\"locationLatitude\" value=\"(.*?)\".*?\"locationLongitude\" value=\"(.*?)\".*?\"locationRange\" value=\"(.*?)\".*?\")?", res.text, DOTALL)
@@ -448,74 +431,84 @@ class Chaoxing:
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
 		:param location: Address, latitude, longitude and range enforcement in dictionary. Overriden by server-side location. Unused if designated place not enabled.
-		:return: True on success, otherwise False.
+		:return: True and error message on success, otherwise False and error message.
 		"""
+		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+		params = {
+			"name": self.name,
+			"address": "",
+			"activeId": activity["active_id"],
+			"uid": self.cookies["UID"],
+			"clientip": "",
+			"latitude": -1,
+			"longitude": -1,
+			"fid": self.cookies.get("fid") or 0,
+			"appType": 15,
+			"ifTiJiao": 0,
+			"validate": ""
+		}
 		try:
 			presign = self.checkin_do_presign(activity = activity)
-			assert presign
+			assert presign, "Presign failure. (" + dumps(activity) + ")"
 			if presign == 2:
 				return True
-			assert self.checkin_do_analysis(activity = activity)
+			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ")"
 			if type(presign) is dict:
 				location = presign
-			ranged = 1 if location.get("ranged") is None else location.get("ranged")
-			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-			params = {
-				"address": location["address"] if ranged else "",
-				"activeId": activity["active_id"],
-				"latitude": location["latitude"] if ranged else -1,
-				"longitude": location["longitude"] if ranged else -1,
-				"fid": 0,
-				"appType": 15,
-				"ifTiJiao": ranged
-			}
+			if location.get("ranged") or location.get("ranged") is None:
+				params["address"], params["latitude"], params["longitude"], params["ifTiJiao"] = location["address"], location["latitude"], location["longitude"], 1
 			res = self.get(url = url, params = params)
-			return res.text in ("success", "您已签到过了")
-		except Exception:
-			return False
+			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + res.text + ", " + dumps(params) + ")"
+			return True, "Checkin success. (" + res.text + ")"
+		except Exception as e:
+			return False, str(e)
 
 	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param active_id: Activity ID and ENC code in dictionary.
 		:param location: Same as checkin_checkin_location().
-		:return: True on success, otherwise False.
+		:return: Same as checkin_checkin_location().
 		"""
+		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+		params = {
+			"enc": activity["enc"],
+			"name": self.name,
+			"activeId": activity["active_id"],
+			"uid": self.cookies["UID"],
+			"clientip": "",
+			"location": "",
+			"latitude": -1,
+			"longitude": -1,
+			"fid": self.cookies.get("fid") or 0,
+			"appType": 15
+		}
 		try:
 			presign = self.checkin_do_presign(activity = activity)
-			assert presign
+			assert presign, "Presign failure. (" + dumps(activity) + ")"
 			if presign == 2:
 				return True
-			assert self.checkin_do_analysis(activity = activity)
+			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ")"
 			if type(presign) is dict:
 				location = presign
-			ranged = 1 if location.get("ranged") is None else location.get("ranged")
-			url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-			params = {
-				"enc": activity["enc"],
-				"activeId": activity["active_id"],
-				"location": "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}" if ranged else "",
-				"latitude": -1 if ranged else location["latitude"],
-				"longitude": -1 if ranged else location["longitude"],
-				"fid": 0
-			}
+			if location.get("ranged") or location.get("ranged") is None:
+				params["location"] = "{\"result\":1,\"latitude\":" + str(location["latitude"]) + ",\"longitude\":" + str(location["longitude"]) + ",\"address\":\"" + location["address"] + "\"}"
+			else:
+				params["latitude"], params["longitude"] = location["latitude"], location["longitude"]
 			res = self.get(url = url, params = params)
-			return res.text in ("success", "您已签到过了")
-		except Exception:
-			return False
+			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + res.text + ", " + dumps(params) + ")"
+			return True, "Checkin success. (" + res.text + ")"
+		except Exception as e:
+			return False, str(e)
 
 	def checkin_checkin_qrcode_url(self, qr_url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
 		"""Qrcode checkin.
 		:param qr_url: URL from qrcode.
 		:param location: Same as checkin_checkin_location().
-		:return: True on success, otherwise False.
+		:return: Same as checkin_checkin_location().
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" in qr_url
+			assert "mobilelearn.chaoxing.com/widget/sign/e" in qr_url, "Checkin failure. (Not a checkin URL, " + qr_url + ")"
 			params = parse_qs(urlparse(unquote(qr_url)).query)
-			activity = {
-				"active_id": params["id"][0],
-				"enc": params["enc"][0]
-			}
-			return self.checkin_checkin_qrcode(activity = activity, location = location)
-		except Exception:
-			return False
+			return self.checkin_checkin_qrcode(activity = {"active_id": params["id"][0], "enc": params["enc"][0]}, location = location)
+		except Exception as e:
+			return False, str(e)
