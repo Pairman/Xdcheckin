@@ -278,10 +278,16 @@
 			enablePlayers.calling = false;
 		}
 
+		/* Update classrooms. */
+		async function updateClassrooms() {
+			
+		}
+
 		/* Listify classrooms. */
 		function listifyClassrooms() {
 			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
-			const classrooms_list_div = document.getElementById("classrooms-list-div");
+			let classrooms_list_div = document.getElementById("classrooms-list-div");
+			classrooms_list_div.replaceChildren();
 			for (let buildingName in urls) {
 				let building = urls[buildingName];
 				let div = document.createElement("div");
