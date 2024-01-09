@@ -281,19 +281,19 @@
 		/* Listify classrooms. */
 		function listifyClassrooms() {
 			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
-			let classrooms_list_div = document.getElementById("classrooms-list-div");
-			classrooms_list_div.replaceChildren();
+			let e = document.getElementById("classrooms-list-div");
+			e.replaceChildren();
 			for (let buildingName in urls) {
 				let building = urls[buildingName];
 				let div = document.createElement("div");
 				div.innerText = buildingName + ": ";
-				classrooms_list_div.appendChild(div);
+				e.appendChild(div);
 				let classroomArr = [], classroomNamesArr = [];
 				for (let classroomName in building) {
 					let button = document.createElement("button");
 					button.innerText = classroomName;
 					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
-					classrooms_list_div.appendChild(button);
+					e.appendChild(button);
 					classroomArr.push(building[classroomName]);
 					classroomNamesArr.push(classroomName)
 				}
