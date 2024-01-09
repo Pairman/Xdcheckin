@@ -456,7 +456,7 @@ class Chaoxing:
 			if type(presign) is dict:
 				location = presign
 			if location.get("ranged") or location.get("ranged") is None:
-				params["address"], params["latitude"], params["longitude"], params["ifTiJiao"] = location["address"], location["latitude"], location["longitude"], 1
+				params["address"], params["latitude"], params["longitude"], params["ifTiJiao"] = location["address"], location["latitude"], location["longitude"], 0 if presign == 1 else 1
 			res = self.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + res.text + ", " + dumps(params) + ")"
 			return True, "Checkin success. (" + res.text + ")"
