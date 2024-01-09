@@ -448,17 +448,18 @@ class Chaoxing:
 			"validate": ""
 		}
 		try:
+			location_bak = location
 			presign = self.checkin_do_presign(activity = activity)
-			assert presign, "Presign failure. (" + dumps(activity) + ", " + dumps(presign) + ")"
+			assert presign, "Presign failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ")"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ", " + dumps(presign) + ")"
+			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ")"
 			if type(presign) is dict:
 				location = presign
 			if location.get("ranged") or location.get("ranged") is None:
 				params["address"], params["latitude"], params["longitude"], params["ifTiJiao"] = location["address"], location["latitude"], location["longitude"], 0 if presign == 1 else 1
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + dumps(activity) + ", " + dumps(presign) + ", " + dumps(params) + ", " + res.text + ")"
+			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ", " + dumps(params) + ", " + res.text + ")"
 			return True, "Checkin success. (" + res.text + ")"
 		except Exception as e:
 			return False, str(e)
@@ -484,10 +485,10 @@ class Chaoxing:
 		}
 		try:
 			presign = self.checkin_do_presign(activity = activity)
-			assert presign, "Presign failure. (" + dumps(activity) + ", " + dumps(presign) + ")"
+			assert presign, "Presign failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ")"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ", " + dumps(presign) + ")"
+			assert self.checkin_do_analysis(activity = activity), "Analysis failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ")"
 			if type(presign) is dict:
 				location = presign
 			if location.get("ranged") or location.get("ranged") is None:
@@ -495,7 +496,7 @@ class Chaoxing:
 			else:
 				params["latitude"], params["longitude"] = location["latitude"], location["longitude"]
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + dumps(activity) + ", " + dumps(presign) + ", " + dumps(params) + ", " + res.text + ")"
+			assert res.text in ("success", "您已签到过了"), "Checkin failure. (" + dumps(activity) + ", " + dumps(location_bak) + ", " + dumps(presign) + ", " + dumps(params) + ", " + res.text + ")"
 			return True, "Checkin success. (" + res.text + ")"
 		except Exception as e:
 			return False, str(e)
@@ -507,7 +508,7 @@ class Chaoxing:
 		:return: Same as checkin_checkin_location().
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" in qr_url, "Checkin failure. (Not a checkin URL, " + qr_url + ")"
+			assert "mobilelearn.chaoxing.com/widget/sign/e" in qr_url, "Checkin failure. (Not a checkin URL, " + qr_url + ", " + dumps(location) + ")"
 			params = parse_qs(urlparse(unquote(qr_url)).query)
 			return self.checkin_checkin_qrcode(activity = {"active_id": params["id"][0], "enc": params["enc"][0]}, location = location)
 		except Exception as e:
