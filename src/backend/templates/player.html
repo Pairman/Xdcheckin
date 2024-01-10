@@ -607,7 +607,7 @@
 		async function chaoxingCheckinQrcode(img_src, div_id) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			document.getElementById(div_id).innerText = decodeURIComponent(res.text) || "Checkin error. (Backend error)";
+			document.getElementById(div_id).innerText = decodeURIComponent(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(decodeURIComponent(res.text));
 		};
@@ -616,7 +616,7 @@
 		async function chaoxingCheckinLocation(activity) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			alert((res.status_code == 200) ? decodeURIComponent(res.text) : "Checkin error. (Backend error)");
+			alert((res.status_code == 200) ? decodeURIComponent(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
 		}
 	</script>
 </html>
