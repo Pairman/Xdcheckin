@@ -148,10 +148,10 @@ def chaoxing_checkin_checkin_qrcode_img():
 		assert img_src, "No image given."
 		urls = decode(Image_open(BytesIO(b64decode(img_src))))
 		assert urls, "No Qrcode detected."
-		qr_urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
-		assert qr_urls, "No checkin URL found."
-		result = chaoxing.checkin_checkin_qrcode_url(qr_url = qr_urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
-		res = make_response(result[1][:-1] + ", " + qr_urls[0] + ")")
+		urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
+		assert urls, "No checkin URL found."
+		result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		res = make_response(result[1][:-1] + ", " + urls[0] + ")")
 	except Exception as e:
 		res = make_response("Checkin error. (" + str(e) + ")")
 	finally:
