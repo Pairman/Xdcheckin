@@ -167,7 +167,11 @@
 			let e = document.getElementById(e_id);
 			e.style.pointerEvents = "none";
 			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
-		};
+		}
+
+		function escapeUnicode(text) {
+			return text.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {return String.fromCharCode(parseInt(match.substr(2), 16));});
+		}
 
 		/* Check EULA state. */
 		function checkEula() {
@@ -473,11 +477,12 @@
 				localStorage.setItem("chaoxing_cookies", "");
 			}
 			try {
-				assert((username && password) || conf);
+				assert((username && password) || conf, "Invalid input.");
 				alert("Logging in.");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
-				assert(chaoxingLogin.success = (res.status_code == 200));
+				assert(res.status_code == 200, "Backend error.");
 				data = res.json();
+				assert(chaoxingLogin.success = !("err" in data), data["err"]);
 				localStorage.setItem("chaoxing_username", username);
 				localStorage.setItem("chaoxing_password", password);
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
@@ -497,7 +502,7 @@
 				document.getElementById("camera-scan-button").style.display = "block";
 			}
 			catch (err) {
-				alert("Login failed.");
+				alert("Login failed.(" + err.message + ")");
 			}
 			chaoxingLogin.calling = false;
 		}
@@ -607,16 +612,16 @@
 		async function chaoxingCheckinQrcode(img_src, div_id) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			document.getElementById(div_id).innerText = decodeURIComponent(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
+			document.getElementById(div_id).innerText = escapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
-				alert(decodeURIComponent(res.text));
+				alert(escapeUnicode(res.text));
 		};
 
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			alert((res.status_code == 200) ? decodeURIComponent(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
+			alert((res.status_code == 200) ? escapeUnicode(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
 		}
 	</script>
 </html>
