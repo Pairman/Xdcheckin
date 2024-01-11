@@ -10,7 +10,7 @@ from pyzbar.pyzbar import decode
 from requests import get
 from requests.utils import add_dict_to_cookiejar
 from tempfile import gettempdir
-from traceback import format_exc
+from traceback import format_exception
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
@@ -103,7 +103,7 @@ def chaoxing_login():
 		session["chaoxing"] = chaoxing
 		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
 	except Exception:
-		res = make_response(dumps({"err": format_exc()}))
+		res = make_response(dumps({"err": format_exception(type(e), e, e.__traceback__)}))
 	finally:
 		res.status_code = 200
 		return res
