@@ -169,7 +169,7 @@
 			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
 		}
 
-		function escapeUnicode(text) {
+		function unescapeUnicode(text) {
 			return text.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {return String.fromCharCode(parseInt(match.substr(2), 16));});
 		}
 
@@ -612,16 +612,16 @@
 		async function chaoxingCheckinQrcode(img_src, div_id) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			document.getElementById(div_id).innerText = escapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
+			document.getElementById(div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
-				alert(escapeUnicode(res.text));
+				alert(unescapeUnicode(res.text));
 		};
 
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
 			let location_str = localStorage.getItem("location_");
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
-			alert((res.status_code == 200) ? escapeUnicode(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
+			alert((res.status_code == 200) ? unescapeUnicode(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
 		}
 	</script>
 </html>
