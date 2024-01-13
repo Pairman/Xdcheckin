@@ -31,7 +31,9 @@
 			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') getActivities().then(displayDiv('activities-list-div')); else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
 		</div>
 		<div id="curriculum-list-div" style="display: none"></div>
-		<div id="locations-list-div" style="display: none"></div>
+		<div id="locations-list-div" style="display: none">
+			<div id="location-current-div" style="display: none"></div>
+		</div>
 		<div id="activities-list-div" style="display: none"></div>
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
@@ -498,6 +500,7 @@
 				document.getElementById("chaoxing-locations-button").style.display = "block";
 				document.getElementById("chaoxing-input-location-button").style.display = "block";
 				document.getElementById("chaoxing-activities-button").style.display = "block";
+				document.getElementById("location-current-div").style.display = "block";
 				document.getElementById("player0-scan-button").style.display = "block";
 				document.getElementById("camera-scan-button").style.display = "block";
 			}
@@ -570,7 +573,7 @@
 				let button = document.createElement("button");
 				button.innerText = buildingName;
 				locations[buildingName]["ranged"] = 1;
-				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "')");
+				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "'); document.getElementById('location-current-div').innerText = 'Current location: " + buildingName + "(" + JSON.stringify(locations[buildingName]) + ")'");
 				e.appendChild(button);
 			}
 		}
@@ -591,6 +594,7 @@
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
 				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
+				document.getElementById("location-current-div").innerText = "Current location: Input(" + JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}) + ")";
 			}
 			catch (err) {
 				alert("Invalid input.");
