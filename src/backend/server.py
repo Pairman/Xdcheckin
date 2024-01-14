@@ -7,7 +7,6 @@ from json import loads, dumps
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
-
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
