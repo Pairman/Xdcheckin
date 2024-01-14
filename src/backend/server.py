@@ -1,34 +1,25 @@
+from atexit import register
 from base64 import b64decode
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from io import BytesIO
 from json import loads, dumps
-from os import listdir, remove, makedirs
-from os.path import exists
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
 from requests.utils import add_dict_to_cookiejar
-from tempfile import gettempdir
-from traceback import format_exception
+
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
 server = Flask(__name__)
 server.config["SESSION_PERMANENT"] = False
 server.config["SESSION_TYPE"] = "filesystem"
-server.config["SESSION_FILE_DIR"] = gettempdir() + "/xdcheckin"
+session_file_dir = TemporaryDirectory()
+server.config["SESSION_FILE_DIR"] = session_file_dir.name
 server.config["version"] = "0.0.0"
 
-
-if not exists(server.config["SESSION_FILE_DIR"]):
-	makedirs(server.config["SESSION_FILE_DIR"])
-else:
-	for i in listdir(server.config["SESSION_FILE_DIR"]):
-		try:	
-			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
-		except Exception:	
-			continue
+register(session_file_dir.cleanup)
 
 Session(server)
 
