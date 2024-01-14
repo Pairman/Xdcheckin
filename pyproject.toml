@@ -16,7 +16,7 @@ long_description = """Chaoxing Checkin Tool for XDU.
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/backend",
-    "src/xdcheckin",
+    "src/xdcheckin"
 ]
 test_sources = []
 
@@ -27,6 +27,7 @@ requires = [
 	"pycryptodome",
 	"pyzbar",
 	"requests",
+ 	"requests-cache",
 	"waitress"
 ]
 test_requires = []
