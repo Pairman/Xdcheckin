@@ -7,7 +7,6 @@ from json import loads, dumps
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
-from requests.utils import add_dict_to_cookiejar
 
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
@@ -89,12 +88,12 @@ def chaoxing_login():
 		data = request.get_json(force = True)
 		username, password, cookies = data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies
-		chaoxing = Chaoxing(username = username, password = password, cookies = add_dict_to_cookiejar(None, loads(cookies)) if cookies else None)
+		chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
 		assert chaoxing.logined
 		session["chaoxing"] = chaoxing
 		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
 	except Exception:
-		res = make_response(dumps({"err": format_exception(type(e), e, e.__traceback__)}))
+		res = make_response("{}")
 	finally:
 		res.status_code = 200
 		return res
