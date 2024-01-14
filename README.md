@@ -11,8 +11,6 @@ Currently, APP webview is broken on Android and awaits upstream fix. Hence do no
 For Xdcheckin 1.0.1+, Pyzbar on Windows needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784). If you encounter any ```ImportError``` about Pyzbar, please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
 
 # Build
-1. Install beeware build tool and framework with ```pip install briefcase toga```. <br>
-2. Clone recursively with ```git clone -b toga-flask --recursive https://github.com/Pairman/Xdcheckin```. <br>
-3. Cd into the cloned repo. <br>
-4. Run ```breifcase create``` to create project skeleton. <br>
-5. Run ```briefcase update -r && briefcase package <platform>``` to build and generate packages, where ```<platform>``` can be ```windows```, ```android``` or etc.
+1. Install ```briefcase```. <br>
+2. Clone branch ```toga-flask``` recursively. <br>
+3. Run ```briefcase package``` to build and package for your platform.
