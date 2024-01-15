@@ -18,7 +18,7 @@ server.config.update({
 	"SESSION_PERMANENT": False,
 	"SESSION_TYPE": "filesystem",
 	"SESSION_FILE_DIR": session_file_dir.name,
-	"version": "0.0.0"
+	"XDCHECKIN_VERSION": "0.0.0"
 })
 register(session_file_dir.cleanup)
 
@@ -37,7 +37,7 @@ def xdcheckin_static_locations_js():
 
 @server.route("/xdcheckin/get/version", methods = ["POST"])
 def xdcheckin_get_version():
-	res = make_response(server.config["version"])
+	res = make_response(server.config["XDCHECKIN_VERSION"])
 	res.status_code = 200
 	return res
 
