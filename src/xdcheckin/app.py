@@ -6,7 +6,7 @@ from backend.server import server
 
 class Xdcheckin(toga_App):
 	def startup(self):
-		server.config["version"] = self.version
+		server.config["XDCHECKIN_VERSION"] = self.version
 		Thread(target = serve, kwargs = {"app": server, "host": "127.0.0.1", "port": 5001}).start()
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		self.main_window.content = toga_Box(
