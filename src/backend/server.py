@@ -12,12 +12,14 @@ from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
 server = Flask(__name__)
-server.config["SESSION_PERMANENT"] = False
-server.config["SESSION_TYPE"] = "filesystem"
 session_file_dir = TemporaryDirectory()
-server.config["SESSION_FILE_DIR"] = session_file_dir.name
-server.config["version"] = "0.0.0"
 
+server.config.update({
+	"SESSION_PERMANENT": False,
+	"SESSION_TYPE": "filesystem",
+	"SESSION_FILE_DIR": session_file_dir.name,
+	"version": "0.0.0"
+})
 register(session_file_dir.cleanup)
 
 Session(server)
