@@ -11,17 +11,14 @@ from tempfile import TemporaryDirectory
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
-server = Flask(__name__)
 session_file_dir = TemporaryDirectory()
-
+register(session_file_dir.cleanup)
+server = Flask(__name__)
 server.config.update({
 	"SESSION_PERMANENT": False,
 	"SESSION_TYPE": "filesystem",
-	"SESSION_FILE_DIR": session_file_dir.name,
-	"XDCHECKIN_VERSION": "0.0.0"
+	"SESSION_FILE_DIR": session_file_dir.name
 })
-register(session_file_dir.cleanup)
-
 Session(server)
 
 @server.route("/")
@@ -37,7 +34,7 @@ def xdcheckin_static_locations_js():
 
 @server.route("/xdcheckin/get/version", methods = ["POST"])
 def xdcheckin_get_version():
-	res = make_response(server.config["XDCHECKIN_VERSION"])
+	res = make_response(server.config.get("XDCHECKIN_VERSION") or "0.0.0")
 	res.status_code = 200
 	return res
 
