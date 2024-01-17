@@ -67,7 +67,6 @@ def xdcheckin_get_latest_release():
 @server.route("/chaoxing/extract_url", methods = ["POST"])
 def chaoxing_extract_url():
 	try:
-		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
 		data = request.get_json(force = True)
 		assert data
@@ -87,9 +86,9 @@ def chaoxing_login():
 		data = request.get_json(force = True)
 		username, password, cookies = data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies
+		global chaoxing
 		chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
 		assert chaoxing.logined
-		session["chaoxing"] = chaoxing
 		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
 	except Exception as e:
 		res = make_response(dumps({"err": (type(e), e, e.__traceback__)}))
@@ -100,7 +99,6 @@ def chaoxing_login():
 @server.route("/chaoxing/get_activities", methods = ["POST"])
 def chaoxing_get_activities():
 	try:
-		chaoxing = session["chaoxing"]
 		assert chaoxing.logined
 		activities = chaoxing.course_get_activities()
 		res = make_response(dumps(activities))
@@ -114,7 +112,6 @@ def chaoxing_get_activities():
 @server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
 def chaoxing_checkin_checkin_location():
 	try:
-		chaoxing = session["chaoxing"]
 		assert chaoxing.logined, "Not logged in."
 		data = request.get_json(force = True)
 		assert data["activity"]["active_id"], "No activity ID given."
@@ -129,7 +126,6 @@ def chaoxing_checkin_checkin_location():
 @server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
 def chaoxing_checkin_checkin_qrcode_img():
 	try:
-		chaoxing = session["chaoxing"]
 		assert chaoxing.logined, "Not logged in."
 		data = request.get_json(force = True)
 		assert data["img_src"], "No image given."
