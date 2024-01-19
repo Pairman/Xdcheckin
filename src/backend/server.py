@@ -4,21 +4,31 @@ from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from io import BytesIO
 from json import loads, dumps
+from os import listdir, remove, makedirs
+from os.path import exists
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
-from tempfile import TemporaryDirectory
+from tempfile import gettempdir
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
 from backend.xdcheckin_py.chaoxing.locations import locations
 
-session_file_dir = TemporaryDirectory()
-register(session_file_dir.cleanup)
 server = Flask(__name__)
 server.config.update({
 	"SESSION_PERMANENT": False,
 	"SESSION_TYPE": "filesystem",
-	"SESSION_FILE_DIR": session_file_dir.name
+	"SESSION_FILE_DIR": gettempdir() + "/xdcheckin"
 })
+
+if not exists(server.config["SESSION_FILE_DIR"]):
+	makedirs(server.config["SESSION_FILE_DIR"])
+else:
+	for i in listdir(server.config["SESSION_FILE_DIR"]):
+		try:	
+			remove(server.config["SESSION_FILE_DIR"] + "/" + i)
+		except Exception:	
+			continue
+
 Session(server)
 
 @server.route("/blank.html")
