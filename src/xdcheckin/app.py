@@ -12,7 +12,7 @@ class Xdcheckin(toga_App):
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		self.main_window.content = toga_Box(
 			children = [
-				toga_WebView(url = "about:blank" if toga_platform_current_platform == "android" else "http://127.0.0.1:5001", style = toga_style_Pack(flex = 1))
+				toga_WebView(url = "http://127.0.0.1:5001/blank.html" if toga_platform_current_platform == "android" else "http://127.0.0.1:5001", style = toga_style_Pack(flex = 1))
 			]
 		)
 		self.main_window.show()
