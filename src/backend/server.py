@@ -1,4 +1,3 @@
-from atexit import register
 from base64 import b64decode
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
