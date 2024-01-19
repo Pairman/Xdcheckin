@@ -18,7 +18,7 @@ class Xdcheckin(toga_App):
 		self.main_window.show()
 		if toga_platform_current_platform == "android":
 			from java import jclass
-			Intent, Uri = jclass('android.content.Intent'), jclass('android.net.Uri')
+			Intent, Uri = jclass("android.content.Intent"), jclass("android.net.Uri")
 			self._impl.native.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://127.0.0.1:5001")))
 
 def main():
