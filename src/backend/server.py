@@ -21,6 +21,10 @@ server.config.update({
 })
 Session(server)
 
+@server.route("/blank.html")
+def blank_html():
+	return render_template("blank.html")
+
 @server.route("/")
 @server.route("/player.html")
 def player_html():
