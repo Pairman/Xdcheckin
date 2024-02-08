@@ -50,6 +50,7 @@ system_requires = [
     "libcairo2-dev",
     # Needed to compile PyGObject wheel
     "libgirepository1.0-dev",
+    # Needed to compile pyzbar
     "libzbar-dev"
 ]
 
@@ -61,7 +62,8 @@ system_runtime_requires = [
     "libcanberra-gtk3-module",
     # Needed to provide WebKit2 at runtime
     # "gir1.2-webkit2-4.0",
-    "libzbar"
+    # Needed for pyzbar at runtime
+    "libzbar0"
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.rhel]
@@ -70,6 +72,7 @@ system_requires = [
     "cairo-gobject-devel",
     # Needed to compile PyGObject wheel
     "gobject-introspection-devel",
+    # Needed to compile pyzbar
     "zbar-devel"
 ]
 
@@ -82,7 +85,8 @@ system_runtime_requires = [
     "libcanberra-gtk3",
     # Needed to provide WebKit2 at runtime
     # "webkit2gtk3",
-    "zbar"
+    # Needed for pyzbar at runtime
+    "zbar-libs"
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.suse]
@@ -91,6 +95,7 @@ system_requires = [
     "cairo-devel",
     # Needed to compile PyGObject wheel
     "gobject-introspection-devel",
+    # Needed to compile pyzbar
     "libzbar-devel"
 ]
 
@@ -104,7 +109,8 @@ system_runtime_requires = [
     # Needed to provide WebKit2 at runtime
     # "libwebkit2gtk3",
     # "typelib(WebKit2)",
-    "libzbar"
+    # Needed for pyzbar at runtime
+    "libzbar0"
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.arch]
@@ -121,6 +127,7 @@ system_requires = [
     "libcanberra",
     # Needed to provide WebKit2
     # "webkit2gtk",
+    # Needed to compile pyzbar
     "zbar"
 ]
 
@@ -133,6 +140,7 @@ system_runtime_requires = [
     "libcanberra",
     # Needed to provide WebKit2 at runtime
     # "webkit2gtk",
+    # Needed for pyzbar at runtime
     "zbar"
 ]
 
@@ -151,7 +159,9 @@ system_requires = [
     "libcanberra-gtk3",
     "PackageKit-gtk3-module",
     "gvfs-client",
+    # Needed to compile pyzbar
     "zbar-dev",
+    # Needed for pyzbar at runtime
     "zbar"
 ]
 linuxdeploy_plugins = [
