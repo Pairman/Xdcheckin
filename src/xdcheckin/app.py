@@ -12,11 +12,11 @@ class Xdcheckin(toga_App):
 		server_proc = Process(target = serve, kwargs = {"app": server, "host": "127.0.0.1", "port": 5001})
 		server_proc.start()
 
-		def exit_handler(self):
+		def _exit_handler(self):
 			server_proc.terminate()
 			server_proc.join()
 			return self._on_exit
-		self.on_exit = exit_handler
+		self.on_exit = _exit_handler
 
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		if toga_platform_current_platform == "linux":
