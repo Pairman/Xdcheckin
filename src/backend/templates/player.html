@@ -528,8 +528,8 @@
 				tr.appendChild(td);
 				td = document.createElement("td");
 				for (i in lesson["time"]) {
-					let time = lesson["time"][i];
-					td.appendChild(document.createTextNode("Day " + time["day"] + " " + timetable[time["period_begin"] - 1].slice(0, 5) + "-" + timetable[time["period_end"] - 1].slice(6, 11) + "<br>"));
+					td.appendChild(document.createTextNode(e.innerText += "Day " + lesson["time"][i]["day"] + " " + timetable[lesson["time"][i]["period_begin"] - 1].slice(0, 5) + "-" + timetable[lesson["time"][i]["period_end"] - 1].slice(6, 11)));
+					td.appendChild(document.createElement("br"));
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
