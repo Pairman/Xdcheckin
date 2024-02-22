@@ -527,6 +527,12 @@
 				tr.appendChild(td);
 				td = document.createElement("td");
 				td.appendChild(document.createTextNode(lesson["location"]));
+				if ("livestream" in lesson) {
+					let btn = document.createElement("button");
+					btn.innerText = lesson["livestream"]["device"] + ", " + lesson["livestream"]["live_id"];
+					btn.setAttribute("onclick", "setClassroom('" + lesson["livestream"]["url"] + "', '" + lesson[location] + "')");
+					td.appendChild(btn);
+				}
 				tr.appendChild(td);
 				tableBody.appendChild(tr);
 			}
