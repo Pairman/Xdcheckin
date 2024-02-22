@@ -9,7 +9,7 @@ from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
 from tempfile import gettempdir
-from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing
+from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing, Newesxidian
 from backend.xdcheckin_py.chaoxing.locations import locations
 
 server = Flask(__name__)
@@ -73,36 +73,37 @@ def xdcheckin_get_latest_release():
 	finally:
 		return res
 
-@server.route("/chaoxing/extract_url", methods = ["POST"])
-def chaoxing_extract_url():
-	try:
-		assert chaoxing.logined
-		data = request.get_json(force = True)
-		assert data
-		res = chaoxing.get("https://newesxidian.chaoxing.com/live/getViewUrlHls", params = {"liveId": data})
-		assert res.status_code == 200
-		res = make_response(res.text)
-		res.status_code = 200
-	except Exception:
-		res = make_response("")
-		res.status_code = 500
-	finally:
-		return res
-
 @server.route("/chaoxing/login", methods = ["POST"])
 def chaoxing_login():
 	try:
 		data = request.get_json(force = True)
 		username, password, cookies = data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies
-		global chaoxing
+		global chaoxing, newesxidian
 		chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
+		newesxidian = Newesxidian(chaoxing = chaoxing)
 		assert chaoxing.logined
-		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": chaoxing.curriculum_get_curriculum(), "cookies": dumps(dict(chaoxing.cookies))}))
+		curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
+		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": curriculum, "cookies": dumps(dict(chaoxing.cookies))}))
 	except Exception as e:
 		res = make_response(dumps({"err": (type(e), e, e.__traceback__)}))
 	finally:
 		res.status_code = 200
+		return res
+
+@server.route("/chaoxing/extract_url", methods = ["POST"])
+def chaoxing_extract_url():
+	try:
+		assert chaoxing.logined
+		data = request.get_json(force = True)
+		assert data
+		livestream = newesxidian.livestream_get_live_url(live_id = str(data))
+		res = make_response(livestream["url"])
+		res.status_code = 200
+	except Exception:
+		res = make_response("")
+		res.status_code = 500
+	finally:
 		return res
 
 @server.route("/chaoxing/get_activities", methods = ["POST"])
