@@ -510,15 +510,15 @@
 
 		/* Tablify curriculum. */
 		function tablifyCurriculum() {
-			if (!Object.keys(chaoxingLogin.curriculum).length) {
+			if (!Object.keys(chaoxingLogin.curriculum["lessons"]).length) {
 				document.getElementById("curriculum-list-div").innerText = "No curriculum."
 				return;
 			}
 			let table = document.createElement("table");
 			table.border = "1";
 			let tableBody = document.createElement("tbody");
-			for (let class_id in chaoxingLogin.curriculum) {
-				let lesson = chaoxingLogin.curriculum[class_id];
+			for (let class_id in chaoxingLogin.curriculum["lessons"]) {
+				let lesson = chaoxingLogin.curriculum["lessons"][class_id];
 				let tr = document.createElement("tr"), td = document.createElement("td");
 				td.appendChild(document.createTextNode(lesson["name"]));
 				tr.appendChild(td);
