@@ -97,7 +97,7 @@ def chaoxing_extract_url():
 		assert chaoxing.logined
 		data = request.get_json(force = True)
 		assert data
-		livestream = newesxidian.livestream_get_live_url(live_id = str(data))
+		livestream = newesxidian.livestream_get_live_url(livestream = {"live_id": str(data)})
 		res = make_response(livestream["url"])
 		res.status_code = 200
 	except Exception:
