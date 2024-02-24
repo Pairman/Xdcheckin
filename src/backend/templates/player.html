@@ -60,7 +60,7 @@
 			<button onclick="initPlayers.player0.stop();">Stop</button>
 			<button onclick="initPlayers.player0.unmute();">Unmute</button>
 			<button onclick="initPlayers.player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="chaoxingCheckinQrcode((await screenshot(initPlayers.player0.tag, 0.85)), 'player0-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="player0-scan-button" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(initPlayers.player0.tag, 0.85)), 'player0-scanresult-div');}; onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
 		<div id="player0-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
@@ -101,7 +101,7 @@
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
 			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
-			<button id="camera-scan-button" onclick="chaoxingCheckinQrcode((await screenshot(document.getElementById('camera-video'), 0.6)), 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="camera-scan-button" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(document.getElementById('camera-video'), 0.6)), 'camera-scanresult-div');}; onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="camera-div">
 			<video id="camera-video" width="640" height="480" autoplay></video>
