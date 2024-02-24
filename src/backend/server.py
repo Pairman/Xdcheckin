@@ -50,9 +50,9 @@ def xdcheckin_get_version():
 @server.route("/xdcheckin/get/releases/latest", methods = ["POST"])
 def xdcheckin_get_latest_release():
 	try:
-		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases")
+		res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases/latest")
 		assert res.status_code == 200
-		data = res.json()[0]
+		data = res.json()
 		res = make_response(dumps({
 			"tag_name": data["tag_name"],
 			"name": data["name"],
