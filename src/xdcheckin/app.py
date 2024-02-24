@@ -24,7 +24,7 @@ class Xdcheckin(toga_App):
 			system("xdg-open \"http://127.0.0.1:5001\"")
 			self.main_window.content = toga_Box(
 				children = [
-					toga_Label("This APP will launch\n your browser automatically.\nIf not, visit \"http://127.0.0.1:5001\"\nin you browser manually.", style = toga_style_Pack(padding = 12, font_size = 16))
+					toga_Label("This APP will launch\nyour browser automatically.\nIf not, visit \"http://127.0.0.1:5001\"\nin you browser manually.", style = toga_style_Pack(padding = 12, font_size = 16))
 				]
 			)
 		elif toga_platform_current_platform == "android":
@@ -33,7 +33,7 @@ class Xdcheckin(toga_App):
 			self._impl.native.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://127.0.0.1:5001")))
 			self.main_window.content = toga_Box(
 				children = [
-					toga_Label("This APP will launch\n your browser automatically.\nIf not, visit \"http://127.0.0.1:5001\"\nin you browser manually.", style = toga_style_Pack(padding = 12, font_size = 16))
+					toga_Label("This APP will launch\nyour browser automatically.\nIf not, visit \"http://127.0.0.1:5001\"\nin you browser manually.", style = toga_style_Pack(padding = 12, font_size = 16))
 				]
 			)
 		else:
