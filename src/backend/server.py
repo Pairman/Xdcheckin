@@ -1,4 +1,3 @@
-from base64 import b64decode
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from io import BytesIO
@@ -141,7 +140,7 @@ def chaoxing_checkin_checkin_qrcode_img():
 		assert data["img_src"], "No image given."
 		img_src = data["img_src"].split(",")[1]
 		assert img_src, "No image given."
-		urls = decode(Image_open(BytesIO(b64decode(img_src))))
+		urls = decode(Image_open(BytesIO(img_src)))
 		assert urls, "No Qrcode detected."
 		urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 		assert urls, "No checkin URL found."
