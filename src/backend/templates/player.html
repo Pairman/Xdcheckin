@@ -606,6 +606,13 @@
 				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "'); document.getElementById('location-current-div').innerText = 'Current location: " + buildingName + "(" + JSON.stringify(locations[buildingName]) + ")'");
 				e.appendChild(button);
 			}
+			e = document.getElementById("location-current-div");
+			if (!localStorage.getItem("location_")) {
+				localStorage.setItem("location_", JSON.stringify(locations["B楼"]));
+				e.innerText = "Current location: B楼";
+			}
+			else
+				e.innerText = "Current location: " + localStorage.getItem("location_");
 		}
 
 		/* Input location. */
@@ -646,8 +653,7 @@
 
 		/* Qrcode checkin. */
 		async function chaoxingCheckinQrcode(img_src, div_id) {
-			let location_str = localStorage.getItem("location_");
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
+			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = {"img_src": img_src, "location": JSON.parse(localStorage.getItem("location_"))});
 			document.getElementById(div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(unescapeUnicode(res.text));
@@ -655,8 +661,7 @@
 
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
-			let location_str = localStorage.getItem("location_");
-			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": (!location_str) ? locations["B楼"] : JSON.parse(location_str)});
+			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": JSON.parse(localStorage.getItem("location_"))});
 			alert((res.status_code == 200) ? unescapeUnicode(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
 		}
 	</script>
