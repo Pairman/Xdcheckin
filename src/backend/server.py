@@ -136,15 +136,14 @@ def chaoxing_checkin_checkin_location():
 def chaoxing_checkin_checkin_qrcode_img():
 	try:
 		assert chaoxing.logined, "Not logged in."
-		data = request.get_json(force = True)
-		assert data["img_src"], "No image given."
-		img_src = data["img_src"].split(",")[1]
+		location = request.form["location"]
+		img_src = request.files["img_src"]
 		assert img_src, "No image given."
 		urls = decode(Image_open(BytesIO(img_src)))
 		assert urls, "No Qrcode detected."
 		urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 		assert urls, "No checkin URL found."
-		result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = location)
 		res = make_response(result[1][: -1] + ", " + urls[0] + ")")
 	except Exception as e:
 		res = make_response("Checkin error. (" + str(e) + ")")
