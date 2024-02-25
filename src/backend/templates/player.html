@@ -54,7 +54,7 @@
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
-			<div id="player0-title-div" class="div-center"  onclick="async function () {await chaoxingCheckinQrcode((await screenshot(initPlayers.player0.tag, 0.85)), 'player0-scanresult-div');}; onclickCooldown(this.id);">
+			<div id="player0-title-div" class="div-center" onclick="chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);">
 				<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
 			</div>
 			&emsp;
@@ -62,7 +62,7 @@
 			<button onclick="initPlayers.player0.stop();">Stop</button>
 			<button onclick="initPlayers.player0.unmute();">Unmute</button>
 			<button onclick="initPlayers.player0.mute();;">Mute</button>
-			<button id="player0-scan-button" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(initPlayers.player0.tag, 0.85)), 'player0-scanresult-div');}; onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="player0-scan-button" onclick="chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
 		<div id="player0-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
@@ -98,14 +98,14 @@
 		<div id="player3-div"></div>
 
 		<div id="camera-buttons-div" class="div-center">
-			<div id="camera-title-div" class="div-center" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(document.getElementById('camera-video'), 0.6)), 'camera-scanresult-div');}; onclickCooldown(this.id);">
+			<div id="camera-title-div" class="div-center" onclick="chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);">
 				<B style="font-size:40px; font-family: sans-serif;">Camera</B>
 			</div>
 			&emsp;
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
 			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
-			<button id="camera-scan-button" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(document.getElementById('camera-video'), 0.6)), 'camera-scanresult-div');}; onclickCooldown(this.id);" style="display: none;">Scan</button>
+			<button id="camera-scan-button" onclick="chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="camera-div">
 			<video id="camera-video" width="640" height="480" autoplay></video>
@@ -645,7 +645,7 @@
 		}
 
 		/* Take video screenshot. */
-		async function screenshot(video, quality = 1) {
+		async function screenshot(video, quality) {
 			return new Promise((resolve, reject) => {
 				let canvas = document.createElement("canvas");
 				[canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
@@ -664,6 +664,10 @@
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(unescapeUnicode(res.text));
 		};
+
+		async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
+			await chaoxingCheckinQrcode((await screenshot(video, quality)), result_div_id);
+		}
 
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
