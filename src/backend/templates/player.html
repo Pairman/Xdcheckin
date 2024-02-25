@@ -539,10 +539,14 @@
 				document.getElementById("curriculum-list-div").innerText = "No curriculum."
 				return;
 			}
+			let details = chaoxingLogin.curriculum["details"];
+			let info_div = document.createElement("div");
+			info_div.innerText = "Current year: " + details["year"] + ", semester: " + details["semester"] + ", week: " + details["week"] + ".";
+			document.getElementById("curriculum-list-div").replaceChildren(info_div);
 			let table = document.createElement("table");
 			table.border = "1";
 			let tableBody = document.createElement("tbody");
-			let timetable = chaoxingLogin.curriculum["details"]["time"]["timetable"];
+			let timetable = details["time"]["timetable"];
 			for (let class_id in chaoxingLogin.curriculum["lessons"]) {
 				let lesson = chaoxingLogin.curriculum["lessons"][class_id];
 				let tr = document.createElement("tr"), td = document.createElement("td");
@@ -571,7 +575,7 @@
 				tableBody.appendChild(tr);
 			}
 			table.appendChild(tableBody);
-			document.getElementById("curriculum-list-div").replaceChildren(table);
+			document.getElementById("curriculum-list-div").appendChild(table);
 		}
 
 		/* Get activities. */
