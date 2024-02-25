@@ -2,7 +2,7 @@ from multiprocessing import Process
 from waitress import serve
 from backend.server import server
 
-server_proc = Process(target = serve, kwargs = {"app": server, "host": "127.0.0.1", "port": 5001})
+server_proc = Process(target = serve, kwargs = {"app": server, "host": "0.0.0.0", "port": 5001})
 server_proc.start()
 
 from toga import App as toga_App, Box as toga_Box, MainWindow as toga_MainWindow, WebView as toga_WebView, Label as toga_Label
