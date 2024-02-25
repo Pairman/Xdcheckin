@@ -160,10 +160,10 @@
 		}
 
 		/* Post request. */
-		async function post(url = "", data = {}, body = undefined) {
+		async function post(url = "", data = {}, body = undefined, headers = {}) {
 			let status_code = 404, text = "";
 			try {
-				let res = await fetch(url, {method: "POST", body: (body ? body : JSON.stringify(data))});
+				let res = await fetch(url, {method: "POST", body: (body ? body : JSON.stringify(data)), headers: headers});
 				[status_code, text] = [res.status, await res.text()];
 			} catch (err) {}
 			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
@@ -665,7 +665,7 @@
 			var form = new FormData();
 			form.append("img_src", img_src);
 			form.append("location", localStorage.getItem("location_"));
-			let res = await post("/chaoxing/checkin_checkin_qrcode_img", body = form);
+			let res = await post("/chaoxing/checkin_checkin_qrcode_img", body = form, headers = headers: {"Content-Type": "multipart/form-data"});
 			document.getElementById(div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(unescapeUnicode(res.text));
