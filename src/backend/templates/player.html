@@ -54,7 +54,9 @@
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
-			<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
+			<div id="player0-title-div" class="div-center"  onclick="async function () {await chaoxingCheckinQrcode((await screenshot(initPlayers.player0.tag, 0.85)), 'player0-scanresult-div');}; onclickCooldown(this.id);">
+				<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
+			</div>
 			&emsp;
 			<button onclick="initPlayers.player0.initPlay();">Play</button>
 			<button onclick="initPlayers.player0.stop();">Stop</button>
@@ -96,7 +98,9 @@
 		<div id="player3-div"></div>
 
 		<div id="camera-buttons-div" class="div-center">
-			<B style="font-size:40px; font-family: sans-serif;">Camera</B>
+			<div id="camera-title-div" class="div-center" onclick="async function () {await chaoxingCheckinQrcode((await screenshot(document.getElementById('camera-video'), 0.6)), 'camera-scanresult-div');}; onclickCooldown(this.id);">
+				<B style="font-size:40px; font-family: sans-serif;">Camera</B>
+			</div>
 			&emsp;
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
