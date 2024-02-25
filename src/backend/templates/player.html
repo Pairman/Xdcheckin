@@ -630,7 +630,7 @@
 				let address = prompt("Input address:");
 				if (address === null)
 					return;
-				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
+				assert(address !== "" || !(/[()\[\]{}]/.test(address)));
 				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
 				localStorage.setItem("location_name", "Input(" + latitude + ", " + longitude + ", " + address + ")");
 				document.getElementById("location-current-div").innerText = "Current location: " + localStorage.getItem("location_name");
