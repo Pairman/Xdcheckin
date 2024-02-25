@@ -87,8 +87,7 @@ def chaoxing_login():
 		chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
 		newesxidian = Newesxidian(chaoxing = chaoxing)
 		assert chaoxing.logined
-		curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
-		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "curriculum": curriculum, "cookies": dumps(dict(chaoxing.cookies))}))
+		res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "cookies": dumps(dict(chaoxing.cookies))}))
 	except Exception as e:
 		res = make_response(dumps({"err": (type(e), e, e.__traceback__)}))
 	finally:
@@ -106,6 +105,19 @@ def chaoxing_extract_url():
 		res.status_code = 200
 	except Exception:
 		res = make_response("")
+		res.status_code = 500
+	finally:
+		return res
+
+@server.route("/chaoxing/get_curriculum", methods = ["POST"])
+def chaoxing_get_curriculum():
+	try:
+		assert chaoxing.logined
+		curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
+		res = make_response(dumps(curriculum))
+		res.status_code = 200
+	except Exception:
+		res = make_response("{}")
 		res.status_code = 500
 	finally:
 		return res
