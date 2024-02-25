@@ -163,7 +163,7 @@
 		async function post(url = "", data = {}) {
 			let status_code = 404, text = "";
 			try {
-				let res = await fetch(url, {method: "POST", body: ((data instanceof FormData) ? data : JSON.stringify(data)), headers: ((data instanceof FormData) ? {"Content-Type": "multipart/form-data"} : undefined)});
+				let res = await fetch(url, {method: "POST", body: ((data instanceof FormData) ? data : JSON.stringify(data)));
 				[status_code, text] = [res.status, await res.text()];
 			} catch (err) {}
 			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
