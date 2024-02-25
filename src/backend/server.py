@@ -129,7 +129,8 @@ def chaoxing_checkin_checkin_location():
 		assert chaoxing.logined, "Not logged in."
 		data = request.get_json(force = True)
 		assert data["activity"]["active_id"], "No activity ID given."
-		result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data.get("location") or {"latitude": -1, "longitude": -1, "address": ""})
+		data["activity"]["active_id"] = str(data["activity"]["active_id"])
+		result = chaoxing.checkin_checkin_location(activity = data["activity"], location = loads(data["location"]))
 		res = make_response(result[1][: -1] + ", " + data["activity"]["active_id"] + ")")
 	except Exception as e:
 		res = make_response("Checkin error. (" + str(e) + ")")
@@ -141,7 +142,6 @@ def chaoxing_checkin_checkin_location():
 def chaoxing_checkin_checkin_qrcode_img():
 	try:
 		assert chaoxing.logined, "Not logged in."
-		location = request.form["location"]
 		img_src = request.files["img_src"]
 		assert img_src, "No image given."
 		with Image_open(BytesIO(img_src.read())) as img:
@@ -150,7 +150,7 @@ def chaoxing_checkin_checkin_qrcode_img():
 		assert urls, "No Qrcode detected."
 		urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 		assert urls, "No checkin URL found."
-		result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = location)
+		result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
 		res = make_response(result[1][: -1] + ", " + urls[0] + ")")
 	except Exception as e:
 		res = make_response("Checkin error. (" + str(e) + ")")
