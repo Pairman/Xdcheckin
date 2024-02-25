@@ -130,7 +130,7 @@ def chaoxing_checkin_checkin_location():
 		data = request.get_json(force = True)
 		assert data["activity"]["active_id"], "No activity ID given."
 		data["activity"]["active_id"] = str(data["activity"]["active_id"])
-		result = chaoxing.checkin_checkin_location(activity = data["activity"], location = loads(data["location"]))
+		result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
 		res = make_response(result[1][: -1] + ", " + data["activity"]["active_id"] + ")")
 	except Exception as e:
 		res = make_response("Checkin error. (" + str(e) + ")")
