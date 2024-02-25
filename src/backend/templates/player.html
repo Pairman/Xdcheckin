@@ -163,7 +163,7 @@
 		async function post(url = "", data = {}) {
 			let status_code = 404, text = "";
 			try {
-				let res = await fetch(url, {method: "POST", body: ((data instanceof FormData) ? data : JSON.stringify(data)));
+				let res = await fetch(url, {method: "POST", body: ((data instanceof FormData) ? data : JSON.stringify(data))});
 				[status_code, text] = [res.status, await res.text()];
 			} catch (err) {}
 			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
@@ -203,7 +203,7 @@
 		/* Check APP updates. */
 		async function xdcheckinCheckUpdates() {
 			let xdcheckin_version, xdcheckin_latest_release;
-			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json()).length)
+			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
 				return;
 			let xdcheckin_version_arr = xdcheckin_version.split(".");
 			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
@@ -454,6 +454,8 @@
 				e.srcObject = stream;
 				e.play();
 				e.addEventListener("playing", () => {if (!e.height) resizeCamera();});
+			}).catch((err) => {
+				alert("Camera not found or inaccessible. (" + err.name + ")")
 			});
 		}
 
@@ -661,17 +663,21 @@
 		}
 
 		/* Qrcode checkin. */
-		async function chaoxingCheckinQrcode(img_src, div_id) {
+		async function chaoxingCheckinQrcode(img_src, result_div_id) {
 			var form = new FormData();
 			form.append("img_src", img_src);
 			form.append("location", localStorage.getItem("location_"));
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = form);
-			document.getElementById(div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
+			document.getElementById(result_div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(unescapeUnicode(res.text));
 		};
 
 		async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
+			if (video.paused) {
+				document.getElementById(result_div_id).innerText = "Checkin error. (No image given.)";
+				return;
+			}
 			await chaoxingCheckinQrcode((await screenshot(video, quality)), result_div_id);
 		}
 

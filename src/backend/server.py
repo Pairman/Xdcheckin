@@ -1,5 +1,6 @@
 from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
+from importlib.metadata import version
 from io import BytesIO
 from json import loads, dumps
 from os import listdir, remove, makedirs
@@ -8,14 +9,18 @@ from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
 from tempfile import gettempdir
+from urllib3 import disable_warnings
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing, Newesxidian
 from backend.xdcheckin_py.chaoxing.locations import locations
+
+disable_warnings()
 
 server = Flask(__name__)
 server.config.update({
 	"SESSION_PERMANENT": False,
 	"SESSION_TYPE": "filesystem",
-	"SESSION_FILE_DIR": gettempdir() + "/xdcheckin"
+	"SESSION_FILE_DIR": gettempdir() + "/xdcheckin",
+	"XDCHECKIN_VERSION": version("Xdcheckin")
 })
 
 if not exists(server.config["SESSION_FILE_DIR"]):
@@ -139,7 +144,7 @@ def chaoxing_checkin_checkin_qrcode_img():
 		location = request.form["location"]
 		img_src = request.files["img_src"]
 		assert img_src, "No image given."
-		with Image_open(BytesIO(img_src)) as img:
+		with Image_open(BytesIO(img_src.read())) as img:
 			assert img.size[0] > 0 and img.size[1] > 0, "Empty image."
 			urls = decode(img)
 		assert urls, "No Qrcode detected."
