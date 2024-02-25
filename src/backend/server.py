@@ -56,7 +56,7 @@ def xdcheckin_get_latest_release():
 			"tag_name": data["tag_name"],
 			"name": data["name"],
 			"author": data["author"]["login"],
-			"body": data["body"].replace("\r\n", "\n"),
+			"body": data["body"],
 			"published_at": data["published_at"],
 			"html_url": data["html_url"],
 			"assets": [{
