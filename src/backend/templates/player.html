@@ -324,11 +324,11 @@
 					initPlayers.player0.play();
 					initPlayers.player0.on("canplay", () => {
 						let t = initPlayers.player0.getCurrentTime();
-						if (initPlayers.player1.getStatus() == "playing")
+						if (initPlayers.player1 && initPlayers.player1.getStatus() == "playing")
 							initPlayers.player1.seek(t);
-						if (initPlayers.player2.getStatus() == "playing")
+						if (initPlayers.player2 && initPlayers.player2.getStatus() == "playing")
 							initPlayers.player2.seek(t);
-						if (initPlayers.player3.getStatus() == "playing")
+						if (initPlayers.player3 && initPlayers.player3.getStatus() == "playing")
 							initPlayers.player3.seek(t);
 					})
 				});
