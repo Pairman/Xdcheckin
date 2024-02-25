@@ -516,10 +516,9 @@
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
-				chaoxingLogin.curriculum = data["curriculum"];
 				alert("Logged in successfully.");
+				getCurriculum();
 				enablePlayers();
-				tablifyCurriculum();
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
 				document.getElementById("chaoxing-curriculum-button").style.display = "block";
@@ -539,21 +538,24 @@
 		}
 
 		/* Tablify curriculum. */
-		async function tablifyCurriculum() {
-			let details = chaoxingLogin.curriculum["details"];
+		async function getCurriculum() {
+			if (getCurriculum.calling)
+				return;
+			getCurriculum.calling = true;
+			let curriculum = (await post("/chaoxing/get_activities")).json() || {};
 			let info_div = document.createElement("div");
-			info_div.innerText = "Current year: " + details["year"] + ", semester: " + details["semester"] + ", week: " + details["week"] + ".";
+			info_div.innerText = "Current year: " + curriculum["details"]["year"] + ", semester: " + curriculum["details"]["semester"] + ", week: " + curriculum["details"]["week"] + ".";
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
-			if (!Object.keys(chaoxingLogin.curriculum["lessons"]).length) {
+			if (!Object.keys(curriculum["lessons"]).length) {
 				info_div.innerText += " No curriculum."
 				return;
 			}
 			let table = document.createElement("table");
 			table.border = "1";
 			let tableBody = document.createElement("tbody");
-			let timetable = details["time"]["timetable"];
-			for (let class_id in chaoxingLogin.curriculum["lessons"]) {
-				let lesson = chaoxingLogin.curriculum["lessons"][class_id];
+			let timetable = curriculum["details"]["time"]["timetable"];
+			for (let class_id in curriculum["lessons"]) {
+				let lesson = curriculum["lessons"][class_id];
 				let tr = document.createElement("tr"), td = document.createElement("td");
 				td.appendChild(document.createTextNode(lesson["name"]));
 				tr.appendChild(td);
@@ -581,6 +583,7 @@
 			}
 			table.appendChild(tableBody);
 			document.getElementById("curriculum-list-div").appendChild(table);
+			getCurriculum.calling = false;
 		}
 
 		/* Get activities. */
