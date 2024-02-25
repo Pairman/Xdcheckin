@@ -126,9 +126,10 @@
 		checkEula();
 		xdcheckinCheckUpdates();
 		listifyLocations();
-		listifyClassrooms();
-		resizePlayers();
-		enablePlayers();
+		listifyClassrooms().then((ret) => {
+			resizePlayers();
+			enablePlayers();
+		});
 
 		/*
 		 * Function definitions.
@@ -170,7 +171,7 @@
 		}
 
 		/* Div listing toggle. */
-		function displayDiv(e_id) {
+		async function displayDiv(e_id) {
 			let e = document.getElementById(e_id);
 			e.style.display = ((e.style.display == "none") ? "block" : "none");
 		}
@@ -187,7 +188,7 @@
 		}
 
 		/* Check EULA state. */
-		function checkEula() {
+		async function checkEula() {
 			if (localStorage.getItem("xdcheckin_eula"))
 				document.getElementById("main-body").style.display = "block";
 			else if (confirm("This APP provides utilities for Chaoxing check-ins and classroom livestreams exclusively for XDUers.\n\n" +
@@ -218,7 +219,7 @@
 		}
 
 		/* Enable players for XDUers. */
-		function enablePlayers() {
+		async function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
 			if (enablePlayers.success || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
 				return;
@@ -238,7 +239,10 @@
 		}
 
 		/* Listify classrooms. */
-		function listifyClassrooms() {
+		async function listifyClassrooms() {
+			if (listifyClassrooms.calling)
+				return;
+			listifyClassrooms.calling = true;
 			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
 			let e = document.getElementById("classrooms-list-div");
 			e.replaceChildren();
@@ -259,6 +263,7 @@
 				listifyClassrooms.buildingsArr.push(classroomArr);
 				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
 			}
+			listifyClassrooms.calling = false;
 		}
 
 		function getScrollBarWidth() {
@@ -270,7 +275,7 @@
 		}
 
 		/* Players and camera resize. */
-		function resizePlayers(w = 0) {
+		async function resizePlayers(w = 0) {
 			w = w || window.innerWidth - getScrollBarWidth();
 			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
 			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
@@ -286,7 +291,7 @@
 			resizeCamera(w);
 		}
 
-		function resizeCamera(w = 0) {
+		async function resizeCamera(w = 0) {
 			w = w || window.innerWidth - getScrollBarWidth();
 			let e = document.getElementById("camera-video");
 			try {
@@ -297,7 +302,7 @@
 		}
 
 		/* Player creation and selection. */
-		function initPlayers() {
+		async function initPlayers() {
 			if (initPlayers.calling)
 				return;
 			initPlayers.calling = true;
@@ -375,7 +380,7 @@
 		}
 
 		/* Video sources control. */
-		function setClassroom(url, classroomName = "Unknown") {
+		async function setClassroom(url, classroomName = "Unknown") {
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let info = JSON.parse(params.get("info"));
 			localStorage.setItem("classroomName", classroomName);
@@ -386,13 +391,13 @@
 		}
 
 		/* Randomize classroom. */
-		function randClassroom() {
+		async function randClassroom() {
 			let b = Math.floor(Math.random() * listifyClassrooms.buildingsArr.length);
 			let c = Math.floor(Math.random() * listifyClassrooms.buildingsArr[b].length);
 			setClassroom(listifyClassrooms.buildingsArr[b][c], listifyClassrooms.buildingNamesArr[b][c]);
 		}
 
-		function inputClassroom() {
+		async function inputClassroom() {
 			let input = prompt("Input the extracted URL:");
 			if (input === null)
 				return;
@@ -439,7 +444,7 @@
 			}
 		}
 
-		function cameraOn() {
+		async function cameraOn() {
 			let e = document.getElementById("camera-video");
 			if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
 				return;
@@ -459,7 +464,7 @@
 			});
 		}
 
-		function cameraOff() {
+		async function cameraOff() {
 			let e = document.getElementById("camera-video");
 			if (!e.srcObject)
 				return;
@@ -534,7 +539,7 @@
 		}
 
 		/* Tablify curriculum. */
-		function tablifyCurriculum() {
+		async function tablifyCurriculum() {
 			let details = chaoxingLogin.curriculum["details"];
 			let info_div = document.createElement("div");
 			info_div.innerText = "Current year: " + details["year"] + ", semester: " + details["semester"] + ", week: " + details["week"] + ".";
@@ -609,7 +614,10 @@
 		}
 
 		/* Listify locations. */
-		function listifyLocations() {
+		async function listifyLocations() {
+			if (listifyLocations.calling)
+				return;
+			listifyLocations.calling = true;
 			let e = document.getElementById("locations-list-div");
 			for (let buildingName in locations) {
 				let button = document.createElement("button");
@@ -626,10 +634,11 @@
 			}
 			else
 				e.innerText = "Current location: " + localStorage.getItem("location_name");
+			listifyLocations.calling = false;
 		}
 
 		/* Input location. */
-		function inputLocation() {
+		async function inputLocation() {
 			try {
 				let latitude = prompt("Input latitude:");
 				if (latitude === null)
