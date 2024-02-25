@@ -535,14 +535,14 @@
 
 		/* Tablify curriculum. */
 		function tablifyCurriculum() {
-			if (!Object.keys(chaoxingLogin.curriculum["lessons"]).length) {
-				document.getElementById("curriculum-list-div").innerText = "No curriculum."
-				return;
-			}
 			let details = chaoxingLogin.curriculum["details"];
 			let info_div = document.createElement("div");
 			info_div.innerText = "Current year: " + details["year"] + ", semester: " + details["semester"] + ", week: " + details["week"] + ".";
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
+			if (!Object.keys(chaoxingLogin.curriculum["lessons"]).length) {
+				info_div.innerText += " No curriculum."
+				return;
+			}
 			let table = document.createElement("table");
 			table.border = "1";
 			let tableBody = document.createElement("tbody");
