@@ -139,7 +139,9 @@ def chaoxing_checkin_checkin_qrcode_img():
 		location = request.form["location"]
 		img_src = request.files["img_src"]
 		assert img_src, "No image given."
-		urls = decode(Image_open(BytesIO(img_src)))
+		with Image_open(BytesIO(img_src)) as img:
+			assert img.size[0] > 0 and img.size[1] > 0, "No image given."
+			urls = decode(img)
 		assert urls, "No Qrcode detected."
 		urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 		assert urls, "No checkin URL found."
