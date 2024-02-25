@@ -54,7 +54,7 @@
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
-			<div id="player0-title-div" class="div-center" onclick="chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);">
+			<div id="player0-title-div" onclick="chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);">
 				<B style="font-size:40px; font-family: sans-serif;">PPTVideo</B>
 			</div>
 			&emsp;
@@ -98,7 +98,7 @@
 		<div id="player3-div"></div>
 
 		<div id="camera-buttons-div" class="div-center">
-			<div id="camera-title-div" class="div-center" onclick="chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);">
+			<div id="camera-title-div">
 				<B style="font-size:40px; font-family: sans-serif;">Camera</B>
 			</div>
 			&emsp;
@@ -521,7 +521,9 @@
 				document.getElementById("chaoxing-activities-button").style.display = "block";
 				document.getElementById("location-current-div").style.display = "block";
 				document.getElementById("player0-scan-button").style.display = "block";
+				document.getElementById("player0-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);");
 				document.getElementById("camera-scan-button").style.display = "block";
+				document.getElementById("camera-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);");
 			}
 			catch (err) {
 				alert("Login failed.(" + err.message + ")");
