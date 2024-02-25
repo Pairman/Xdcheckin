@@ -603,16 +603,17 @@
 				let button = document.createElement("button");
 				button.innerText = buildingName;
 				locations[buildingName]["ranged"] = 1;
-				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "'); document.getElementById('location-current-div').innerText = 'Current location: " + buildingName + "(" + JSON.stringify(locations[buildingName]) + ")'");
+				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "'); localStorage.setItem('location_name', '" + buildingName + "'); document.getElementById('location-current-div').innerText = 'Current location: " + buildingName + "'");
 				e.appendChild(button);
 			}
 			e = document.getElementById("location-current-div");
 			if (!localStorage.getItem("location_")) {
 				localStorage.setItem("location_", JSON.stringify(locations["B楼"]));
+				localStorage.setItem("location_name", "B楼");
 				e.innerText = "Current location: B楼";
 			}
 			else
-				e.innerText = "Current location: " + localStorage.getItem("location_");
+				e.innerText = "Current location: " + localStorage.getItem("location_name");
 		}
 
 		/* Input location. */
@@ -631,7 +632,8 @@
 					return;
 				assert(address !== "" || !(/[`!@#$%^&*_+\=\[\]{};':"\\|,.<>\/?~]/.test(address)));
 				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
-				document.getElementById("location-current-div").innerText = "Current location: Input(" + JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}) + ")";
+				localStorage.setItem("location_name", "Input(" + latitude + ", " + longitude + ", " + address + ")");
+				document.getElementById("location-current-div").innerText = "Current location: " + localStorage.getItem("location_name");
 			}
 			catch (err) {
 				alert("Invalid input.");
