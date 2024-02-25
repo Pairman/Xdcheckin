@@ -648,15 +648,16 @@
 
 		/* Take video screenshot. */
 		async function screenshot(video, quality) {
-			return (await (new Promise((resolve, reject) => {
-				let canvas = document.createElement("canvas");
-				[canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
-				canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+			let canvas = document.createElement("canvas");
+			[canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
+			canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+			let img_src = await (new Promise((resolve, reject) => {
 				canvas.toBlob(blob => {
 					resolve(blob);
-					canvas.remove();
 				}, "image/jpeg", quality);
-			})));
+			}));
+			canvas.remove();
+			return img_src;
 		}
 
 		/* Qrcode checkin. */
