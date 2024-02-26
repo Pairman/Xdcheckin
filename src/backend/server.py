@@ -172,6 +172,6 @@ def create_server():
 
 	return server
 
-def start_server():
+def start_server(host: str = "127.0.0.1", port: int = 5001):
 	disable_warnings()
-	serve(app = create_server(), host = "127.0.0.1", port =  5001)
+	serve(app = create_server(), host = host, port = port)
