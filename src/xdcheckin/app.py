@@ -1,8 +1,8 @@
 from threading import Thread
-from backend.server import start_server
 from toga import App as toga_App, Box as toga_Box, MainWindow as toga_MainWindow, WebView as toga_WebView, Label as toga_Label
 from toga.platform import current_platform as toga_platform_current_platform
 from toga.style import Pack as toga_style_Pack
+from backend.server import start_server
 
 class Xdcheckin(toga_App):
 	def startup(self):
