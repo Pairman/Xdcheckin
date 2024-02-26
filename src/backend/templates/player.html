@@ -126,7 +126,7 @@
 		checkEula();
 		xdcheckinCheckUpdates();
 		listifyLocations();
-		listifyClassrooms().then((ret) => {
+		listifyClassrooms().then(() => {
 			resizePlayers();
 			enablePlayers();
 		});
@@ -519,7 +519,7 @@
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
 				alert("Logged in successfully.");
-				getCurriculum().then((result) => {
+				getCurriculum().then(() => {
 					document.getElementById("chaoxing-curriculum-button").style.display = "block";
 				});
 				enablePlayers();
