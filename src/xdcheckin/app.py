@@ -1,20 +1,12 @@
-from multiprocessing import Process
+from threading import Thread
 from backend.server import start_server
-
-server_proc = Process(target = start_server)
-server_proc.start()
-
 from toga import App as toga_App, Box as toga_Box, MainWindow as toga_MainWindow, WebView as toga_WebView, Label as toga_Label
 from toga.platform import current_platform as toga_platform_current_platform
 from toga.style import Pack as toga_style_Pack
 
 class Xdcheckin(toga_App):
 	def startup(self):
-		def _exit_handler(self):
-			server_proc.terminate()
-			server_proc.join()
-			return self._on_exit
-		self.on_exit = _exit_handler
+		Thread(target = start_server, daemon = True)
 
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		if toga_platform_current_platform == "android":
