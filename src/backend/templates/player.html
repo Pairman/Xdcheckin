@@ -6,8 +6,8 @@
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/skins/default/aliplayer-min.css"/>
 	<script type="text/javascript" src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js"></script>
-	<script type="text/javascript" src="xdcheckin/static/locations.js"></script>
-	<script type="text/javascript" src="static/classrooms.js"></script>
+	<script async defer src="xdcheckin/static/locations.js" onload="listifyLocations().then(() => {document.getElementById('chaoxing-locations-button').style.display = 'block';});"></script>
+	<script async defer src="static/classrooms.js" onload="listifyClassrooms().then(() => {resizePlayers(); enablePlayers();});"></script>
 	<script async defer src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js" onload="listifyClassrooms();"></script>
 
 	<head>
@@ -125,11 +125,6 @@
 
 		checkEula();
 		xdcheckinCheckUpdates();
-		listifyLocations();
-		listifyClassrooms().then(() => {
-			resizePlayers();
-			enablePlayers();
-		});
 
 		/*
 		 * Function definitions.
@@ -219,7 +214,6 @@
 				}
 			}
 		}
-
 		/* Enable players for XDUers. */
 		async function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
@@ -525,7 +519,6 @@
 				enablePlayers();
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
-				document.getElementById("chaoxing-locations-button").style.display = "block";
 				document.getElementById("chaoxing-input-location-button").style.display = "block";
 				document.getElementById("chaoxing-activities-button").style.display = "block";
 				document.getElementById("location-current-div").style.display = "block";
