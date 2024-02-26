@@ -177,7 +177,7 @@
 		}
 
 		/* Onclick cooldown. */
-		function onclickCooldown(e_id, time = 1000) {
+		async function onclickCooldown(e_id, time = 1000) {
 			let e = document.getElementById(e_id);
 			e.style.pointerEvents = "none";
 			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
