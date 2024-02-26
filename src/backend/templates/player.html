@@ -5,9 +5,9 @@
 	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/skins/default/aliplayer-min.css"/>
-	<script type="text/javascript" src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js"></script>
+	<script async defer src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.18.1/aliplayer-min.js" onload="resizePlayers().then(enablePlayers());"></script>
 	<script async defer src="xdcheckin/static/locations.js" onload="listifyLocations().then(() => {document.getElementById('chaoxing-locations-button').style.display = 'block';});"></script>
-	<script async defer src="static/classrooms.js" onload="listifyClassrooms().then(() => {resizePlayers(); enablePlayers();});"></script>
+	<script async defer src="static/classrooms.js" onload="listifyClassrooms().then(resizePlayers()).then(enablePlayers());"></script>
 	<script async defer src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js" onload="listifyClassrooms();"></script>
 
 	<head>
