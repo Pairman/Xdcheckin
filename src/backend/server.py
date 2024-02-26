@@ -10,10 +10,9 @@ from pyzbar.pyzbar import decode
 from requests import get
 from tempfile import gettempdir
 from urllib3 import disable_warnings
+from waitress import serve
 from backend.xdcheckin_py.chaoxing.chaoxing import Chaoxing, Newesxidian
 from backend.xdcheckin_py.chaoxing.locations import locations
-
-disable_warnings()
 
 def create_server():
 	server = Flask(__name__)
@@ -172,3 +171,7 @@ def create_server():
 			return res
 
 	return server
+
+def start_server():
+	disable_warnings()
+	serve(app = create_server(), host = "127.0.0.1", port =  5001)
