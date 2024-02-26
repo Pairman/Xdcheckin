@@ -254,7 +254,7 @@
 					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
 					e.appendChild(button);
 					classroomArr.push(building[classroomName]);
-					classroomNamesArr.push(classroomName)
+					classroomNamesArr.push(classroomName);
 				}
 				listifyClassrooms.buildingsArr.push(classroomArr);
 				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
@@ -377,12 +377,12 @@
 
 		/* Video sources control. */
 		async function setClassroom(url, classroomName = "Unknown") {
-			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
-			let info = JSON.parse(params.get("info"));
+			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName;
 			localStorage.setItem("classroomName", classroomName);
 			localStorage.setItem("classroom", url);
-			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName;
-			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [info.videoPath.pptVideo || "", info.videoPath.teacherTrack || "", info.videoPath.teacherFull || "", info.videoPath.studentFull || ""];
+			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
+			let videos = JSON.parse(params.get("info"))["videoPath"];
+			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [videos.pptVideo || "", videos.teacherTrack || "", videos.teacherFull || "", videos.studentFull || ""];
 			initPlayers();
 		}
 
@@ -691,7 +691,7 @@
 				document.getElementById(result_div_id).innerText = "Checkin error. (No image given.)";
 				return;
 			}
-			await chaoxingCheckinQrcode((await screenshot(video, quality)), result_div_id);
+			chaoxingCheckinQrcode((await screenshot(video, quality)), result_div_id);
 		}
 
 		/* Location checkin. */
