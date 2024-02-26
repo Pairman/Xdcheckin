@@ -6,7 +6,7 @@ from toga.style import Pack as toga_style_Pack
 
 class Xdcheckin(toga_App):
 	def startup(self):
-		Thread(target = start_server, daemon = True)
+		Thread(target = start_server, daemon = True).start()
 
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		if toga_platform_current_platform == "android":
