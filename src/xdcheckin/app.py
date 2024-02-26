@@ -1,10 +1,6 @@
 from multiprocessing import Process
 from waitress import serve
 from backend.server import server
-
-server_proc = Process(target = serve, kwargs = {"app": server, "host": "127.0.0.1", "port": 5001})
-server_proc.start()
-
 from toga import App as toga_App, Box as toga_Box, MainWindow as toga_MainWindow, WebView as toga_WebView, Label as toga_Label
 from toga.platform import current_platform as toga_platform_current_platform
 from toga.style import Pack as toga_style_Pack
@@ -12,6 +8,7 @@ from toga.style import Pack as toga_style_Pack
 class Xdcheckin(toga_App):
 	def startup(self):
 		def _exit_handler(self):
+			nonlocal server_proc
 			server_proc.terminate()
 			server_proc.join()
 			return self._on_exit
@@ -44,4 +41,6 @@ class Xdcheckin(toga_App):
 		self.main_window.show()
 
 def main():
+	server_proc = Process(target = serve, kwargs = {"app": server, "host": "127.0.0.1", "port": 5001})
+	server_proc.start()
 	return Xdcheckin()
