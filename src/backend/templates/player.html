@@ -206,6 +206,8 @@
 			let xdcheckin_version, xdcheckin_latest_release;
 			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
 				return;
+			let footer_div = document.getElementById("footer-div");
+			footer_div.innerText = "Xdcheckin " + xdcheckin_version + "&emsp;" + footer_div.innerText;
 			let xdcheckin_version_arr = xdcheckin_version.split(".");
 			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
 			for (let i = 0; i < 3; ++i) {
