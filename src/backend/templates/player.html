@@ -208,7 +208,7 @@
 				return;
 			let footer_div = document.getElementById("footer-div");
 			footer_div.innerHTML = "Xdcheckin " + xdcheckin_version + "&emsp;" + footer_div.innerHTML;
-			let xdcheckin_version_arr = xdcheckin_version.split(".");
+			let xdcheckin_version_arr = xdcheckin_version.split("-")[0].split(".");
 			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
 			for (let i = 0; i < 3; ++i) {
 				if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
