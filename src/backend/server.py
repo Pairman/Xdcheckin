@@ -89,7 +89,7 @@ def create_server():
 			assert chaoxing.logined
 			res = make_response(dumps({"fid": chaoxing.cookies.get("fid") or "0", "courses": chaoxing.courses, "cookies": dumps(dict(chaoxing.cookies))}))
 		except Exception as e:
-			res = make_response(dumps({"err": (str(e), str(e.__traceback__))}))
+			res = make_response(dumps({"err": str(e)}))
 		finally:
 			res.status_code = 200
 			return res
