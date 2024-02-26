@@ -517,11 +517,12 @@
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
 				alert("Logged in successfully.");
-				getCurriculum();
+				getCurriculum().then((result) => {
+					document.getElementById("chaoxing-curriculum-button").style.display = "block";
+				});
 				enablePlayers();
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
-				document.getElementById("chaoxing-curriculum-button").style.display = "block";
 				document.getElementById("chaoxing-locations-button").style.display = "block";
 				document.getElementById("chaoxing-input-location-button").style.display = "block";
 				document.getElementById("chaoxing-activities-button").style.display = "block";
@@ -542,7 +543,7 @@
 			if (getCurriculum.calling)
 				return;
 			getCurriculum.calling = true;
-			let curriculum = (await post("/chaoxing/get_activities")).json() || {};
+			let curriculum = (await post("/chaoxing/get_curriculum")).json() || {};
 			let info_div = document.createElement("div");
 			info_div.innerText = "Current year: " + curriculum["details"]["year"] + ", semester: " + curriculum["details"]["semester"] + ", week: " + curriculum["details"]["week"] + ".";
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
