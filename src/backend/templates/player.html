@@ -175,7 +175,7 @@
 			let e_ids = ["curriculum-list-div", "locations-list-div", "activities-list-div", "classrooms-list-div"];
 			for (let i in e_ids)
 				if (e_ids[i] != e_id)
-					e.style.display = "none";
+					document.getElementById(e_ids[i]).style.display = "none";
 		}
 
 		/* Onclick cooldown. */
