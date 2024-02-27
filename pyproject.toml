@@ -49,9 +49,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "libcairo2-dev",
     # Needed to compile PyGObject wheel
-    "libgirepository1.0-dev",
-    # Needed to compile pyzbar
-    "libzbar-dev"
+    "libgirepository1.0-dev"
 ]
 
 system_runtime_requires = [
@@ -71,9 +69,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "cairo-gobject-devel",
     # Needed to compile PyGObject wheel
-    "gobject-introspection-devel",
-    # Needed to compile pyzbar
-    "zbar-devel"
+    "gobject-introspection-devel"
 ]
 
 system_runtime_requires = [
@@ -94,9 +90,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "cairo-devel",
     # Needed to compile PyGObject wheel
-    "gobject-introspection-devel",
-    # Needed to compile pyzbar
-    "libzbar-devel"
+    "gobject-introspection-devel"
 ]
 
 system_runtime_requires = [
@@ -127,8 +121,6 @@ system_requires = [
     "libcanberra",
     # Needed to provide WebKit2
     # "webkit2gtk",
-    # Needed to compile pyzbar
-    "zbar"
 ]
 
 system_runtime_requires = [
