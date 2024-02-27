@@ -24,11 +24,11 @@
 		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold;"></div>
 
 		<div id="chaoxing-buttons" class="div-center">
-			<button id="chaoxing-login-button" onclick="chaoxingLogin()">Chaoxing Login</button>
-			<button id="chaoxing-curriculum-button" onclick="displayDiv('curriculum-list-div')" style="display: none">Show Curriculum</button>
-			<button id="chaoxing-locations-button" onclick="displayDiv('locations-list-div')" style="display: none">Select Location</button>
-			<button id="chaoxing-input-location-button" onclick="inputLocation()" style="display: none">Input Location</button>
-			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') getActivities().then(displayDiv('activities-list-div')); else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
+			<button id="chaoxing-login-button" onclick="chaoxingLogin();">Chaoxing Login</button>
+			<button id="chaoxing-curriculum-button" onclick="hideOtherDivs('curriculum-list-div'); displayDiv('curriculum-list-div');" style="display: none">Show Curriculum</button>
+			<button id="chaoxing-locations-button" onclick="hideOtherDivs('locations-list-div'); displayDiv('locations-list-div');" style="display: none">Select Location</button>
+			<button id="chaoxing-input-location-button" onclick="inputLocation();" style="display: none">Input Location</button>
+			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') {hideOtherDivs('activities-list-div'); getActivities().then(displayDiv('activities-list-div'));} else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
 		</div>
 		<div id="curriculum-list-div" style="display: none"></div>
 		<div id="locations-list-div" style="display: none">
@@ -37,10 +37,10 @@
 		<div id="activities-list-div" style="display: none"></div>
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
-			<button onclick="displayDiv('classrooms-list-div')">Select Classroom</button>
-			<button onclick="randClassroom()">I'm Feeling Lucky</button>
-			<button onclick="inputClassroom()">Load URL</button>
-			<button id="extract-classroom-button" onclick="extractClassroom()" style="display: none;">Extract URL</button>
+			<button onclick="hideOtherDivs('classrooms-list-div'); displayDiv('classrooms-list-div');">Select Classroom</button>
+			<button onclick="randClassroom();">I'm Feeling Lucky</button>
+			<button onclick="inputClassroom();">Load URL</button>
+			<button id="extract-classroom-button" onclick="extractClassroom();" style="display: none;">Extract URL</button>
 		</div>
 		<div id="classrooms-list-div" style="display: none;"></div>
 
@@ -50,7 +50,7 @@
 			<button onclick="if (initPlayers.player0) initPlayers.player0.stop(); if (initPlayers.player1) initPlayers.player1.stop(); if (initPlayers.player2) initPlayers.player2.stop(); if (initPlayers.player3) initPlayers.player3.stop(); cameraOff();">Stop All</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.setVolume(1); if (initPlayers.player1) initPlayers.player1.setVolume(1); if (initPlayers.player2) initPlayers.player2.setVolume(1); if (initPlayers.player3) initPlayers.player3.setVolume(1);">Unmute All</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.mute(); if (initPlayers.player1) initPlayers.player1.mute(); if (initPlayers.player2) initPlayers.player2.mute(); if (initPlayers.player3) initPlayers.player3.mute();">Mute All</button>
-			<button onclick="resizePlayers()">Resize All</button>
+			<button onclick="resizePlayers();">Resize All</button>
 		</div>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
@@ -104,7 +104,7 @@
 			&emsp;
 			<button onclick="cameraOn();">On</button>
 			<button onclick="cameraOff();">Off</button>
-			<button id="camera-resize-button" onclick="resizePlayers()">Resize</button>
+			<button id="camera-resize-button" onclick="resizePlayers();">Resize</button>
 			<button id="camera-scan-button" onclick="chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="camera-div">
@@ -169,6 +169,13 @@
 		async function displayDiv(e_id) {
 			let e = document.getElementById(e_id);
 			e.style.display = ((e.style.display == "none") ? "block" : "none");
+		}
+
+		async function hideOtherDivs(e_id) {
+			let e_ids = ["curriculum-list-div", "locations-list-div", "activities-list-div", "classrooms-list-div"];
+			for (let i in e_ids)
+				if (e_ids[i] != e_id)
+					e.style.display = "none";
 		}
 
 		/* Onclick cooldown. */
