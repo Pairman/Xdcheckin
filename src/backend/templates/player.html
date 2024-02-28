@@ -213,7 +213,7 @@
 			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text))
 				return;
 			let footer_div = document.getElementById("footer-div");
-			footer_div.innerHTML = "Xdcheckin " + xdcheckin_version + "&emsp;" + footer_div.innerHTML;
+			footer_div.innerHTML = `Xdcheckin ${xdcheckin_version}&emsp;${footer_div.innerHTML}`;
 			if (!Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
 				return;
 			let xdcheckin_version_arr = xdcheckin_version.split("-")[0].split(".");
@@ -222,7 +222,7 @@
 				if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
 					return;
 				if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
-					document.getElementById("xdcheckin-update-div").innerHTML = "<a href=\"" + xdcheckin_latest_release["html_url"] + "\">Version " + xdcheckin_latest_release["tag_name"] + " released.</a><br>" + xdcheckin_latest_release["body"].replaceAll("\r\n", "<br>");
+					document.getElementById("xdcheckin-update-div").innerHTML = `<a href='${xdcheckin_latest_release['html_url']}'>Version ${xdcheckin_latest_release['tag_name']} released.</a><br>${xdcheckin_latest_release['body'].replaceAll('\r\n', '<br>')}`;
 					return;
 				}
 			}
@@ -378,13 +378,13 @@
 			for (let buildingName in urls) {
 				let building = urls[buildingName];
 				let div = document.createElement("div");
-				div.innerText = buildingName + ": ";
+				div.innerText = `${buildingName}: `;
 				e.appendChild(div);
 				let classroomArr = [], classroomNamesArr = [];
 				for (let classroomName in building) {
 					let button = document.createElement("button");
 					button.innerText = classroomName;
-					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
+					button.setAttribute("onclick", `setClassroom('${building[classroomName]}', '${classroomName}')`);
 					e.appendChild(button);
 					classroomArr.push(building[classroomName]);
 					classroomNamesArr.push(classroomName);
@@ -397,7 +397,7 @@
 
 		/* Video sources control. */
 		async function setClassroom(url, classroomName = "Unknown") {
-			document.getElementById("xdcheckin-title-div").innerText = "Xdcheckin: " + classroomName;
+			document.getElementById("xdcheckin-title-div").innerText = `Xdcheckin: ${classroomName}`;
 			localStorage.setItem("classroomName", classroomName);
 			localStorage.setItem("classroom", url);
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
@@ -476,7 +476,7 @@
 				e.play();
 				e.addEventListener("playing", () => {if (!e.height) resizeCamera();});
 			}).catch((err) => {
-				alert("Camera not found or inaccessible. (" + err.name + ")")
+				alert("Camera not found or inaccessible. ")
 			});
 		}
 
@@ -539,7 +539,7 @@
 			chaoxingPromptLogin.calling = true;
 			try {
 				let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password");
-				if (!username || !password || !confirm("Use previously entered account " + username + "?")) {
+				if (!username || !password || !confirm(`Use previously entered account ${username}?`)) {
 					username = prompt("Input Chaoxing username:");
 					if (username === null)
 						return chaoxingPromptLogin.calling = false;
@@ -554,7 +554,7 @@
 				alert("Logged in successfully.");
 			}
 			catch (err) {
-				alert("Login failed. (" + err.message + ")");
+				alert(`Login failed. (${err.message})`);
 			}
 			chaoxingPromptLogin.calling = false;
 		}
@@ -604,7 +604,7 @@
 			getCurriculum.calling = true;
 			let curriculum = (await post("/chaoxing/get_curriculum")).json() || {};
 			let info_div = document.createElement("div");
-			info_div.innerText = "Current year: " + curriculum["details"]["year"] + ", semester: " + curriculum["details"]["semester"] + ", week: " + curriculum["details"]["week"] + ".";
+			info_div.innerText = `Current year: ${curriculum['details']['year']}, semester: ${curriculum['details']['semester']}, week: ${curriculum['details']['week']}.`;
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
 			if (!Object.keys(curriculum["lessons"]).length) {
 				info_div.innerText += " No curriculum.";
@@ -620,20 +620,20 @@
 				td.appendChild(document.createTextNode(lesson["name"]));
 				tr.appendChild(td);
 				td = document.createElement("td");
-				lesson["teacher"].forEach((teacher) => {td.appendChild(document.createTextNode(teacher + " "))});
+				lesson["teacher"].forEach((teacher) => {td.appendChild(document.createTextNode(`${teacher} `))});
 				tr.appendChild(td);
 				td = document.createElement("td");
-				td.appendChild(document.createTextNode("Day " + lesson["time"][0]["day"] + " " + timetable[lesson["time"][0]["period_begin"] - 1].slice(0, 5) + "-" + timetable[lesson["time"][0]["period_end"] - 1].slice(6, 11)));
+				td.appendChild(document.createTextNode(`Day ${lesson['time'][0]['day']} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
 				for (let i = 1; i < lesson["time"].length; ++i) {
 					td.appendChild(document.createElement("br"));
-					td.appendChild(document.createTextNode("Day " + lesson["time"][i]["day"] + " " + timetable[lesson["time"][i]["period_begin"] - 1].slice(0, 5) + "-" + timetable[lesson["time"][i]["period_end"] - 1].slice(6, 11)));
+					td.appendChild(document.createTextNode(`Day ${lesson['time'][i]['day']} ${timetable[lesson['time'][i]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][i]['period_end'] - 1].slice(6, 11)}`));
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
 				if ("livestream" in lesson) {
 					let btn = document.createElement("button");
 					btn.innerText = lesson["location"];
-					btn.setAttribute("onclick", "setClassroom('" + lesson["livestream"]["url"] + "', '" + lesson["location"] + "')");
+					btn.setAttribute("onclick", `setClassroom('${lesson['livestream']['url']}', '${lesson['location']}')`);
 					td.appendChild(btn);
 				}
 				else
@@ -657,18 +657,21 @@
 			for (let class_id in activities) {
 				let class_activities = activities[class_id];
 				let div = document.createElement("div");
-				div.innerText = chaoxingLogin.courses[class_id]["name"] + ": ";
+				div.innerText = `${chaoxingLogin.courses[class_id]['name']}: `;
 				e.appendChild(div);
 				for (let i in class_activities) {
 					let activity = class_activities[i];
-					let button = document.createElement("button");
-					button.id = "chaoxing-activity-" + activity["active_id"] + "-button";
+					let b = document.createElement("button");
+					b.id = `chaoxing-activity-${activity['active_id']}-button`;
 					if (activity["type"] == "2")
-						button.setAttribute("disabled", "");
+						b.setAttribute("disabled", "");
 					else
-						button.setAttribute("onclick", "chaoxingCheckinLocation(" + JSON.stringify({"active_id": activity["active_id"]}) + "); onclickCooldown(this.id, 5000);");
-					button.innerText = ((activity["type"] == "2") ? "Qrcode" : "Location") + " Checkin (" + activity["name"] + ", " + activity["time_left"] + ")";
-					e.appendChild(button);
+						b.setAttribute("onclick", `chaoxingCheckinLocation(${JSON.stringify({'active_id': activity['active_id']})}); onclickCooldown(this.id, 5000);`);
+					if (activity["type"] == "2")
+						b.innerText = `Qrcode Checkin (${activity['name']}, ${activity['time_left']})`;
+					else
+						b.innerText = `Location Checkin (${activity['name']}, ${activity['time_left']})`;
+					e.appendChild(b);
 				}
 			}
 			if (!Object.keys(activities).length)
@@ -690,11 +693,11 @@
 				return listifyLocations.calling = false;
 			}
 			for (let buildingName in locations) {
-				let button = document.createElement("button");
-				button.innerText = buildingName;
+				let b = document.createElement("button");
+				b.innerText = buildingName;
 				locations[buildingName]["ranged"] = 1;
-				button.setAttribute("onclick", "localStorage.setItem('location_', '" + JSON.stringify(locations[buildingName]) + "'); localStorage.setItem('location_name', '" + buildingName + "'); document.getElementById('location-current-div').innerText = 'Current location: " + buildingName + "'");
-				e.appendChild(button);
+				b.setAttribute("onclick", `localStorage.setItem('location_', '${JSON.stringify(locations[buildingName])}'); localStorage.setItem('location_name', '${buildingName}'); document.getElementById('location-current-div').innerText = 'Current location: ${buildingName}'`);
+				e.appendChild(b);
 			}
 			e = document.getElementById("location-current-div");
 			if (!localStorage.getItem("location_")) {
@@ -703,7 +706,7 @@
 				e.innerText = "Current location: B楼";
 			}
 			else
-				e.innerText = "Current location: " + localStorage.getItem("location_name");
+				e.innerText = `Current location: ${localStorage.getItem('location_name')}`;
 			listifyLocations.calling = false;
 		}
 
