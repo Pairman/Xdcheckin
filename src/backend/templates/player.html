@@ -498,7 +498,7 @@
 		async function chaoxingLogin(username, password) {
 			if (chaoxingLogin.calling || chaoxingLogin.success)
 				return;
-			chaoxingLogin.calling = false;
+			chaoxingLogin.calling = true;
 			try {
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(res.status_code == 200, "Backend error.");
@@ -509,8 +509,10 @@
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
-				getCurriculum();
 				enablePlayers();
+				getCurriculum().then(() => {
+					document.getElementById("chaoxing-curriculum-button").style.display = "block";
+				});
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
 				document.getElementById('chaoxing-locations-button').style.display = 'block';
@@ -549,7 +551,7 @@
 				alert("Logged in successfully.");
 			}
 			carch (err) {
-				alert(err.message);
+				alert("Login failed.(" + err.message + ")");
 			}
 			chaoxingPromptLogin.calling = false;
 
