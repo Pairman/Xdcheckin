@@ -5,9 +5,9 @@
 	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/skins/default/aliplayer-min.css"/>
-	<script async defer src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js" onload="resizePlayers().then(enablePlayers());"></script>
-	<script async defer src="xdcheckin/static/locations.js" onload="listifyLocations().then(() => {if (chaoxingLogin.success === true) document.getElementById('chaoxing-locations-button').style.display = 'block';});"></script>
-	<script async defer src="static/classrooms.js" onload="listifyClassrooms().then(resizePlayers()).then(enablePlayers());"></script>
+	<script src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js"></script>
+	<script src="xdcheckin/static/locations.js"></script>
+	<script src="static/classrooms.js"></script>
 	<script async defer src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js" onload="listifyClassrooms();"></script>
 
 	<head>
@@ -27,12 +27,11 @@
 			<button id="chaoxing-login-button" onclick="chaoxingPromptLogin();">Chaoxing Login</button>
 			<button id="chaoxing-curriculum-button" onclick="hideOtherDivs('curriculum-list-div').then(displayDiv('curriculum-list-div'));" style="display: none">Show Curriculum</button>
 			<button id="chaoxing-locations-button" onclick="hideOtherDivs('locations-list-div').then(displayDiv('locations-list-div'));" style="display: none">Select Location</button>
-			<button id="chaoxing-input-location-button" onclick="inputLocation();" style="display: none">Input Location</button>
 			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') {hideOtherDivs('activities-list-div').then(getActivities()).then(displayDiv('activities-list-div'));} else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
 		</div>
 		<div id="curriculum-list-div" style="display: none"></div>
 		<div id="locations-list-div" style="display: none">
-			<div id="location-current-div" style="display: none"></div>
+			<div id="location-current-div"></div>
 		</div>
 		<div id="activities-list-div" style="display: none"></div>
 		<br>
@@ -41,7 +40,6 @@
 
 		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
 			<button onclick="hideOtherDivs('classrooms-list-div').then(displayDiv('classrooms-list-div'));">Select Classroom</button>
-			<button onclick="randClassroom();">I'm Feeling Lucky</button>
 			<button onclick="inputClassroom();">Load URL</button>
 			<button id="extract-classroom-button" onclick="extractClassroom();" style="display: none;">Extract URL</button>
 		</div>
@@ -51,8 +49,6 @@
 		<div id="players-buttons-div" class="div-center" style="display: none;">
 			<button onclick="if (initPlayers.player0) initPlayers.player0.initPlay(); if (initPlayers.player1) initPlayers.player1.initPlay(); if (initPlayers.player2) initPlayers.player2.initPlay(); if (initPlayers.player3) initPlayers.player3.initPlay();">Play All</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.stop(); if (initPlayers.player1) initPlayers.player1.stop(); if (initPlayers.player2) initPlayers.player2.stop(); if (initPlayers.player3) initPlayers.player3.stop(); cameraOff();">Stop All</button>
-			<button onclick="if (initPlayers.player0) initPlayers.player0.setVolume(1); if (initPlayers.player1) initPlayers.player1.setVolume(1); if (initPlayers.player2) initPlayers.player2.setVolume(1); if (initPlayers.player3) initPlayers.player3.setVolume(1);">Unmute All</button>
-			<button onclick="if (initPlayers.player0) initPlayers.player0.mute(); if (initPlayers.player1) initPlayers.player1.mute(); if (initPlayers.player2) initPlayers.player2.mute(); if (initPlayers.player3) initPlayers.player3.mute();">Mute All</button>
 			<button onclick="resizePlayers();">Resize All</button>
 		</div>
 		<br>
@@ -116,6 +112,10 @@
 		</div>
 		<div id="camera-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
+		<div id="footer-buttons-div" class="div-center">
+			<button id="chaoxing-logout-button" onclick="chaoxingPromptLogout();" style="display: none;">Chaoxing Logout</button>
+		</div>
+		<br>
 		<div id="footer-div" class="div-center">
 			(C) 2024 Pairman&emsp;
 			<a href="https://github.com/Pairman/Xdcheckin">Source Code</a>
@@ -128,6 +128,9 @@
 		 */
 
 		checkEula();
+		listifyLocations();
+		listifyClassrooms();
+		resizePlayers().then(enablePlayers());
 		xdcheckinCheckUpdates();
 
 		/*
@@ -210,10 +213,12 @@
 		/* Check APP updates. */
 		async function xdcheckinCheckUpdates() {
 			let xdcheckin_version, xdcheckin_latest_release;
-			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text) || !Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
+			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text))
 				return;
 			let footer_div = document.getElementById("footer-div");
 			footer_div.innerHTML = "Xdcheckin " + xdcheckin_version + "&emsp;" + footer_div.innerHTML;
+			if (!Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
+				return;
 			let xdcheckin_version_arr = xdcheckin_version.split("-")[0].split(".");
 			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
 			for (let i = 0; i < 3; ++i) {
@@ -251,8 +256,12 @@
 				return;
 			listifyClassrooms.calling = true;
 			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
+			let b = document.createElement("button");
+			b.innerText = "I'm Feeling Lucky";
+			b.setAttribute("onclick", "randClassroom()");
+
 			let e = document.getElementById("classrooms-list-div");
-			e.replaceChildren();
+			e.replaceChildren(b);
 			for (let buildingName in urls) {
 				let building = urls[buildingName];
 				let div = document.createElement("div");
@@ -476,18 +485,19 @@
 			e.srcObject = null;
 		}
 
-		/* Log into Chaoxing account. */
+		/* Chaoxing account login and logout. */
 		async function chaoxingLogin(username, password) {
 			if (chaoxingLogin.calling || chaoxingLogin.success)
 				return;
 			chaoxingLogin.calling = true;
+			let success = chaoxingLogin.success = false;
 			try {
 				if (username != localStorage.getItem("chaoxing_username") || password != localStorage.getItem("chaoxing_password"))
 					localStorage.setItem("chaoxing_cookies", "");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(res.status_code == 200, "Backend error.");
 				let data = res.json();
-				assert(chaoxingLogin.success = !("err" in data), data["err"]);
+				assert(!("err" in data), data["err"]);
 				localStorage.setItem("chaoxing_username", username);
 				localStorage.setItem("chaoxing_password", password);
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
@@ -495,26 +505,27 @@
 				chaoxingLogin.courses = data["courses"];
 				enablePlayers();
 				getCurriculum().then(() => {
-					document.getElementById("chaoxing-curriculum-button").style.display = "block";
+					if (!chaoxingLogout.calling && !chaoxingLogout.success)
+						document.getElementById("chaoxing-curriculum-button").style.display = "inline";
 				});
-				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
-				document.getElementById('chaoxing-locations-button').style.display = 'block';
-				document.getElementById("chaoxing-input-location-button").style.display = "block";
-				document.getElementById("chaoxing-activities-button").style.display = "block";
-				document.getElementById("location-current-div").style.display = "block";
-				document.getElementById("player0-scan-button").style.display = "block";
+				document.getElementById("chaoxing-logout-button").style.display = "inline";
+				document.getElementById('chaoxing-locations-button').style.display = "inline";
+				document.getElementById("chaoxing-activities-button").style.display = "inline";
+				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("player0-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);");
-				document.getElementById("camera-scan-button").style.display = "block";
+				document.getElementById("player0-scan-button").style.display = "inline";
 				document.getElementById("camera-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);");
-				chaoxingLogin.success = true;
+				document.getElementById("camera-scan-button").style.display = "inline";
+				chaoxingLogout.success = false;
+				success = true;
 			}
 			catch (err) {
-				chaoxingLogin.success = err.message;
+				success = err.message;
 			}
-			chaoxingLogin.success = true;
+			chaoxingLogin.success = (success === true);
 			chaoxingLogin.calling = false;
-			return chaoxingLogin.success;
+			return success;
 		}
 
 		async function chaoxingPromptLogin() {
@@ -537,10 +548,48 @@
 				assert(success === true, success);
 				alert("Logged in successfully.");
 			}
-			carch (err) {
+			catch (err) {
 				alert("Login failed. (" + err.message + ")");
 			}
 			chaoxingPromptLogin.calling = false;
+		}
+
+		async function chaoxingLogout() {
+			if (chaoxingLogout.calling || chaoxingLogout.success)
+				return;
+			chaoxingLogout.calling = true;
+			chaoxingLogout.success = false;
+			try {
+				hideOtherDivs();
+				document.getElementById("chaoxing-login-button").style.display = "inline";
+				document.getElementById("chaoxing-logout-button").style.display = "none";
+				document.getElementById("chaoxing-curriculum-button").style.display = "none";
+				document.getElementById('chaoxing-locations-button').style.display = "none";
+				document.getElementById("chaoxing-activities-button").style.display = "none";
+				document.getElementById("extract-classroom-button").style.display = "none";
+				document.getElementById("player0-title-div").setAttribute("onclick", "");
+				document.getElementById("player0-scan-button").style.display = "none";
+				document.getElementById("camera-title-div").setAttribute("onclick", "");
+				document.getElementById("camera-scan-button").style.display = "none";
+				chaoxingLogin.success = false;
+				chaoxingLogout.success = true;
+			}
+			catch (err) {
+				chaoxingLogout.success = false;
+			}
+			chaoxingLogout.calling = false;
+			return chaoxingLogout.success;
+		}
+
+		async function chaoxingPromptLogout() {
+			if (chaoxingPromptLogout.calling)
+				return;
+			chaoxingPromptLogout.calling = true;
+			if (chaoxingLogout())
+				alert("Logged out successfully.");
+			else
+				alert("Logout failed.");
+			chaoxingPromptLogout.calling = false;
 		}
 
 		/* Get curriculum. */
@@ -553,8 +602,8 @@
 			info_div.innerText = "Current year: " + curriculum["details"]["year"] + ", semester: " + curriculum["details"]["semester"] + ", week: " + curriculum["details"]["week"] + ".";
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
 			if (!Object.keys(curriculum["lessons"]).length) {
-				info_div.innerText += " No curriculum."
-				return;
+				info_div.innerText += " No curriculum.";
+				return getCurriculum.calling = false;
 			}
 			let table = document.createElement("table");
 			table.border = "1";
@@ -627,7 +676,14 @@
 			if (listifyLocations.calling)
 				return;
 			listifyLocations.calling = true;
+			let b = document.createElement("button");
+			b.innerText = "Input Location";
+			b.setAttribute("onclick", "inputLocation();");
 			let e = document.getElementById("locations-list-div");
+			e.appendChild(b);
+			if (localStorage.getItem("chaoxing_fid") != "16820") {
+				return listifyLocations.calling = false;
+			}
 			for (let buildingName in locations) {
 				let button = document.createElement("button");
 				button.innerText = buildingName;
