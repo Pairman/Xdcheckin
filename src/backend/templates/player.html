@@ -61,8 +61,8 @@
 			&emsp;
 			<button onclick="initPlayers.player0.initPlay();">Play</button>
 			<button onclick="initPlayers.player0.stop();">Stop</button>
-			<button onclick="initPlayers.player0.setVolume(1);">Unmute</button>
-			<button onclick="initPlayers.player0.mute();;">Mute</button>
+			<button onclick="initPlayers.player0.setVolume(1); muteOtherPlayers('player0');">Unmute</button>
+			<button onclick="initPlayers.player0.mute();">Mute</button>
 			<button id="player0-scan-button" onclick="chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);" style="display: none;">Scan</button>
 		</div>
 		<div id="player0-div"></div>
@@ -73,8 +73,8 @@
 			&emsp;
 			<button onclick="initPlayers.player1.initPlay();">Play</button>
 			<button onclick="initPlayers.player1.stop();">Stop</button>
-			<button onclick="initPlayers.player1.setVolume(1);">Unmute</button>
-			<button onclick="initPlayers.player1.mute();;">Mute</button>
+			<button onclick="initPlayers.player1.setVolume(1); muteOtherPlayers('player1');">Unmute</button>
+			<button onclick="initPlayers.player1.mute();">Mute</button>
 		</div>
 		<div id="player1-div"></div>
 
@@ -83,7 +83,7 @@
 			&emsp;
 			<button onclick="initPlayers.player2.initPlay();">Play</button>
 			<button onclick="initPlayers.player2.stop();">Stop</button>
-			<button onclick="initPlayers.player2.setVolume(1);">Unmute</button>
+			<button onclick="initPlayers.player2.setVolume(1); muteOtherPlayers('player2');">Unmute</button>
 			<button onclick="initPlayers.player2.mute();">Mute</button>
 		</div>
 		<div id="player2-div"></div>
@@ -93,7 +93,7 @@
 			&emsp;
 			<button onclick="initPlayers.player3.initPlay();">Play</button>
 			<button onclick="initPlayers.player3.stop();">Stop</button>
-			<button onclick="initPlayers.player3.setVolume(1);">Unmute</button>
+			<button onclick="initPlayers.player3.setVolume(1); muteOtherPlayers('player3');">Unmute</button>
 			<button onclick="initPlayers.player3.mute();">Mute</button>
 		</div>
 		<div id="player3-div"></div>
@@ -247,44 +247,22 @@
 			enablePlayers.calling = false;
 		}
 
-		/* Listify classrooms. */
-		async function listifyClassrooms() {
-			if (listifyClassrooms.calling)
-				return;
-			listifyClassrooms.calling = true;
-			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
-			let b = document.createElement("button");
-			b.innerText = "I'm Feeling Lucky";
-			b.setAttribute("onclick", "randClassroom()");
-
-			let e = document.getElementById("classrooms-list-div");
-			e.replaceChildren(b);
-			for (let buildingName in urls) {
-				let building = urls[buildingName];
-				let div = document.createElement("div");
-				div.innerText = buildingName + ": ";
-				e.appendChild(div);
-				let classroomArr = [], classroomNamesArr = [];
-				for (let classroomName in building) {
-					let button = document.createElement("button");
-					button.innerText = classroomName;
-					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
-					e.appendChild(button);
-					classroomArr.push(building[classroomName]);
-					classroomNamesArr.push(classroomName);
-				}
-				listifyClassrooms.buildingsArr.push(classroomArr);
-				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
-			}
-			listifyClassrooms.calling = false;
-		}
-
 		function getScrollBarWidth() {
 			let e = document.createElement("div");
 			e.style.cssText = "overflow: scroll; visibility: hidden; position: absolute;";
 			let w = e.offsetWidth - e.clientWidth;
 			e.remove();
 			return w;
+		}
+
+		async function resizeCamera(w = 0) {
+			w = w || window.innerWidth - getScrollBarWidth();
+			let e = document.getElementById("camera-video");
+			try {
+				[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
+			}
+			catch (err) {}
+			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
 		}
 
 		/* Players and camera resize. */
@@ -304,14 +282,12 @@
 			resizeCamera(w);
 		}
 
-		async function resizeCamera(w = 0) {
-			w = w || window.innerWidth - getScrollBarWidth();
-			let e = document.getElementById("camera-video");
-			try {
-				[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
-			}
-			catch (err) {}
-			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
+		async function muteOtherPlayers(p_id) {
+			let p_ids = ["player0", "player1", "player2", "player3"];
+			let players = [initPlayers.player0, initPlayers.player1, initPlayers.player2, initPlayers.player3];
+			for (let i in p_ids)
+				if (p_ids[i] != p_id)
+					players[i].mute();
 		}
 
 		/* Player creation and selection. */
@@ -385,6 +361,38 @@
 					initPlayers.player3.stop();
 				});
 			initPlayers.calling = false;
+		}
+
+		/* Listify classrooms. */
+		async function listifyClassrooms() {
+			if (listifyClassrooms.calling)
+				return;
+			listifyClassrooms.calling = true;
+			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
+			let b = document.createElement("button");
+			b.innerText = "I'm Feeling Lucky";
+			b.setAttribute("onclick", "randClassroom()");
+
+			let e = document.getElementById("classrooms-list-div");
+			e.replaceChildren(b);
+			for (let buildingName in urls) {
+				let building = urls[buildingName];
+				let div = document.createElement("div");
+				div.innerText = buildingName + ": ";
+				e.appendChild(div);
+				let classroomArr = [], classroomNamesArr = [];
+				for (let classroomName in building) {
+					let button = document.createElement("button");
+					button.innerText = classroomName;
+					button.setAttribute("onclick", "setClassroom('" + building[classroomName] + "', '" + classroomName + "')");
+					e.appendChild(button);
+					classroomArr.push(building[classroomName]);
+					classroomNamesArr.push(classroomName);
+				}
+				listifyClassrooms.buildingsArr.push(classroomArr);
+				listifyClassrooms.buildingNamesArr.push(classroomNamesArr);
+			}
+			listifyClassrooms.calling = false;
 		}
 
 		/* Video sources control. */
