@@ -6,7 +6,7 @@
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/skins/default/aliplayer-min.css"/>
 	<script async defer src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js" onload="resizePlayers().then(enablePlayers());"></script>
-	<script async defer src="xdcheckin/static/locations.js" onload="listifyLocations().then(() => {if (chaoxingLogin.success) document.getElementById('chaoxing-locations-button').style.display = 'block';});"></script>
+	<script async defer src="xdcheckin/static/locations.js" onload="listifyLocations().then(() => {if (chaoxingLogin.success === true) document.getElementById('chaoxing-locations-button').style.display = 'block';});"></script>
 	<script async defer src="static/classrooms.js" onload="listifyClassrooms().then(resizePlayers()).then(enablePlayers());"></script>
 	<script async defer src="https://xdcheckin.git.pnxlr.eu.org/src/backend/static/classrooms.js" onload="listifyClassrooms();"></script>
 
@@ -24,7 +24,7 @@
 		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold;"></div>
 
 		<div id="chaoxing-buttons" class="div-center">
-			<button id="chaoxing-login-button" onclick="chaoxingLogin();">Chaoxing Login</button>
+			<button id="chaoxing-login-button" onclick="chaoxingPromptLogin();">Chaoxing Login</button>
 			<button id="chaoxing-curriculum-button" onclick="hideOtherDivs('curriculum-list-div').then(displayDiv('curriculum-list-div'));" style="display: none">Show Curriculum</button>
 			<button id="chaoxing-locations-button" onclick="hideOtherDivs('locations-list-div').then(displayDiv('locations-list-div'));" style="display: none">Select Location</button>
 			<button id="chaoxing-input-location-button" onclick="inputLocation();" style="display: none">Input Location</button>
@@ -495,33 +495,21 @@
 		}
 
 		/* Log into Chaoxing account. */
-		async function chaoxingLogin() {
-			if (chaoxingLogin.calling)
+		async function chaoxingLogin(username, password) {
+			if (chaoxingLogin.calling || chaoxingLogin.success)
 				return;
-			chaoxingLogin.calling = true;
-			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, conf, data;
-			if (!username || !password || !(conf = confirm("Use previously entered account " + username + "?"))) {
-				if (!(input = chaoxingInputAccount()))
-					return chaoxingLogin.calling = false;
-				[username, password] = input;
-				localStorage.setItem("chaoxing_cookies", "");
-			}
+			chaoxingLogin.calling = false;
 			try {
-				assert((username && password) || conf, "Invalid input.");
-				alert("Logging in.");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(res.status_code == 200, "Backend error.");
-				data = res.json();
+				let data = res.json();
 				assert(chaoxingLogin.success = !("err" in data), data["err"]);
 				localStorage.setItem("chaoxing_username", username);
 				localStorage.setItem("chaoxing_password", password);
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
-				alert("Logged in successfully.");
-				getCurriculum().then(() => {
-					document.getElementById("chaoxing-curriculum-button").style.display = "block";
-				});
+				getCurriculum();
 				enablePlayers();
 				document.getElementById("extract-classroom-button").style.display = "inline";
 				document.getElementById("chaoxing-login-button").style.display = "none";
@@ -533,14 +521,41 @@
 				document.getElementById("player0-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);");
 				document.getElementById("camera-scan-button").style.display = "block";
 				document.getElementById("camera-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);");
+				chaoxingLogin.success = true;
 			}
 			catch (err) {
-				alert("Login failed.(" + err.message + ")");
+				chaoxingLogin.success = err.message;
 			}
+			chaoxingLogin.success = true;
 			chaoxingLogin.calling = false;
+			return chaoxingLogin.success;
 		}
 
-		/* Tablify curriculum. */
+		async function chaoxingPromptLogin() {
+			if (chaoxingPromptLogin.calling)
+				return;
+			chaoxingPromptLogin.calling = true;
+			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, conf;
+			if (!username || !password || !(conf = confirm("Use previously entered account " + username + "?"))) {
+				if (!(input = chaoxingInputAccount()))
+					return chaoxingPromptLogin.calling = false;
+				[username, password] = input;
+				localStorage.setItem("chaoxing_cookies", "");
+			}
+			try {
+				assert((username && password) || conf, "Invalid input.");
+				let success = await chaoxingLogin(username, password);
+				assert(success === true, success);
+				alert("Logged in successfully.");
+			}
+			carch (err) {
+				alert(err.message);
+			}
+			chaoxingPromptLogin.calling = false;
+
+		}
+
+		/* Get curriculum. */
 		async function getCurriculum() {
 			if (getCurriculum.calling)
 				return;
