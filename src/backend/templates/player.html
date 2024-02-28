@@ -476,30 +476,13 @@
 			e.srcObject = null;
 		}
 
-		/* Chaoxing related. */
-		function chaoxingInputAccount() {
-			try {
-				let username = prompt("Input Chaoxing username:");
-				if (username === null)
-					return;
-				assert(username !== "");
-				let password = prompt("Input Chaoxing password");
-				if (password === null)
-					return;
-				assert(/^(((?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^\s0-9a-zA-Z])|(?=.*[a-zA-Z])(?=.*[^\s0-9a-zA-Z]))[^\s\u4e00-\u9fa5]+)$/.test(password));
-				return [username, password];
-			}
-			catch (err) {
-				alert("Invalid input.");
-			}
-		}
-
 		/* Log into Chaoxing account. */
 		async function chaoxingLogin(username, password) {
 			if (chaoxingLogin.calling || chaoxingLogin.success)
 				return;
 			chaoxingLogin.calling = true;
 			try {
+				localStorage.setItem("chaoxing_cookies", "");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(res.status_code == 200, "Backend error.");
 				let data = res.json();
@@ -537,24 +520,26 @@
 			if (chaoxingPromptLogin.calling)
 				return;
 			chaoxingPromptLogin.calling = true;
-			let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password"), input, conf;
-			if (!username || !password || !(conf = confirm("Use previously entered account " + username + "?"))) {
-				if (!(input = chaoxingInputAccount()))
-					return chaoxingPromptLogin.calling = false;
-				[username, password] = input;
-				localStorage.setItem("chaoxing_cookies", "");
-			}
 			try {
-				assert((username && password) || conf, "Invalid input.");
+				let username = localStorage.getItem("chaoxing_username"), password = localStorage.getItem("chaoxing_password");
+				if (!username || !password || !confirm("Use previously entered account " + username + "?")) {
+					username = prompt("Input Chaoxing username:");
+					if (username === null)
+						return chaoxingPromptLogin.calling = false;
+					assert(username, "Invalid username.");
+					password = prompt("Input Chaoxing password:");
+					if (password === null)
+						return chaoxingPromptLogin.calling = false;
+					assert(/^(((?=.*[0-9])(?=.*[a-zA-Z])|(?=.*[0-9])(?=.*[^\s0-9a-zA-Z])|(?=.*[a-zA-Z])(?=.*[^\s0-9a-zA-Z]))[^\s\u4e00-\u9fa5]+)$/.test(password), "Invalid password.");
+				}
 				let success = await chaoxingLogin(username, password);
 				assert(success === true, success);
 				alert("Logged in successfully.");
 			}
 			carch (err) {
-				alert("Login failed.(" + err.message + ")");
+				alert("Login failed. (" + err.message + ")");
 			}
 			chaoxingPromptLogin.calling = false;
-
 		}
 
 		/* Get curriculum. */
