@@ -25,6 +25,7 @@
 
 		<div id="chaoxing-buttons" class="div-center">
 			<button id="chaoxing-login-button" onclick="chaoxingPromptLogin();">Chaoxing Login</button>
+			<button id="chaoxing-logout-button" onclick="chaoxingPromptLogout();" style="display: none;">Chaoxing Logout</button>
 			<button id="chaoxing-curriculum-button" onclick="hideOtherDivs('curriculum-list-div').then(displayDiv('curriculum-list-div'));" style="display: none">Show Curriculum</button>
 			<button id="chaoxing-locations-button" onclick="hideOtherDivs('locations-list-div').then(displayDiv('locations-list-div'));" style="display: none">Select Location</button>
 			<button id="chaoxing-activities-button" onclick="if (document.getElementById('activities-list-div').style.display == 'none') {hideOtherDivs('activities-list-div').then(getActivities()).then(displayDiv('activities-list-div'));} else displayDiv('activities-list-div');" style="display: none">Check Activities</button>
@@ -112,10 +113,6 @@
 		</div>
 		<div id="camera-scanresult-div" style="text-align: center; word-wrap: break-word; width: 400px;"></div>
 
-		<div id="footer-buttons-div" class="div-center">
-			<button id="chaoxing-logout-button" onclick="chaoxingPromptLogout();" style="display: none;">Chaoxing Logout</button>
-		</div>
-		<br>
 		<div id="footer-div" class="div-center">
 			(C) 2024 Pairman&emsp;
 			<a href="https://github.com/Pairman/Xdcheckin">Source Code</a>
@@ -555,7 +552,7 @@
 		}
 
 		async function chaoxingLogout() {
-			if (chaoxingLogout.calling || chaoxingLogout.success)
+			if (chaoxingLogout.calling || chaoxingLogout.success || !confirm("Log out of your Chaoxing account?"))
 				return;
 			chaoxingLogout.calling = true;
 			chaoxingLogout.success = false;
