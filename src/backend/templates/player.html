@@ -482,19 +482,16 @@
 				return;
 			chaoxingLogin.calling = true;
 			try {
-				let changed = (username != localStorage.getItem("chaoxing_username") || password != localStorage.getItem("chaoxing_password"));
-				if (changed)
+				if (username != localStorage.getItem("chaoxing_username") || password != localStorage.getItem("chaoxing_password"))
 					localStorage.setItem("chaoxing_cookies", "");
 				let res = await post("/chaoxing/login", {"username": username, "password": password, "cookies": localStorage.getItem("chaoxing_cookies")});
 				assert(res.status_code == 200, "Backend error.");
 				let data = res.json();
 				assert(chaoxingLogin.success = !("err" in data), data["err"]);
-				if (changed) {
-					localStorage.setItem("chaoxing_username", username);
-					localStorage.setItem("chaoxing_password", password);
-					localStorage.setItem("chaoxing_cookies", data["cookies"]);
-					localStorage.setItem("chaoxing_fid", data["fid"]);
-				}
+				localStorage.setItem("chaoxing_username", username);
+				localStorage.setItem("chaoxing_password", password);
+				localStorage.setItem("chaoxing_cookies", data["cookies"]);
+				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
 				enablePlayers();
 				getCurriculum().then(() => {
