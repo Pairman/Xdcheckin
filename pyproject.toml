@@ -50,7 +50,7 @@ author_email = "{project.authors[0].email}"
 [tool.briefcase.app.xdcheckin]
 formal_name = "{project.name}"
 description = "{project.description}"
-long_description = """Chaoxing Checkin Tool for XDU.     """
+long_description = "{project.description}"
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/xdcheckin"
