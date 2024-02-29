@@ -177,20 +177,28 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	serve(app = create_server(), host = host, port = port)
 
 def main():
-	from socket import inet_aton
 	from sys import argv
-	if len(argv) != 3:
+
+	if not len(argv) in (1, 3):
 		print("Usage: %s <ip> <port>" % (argv[0]))
+		print("    or %s (IP and port defaults to 0.0.0.0 and 5001)" % (argv[0]))
 		return 1
-	try:
-		inet_aton(argv[1])
-	except Exception:
-		print("Invalid IP address \"%s\"." % (argv[1]))
-		return 1
-	try:
-		assert 0 < int(argv[2]) < 65536
-	except Exception:
-		print("Invalid port number \"%s\"." % (argv[2]))
-		return 1
-	print("Starting server at \"%s:%s\"." % (argv[1], argv[2]))
-	start_server(host = argv[1], port = int(argv[2])
+
+	ip, port = "0.0.0.0", 5001
+	if len(argv) == 3:
+		from socket import inet_aton
+		try:
+			ip = argv[1]
+			inet_aton(ip)
+		except Exception:
+			print("Invalid IP address \"%s\"." % (ip))
+			return 1
+		try:
+			port = int(argv[2])
+			assert 0 < port < 65536
+		except Exception:
+			print("Invalid port number \"%s\"." % (port))
+			return 1
+	
+	print("Starting server at \"%s:%s\"." % (ip, port))
+	start_server(host = ip, port = port)
