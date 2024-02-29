@@ -45,7 +45,6 @@ exclude = ["xdcheckin.app*"]
 [tool.briefcase]
 project_name = "{project.name}"
 bundle = "org.eu.pnxlr.git"
-version = "{project.version}"
 url = "https://github.com/Pairman/Xdcheckin"
 license = "{project.license}"
 author = "{project.authors[0].name}"
