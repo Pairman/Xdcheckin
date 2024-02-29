@@ -26,6 +26,9 @@ dependencies = [
         "waitress"
 ]
 
+[project.scripts]
+xdcheckind = "xdcheckin.server.server:main"
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
