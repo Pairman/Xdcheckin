@@ -183,7 +183,7 @@ def main():
 		print("Usage: %s <ip> <port>" % (argv[0]))
 		return 1
 	try:
-		socket.inet_aton(argv[1])
+		inet_aton(argv[1])
 	except Exception:
 		print("Invalid IP address \"%s\"." % (argv[1]))
 		return 1
