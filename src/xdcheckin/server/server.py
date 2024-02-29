@@ -181,7 +181,7 @@ def main():
 
 	if not len(argv) in (1, 3):
 		print("Usage: %s <ip> <port>" % (argv[0]))
-		print("    or %s (IP and port defaults to 0.0.0.0 and 5001)" % (argv[0]))
+		print("  or %s" % (argv[0]))
 		return 1
 
 	ip, port = "0.0.0.0", 5001
