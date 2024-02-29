@@ -31,7 +31,10 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["xdcheckin.server*"]
+include = [
+	"xdcheckin.server*",
+	"xdcheckin.core*"
+]
 
 [tool.briefcase]
 project_name = "{project.name}"

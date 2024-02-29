@@ -1,4 +1,0 @@
-[submodule "src/backend/xdcheckin_py"]
-	path = src/backend/xdcheckin_py
-	url = https://github.com/Pairman/Xdcheckin
-	branch = py
