@@ -13,6 +13,7 @@ keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
     "Framework :: Flask",
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License (GPL)"
 ]
 dependencies = [
         "flask",
