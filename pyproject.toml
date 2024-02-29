@@ -8,6 +8,7 @@ description = "Chaoxing Checkin Tool for XDU."
 authors = [
 	{name = "Pairman", email = "pairmanxlr@gmail.com"}
 ]
+url = "https://github.com/Pairman/Xdcheckin"
 requires-python = ">=3.8"
 keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
@@ -43,12 +44,7 @@ include = [
 exclude = ["xdcheckin.app*"]
 
 [tool.briefcase]
-project_name = "{project.name}"
 bundle = "org.eu.pnxlr.git"
-url = "https://github.com/Pairman/Xdcheckin"
-license = "{project.license}"
-author = "{project.authors[0].name}"
-author_email = "{project.authors[0].email}"
 
 [tool.briefcase.app.xdcheckin]
 formal_name = "{project.name}"
