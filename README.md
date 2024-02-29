@@ -15,5 +15,5 @@ For Xdcheckin 1.0.1+, Pyzbar on Windows needs [Visual C++ Redistributable Packag
 
 # Build
 1. Install ```briefcase```.<br>
-2. Clone branch ```toga-flask```.<br>
+2. Clone this repo.<br>
 3. Run ```briefcase package``` to build and package for your platform.
