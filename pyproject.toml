@@ -36,6 +36,7 @@ include = [
 	"xdcheckin.server*",
 	"xdcheckin.core*"
 ]
+exclude = ["xdcheckin.app*"]
 
 [tool.briefcase]
 project_name = "{project.name}"
