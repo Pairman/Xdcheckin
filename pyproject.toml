@@ -29,6 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 app = ["toga"]
+app-dev = ["briefcase"]
 
 [project.urls]
 Homepage = "https://github.com/Pairman/Xdcheckin"
