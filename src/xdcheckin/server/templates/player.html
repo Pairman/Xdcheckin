@@ -268,7 +268,7 @@
 		/* Players and camera resize. */
 		async function resizePlayers(w = 0) {
 			w = w || window.innerWidth - getScrollBarWidth();
-			[resizePlayers.w, resizePlayers.h] = [w + "px", parseInt(w / 16 * 9) + "px"];
+			[resizePlayers.w, resizePlayers.h] = [`${w}px`, `${parseInt(w / 16 * 9)}px`];
 			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
 			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
 			if (initPlayers.player0)
@@ -452,7 +452,7 @@
 				info_new["videoPath"]["teacherTrack"] = info["videoPath"]["teacherTrack"] || "";
 				info_new["videoPath"]["pptVideo"] = info["videoPath"]["pptVideo"] || "";
 				info_new["videoPath"]["studentFull"] = info["videoPath"]["studentFull"] || "";
-				let url_new = `${url.protocol}//${url.hostname}${url.pathname}` + "?info=" + encodeURIComponent(JSON.stringify(info_new));
+				let url_new = `${url.protocol}//${url.hostname}${url.pathname}?info=${encodeURIComponent(JSON.stringify(info_new))}`;
 				prompt("Extracted URL:", url_new);
 			}
 			catch (err) {
@@ -754,7 +754,7 @@
 			form.append("img_src", img_src);
 			form.append("location", localStorage.getItem("location_"));
 			let res = await post("/chaoxing/checkin_checkin_qrcode_img", data = form);
-			document.getElementById(result_div_id).innerText = unescapeUnicode(res.text) || ("Checkin error. (Backend error, " + res.status_code + ")");
+			document.getElementById(result_div_id).innerText = unescapeUnicode(res.text) || `Checkin error. (Backend error, ${res.status_code})`;
 			if (res.status_code == 200 && res.text.indexOf("success") != -1)
 				alert(unescapeUnicode(res.text));
 		};
@@ -770,7 +770,7 @@
 		/* Location checkin. */
 		async function chaoxingCheckinLocation(activity) {
 			let res = await post("/chaoxing/checkin_checkin_location", data = {"activity": activity, "location": JSON.parse(localStorage.getItem("location_"))});
-			alert((res.status_code == 200) ? unescapeUnicode(res.text) : ("Checkin error. (Backend error, " + res.status_code + ")"));
+			alert((res.status_code == 200) ? unescapeUnicode(res.text) : `Checkin error. (Backend error, ${res.status_code})`);
 		}
 	</script>
 </html>
