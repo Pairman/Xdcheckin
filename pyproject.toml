@@ -13,6 +13,7 @@ keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
     "Framework :: Flask",
     "Programming Language :: Python :: 3",
+    "Programming Language :: JavaScript",
     "License :: OSI Approved :: GNU General Public License (GPL)"
 ]
 dependencies = [
@@ -27,7 +28,7 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://github.com/Pairman/Xdcheckin"
+Homepage = "https://github.com/Pairman/Xdcheckin"
 
 [project.scripts]
 xdcheckin-server = "xdcheckin.server.server:main"
