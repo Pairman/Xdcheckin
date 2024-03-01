@@ -30,7 +30,7 @@ dependencies = [
 homepage = "https://github.com/Pairman/Xdcheckin"
 
 [project.scripts]
-xdcheckind = "xdcheckin.server.server:main"
+xdcheckin-server = "xdcheckin.server.server:main"
 
 [build-system]
 requires = ["setuptools"]
