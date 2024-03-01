@@ -58,6 +58,18 @@ icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/xdcheckin"
 ]
+test_sources = []
+requires = [
+        "flask",
+        "flask-session",
+        "pillow",
+        "pycryptodome",
+        "pyzbar",
+        "requests",
+        "requests-cache",
+        "waitress"
+]
+test_requires = []
 
 [tool.briefcase.app.xdcheckin.macOS]
 universal_build = true
