@@ -49,6 +49,7 @@ include = [
 	"xdcheckin.core*"
 ]
 exclude = ["xdcheckin.app*"]
+include-package-data = false
 
 [tool.briefcase]
 project_name = "Xdcheckin"
