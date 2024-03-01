@@ -1,19 +1,34 @@
 # Xdcheckin
 Don't use.
 
-# Unusage
 ## APP
-Don't checkout [releases](https://github.com/Pairman/Xdcheckin/releases/).
+### Install
+Checkout [releases](https://github.com/Pairman/Xdcheckin/releases/).
 
 ### Build
-1. Install build tool via ```pip install briefcase```.<br>
-2. Clone this repo with ```git clone https://github.com/Pairman/Xdcheckin```.<br>
-3. Run ```briefcase package``` to build and package for your platform.
+1. Install build tool:
+```
+pip install briefcase
+```
 
+2. Clone this repo:
+```
+git clone https://github.com/Pairman/Xdcheckin
+```
+
+3. Build and package for your platform:
+```
+briefcase package
+```
 
 ## Module
-Install the module via ```pip install Xdcheckin```.
+### Install
+Install the module:
+```
+pip install Xdcheckin
+```
 
+### Usage
 The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) or ```xdcheckin.server``` (server implementation) for importing. It also provides the ```xdcheckin-server``` commandline tool to start a server at the given IP and port.
 
 ## Notes
