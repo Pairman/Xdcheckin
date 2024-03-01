@@ -8,7 +8,6 @@ description = "Chaoxing Checkin Tool for XDU."
 authors = [
 	{name = "Pairman", email = "pairmanxlr@gmail.com"}
 ]
-url = "https://github.com/Pairman/Xdcheckin"
 requires-python = ">=3.8"
 keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
