@@ -27,6 +27,9 @@ dependencies = [
         "waitress"
 ]
 
+[project.urls]
+homepage = "https://github.com/Pairman/Xdcheckin"
+
 [project.scripts]
 xdcheckind = "xdcheckin.server.server:main"
 
@@ -44,17 +47,17 @@ include = [
 exclude = ["xdcheckin.app*"]
 
 [tool.briefcase]
+project_name = "Xdcheckin"
 bundle = "org.eu.pnxlr.git"
 
 [tool.briefcase.app.xdcheckin]
+formal_name = "Xdcheckin"
+long_description = """Chaoxing Checkin Tool for XDU.
+"""
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/xdcheckin"
 ]
-test_sources = []
-
-requires = ["{project.dependencies | join(',')}"]
-test_requires = []
 
 [tool.briefcase.app.xdcheckin.macOS]
 universal_build = true
