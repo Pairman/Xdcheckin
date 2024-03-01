@@ -12,7 +12,9 @@ Don't checkout [releases](https://github.com/Pairman/Xdcheckin/releases/).
 
 
 ## Module
-Clone this repo and ```pip install -e``` it as a module. You can then import ```xdcheckin```, ```xdcheckin.core``` (Core APIs) or ```xdcheckin.server``` (Flask server implementation).
+Clone this repo and ```pip install -e``` it as a module.
+
+You can then import ```xdcheckin```, ```xdcheckin.core``` (Core APIs) or ```xdcheckin.server``` (Flask server implementation). It also provides the ```xdcheckind``` command to start a flask server on a certain IP and port.
 
 ## Notes
 #### Android
