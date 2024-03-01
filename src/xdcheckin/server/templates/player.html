@@ -149,24 +149,15 @@
 			}
 		}
 
-		/* Get request. */
-		async function get(url = "", params = {}) {
-			let status_code = 404, text = "";
-			try {
-				let res = await fetch(Object.keys(params).length ? `${url}?${new URLSearchParams(params).toString()}` : url);
-				[status_code, text] = [res.status, await res.text()];
-			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
-		}
-
 		/* Post request. */
 		async function post(url = "", data = {}) {
 			let status_code = 404, text = "";
 			try {
 				let res = await fetch(url, {method: "POST", body: ((data instanceof FormData) ? data : JSON.stringify(data))});
-				[status_code, text] = [res.status, await res.text()];
+				status_code = res.status;
+				text = await res.text();
 			} catch (err) {}
-			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return undefined;}}};
+			return {status_code: status_code, text, json: () => {try {return JSON.parse(text);} catch (err) {return {};}}};
 		}
 
 		/* Div listing toggle. */
@@ -209,24 +200,28 @@
 
 		/* Check APP updates. */
 		async function xdcheckinCheckUpdates() {
-			let xdcheckin_version, xdcheckin_latest_release;
-			if (!(xdcheckin_version = (await post("/xdcheckin/get/version")).text))
+			let res = await post("/xdcheckin/get/version");
+			let version = res.text;
+			if (!version)
 				return;
 			let footer_div = document.getElementById("footer-div");
-			footer_div.innerHTML = `Xdcheckin ${xdcheckin_version}&emsp;${footer_div.innerHTML}`;
-			if (!Object.keys(xdcheckin_latest_release = (await post("/xdcheckin/get/releases/latest")).json() || {}).length)
+			footer_div.innerHTML = `Xdcheckin ${version}&emsp;${footer_div.innerHTML}`;
+			res = await post("/xdcheckin/get/releases/latest");
+			let release = res.json();
+			if (!Object.keys(release).length)
 				return;
-			let xdcheckin_version_arr = xdcheckin_version.split("-")[0].split(".");
-			let xdcheckin_latest_release_version_arr = xdcheckin_latest_release["tag_name"].split(".");
+			let version_arr = version.split("-")[0].split(".");
+			let latest_version_arr = release["tag_name"].split(".");
 			for (let i = 0; i < 3; ++i) {
-				if (parseInt(xdcheckin_version_arr[i]) > parseInt(xdcheckin_latest_release_version_arr[i]))
+				if (parseInt(version_arr[i]) > parseInt(latest_version_arr[i]))
 					return;
-				if (parseInt(xdcheckin_version_arr[i]) < parseInt(xdcheckin_latest_release_version_arr[i])) {
-					document.getElementById("xdcheckin-update-div").innerHTML = `<a href='${xdcheckin_latest_release['html_url']}'>Version ${xdcheckin_latest_release['tag_name']} released.</a><br>${xdcheckin_latest_release['body'].replaceAll('\r\n', '<br>')}`;
+				if (parseInt(version_arr[i]) < parseInt(latest_version_arr[i])) {
+					document.getElementById("xdcheckin-update-div").innerHTML = `<a href='${release['html_url']}'>Version ${release['tag_name']} released.</a><br>${release['body'].replaceAll('\r\n', '<br>')}`;
 					return;
 				}
 			}
 		}
+
 		/* Enable players for XDUers. */
 		async function enablePlayers() {
 			/* Classroom livestreams for XDUers only. */
@@ -259,7 +254,8 @@
 			w = w || window.innerWidth - getScrollBarWidth();
 			let e = document.getElementById("camera-video");
 			try {
-				[resizeCamera.w, resizeCamera.h] = [e.width, e.height] = [w.toString(), parseInt(w * e.videoHeight / e.videoWidth).toString()];
+				resizeCamera.w = e.width = w.toString();
+				resizeCamera.h = e.height = parseInt(w * e.videoHeight / e.videoWidth).toString();
 			}
 			catch (err) {}
 			document.getElementById("camera-scanresult-div").style.width = resizeCamera.w;
@@ -268,7 +264,8 @@
 		/* Players and camera resize. */
 		async function resizePlayers(w = 0) {
 			w = w || window.innerWidth - getScrollBarWidth();
-			[resizePlayers.w, resizePlayers.h] = [`${w}px`, `${parseInt(w / 16 * 9)}px`];
+			resizePlayers.w = `${w}px`;
+			resizePlayers.h = `${parseInt(w / 16 * 9)}px`;
 			document.getElementById("player0-scanresult-div").style.width = resizePlayers.w;
 			document.getElementById("camera-scanresult-div").style.width = resizePlayers.w;
 			if (initPlayers.player0)
@@ -368,7 +365,8 @@
 			if (listifyClassrooms.calling)
 				return;
 			listifyClassrooms.calling = true;
-			[listifyClassrooms.buildingsArr, listifyClassrooms.buildingNamesArr] = [[], []];
+			listifyClassrooms.buildingsArr = [];
+			listifyClassrooms.buildingNamesArr = [];
 			let b = document.createElement("button");
 			b.innerText = "I'm Feeling Lucky";
 			b.setAttribute("onclick", "randClassroom()");
@@ -402,7 +400,10 @@
 			localStorage.setItem("classroom", url);
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let videos = JSON.parse(params.get("info"))["videoPath"];
-			[setClassroom.pptVideo, setClassroom.teacherTrack, setClassroom.teacherFull, setClassroom.studentFull] = [videos.pptVideo || "", videos.teacherTrack || "", videos.teacherFull || "", videos.studentFull || ""];
+			setClassroom.pptVideo = videos.pptVideo || "";
+			setClassroom.teacherTrack = videos.teacherTrack || "";
+			setClassroom.teacherFull = videos.teacherFull || "";
+			setClassroom.studentFull = videos.studentFull || "";
 			initPlayers();
 		}
 
@@ -602,7 +603,8 @@
 			if (getCurriculum.calling)
 				return;
 			getCurriculum.calling = true;
-			let curriculum = (await post("/chaoxing/get_curriculum")).json() || {};
+			let res = await post("/chaoxing/get_curriculum");
+			let curriculum = res.json();
 			let info_div = document.createElement("div");
 			info_div.innerText = `Current year: ${curriculum['details']['year']}, semester: ${curriculum['details']['semester']}, week: ${curriculum['details']['week']}.`;
 			document.getElementById("curriculum-list-div").replaceChildren(info_div);
@@ -652,13 +654,14 @@
 				return;
 			getActivities.calling = true;
 			let e = document.getElementById("activities-list-div");
-			let activities = (await post("/chaoxing/get_activities")).json() || {};
+			let res = await post("/chaoxing/get_activities");
+			let activities = res.json();
 			e.replaceChildren();
 			for (let class_id in activities) {
 				let class_activities = activities[class_id];
-				let div = document.createElement("div");
-				div.innerText = `${chaoxingLogin.courses[class_id]['name']}: `;
-				e.appendChild(div);
+				let d = document.createElement("div");
+				d.innerText = `${chaoxingLogin.courses[class_id]['name']}: `;
+				e.appendChild(d);
 				for (let i in class_activities) {
 					let activity = class_activities[i];
 					let b = document.createElement("button");
@@ -737,7 +740,8 @@
 		/* Take video screenshot. */
 		async function screenshot(video, quality) {
 			let canvas = document.createElement("canvas");
-			[canvas.width, canvas.height] = [video.videoWidth, video.videoHeight];
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
 			canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
 			let img_src = await (new Promise((resolve, reject) => {
 				canvas.toBlob(blob => {
