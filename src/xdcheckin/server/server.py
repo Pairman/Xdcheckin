@@ -23,15 +23,6 @@ def create_server():
 		"XDCHECKIN_VERSION": version("Xdcheckin")
 	})
 
-	if not exists(server.config["SESSION_FILE_DIR"]):
-		makedirs(server.config["SESSION_FILE_DIR"])
-	else:
-		for i in listdir(server.config["SESSION_FILE_DIR"]):
-			try:	
-				remove(server.config["SESSION_FILE_DIR"] + "/" + i)
-			except Exception:	
-				continue
-
 	Session(server)
 
 	@server.route("/")
@@ -173,8 +164,19 @@ def create_server():
 	return server
 
 def start_server(host: str = "127.0.0.1", port: int = 5001):
+	server = create_server()
+
+	if not exists(server.config["SESSION_FILE_DIR"]):
+		makedirs(server.config["SESSION_FILE_DIR"])
+	else:
+		for i in listdir(server.config["SESSION_FILE_DIR"]):
+			try:	
+				remove(server.config["SESSION_FILE_DIR"] + "/" + i)
+			except Exception:	
+				continue
+
 	disable_warnings()
-	serve(app = create_server(), host = host, port = port)
+	serve(app = server, host = host, port = port)
 
 def main():
 	from sys import argv
