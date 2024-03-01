@@ -12,9 +12,9 @@ Don't checkout [releases](https://github.com/Pairman/Xdcheckin/releases/).
 
 
 ## Module
-Clone this repo and ```pip install -e``` it as a module.
+Install the module via ```pip install Xdcheckin```.
 
-You can then import ```xdcheckin```, ```xdcheckin.core``` (core APIs) or ```xdcheckin.server``` (server implementation). It also provides the ```xdcheckin-server``` command to start a server at certain IP and port.
+It provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) or ```xdcheckin.server``` (server implementation) for importing. It also provides the ```xdcheckin-server``` commandline tool to start a server at the given IP and port.
 
 ## Notes
 ### For Android
