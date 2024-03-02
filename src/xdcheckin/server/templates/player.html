@@ -35,14 +35,11 @@
 			<div id="location-current-div"></div>
 		</div>
 		<div id="activities-list-div" style="display: none"></div>
-		<br>
 
 		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
 
 		<div id="players-buttons-div" class="div-center" style="display: none;">
 			<button onclick="hideOtherDivs('classrooms-list-div').then(displayDiv('classrooms-list-div'));">Classroom</button>
-			<button onclick="inputClassroom();">Load</button>
-			<button id="extract-classroom-button" onclick="extractClassroom();" style="display: none;">Extract</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.initPlay(); if (initPlayers.player1) initPlayers.player1.initPlay(); if (initPlayers.player2) initPlayers.player2.initPlay(); if (initPlayers.player3) initPlayers.player3.initPlay();">Play All</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.stop(); if (initPlayers.player1) initPlayers.player1.stop(); if (initPlayers.player2) initPlayers.player2.stop(); if (initPlayers.player3) initPlayers.player3.stop(); cameraOff();">Stop All</button>
 		</div>
@@ -362,12 +359,21 @@
 			listifyClassrooms.calling = true;
 			listifyClassrooms.buildingsArr = [];
 			listifyClassrooms.buildingNamesArr = [];
+			let e = document.getElementById("classrooms-list-div");
 			let b = document.createElement("button");
 			b.innerText = "Random";
-			b.setAttribute("onclick", "randClassroom()");
-
-			let e = document.getElementById("classrooms-list-div");
+			b.setAttribute("onclick", "randClassroom();");
 			e.replaceChildren(b);
+			b = document.createElement("button");
+			b.innerText = "Load";
+			b.setAttribute("onclick", "inputClassroom();");
+			e.appendChild(b);
+			b = document.createElement("button");
+			b.id = "extract-classroom-button";
+			b.innerText = "Extract";
+			b.setAttribute("onclick", "extractClassroom();");
+			b.style.display = "none";
+			e.appendChild(b);
 			for (let buildingName in urls) {
 				let building = urls[buildingName];
 				let div = document.createElement("div");
