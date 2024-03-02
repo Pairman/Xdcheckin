@@ -11,7 +11,8 @@ from requests import get
 from tempfile import gettempdir
 from urllib3 import disable_warnings
 from waitress import serve
-from xdcheckin.core.chaoxing import Chaoxing, Newesxidian
+from xdcheckin.core.chaoxing import Chaoxing
+from xdcheckin.core.newesxidian import Newesxidian
 from xdcheckin.core.locations import locations
 
 def create_server():
