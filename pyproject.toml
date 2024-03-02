@@ -41,7 +41,7 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 include = [
 	"xdcheckin.*",
-	"xdcheckin.core.*"，
+	"xdcheckin.core.*",
 	"xdcheckin.server.*"
 ]
 exclude = ["xdcheckin.app.*"]
