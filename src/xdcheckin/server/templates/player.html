@@ -2,7 +2,7 @@
 <html>
 	<title>Xdcheckin</title>
 	<meta charset="UTF-8">
-	<meta name="viewport" content="initial-scale=0.4, user-scalable=no">
+	<meta name="viewport" content="initial-scale=0.7, user-scalable=no">
 	<link rel="shortcut icon" href="#"/>
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/skins/default/aliplayer-min.css"/>
 	<script src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js"></script>
@@ -39,18 +39,14 @@
 
 		<div id="xdcheckin-title-div" class="div-center" style="display: none; font-size:48px; font-family: sans-serif; font-weight: bold;">Xdcheckin</div>
 
-		<div id="classrooms-buttons-div" class="div-center" style="display: none;">
+		<div id="players-buttons-div" class="div-center" style="display: none;">
 			<button onclick="hideOtherDivs('classrooms-list-div').then(displayDiv('classrooms-list-div'));">Classroom</button>
 			<button onclick="inputClassroom();">Load</button>
 			<button id="extract-classroom-button" onclick="extractClassroom();" style="display: none;">Extract</button>
-		</div>
-		<div id="classrooms-list-div" style="display: none;"></div>
-		<br>
-
-		<div id="players-buttons-div" class="div-center" style="display: none;">
 			<button onclick="if (initPlayers.player0) initPlayers.player0.initPlay(); if (initPlayers.player1) initPlayers.player1.initPlay(); if (initPlayers.player2) initPlayers.player2.initPlay(); if (initPlayers.player3) initPlayers.player3.initPlay();">Play All</button>
 			<button onclick="if (initPlayers.player0) initPlayers.player0.stop(); if (initPlayers.player1) initPlayers.player1.stop(); if (initPlayers.player2) initPlayers.player2.stop(); if (initPlayers.player3) initPlayers.player3.stop(); cameraOff();">Stop All</button>
 		</div>
+		<div id="classrooms-list-div" style="display: none;"></div>
 		<br>
 
 		<div id="player0-buttons-div" class="div-center" style="display: none;">
@@ -127,7 +123,7 @@
 		listifyLocations();
 		listifyClassrooms();
 		resizePlayers().then(enablePlayers());
-		window.addEventListener("resize", resizePlayers());
+		window.addEventListener("resize", () => {resizePlayers();});
 		xdcheckinCheckUpdates();
 
 		/*
@@ -135,9 +131,9 @@
 		 */
 
 		/* Assertion. */
-		function assert(condition, message) {
-			if (!condition)
-				throw new Error(message || "Assertion failed");
+		function assert(cond, msg) {
+			if (!cond)
+				throw new Error(msg || "Assertion failed");
 		}
 
 		function isValidUrl(url) {
@@ -174,14 +170,14 @@
 		}
 
 		/* Onclick cooldown. */
-		async function onclickCooldown(e_id, time = 1000) {
+		async function onclickCooldown(e_id, ms = 1000) {
 			let e = document.getElementById(e_id);
 			e.style.pointerEvents = "none";
-			setTimeout(() => {e.style.pointerEvents = "auto";}, time);
+			setTimeout(() => {e.style.pointerEvents = "auto";}, ms);
 		}
 
-		function unescapeUnicode(text) {
-			return text.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {return String.fromCharCode(parseInt(match.substr(2), 16));});
+		function unescapeUnicode(s) {
+			return s.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {return String.fromCharCode(parseInt(match.substr(2), 16));});
 		}
 
 		/* Check EULA state. */
@@ -228,7 +224,6 @@
 			if (enablePlayers.success || enablePlayers.calling || !(localStorage.getItem("chaoxing_fid") == "16820"))
 				return;
 			enablePlayers.calling = true;
-			document.getElementById("classrooms-buttons-div").style.display = "flex";
 			document.getElementById("xdcheckin-title-div").style.display = "flex";
 			document.getElementById("players-buttons-div").style.display = "flex";
 			document.getElementById("player0-buttons-div").style.display = "flex";
@@ -250,7 +245,7 @@
 			return w;
 		}
 
-		async function resizeCamera(w = 0) {
+		async function resizeCamera(w) {
 			w = w || window.innerWidth - getScrollBarWidth();
 			let e = document.getElementById("camera-video");
 			try {
@@ -262,7 +257,7 @@
 		}
 
 		/* Players and camera resize. */
-		async function resizePlayers(w = 0) {
+		async function resizePlayers(w) {
 			w = w || window.innerWidth - getScrollBarWidth();
 			resizePlayers.w = `${w}px`;
 			resizePlayers.h = `${parseInt(w / 16 * 9)}px`;
@@ -380,10 +375,10 @@
 				e.appendChild(div);
 				let classroomArr = [], classroomNamesArr = [];
 				for (let classroomName in building) {
-					let button = document.createElement("button");
-					button.innerText = classroomName;
-					button.setAttribute("onclick", `setClassroom('${building[classroomName]}', '${classroomName}')`);
-					e.appendChild(button);
+					let b = document.createElement("button");
+					b.innerText = classroomName;
+					b.setAttribute("onclick", `setClassroom('${building[classroomName]}', '${classroomName}')`);
+					e.appendChild(b);
 					classroomArr.push(building[classroomName]);
 					classroomNamesArr.push(classroomName);
 				}
@@ -394,9 +389,9 @@
 		}
 
 		/* Video sources control. */
-		async function setClassroom(url, classroomName = "Unknown") {
-			document.getElementById("xdcheckin-title-div").innerText = `Xdcheckin: ${classroomName}`;
-			localStorage.setItem("classroomName", classroomName);
+		async function setClassroom(url, name = "Unknown") {
+			document.getElementById("xdcheckin-title-div").innerText = `Xdcheckin: ${name}`;
+			localStorage.setItem("classroomName", name);
 			localStorage.setItem("classroom", url);
 			let params = new URLSearchParams(decodeURIComponent(new URL(url).search));
 			let videos = JSON.parse(params.get("info"))["videoPath"];
@@ -605,16 +600,16 @@
 			getCurriculum.calling = true;
 			let res = await post("/chaoxing/get_curriculum");
 			let curriculum = res.json();
-			let info_div = document.createElement("div");
-			info_div.innerText = `Current year: ${curriculum['details']['year']}, semester: ${curriculum['details']['semester']}, week: ${curriculum['details']['week']}.`;
-			document.getElementById("curriculum-list-div").replaceChildren(info_div);
+			let d = document.createElement("div");
+			d.innerText = `Current year: ${curriculum['details']['year']}, semester: ${curriculum['details']['semester']}, week: ${curriculum['details']['week']}.`;
+			document.getElementById("curriculum-list-div").replaceChildren(d);
 			if (!Object.keys(curriculum["lessons"]).length) {
-				info_div.innerText += " No curriculum.";
+				d.innerText += " No curriculum.";
 				return getCurriculum.calling = false;
 			}
-			let table = document.createElement("table");
-			table.border = "1";
-			let tableBody = document.createElement("tbody");
+			let t = document.createElement("table");
+			t.border = "1";
+			let tb = document.createElement("tbody");
 			let timetable = curriculum["details"]["time"]["timetable"];
 			for (let class_id in curriculum["lessons"]) {
 				let lesson = curriculum["lessons"][class_id];
@@ -633,18 +628,18 @@
 				tr.appendChild(td);
 				td = document.createElement("td");
 				if ("livestream" in lesson) {
-					let btn = document.createElement("button");
-					btn.innerText = lesson["location"];
-					btn.setAttribute("onclick", `setClassroom('${lesson['livestream']['url']}', '${lesson['location']}')`);
-					td.appendChild(btn);
+					let b = document.createElement("button");
+					b.innerText = lesson["location"];
+					b.setAttribute("onclick", `setClassroom('${lesson['livestream']['url']}', '${lesson['location']}')`);
+					td.appendChild(b);
 				}
 				else
 					td.appendChild(document.createTextNode(lesson["location"]));
 				tr.appendChild(td);
-				tableBody.appendChild(tr);
+				tb.appendChild(tr);
 			}
-			table.appendChild(tableBody);
-			document.getElementById("curriculum-list-div").appendChild(table);
+			t.appendChild(tb);
+			document.getElementById("curriculum-list-div").appendChild(t);
 			getCurriculum.calling = false;
 		}
 
@@ -658,12 +653,12 @@
 			let activities = res.json();
 			e.replaceChildren();
 			for (let class_id in activities) {
-				let class_activities = activities[class_id];
+				let course_activities = activities[class_id];
 				let d = document.createElement("div");
 				d.innerText = `${chaoxingLogin.courses[class_id]['name']}: `;
 				e.appendChild(d);
-				for (let i in class_activities) {
-					let activity = class_activities[i];
+				for (let i in course_activities) {
+					let activity = course_activities[i];
 					let b = document.createElement("button");
 					b.id = `chaoxing-activity-${activity['active_id']}-button`;
 					if (activity["type"] == "2")
