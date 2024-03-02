@@ -47,7 +47,7 @@ include = [
 exclude = ["xdcheckin.app.*"]
 
 [tool.setuptools.package-data]
-xdcheckin.server = ["static/*", "templates/*"]
+"xdcheckin.server" = ["static/*", "templates/*"]
 
 [tool.briefcase]
 project_name = "Xdcheckin"
