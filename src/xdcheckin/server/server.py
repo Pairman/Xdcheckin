@@ -186,7 +186,6 @@ def main():
 		print("Usage: %s <ip> <port>" % (argv[0]))
 		print("  or:  %s" % (argv[0]))
 		return 1
-
 	ip, port = "0.0.0.0", 5001
 	if len(argv) == 3:
 		from socket import inet_aton
@@ -202,6 +201,6 @@ def main():
 		except Exception:
 			print("Invalid port number \"%s\"." % (port))
 			return 1
-	
+
 	print("Starting server at \"%s:%s\"." % (ip, port))
 	start_server(host = ip, port = port)
