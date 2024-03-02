@@ -182,8 +182,9 @@ def main():
 	from sys import argv
 
 	if not len(argv) in (1, 3):
+		print("xdcheckin-server - Xdcheckin Server Commandline Tool %s" % (version("Xdcheckin")))
 		print("Usage: %s <ip> <port>" % (argv[0]))
-		print("  or %s" % (argv[0]))
+		print("  or:  %s" % (argv[0]))
 		return 1
 
 	ip, port = "0.0.0.0", 5001
