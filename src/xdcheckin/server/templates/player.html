@@ -625,7 +625,11 @@
 				td.appendChild(document.createTextNode(lesson["name"]));
 				tr.appendChild(td);
 				td = document.createElement("td");
-				lesson["teacher"].forEach((teacher) => {td.appendChild(document.createTextNode(`${teacher} `))});
+				td.appendChild(document.createTextNode(`${lesson["teacher"][0]}`));
+				for (let i = 1; i < lesson["teacher"].length; ++i) {
+					td.appendChild(document.createElement("br"));
+					td.appendChild(document.createTextNode(`${lesson["teacher"][i]}`));
+				}
 				tr.appendChild(td);
 				td = document.createElement("td");
 				td.appendChild(document.createTextNode(`${weekdays[lesson['time'][0]['day'] - 1]} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
