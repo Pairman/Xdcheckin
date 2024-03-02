@@ -605,7 +605,6 @@
 			if (getCurriculum.calling)
 				return;
 			getCurriculum.calling = true;
-			let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 			let res = await post("/chaoxing/get_curriculum");
 			let curriculum = res.json();
 			let d = document.createElement("div");
@@ -632,10 +631,10 @@
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
-				td.appendChild(document.createTextNode(`${weekdays[lesson['time'][0]['day'] - 1]} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
+				td.appendChild(document.createTextNode(`D${lesson['time'][0]['day']} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
 				for (let i = 1; i < lesson["time"].length; ++i) {
 					td.appendChild(document.createElement("br"));
-					td.appendChild(document.createTextNode(`${weekdays[lesson['time'][i]['day'] - 1]} ${timetable[lesson['time'][i]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][i]['period_end'] - 1].slice(6, 11)}`));
+					td.appendChild(document.createTextNode(`D${lesson['time'][i]['day']} ${timetable[lesson['time'][i]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][i]['period_end'] - 1].slice(6, 11)}`));
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
