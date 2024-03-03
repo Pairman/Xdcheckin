@@ -64,7 +64,6 @@ def create_server():
 	@server.route("/chaoxing/login", methods = ["POST"])
 	def chaoxing_login():
 		try:
-			print(server.config["SESSION"])
 			data = request.get_json(force = True)
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies
