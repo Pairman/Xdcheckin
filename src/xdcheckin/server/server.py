@@ -3,12 +3,9 @@ from flask_session import Session
 from importlib.metadata import version
 from io import BytesIO
 from json import loads, dumps
-from os import listdir, remove, makedirs
-from os.path import exists, join
 from PIL.Image import open as Image_open
 from pyzbar.pyzbar import decode
 from requests import get
-from tempfile import gettempdir
 from urllib3 import disable_warnings
 from uuid import uuid4
 from waitress import serve
@@ -20,8 +17,6 @@ def create_server():
 	server = Flask(__name__)
 	server.config.update({
 		"SESSION_PERMANENT": False,
-		# "SESSION_TYPE": "filesystem",
-		# "SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
 		"SESSION": {}
 	})
 
@@ -184,19 +179,8 @@ def create_server():
 	return server
 
 def start_server(host: str = "127.0.0.1", port: int = 5001):
-	server = create_server()
-
-#	if not exists(server.config["SESSION_FILE_DIR"]):
-#		makedirs(server.config["SESSION_FILE_DIR"])
-#	else:
-#		for i in listdir(server.config["SESSION_FILE_DIR"]):
-#			try:	
-#				remove(join(server.config["SESSION_FILE_DIR"], i))
-#			except Exception:	
-#				continue
-
 	disable_warnings()
-	serve(app = server, host = host, port = port)
+	serve(app = create_server(), host = host, port = port)
 
 def main():
 	from sys import argv
