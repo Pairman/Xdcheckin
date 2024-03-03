@@ -15,20 +15,20 @@ authors = [
 requires-python = ">=3.8"
 keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
-    "Framework :: Flask",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: JavaScript",
-    "License :: OSI Approved :: GNU General Public License (GPL)"
+	"Framework :: Flask",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: JavaScript",
+	"License :: OSI Approved :: GNU General Public License (GPL)"
 ]
 dependencies = [
-        "flask >= 3.0.0",
+	"flask >= 3.0.0",
         "flask-session >= 0.6.0",
         "pillow >= 8.4.0",
         "pycryptodome >= 3.9.4",
         "pyzbar >= 0.1.8",
         "requests >= 2.31.0",
         "requests-cache >= 1.2.0",
-        "waitress >= 3.0.0"
+	"waitress >= 3.0.0"
 ]
 
 [project.urls]
@@ -44,7 +44,14 @@ include = [
 	"xdcheckin.core.*",
 	"xdcheckin.server.*"
 ]
-exclude = ["xdcheckin.app.*"]
+# exclude = ["xdcheckin.app.*"]
+
+[tool.setuptools.extras-require]
+"app" = [
+  	"briefcase",
+ 	"toga",
+	"xdcheckin.app*"
+]
 
 [tool.setuptools.package-data]
 "xdcheckin.server" = ["static/*", "templates/*"]
@@ -59,7 +66,7 @@ long_description = """Chaoxing Checkin Tool for XDU.
 """
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
-    "src/xdcheckin"
+	"src/xdcheckin"
 ]
 # test_sources = []
 requires = [
@@ -77,33 +84,33 @@ requires = [
 [tool.briefcase.app.xdcheckin.macOS]
 universal_build = true
 requires = [
-    "toga-cocoa~=0.4.0",
-    "std-nslog~=1.0.0",
+	"toga-cocoa~=0.4.0",
+	"std-nslog~=1.0.0",
 ]
 
 [tool.briefcase.app.xdcheckin.linux]
 requires = [
-    "toga-gtk~=0.4.0",
+	"toga-gtk~=0.4.0",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.debian]
 system_requires = [
-    # Needed to compile pycairo wheel
-    "libcairo2-dev",
-    # Needed to compile PyGObject wheel
-    "libgirepository1.0-dev",
+	# Needed to compile pycairo wheel
+	"libcairo2-dev",
+	# Needed to compile PyGObject wheel
+	"libgirepository1.0-dev",
 ]
 
 system_runtime_requires = [
-    # Needed to provide GTK and its GI bindings
-    "gir1.2-gtk-3.0",
-    "libgirepository-1.0-1",
-    # Dependencies that GTK looks for at runtime
-    "libcanberra-gtk3-module",
-    # Needed to provide WebKit2 at runtime
-    # "gir1.2-webkit2-4.0",
-    # Needed for pyzbar at runtime
-    "libzbar0"
+	# Needed to provide GTK and its GI bindings
+	"gir1.2-gtk-3.0",
+	"libgirepository-1.0-1",
+	# Dependencies that GTK looks for at runtime
+	"libcanberra-gtk3-module",
+	# Needed to provide WebKit2 at runtime
+	# "gir1.2-webkit2-4.0",
+	# Needed for pyzbar at runtime
+	"libzbar0"
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.rhel]
