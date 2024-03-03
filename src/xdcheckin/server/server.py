@@ -19,9 +19,9 @@ from xdcheckin.core.locations import locations
 def create_server():
 	server = Flask(__name__)
 	server.config.update({
-		# "SESSION_PERMANENT": False,
-		# "SESSION_TYPE": "filesystem",
-		# "SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
+		"SESSION_PERMANENT": False,
+		"SESSION_TYPE": "filesystem",
+		"SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
 		"SESSION": {}
 	})
 
