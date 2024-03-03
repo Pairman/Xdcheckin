@@ -1,5 +1,4 @@
-# This project was generated with 0.3.16 using template: https://github.com/beeware/briefcase-template@v0.3.16
-
+# This project was generated with 0.3.17 using template: https://github.com/beeware/briefcase-template@v0.3.17
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -79,7 +78,7 @@ test_requires = []
 universal_build = true
 requires = [
     "toga-cocoa~=0.4.0",
-    "std-nslog~=1.0.0"
+    "std-nslog~=1.0.0",
 ]
 
 [tool.briefcase.app.xdcheckin.linux]
@@ -92,7 +91,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "libcairo2-dev",
     # Needed to compile PyGObject wheel
-    "libgirepository1.0-dev"
+    "libgirepository1.0-dev",
 ]
 
 system_runtime_requires = [
@@ -112,7 +111,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "cairo-gobject-devel",
     # Needed to compile PyGObject wheel
-    "gobject-introspection-devel"
+    "gobject-introspection-devel",
 ]
 
 system_runtime_requires = [
@@ -125,7 +124,7 @@ system_runtime_requires = [
     # Needed to provide WebKit2 at runtime
     # "webkit2gtk3",
     # Needed for pyzbar at runtime
-    "zbar-libs"
+    "zbar-libs",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.suse]
@@ -133,7 +132,7 @@ system_requires = [
     # Needed to compile pycairo wheel
     "cairo-devel",
     # Needed to compile PyGObject wheel
-    "gobject-introspection-devel"
+    "gobject-introspection-devel",
 ]
 
 system_runtime_requires = [
@@ -147,7 +146,7 @@ system_runtime_requires = [
     # "libwebkit2gtk3",
     # "typelib(WebKit2)",
     # Needed for pyzbar at runtime
-    "libzbar0"
+    "libzbar0",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.arch]
@@ -176,11 +175,11 @@ system_runtime_requires = [
     # Needed to provide WebKit2 at runtime
     # "webkit2gtk",
     # Needed for pyzbar at runtime
-    "zbar"
+    "zbar",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.appimage]
-manylinux = "manylinux2014"
+manylinux = "manylinux_2_28"
 
 system_requires = [
     # Needed to compile pycairo wheel
@@ -194,18 +193,17 @@ system_requires = [
     "libcanberra-gtk3",
     "PackageKit-gtk3-module",
     "gvfs-client",
-    # Needed to compile pyzbar
-    "zbar-dev",
     # Needed for pyzbar at runtime
-    "zbar"
+    "zbar",
 ]
+
 linuxdeploy_plugins = [
     "DEPLOY_GTK_VERSION=3 gtk",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.flatpak]
 flatpak_runtime = "org.gnome.Platform"
-flatpak_runtime_version = "44"
+flatpak_runtime_version = "45"
 flatpak_sdk = "org.gnome.Sdk"
 
 [tool.briefcase.app.xdcheckin.windows]
@@ -217,12 +215,12 @@ requires = [
 [tool.briefcase.app.xdcheckin.iOS]
 requires = [
     "toga-iOS~=0.4.0",
-    "std-nslog~=1.0.0"
+    "std-nslog~=1.0.0",
 ]
 
 [tool.briefcase.app.xdcheckin.android]
 requires = [
-    "toga-android~=0.4.0"
+    "toga-android~=0.4.0",
 ]
 build_gradle_extra_content = """
 android.defaultConfig.ndk.abiFilters = ['arm64-v8a']
