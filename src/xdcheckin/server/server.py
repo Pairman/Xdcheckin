@@ -186,14 +186,14 @@ def create_server():
 def start_server(host: str = "127.0.0.1", port: int = 5001):
 	server = create_server()
 
-	if not exists(server.config["SESSION_FILE_DIR"]):
-		makedirs(server.config["SESSION_FILE_DIR"])
-	else:
-		for i in listdir(server.config["SESSION_FILE_DIR"]):
-			try:	
-				remove(join(server.config["SESSION_FILE_DIR"], i))
-			except Exception:	
-				continue
+#	if not exists(server.config["SESSION_FILE_DIR"]):
+#		makedirs(server.config["SESSION_FILE_DIR"])
+#	else:
+#		for i in listdir(server.config["SESSION_FILE_DIR"]):
+#			try:	
+#				remove(join(server.config["SESSION_FILE_DIR"], i))
+#			except Exception:	
+#				continue
 
 	disable_warnings()
 	serve(app = server, host = host, port = port)
