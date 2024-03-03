@@ -3,19 +3,30 @@ from flask_session import Session
 from importlib.metadata import version
 from io import BytesIO
 from json import loads, dumps
+from os import listdir, remove, makedirs
+from os.path import exists, join
 from PIL.Image import open
 from pyzbar.pyzbar import decode
 from requests import get
+from tempfile import gettempdir
 from urllib3 import disable_warnings
+from uuid import uuid4
 from waitress import serve
 from xdcheckin.core.chaoxing import Chaoxing
 from xdcheckin.core.xidian import Newesxidian
 from xdcheckin.core.locations import locations
 
-def create_server():
+def create_server(config: dict = {}):
+	"""Create a Xdcheckin server.
+	:param config: Server config.
+	:return: Xdcheckin server.
+	"""
 	server = Flask(__name__)
-	server.config["SESSION_PERMANENT"] = False
-
+	server.config.update(**{
+		"SESSION_PERMANENT": False,
+		"SESSION_TYPE": "filesystem",
+		"XDCHECKIN_SESSION": {}
+	}, **config)
 	Session(server)
 
 	@server.route("/")
@@ -67,13 +78,18 @@ def create_server():
 			data = request.get_json(force = True)
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies
-			session["chaoxing"] = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
-			assert session["chaoxing"].logined
-			session["newesxidian"] = Newesxidian(chaoxing = session["chaoxing"])
+			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
+			assert chaoxing.logined
+			newesxidian = Newesxidian(chaoxing = chaoxing)
+			session["xdcheckin_uuid"] = session.get("xdcheckin_uuid") or str(uuid4())
+			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {
+				"chaoxing": chaoxing,
+				"newesxidian": newesxidian
+			}
 			res = make_response(dumps({
-				"fid": session["chaoxing"].cookies.get("fid") or "0",
-				"courses": session["chaoxing"].courses,
-				"cookies": dumps(dict(session["chaoxing"].cookies))
+				"fid": chaoxing.cookies.get("fid") or "0",
+				"courses": chaoxing.courses,
+				"cookies": dumps(dict(chaoxing.cookies))
 			}))
 		except Exception as e:
 			res = make_response(dumps({"err": str(e)}))
@@ -84,10 +100,12 @@ def create_server():
 	@server.route("/chaoxing/extract_url", methods = ["POST"])
 	def chaoxing_extract_url():
 		try:
-			assert session["chaoxing"].logined
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			newesxidian = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["newesxidian"]
+			assert chaoxing.logined
 			data = request.get_json(force = True)
 			assert data
-			livestream = session["newesxidian"].livestream_get_live_url(livestream = {"live_id": str(data)})
+			livestream = newesxidian.livestream_get_live_url(livestream = {"live_id": str(data)})
 			res = make_response(livestream["url"])
 			res.status_code = 200
 		except Exception:
@@ -99,8 +117,10 @@ def create_server():
 	@server.route("/chaoxing/get_curriculum", methods = ["POST"])
 	def chaoxing_get_curriculum():
 		try:
-			assert session["chaoxing"].logined
-			curriculum = session["newesxidian"].curriculum_get_curriculum() if session["newesxidian"].logined else session["chaoxing"].curriculum_get_curriculum()
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			newesxidian = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["newesxidian"]
+			assert chaoxing.logined
+			curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
 			res = make_response(dumps(curriculum))
 			res.status_code = 200
 		except Exception as e:
@@ -113,8 +133,9 @@ def create_server():
 	@server.route("/chaoxing/get_activities", methods = ["POST"])
 	def chaoxing_get_activities():
 		try:
-			assert session["chaoxing"].logined
-			activities = session["chaoxing"].course_get_activities()
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined
+			activities = chaoxing.course_get_activities()
 			res = make_response(dumps(activities))
 			res.status_code = 200
 		except Exception:
@@ -126,11 +147,12 @@ def create_server():
 	@server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
 	def chaoxing_checkin_checkin_location():
 		try:
-			assert session["chaoxing"].logined, "Not logged in."
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined, "Not logged in."
 			data = request.get_json(force = True)
 			assert data["activity"]["active_id"], "No activity ID given."
 			data["activity"]["active_id"] = str(data["activity"]["active_id"])
-			result = session["chaoxing"].checkin_checkin_location(activity = data["activity"], location = data["location"])
+			result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
 			res = make_response(f"{result[1][: -1]}, {data['activity']['active_id']})")
 		except Exception as e:
 			res = make_response(f"Checkin error. ({str(e)})")
@@ -141,7 +163,8 @@ def create_server():
 	@server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
 	def chaoxing_checkin_checkin_qrcode_img():
 		try:
-			assert session["chaoxing"].logined, "Not logged in."
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined, "Not logged in."
 			img_src = request.files["img_src"]
 			assert img_src, "No image given."
 			with open(BytesIO(img_src.read())) as img:
@@ -150,7 +173,7 @@ def create_server():
 			assert urls, "No Qrcode detected."
 			urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 			assert urls, "No checkin URL found."
-			result = session["chaoxing"].checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
+			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
 			res = make_response(f"{result[1][: -1]}, {urls[0]})")
 		except Exception as e:
 			res = make_response(f"Checkin error. ({str(e)})")
@@ -161,8 +184,18 @@ def create_server():
 	return server
 
 def start_server(host: str = "127.0.0.1", port: int = 5001):
+	"""Run a Xdcheckin server.
+	:param host: IP address.
+	:param port: Port.
+	"""
+	dir = join(gettempdir(), "xdcheckin")
+	if not exists(dir):
+		makedirs(dir)
+	else:
+		for i in listdir(dir):
+				remove(join(dir, i))
 	disable_warnings()
-	serve(app = create_server(), host = host, port = port)
+	serve(app = create_server(config = config), host = host, port = port)
 
 def main():
 	from sys import argv
