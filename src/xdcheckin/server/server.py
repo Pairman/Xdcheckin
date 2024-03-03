@@ -77,7 +77,8 @@ def create_server(config: dict = {}):
 			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
 			assert chaoxing.logined
 			newesxidian = Newesxidian(chaoxing = chaoxing)
-			session["xdcheckin_uuid"] = session.get("xdcheckin_uuid") or str(uuid4())
+			if not session.get("xdcheckin_uuid"):
+				session["xdcheckin_uuid"] = str(uuid4())
 			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {
 				"chaoxing": chaoxing,
 				"newesxidian": newesxidian
