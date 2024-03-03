@@ -34,7 +34,7 @@ def create_server():
 
 	@server.route("/xdcheckin/static/locations.js")
 	def xdcheckin_static_locations_js():
-		res = make_response(f"var locations = {dumps(locations).encode("ascii").decode("unicode-escape")};")
+		res = make_response(f"var locations = {dumps(locations).encode('ascii').decode('unicode-escape')};")
 		res.status_code = 200
 		return res
 
@@ -153,7 +153,7 @@ def create_server():
 			assert data["activity"]["active_id"], "No activity ID given."
 			data["activity"]["active_id"] = str(data["activity"]["active_id"])
 			result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
-			res = make_response(f"{result[1][: -1]}, {data["activity"]["active_id"]})")
+			res = make_response(f"{result[1][: -1]}, {data['activity']['active_id']})")
 		except Exception as e:
 			res = make_response(f"Checkin error. ({str(e)})")
 		finally:
@@ -202,7 +202,7 @@ def main():
 	from sys import argv
 
 	if not len(argv) in (1, 3):
-		print(f"xdcheckin-server - Xdcheckin Server Commandline Tool {version("Xdcheckin")}")
+		print(f"xdcheckin-server - Xdcheckin Server Commandline Tool {version('Xdcheckin')}")
 		print(f"Usage: {argv[0]} <ip> <port>")
 		print(f"  or:  {argv[0]}")
 		return 1
