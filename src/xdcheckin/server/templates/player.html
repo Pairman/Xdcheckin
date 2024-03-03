@@ -705,7 +705,6 @@
 			for (let buildingName in locations) {
 				let b = document.createElement("button");
 				b.innerText = buildingName;
-				locations[buildingName]["ranged"] = 1;
 				b.setAttribute("onclick", `localStorage.setItem('location_', '${JSON.stringify(locations[buildingName])}'); localStorage.setItem('location_name', '${buildingName}'); document.getElementById('location-current-div').innerText = 'Current location: ${buildingName}'`);
 				e.appendChild(b);
 			}
@@ -735,7 +734,7 @@
 				if (address === null)
 					return;
 				assert(address !== "" || !(/[()\[\]{}]/.test(address)));
-				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address, "ranged": 1}));
+				localStorage.setItem("location_", JSON.stringify({"latitude": latitude, "longitude": longitude, "address": address}));
 				localStorage.setItem("location_name", `Input(${latitude}, ${longitude}, ${address})`);
 				document.getElementById("location-current-div").innerText = `Current location: ${localStorage.getItem("location_name")}`;
 			}
