@@ -31,6 +31,13 @@ dependencies = [
 	"waitress >= 3.0.0"
 ]
 
+[project.optional-dependencies]
+"app" = [
+  	"briefcase",
+ 	"toga",
+	"xdcheckin.app*"
+]
+
 [project.urls]
 Homepage = "https://github.com/Pairman/Xdcheckin"
 
@@ -45,13 +52,6 @@ include = [
 	"xdcheckin.server.*"
 ]
 # exclude = ["xdcheckin.app.*"]
-
-[tool.setuptools.extras-require]
-"app" = [
-  	"briefcase",
- 	"toga",
-	"xdcheckin.app*"
-]
 
 [tool.setuptools.package-data]
 "xdcheckin.server" = ["static/*", "templates/*"]
