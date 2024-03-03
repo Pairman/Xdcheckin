@@ -188,13 +188,14 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	config = {
 		"SESSION_PERMANENT": False,
 		"SESSION_TYPE": "filesystem",
+		"SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
 		"XDCHECKIN_SESSION": {}
 	}
-	if not exists(config["XDCHECKIN_SESSION"]):
-		makedirs(config["XDCHECKIN_SESSION"])
+	if not exists(config["SESSION_FILE_DIR"]):
+		makedirs(config["SESSION_FILE_DIR"])
 	else:
-		for i in listdir(config["XDCHECKIN_SESSION"]):
-				remove(join(config["XDCHECKIN_SESSION"], i))
+		for i in listdir(config["SESSION_FILE_DIR"]):
+				remove(join(config["SESSION_FILE_DIR"], i))
 	disable_warnings()
 	serve(app = create_server(config = config), host = host, port = port)
 
