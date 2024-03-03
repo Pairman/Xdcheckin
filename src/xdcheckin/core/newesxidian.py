@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from threading import Thread
+from xdcheckin.core.chaoxing import Chaoxing
 
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
