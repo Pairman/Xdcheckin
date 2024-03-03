@@ -1,13 +1,12 @@
-from flask import Flask, render_template, make_response, request
+from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from importlib.metadata import version
 from io import BytesIO
 from json import loads, dumps
-from PIL.Image import open as Image_open
+from PIL.Image import open
 from pyzbar.pyzbar import decode
 from requests import get
 from urllib3 import disable_warnings
-from uuid import uuid4
 from waitress import serve
 from xdcheckin.core.chaoxing import Chaoxing
 from xdcheckin.core.xidian import Newesxidian
@@ -15,10 +14,7 @@ from xdcheckin.core.locations import locations
 
 def create_server():
 	server = Flask(__name__)
-	server.config.update({
-		"SESSION_PERMANENT": False,
-		"SESSION": {}
-	})
+	server.config["SESSION_PERMANENT"] = False
 
 	Session(server)
 
@@ -72,20 +68,14 @@ def create_server():
 			data = request.get_json(force = True)
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies
-			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
-			assert chaoxing.logined
-			newesxidian = Newesxidian(chaoxing = chaoxing)
-			uuid = request.cookies.get("xdcheckin_uuid") or str(uuid4())
-			server.config["SESSION"][uuid] = {
-				"chaoxing": chaoxing,
-				"newesxidian": newesxidian
-			}
+			session["chaoxing"] = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
+			assert session["chaoxing"].logined
+			session["newesxidian"] = Newesxidian(chaoxing = session["chaoxing"])
 			res = make_response(dumps({
-				"fid": chaoxing.cookies.get("fid") or "0",
-				"courses": chaoxing.courses,
-				"cookies": dumps(dict(chaoxing.cookies))
+				"fid": session["chaoxing"].cookies.get("fid") or "0",
+				"courses": session["chaoxing"].courses,
+				"cookies": dumps(dict(session["chaoxing"].cookies))
 			}))
-			res.set_cookie("xdcheckin_uuid", uuid)
 		except Exception as e:
 			res = make_response(dumps({"err": str(e)}))
 		finally:
@@ -95,12 +85,10 @@ def create_server():
 	@server.route("/chaoxing/extract_url", methods = ["POST"])
 	def chaoxing_extract_url():
 		try:
-			chaoxing = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["chaoxing"]
-			newesxidian = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["newesxidian"]
-			assert chaoxing.logined
+			assert session["chaoxing"].logined
 			data = request.get_json(force = True)
 			assert data
-			livestream = newesxidian.livestream_get_live_url(livestream = {"live_id": str(data)})
+			livestream = session["newesxidian"].livestream_get_live_url(livestream = {"live_id": str(data)})
 			res = make_response(livestream["url"])
 			res.status_code = 200
 		except Exception:
@@ -112,10 +100,8 @@ def create_server():
 	@server.route("/chaoxing/get_curriculum", methods = ["POST"])
 	def chaoxing_get_curriculum():
 		try:
-			chaoxing = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["chaoxing"]
-			newesxidian = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["newesxidian"]
-			assert chaoxing.logined
-			curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
+			assert session["chaoxing"].logined
+			curriculum = session["newesxidian"].curriculum_get_curriculum() if session["newesxidian"].logined else session["chaoxing"].curriculum_get_curriculum()
 			res = make_response(dumps(curriculum))
 			res.status_code = 200
 		except Exception as e:
@@ -128,9 +114,8 @@ def create_server():
 	@server.route("/chaoxing/get_activities", methods = ["POST"])
 	def chaoxing_get_activities():
 		try:
-			chaoxing = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["chaoxing"]
-			assert chaoxing.logined
-			activities = chaoxing.course_get_activities()
+			assert session["chaoxing"].logined
+			activities = session["chaoxing"].course_get_activities()
 			res = make_response(dumps(activities))
 			res.status_code = 200
 		except Exception:
@@ -142,12 +127,11 @@ def create_server():
 	@server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
 	def chaoxing_checkin_checkin_location():
 		try:
-			chaoxing = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["chaoxing"]
-			assert chaoxing.logined, "Not logged in."
+			assert session["chaoxing"].logined, "Not logged in."
 			data = request.get_json(force = True)
 			assert data["activity"]["active_id"], "No activity ID given."
 			data["activity"]["active_id"] = str(data["activity"]["active_id"])
-			result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
+			result = session["chaoxing"].checkin_checkin_location(activity = data["activity"], location = data["location"])
 			res = make_response(f"{result[1][: -1]}, {data['activity']['active_id']})")
 		except Exception as e:
 			res = make_response(f"Checkin error. ({str(e)})")
@@ -158,17 +142,16 @@ def create_server():
 	@server.route("/chaoxing/checkin_checkin_qrcode_img", methods = ["POST"])
 	def chaoxing_checkin_checkin_qrcode_img():
 		try:
-			chaoxing = server.config["SESSION"][request.cookies["xdcheckin_uuid"]]["chaoxing"]
-			assert chaoxing.logined, "Not logged in."
+			assert session["chaoxing"].logined, "Not logged in."
 			img_src = request.files["img_src"]
 			assert img_src, "No image given."
-			with Image_open(BytesIO(img_src.read())) as img:
+			with open(BytesIO(img_src.read())) as img:
 				assert img.size[0] > 0 and img.size[1] > 0, "Empty image."
 				urls = decode(img)
 			assert urls, "No Qrcode detected."
 			urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
 			assert urls, "No checkin URL found."
-			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
+			result = session["chaoxing"].checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
 			res = make_response(f"{result[1][: -1]}, {urls[0]})")
 		except Exception as e:
 			res = make_response(f"Checkin error. ({str(e)})")
