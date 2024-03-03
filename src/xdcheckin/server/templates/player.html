@@ -617,6 +617,7 @@
 			let t = document.createElement("table");
 			t.border = "1";
 			let tb = document.createElement("tbody");
+			let weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 			let timetable = curriculum["details"]["time"]["timetable"];
 			for (let class_id in curriculum["lessons"]) {
 				let lesson = curriculum["lessons"][class_id];
@@ -631,10 +632,10 @@
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
-				td.appendChild(document.createTextNode(`D${lesson['time'][0]['day']} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
+				td.appendChild(document.createTextNode(`${weekdays[lesson['time'][0]['day'] - 1]} ${timetable[lesson['time'][0]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][0]['period_end'] - 1].slice(6, 11)}`));
 				for (let i = 1; i < lesson["time"].length; ++i) {
 					td.appendChild(document.createElement("br"));
-					td.appendChild(document.createTextNode(`D${lesson['time'][i]['day']} ${timetable[lesson['time'][i]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][i]['period_end'] - 1].slice(6, 11)}`));
+					td.appendChild(document.createTextNode(`${weekdays[lesson['time'][i]['day'] - 1]} ${timetable[lesson['time'][i]['period_begin'] - 1].slice(0, 5)}-${timetable[lesson['time'][i]['period_end'] - 1].slice(6, 11)}`));
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
