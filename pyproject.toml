@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Xdcheckin"
-version = "1.2.10"
+version = "1.2.11"
 license = {text = "GNU General Public License v3 (GPLv3)"}
 readme = "README.md"
 description = "Chaoxing Checkin Tool for XDU."
