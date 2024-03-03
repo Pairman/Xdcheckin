@@ -552,9 +552,9 @@ class Chaoxing:
 				thread_location = Thread(target = _get_location)
 				thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
-			assert presign, "Presign failure. " + str((activity, location, info, presign))
+			assert presign, f"Presign failure. {(activity, location, info, presign)}"
 			if presign == 2:
-				return True, "Checkin success. (Already checked in.)"
+				return True, "Checkin success. (already checked in)"
 			thread_analysis.join()
 			if ranged == "1":
 				thread_location.join()
@@ -567,8 +567,8 @@ class Chaoxing:
 				"ifTiJiao": ranged
 			})
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), "Checkin failure. " + str((activity, location, info, presign, location_new, params, res.text))
-			return True, "Checkin success. (" + res.text + ")"
+			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
+			return True, f"Checkin success. ({res.text})"
 		except Exception as e:
 			return False, str(e)
 
@@ -604,13 +604,13 @@ class Chaoxing:
 				thread_location = Thread(target = _get_location)
 				thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
-			assert presign, "Presign failure. " + str((activity, location, info, presign))
+			assert presign, f"Presign failure. {activity, location, info, presign}"
 			if presign == 2:
-				return True, "Checkin success. (Already checked in.)"
+				return True, "Checkin success. (already checked in)"
 			thread_analysis.join()
 			if ranged == "1":
 				thread_location.join()
-				params["location"] = "{\"result\":1,\"latitude\":" + str(location_new["latitude"]) + ",\"longitude\":" + str(location_new["longitude"]) + ",\"address\":\"" + location_new["address"] + "\"}"
+				params["location"] = f"{{\"result\":1,\"latitude\":{location_new["latitude"]},\"longitude\":{location_new["longitude"]},\"address\":\"{location_new["address"]}\"}}"
 			else:
 				location_new = location
 				params.update({
@@ -618,8 +618,8 @@ class Chaoxing:
 					"longitude": location_new["longitude"]
 				})
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), "Checkin failure. " + str((activity, location, info, presign, location_new, params, res.text))
-			return True, "Checkin success. (" + res.text + ")"
+			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
+			return True, f"Checkin success. ({res.text})"
 		except Exception as e:
 			return False, str(e)
 
@@ -630,7 +630,7 @@ class Chaoxing:
 		:return: Same as checkin_checkin_location().
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, "Checkin failure. " + str(("Invalid URL", url, location))
+			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {"invalid url", url, location}"
 			s = search(r"id=(.*?)&.*?enc=(.*?)&", url)
 			return self.checkin_checkin_qrcode(activity = {"active_id": s.group(1), "enc": s.group(2)}, location = location)
 		except Exception as e:
