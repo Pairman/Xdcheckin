@@ -61,7 +61,7 @@ icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
     "src/xdcheckin"
 ]
-test_sources = []
+# test_sources = []
 requires = [
         "flask >= 3.0.0",
         "flask-session >= 0.6.0",
@@ -72,7 +72,7 @@ requires = [
         "requests-cache >= 1.2.0",
         "waitress >= 3.0.0"
 ]
-test_requires = []
+# test_requires = []
 
 [tool.briefcase.app.xdcheckin.macOS]
 universal_build = true
@@ -223,12 +223,14 @@ requires = [
     "toga-android~=0.4.0",
 ]
 
-base_theme = "Theme.MaterialComponents.DayNight"
+# base_theme = "Theme.MaterialComponents.DayNight"
 
-build_gradle_dependencies = [
-    "androidx.appcompat:appcompat:1.6.1",
-    "com.google.android.material:material:1.11.0",
-]
+# build_gradle_dependencies = [
+    # "androidx.appcompat:appcompat:1.6.1",
+    # "com.google.android.material:material:1.11.0",
+    # Needed for DetailedList
+    # "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0",
+# ]
 
 build_gradle_extra_content = """
 android.defaultConfig.ndk.abiFilters = ['arm64-v8a']
