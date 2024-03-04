@@ -40,3 +40,7 @@ The APP doesn't use WebView on Linux, therefore it will open ```http://127.0.0.1
 
 ### For Windows
 The APP needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784)nto work on Windows. Please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
+
+## Credits
+https://github.com/BenderBlog/traintime_pda <br>
+https://github.com/xdlinux/libxduauth
