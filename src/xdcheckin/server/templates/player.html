@@ -115,6 +115,8 @@
 		listifyLocations();
 		listifyClassrooms();
 		resizePlayers().then(enablePlayers());
+		if (localStorage.getItem("chaoxing_username"))
+			chaoxingLogin(localStorage.getItem("chaoxing_username"), localStorage.getItem("chaoxing_password"));
 		window.addEventListener("resize", () => {resizePlayers();});
 		xdcheckinCheckUpdates();
 
