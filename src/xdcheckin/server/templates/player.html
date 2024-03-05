@@ -174,7 +174,7 @@
 			return s.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {return String.fromCharCode(parseInt(match.substr(2), 16));});
 		}
 
-		/* Take video screenshot. */
+		/* Imaging related. */
 		async function screenshot(video, quality) {
 			let canvas = document.createElement("canvas");
 			canvas.width = video.videoWidth;
@@ -187,6 +187,24 @@
 			}));
 			canvas.remove();
 			return img_src;
+		}
+
+		async function scaleImage(img_src, scale) {
+			let canvas = document.createElement("canvas");
+			let ctx = canvas.getContext("2d");
+			let img = new Image();
+			let img_src_new = await (new Promise((resolve, reject) => {
+				img.onload = (() => {
+					canvas.width = img.width * scale;
+					canvas.height = img.height * scale;
+					ctx.scale(scale, scale);
+					ctx.drawImage(img, 0, 0);
+					resolve(canvas.toDataURL());
+				});
+				img.src = img_src;
+			}));
+			canvas.remove();
+			return img_src_new;
 		}
 
 		/* Check EULA state. */
