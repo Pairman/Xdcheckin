@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from threading import Thread
-from xdcheckin.core.chaoxing import Chaoxing
-
-from base64 import b64decode, b64encode
+from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad
-from io import BytesIO
-from PIL.Image import open
 from re import search
 from requests import Response, Session
 from requests.exceptions import RequestException
+from threading import Thread
 from time import time
+from xdcheckin.core.chaoxing import Chaoxing
 
 class IDSSession:
 	requests_session = secrets = service = logined = None
@@ -23,7 +20,7 @@ class IDSSession:
 
 	def __init__(self, service: str = ""):
 		"""Initialize an IDS Session.
-		:param service: The sso service for redirection.
+		:param service: The SSO service for redirection.
 		"""
 		if self.logined:
 			return
@@ -230,18 +227,3 @@ class Newesxidian:
 		tuple(thread.start() for thread in threads)
 		tuple(thread.join() for thread in threads)
 		return curriculum
-
-if __name__ == "__main__":
-	"""Test IDS Login.
-	"""
-	ids = IDSSession(service = "https://learning.xidian.edu.cn/cassso/xidian")
-	print("start prep")
-	prep = ids.login_prepare()
-	print("end prep", prep)
-	img = open(BytesIO(b64decode(prep["big_img_src"])))
-	img.show()
-	vcode = int(input("vcode: ")) * 280 / img.width
-	account = {"username": f"{input('username: ')}", "password": f"{input('password: ')}", "vcode": vcode}
-	print("start finish", account)
-	finish = ids.login_finish(account = account)
-	print("end finish", finish)
