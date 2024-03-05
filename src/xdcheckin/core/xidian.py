@@ -26,17 +26,18 @@ class IDSSession:
 			return
 		self.requests_session, self.secrets, self.service = Session(), {}, service
 
-	def get(self, url: str = "", params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False):
+	def get(self, url: str = "", params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, **kwargs):
 		"""Wrapper for requests.get().
 		:param url: URL.
 		:param params: Parameters.
 		:param cookies: Cookies. Overrides existing cookies.
 		:param headers: Headers. Overrides existing headers.
 		:param verify: SSL certificate verification toggle. False by default.
+		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.get(url, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False)
+			res = self.requests_session.get(url, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False, **kwargs)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
@@ -47,7 +48,7 @@ class IDSSession:
 		finally:
 			return res
 
-	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, cache: bool = False):
+	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, **kwargs):
 		"""Wrapper for requests.post().
 		:param url: URL.
 		:param data: Data.
@@ -55,10 +56,11 @@ class IDSSession:
 		:param cookies: Cookies. Overrides existing cookies.
 		:param headers: Headers. Overrides existing headers.
 		:param verify: SSL certificate verification toggle. False by default.
+		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.post(url, data = data, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False)
+			res = self.requests_session.post(url, data = data, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False, **kwargs)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
@@ -69,8 +71,8 @@ class IDSSession:
 		finally:
 			return res
 
-	def login_prepare(self):
-		"""Prepare for login verification.
+	def login_username_prepare(self):
+		"""Prepare verification for username login.
 		:return: Base64 encoded captcha background and slider image string.
 		"""
 		url1 = "https://ids.xidian.edu.cn/authserver/login"
@@ -103,10 +105,10 @@ class IDSSession:
 		})
 		return ret
 
-	def login_finish(self, account: dict = {"username": "", "password": "", "vcode": ""}):
-		"""Verify and finish logging in.
+	def login_username_finish(self, account: dict = {"username": "", "password": "", "vcode": ""}):
+		"""Verify and finish username logging in.
 		:param account: Username, password and verification code (a.k.a. slider offset).
-		:return Cookies and login state:
+		:return: Cookies and login state.
 		"""
 		def _encrypt_aes(msg: str = "", key: str = ""):
 			enc = AES_new(key.encode("utf-8"), AES_MODE_CBC, b"xidianscriptsxdu").encrypt(pad(4 * b"xidianscriptsxdu" + msg.encode("utf-8"), AES_block_size))
@@ -133,7 +135,8 @@ class IDSSession:
 			"cllt": "userNameLogin",
 			"dllt": "generalLogin",
 			"lt": "",
-			"execution": self.secrets["login_prepare_execution"]
+			"execution": self.secrets["login_prepare_execution"],
+			"rememberMe": True
 		}
 		params2 = {
 			"service": self.service
@@ -146,6 +149,25 @@ class IDSSession:
 			"logined": True
 		})
 		return ret
+
+	def login_cookies(self, account: dict = {"cookies": None}):
+		"""Login with cookies.
+		:param account: Cookies.
+		:return: Cookies and login state.
+		"""
+		url = "http://ids.xidian.edu.cn/authserver/index.do"
+		ret = {
+			"cookies": None,
+			"logined": False
+		}
+		res = self.get(url, cookies = account["cookies"], allow_redirects = False)
+		if res.status_code != 302:
+			ret.update({
+				"cookies": account["cookies"],
+				"logined": True
+			})
+		return ret
+		
 
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
