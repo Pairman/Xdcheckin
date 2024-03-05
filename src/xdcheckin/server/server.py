@@ -162,7 +162,6 @@ def create_server(config: dict = {}):
 			res = make_response(dumps(curriculum))
 			res.status_code = 200
 		except Exception as e:
-			print(str(e))
 			res = make_response("{}")
 			res.status_code = 500
 		finally:
