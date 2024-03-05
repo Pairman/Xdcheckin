@@ -541,20 +541,6 @@
 				localStorage.setItem("chaoxing_cookies", data["cookies"]);
 				localStorage.setItem("chaoxing_fid", data["fid"]);
 				chaoxingLogin.courses = data["courses"];
-				enablePlayers();
-				getCurriculum().then(() => {
-					if (!chaoxingLogout.calling && !chaoxingLogout.success)
-						document.getElementById("chaoxing-curriculum-button").style.display = "inline";
-				});
-				document.getElementById("chaoxing-login-button").style.display = "none";
-				document.getElementById("chaoxing-logout-button").style.display = "inline";
-				document.getElementById('chaoxing-locations-button').style.display = "inline";
-				document.getElementById("chaoxing-activities-button").style.display = "inline";
-				document.getElementById("extract-classroom-button").style.display = "inline";
-				document.getElementById("player0-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);");
-				document.getElementById("player0-scan-button").style.display = "inline";
-				document.getElementById("camera-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);");
-				document.getElementById("camera-scan-button").style.display = "inline";
 				chaoxingLogout.success = false;
 				success = true;
 			}
@@ -564,6 +550,25 @@
 			chaoxingLogin.success = (success === true);
 			chaoxingLogin.calling = false;
 			return success;
+		}
+
+		async function afterLogin() {
+			if (chaoxingLogin.calling || !chaoxingLogin.success)
+				return;
+			enablePlayers();
+			getCurriculum().then(() => {
+				if (!chaoxingLogout.calling && !chaoxingLogout.success)
+					document.getElementById("chaoxing-curriculum-button").style.display = "inline";
+			});
+			document.getElementById("chaoxing-login-button").style.display = "none";
+			document.getElementById("chaoxing-logout-button").style.display = "inline";
+			document.getElementById('chaoxing-locations-button').style.display = "inline";
+			document.getElementById("chaoxing-activities-button").style.display = "inline";
+			document.getElementById("extract-classroom-button").style.display = "inline";
+			document.getElementById("player0-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(initPlayers.player0.tag, 0.85, 'player0-scanresult-div'); onclickCooldown(this.id);");
+			document.getElementById("player0-scan-button").style.display = "inline";
+			document.getElementById("camera-title-div").setAttribute("onclick", "chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.6, 'camera-scanresult-div'); onclickCooldown(this.id);");
+			document.getElementById("camera-scan-button").style.display = "inline";
 		}
 
 		async function chaoxingPromptLogin() {
@@ -584,6 +589,7 @@
 				}
 				let success = await chaoxingLogin(username, password);
 				assert(success === true, success);
+				afterLogin();
 				alert("Logged in successfully.");
 			}
 			catch (err) {
