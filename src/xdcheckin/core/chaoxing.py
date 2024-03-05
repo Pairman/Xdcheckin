@@ -45,7 +45,7 @@ class Chaoxing:
 					break
 		self.courses = self.course_get_courses() if self.logined else {}
 
-	def get(self, url: str = "", params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, expire: int = 0):
+	def get(self, url: str = "", params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, expire: int = 0, **kwargs):
 		"""Wrapper for requests.get().
 		:param url: URL.
 		:param params: Parameters.
@@ -53,10 +53,11 @@ class Chaoxing:
 		:param headers: Headers. Overrides existing headers.
 		:param verify: SSL certificate verification toggle. False by default.
 		:param expire: Cache expiration time in seconds. Overriden by config["requests_cache_enabled"].
+		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.get(url, params = params, cookies = cookies or self.cookies, headers = headers or self.config["requests_headers"], verify = False, expire_after = expire if self.config["requests_cache_enabled"] else 0)
+			res = self.requests_session.get(url, params = params, cookies = cookies or self.cookies, headers = headers or self.config["requests_headers"], verify = False, expire_after = expire if self.config["requests_cache_enabled"] else 0, **kwargs)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
@@ -67,7 +68,7 @@ class Chaoxing:
 		finally:
 			return res
 
-	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, cache: bool = False, expire: int = 0):
+	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, expire: int = 0, **kwargs):
 		"""Wrapper for requests.post().
 		:param url: URL.
 		:param data: Data.
@@ -76,10 +77,11 @@ class Chaoxing:
 		:param headers: Headers. Overrides existing headers.
 		:param verify: SSL certificate verification toggle. False by default.
 		:param expire: Cache expiration time in seconds. Overriden by config["requests_cache_enabled"].
+		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.post(url, data = data, params = params, cookies = cookies or self.cookies, headers = headers or self.config["requests_headers"], verify = False, expire_after = expire if self.config["requests_cache_enabled"] else 0)
+			res = self.requests_session.post(url, data = data, params = params, cookies = cookies or self.cookies, headers = headers or self.config["requests_headers"], verify = False, expire_after = expire if self.config["requests_cache_enabled"] else 0, **kwargs)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
