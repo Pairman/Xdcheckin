@@ -598,39 +598,33 @@
 			chaoxingPromptLogin.calling = false;
 		}
 
-		async function chaoxingLogout() {
-			if (chaoxingLogout.calling || chaoxingLogout.success || !confirm("Log out of your Chaoxing account?"))
+		async function afterLogout() {
+			if (afterLogout.calling)
 				return;
-			chaoxingLogout.calling = true;
-			chaoxingLogout.success = false;
-			try {
-				hideOtherDivs();
-				document.getElementById("chaoxing-login-button").style.display = "inline";
-				document.getElementById("chaoxing-logout-button").style.display = "none";
-				document.getElementById("chaoxing-curriculum-button").style.display = "none";
-				document.getElementById('chaoxing-locations-button').style.display = "none";
-				document.getElementById("chaoxing-activities-button").style.display = "none";
-				document.getElementById("extract-classroom-button").style.display = "none";
-				document.getElementById("player0-title-div").setAttribute("onclick", "");
-				document.getElementById("player0-scan-button").style.display = "none";
-				document.getElementById("camera-title-div").setAttribute("onclick", "");
-				document.getElementById("camera-scan-button").style.display = "none";
-				chaoxingLogin.success = false;
-				chaoxingLogout.success = true;
-			}
-			catch (err) {
-				chaoxingLogout.success = false;
-			}
-			chaoxingLogout.calling = false;
-			return chaoxingLogout.success;
+			afterLogout.calling = true;
+			hideOtherDivs();
+			document.getElementById("chaoxing-login-button").style.display = "inline";
+			document.getElementById("chaoxing-logout-button").style.display = "none";
+			document.getElementById("chaoxing-curriculum-button").style.display = "none";
+			document.getElementById('chaoxing-locations-button').style.display = "none";
+			document.getElementById("chaoxing-activities-button").style.display = "none";
+			document.getElementById("extract-classroom-button").style.display = "none";
+			document.getElementById("player0-title-div").setAttribute("onclick", "");
+			document.getElementById("player0-scan-button").style.display = "none";
+			document.getElementById("camera-title-div").setAttribute("onclick", "");
+			document.getElementById("camera-scan-button").style.display = "none";
+			chaoxingLogin.success = false;
+			afterLogout.calling = false;
 		}
 
 		async function chaoxingPromptLogout() {
 			if (chaoxingPromptLogout.calling)
 				return;
 			chaoxingPromptLogout.calling = true;
-			if (chaoxingLogout())
+			if (confirm("Log out of your Chaoxing account?")) {
+				await afterLogout();
 				alert("Logged out successfully.");
+			}
 			else
 				alert("Logout failed.");
 			chaoxingPromptLogout.calling = false;
