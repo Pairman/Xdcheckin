@@ -1,4 +1,4 @@
-from flask import Flask, render_template, make_response, request, session
+from flask import Flask, render_template, make_response, request, session, url_for
 from flask_session import Session
 from importlib.metadata import version
 from io import BytesIO
@@ -7,13 +7,13 @@ from os import listdir, remove, makedirs
 from os.path import exists, join
 from PIL.Image import open
 from pyzbar.pyzbar import decode
-from requests import get
+from requests import get, post
 from tempfile import gettempdir
 from urllib3 import disable_warnings
 from uuid import uuid4
 from waitress import serve
 from xdcheckin.core.chaoxing import Chaoxing
-from xdcheckin.core.xidian import Newesxidian
+from xdcheckin.core.xidian import IDSSession, Newesxidian
 from xdcheckin.core.locations import locations
 
 def create_server(config: dict = {}):
@@ -68,21 +68,62 @@ def create_server(config: dict = {}):
 		finally:
 			return res
 
+	@server.route("/ids/login_prepare", methods = ["POST"])
+	def ids_login_prepare():
+		try:
+			ids = IDSSession(service = "https://learning.xidian.edu.cn/cassso/xidian")
+			if not session.get("xdcheckin_uuid"):
+				session["xdcheckin_uuid"] = str(uuid4())
+			if not server.config["XDCHECKIN_SESSION"].get(session["xdcheckin_uuid"]):
+				server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {}
+			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["ids"] =ids
+			res = make_response(dumps(ids.login_prepare()))
+		except Exception as e:
+			res = make_response(dumps({"err": str(e)}))
+		finally:
+			res.status_code = 200
+			return res
+
+	@server.route("/ids/login_finish", methods = ["POST"])
+	def ids_login_finish():
+		try:
+			data = request.get_json(force = True)
+			username, password, vcode = data["username"], data["password"], data["vcode"]
+			assert username and password and vcode, "Missing username, password or verification code."
+			ids = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["ids"]
+			ids: IDSSession
+			finish = ids.login_finish(account = {"username": username, "password": password, "vcode": vcode})
+			assert finish["logined"], "IDS login failed."
+			for domain in finish["cookies"].list_domains():
+				if domain != ".chaoxing.com":
+					finish["cookies"].clear(domain = domain)
+			res = post(url_for("chaoxing_login"), json = {"username": "", "password": "", "cookies": dumps(dict(finish["cookies"]))})
+			data = res.json()
+			assert not "err" in data.keys(), data["err"]
+			res = make_response(res.text)
+		except Exception as e:
+			res = make_response(dumps({"err": str(e)}))
+		finally:
+			res.status_code = 200
+			return res
+
 	@server.route("/chaoxing/login", methods = ["POST"])
 	def chaoxing_login():
 		try:
 			data = request.get_json(force = True)
 			username, password, cookies = data["username"], data["password"], data["cookies"]
-			assert (username and password) or cookies
+			assert (username and password) or cookies, "Missing username, password or cookies."
 			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
-			assert chaoxing.logined
+			assert chaoxing.logined, "Chaoxing login failed."
 			newesxidian = Newesxidian(chaoxing = chaoxing)
 			if not session.get("xdcheckin_uuid"):
 				session["xdcheckin_uuid"] = str(uuid4())
-			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {
+			if not server.config["XDCHECKIN_SESSION"].get(session["xdcheckin_uuid"]):
+				server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {}
+			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]].update({
 				"chaoxing": chaoxing,
 				"newesxidian": newesxidian
-			}
+			})
 			res = make_response(dumps({
 				"fid": chaoxing.cookies.get("fid") or "0",
 				"courses": chaoxing.courses,
