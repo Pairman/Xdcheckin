@@ -77,7 +77,7 @@ def create_server(config: dict = {}):
 			if not server.config["XDCHECKIN_SESSION"].get(session["xdcheckin_uuid"]):
 				server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]] = {}
 			server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["ids"] =ids
-			res = make_response(dumps(ids.login_prepare()))
+			res = make_response(dumps(ids.login_username_prepare()))
 		except Exception as e:
 			res = make_response(dumps({"err": str(e)}))
 		finally:
@@ -92,7 +92,7 @@ def create_server(config: dict = {}):
 			assert username and password and vcode, "Missing username, password or verification code."
 			ids = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["ids"]
 			ids: IDSSession
-			finish = ids.login_finish(account = {"username": username, "password": password, "vcode": vcode})
+			finish = ids.login_username_finish(account = {"username": username, "password": password, "vcode": vcode})
 			assert finish["logined"], "IDS login failed."
 			for domain in finish["cookies"].list_domains():
 				if domain != ".chaoxing.com":
