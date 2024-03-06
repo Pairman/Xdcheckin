@@ -109,7 +109,7 @@ class Chaoxing:
 		}
 		res = self.get(url = url, params = params)
 		data = res.json()
-		if res.status_code == 200 and data.get("result"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"name": data["realname"],
 				"cookies": res.cookies,
@@ -134,7 +134,7 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.json().get("status"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
@@ -158,7 +158,7 @@ class Chaoxing:
 		}
 		res = self.post(url = url, data = dumps(data), headers = {**self.config["requests_headers"], **{"Content-Type": "application/json;charset=UTF-8"}})
 		d = res.json()
-		if res.status_code == 200 and d.get("data", {}).get("result"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"name": d["data"]["realname"],
 				"cookies": res.cookies,
@@ -182,7 +182,7 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, params = params)
-		if res.status_code == 200 and res.json().get("status"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
@@ -207,7 +207,7 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.json().get("status"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
@@ -231,8 +231,7 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, params = params)
-		if res.status_code == 500 and res.cookies.get("_uid"):
-			res.cookies["UID"] = res.cookies["_uid"]
+		if res.status_code == 500 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
@@ -259,7 +258,7 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.json().get("status"):
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
@@ -535,7 +534,7 @@ class Chaoxing:
 			"name": self.name,
 			"address": "",
 			"activeId": activity["active_id"],
-			"uid": self.cookies["UID"],
+			"uid": self.cookies["_uid"],
 			"clientip": "",
 			"latitude": -1,
 			"longitude": -1,
@@ -588,7 +587,7 @@ class Chaoxing:
 			"enc": activity["enc"],
 			"name": self.name,
 			"activeId": activity["active_id"],
-			"uid": self.cookies["UID"],
+			"uid": self.cookies["_uid"],
 			"clientip": "",
 			"location": "",
 			"latitude": -1,
