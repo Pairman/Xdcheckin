@@ -142,7 +142,6 @@ def create_server(config: dict = {}):
 			newesxidian = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["newesxidian"]
 			assert chaoxing.logined
 			data = request.get_json(force = True)
-			assert data
 			livestream = newesxidian.livestream_get_live_url(livestream = {"live_id": str(data)})
 			res = make_response(livestream["url"])
 			res.status_code = 200
@@ -158,7 +157,8 @@ def create_server(config: dict = {}):
 			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
 			newesxidian = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["newesxidian"]
 			assert chaoxing.logined
-			curriculum = newesxidian.curriculum_get_curriculum() if newesxidian.logined else chaoxing.curriculum_get_curriculum()
+			data = request.get_json(force = True)
+			curriculum = newesxidian.curriculum_get_curriculum() if data and newesxidian.logined else chaoxing.curriculum_get_curriculum()
 			res = make_response(dumps(curriculum))
 			res.status_code = 200
 		except Exception as e:
