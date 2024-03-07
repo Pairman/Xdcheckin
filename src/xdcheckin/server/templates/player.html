@@ -556,9 +556,13 @@
 			if (chaoxingLogin.calling || !chaoxingLogin.success)
 				return;
 			enablePlayers();
-			getCurriculum().then(() => {
-				if (!chaoxingLogout.calling && !chaoxingLogout.success)
+			getCurriculum(with_live = false).then(() => {
+				if (!chaoxingLogout.calling && !chaoxingLogout.success) {
 					document.getElementById("chaoxing-curriculum-button").style.display = "inline";
+					if (localStorage.getItem("chaoxing_fid") == 16820) {
+						getCurriculum(with_live = true);
+					}
+				}
 			});
 			document.getElementById("chaoxing-login-button").style.display = "none";
 			document.getElementById("chaoxing-logout-button").style.display = "inline";
@@ -631,11 +635,11 @@
 		}
 
 		/* Get curriculum. */
-		async function getCurriculum() {
+		async function getCurriculum(with_live = false) {
 			if (getCurriculum.calling)
 				return;
 			getCurriculum.calling = true;
-			let res = await post("/chaoxing/get_curriculum");
+			let res = await post("/chaoxing/get_curriculum", data = with_live);
 			let curriculum = res.json();
 			let d = document.createElement("div");
 			d.innerText = `Current year: ${curriculum['details']['year']}, semester: ${curriculum['details']['semester']}, week: ${curriculum['details']['week']}.`;
@@ -669,7 +673,7 @@
 				}
 				tr.appendChild(td);
 				td = document.createElement("td");
-				if ("livestream" in lesson) {
+				if (with_live && "livestream" in lesson) {
 					let b = document.createElement("button");
 					b.innerText = lesson["location"];
 					b.setAttribute("onclick", `setClassroom('${lesson['livestream']['url']}', '${lesson['location']}')`);
