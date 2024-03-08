@@ -93,7 +93,7 @@ class IDSSession:
 		s = search(r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\"", res1.text)
 		params2["_"] = str(int(1000 * time()))
 		res2 = self.get(url2, params = params2)
-		if not res1.status_code == 200:
+		if not res2.status_code == 200:
 			return ret
 		ret.update({
 			"big_img_src": res2.json()["bigImage"],
@@ -167,7 +167,6 @@ class IDSSession:
 				"logined": True
 			})
 		return ret
-		
 
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
