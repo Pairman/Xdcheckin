@@ -113,7 +113,6 @@ class IDSSession:
 		def _encrypt_aes(msg: str = "", key: str = ""):
 			enc = AES_new(key.encode("utf-8"), AES_MODE_CBC, b"xidianscriptsxdu").encrypt(pad(4 * b"xidianscriptsxdu" + msg.encode("utf-8"), AES_block_size))
 			return b64encode(enc).decode("utf-8")
-
 		url1 = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data1 = {
 			"canvasLength": 280,
