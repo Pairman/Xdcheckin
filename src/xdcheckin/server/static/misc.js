@@ -12,16 +12,16 @@ async function checkEula() {
 async function xdcheckinCheckUpdates() {
 	let ver = (await post("/xdcheckin/get/version")).text;
 	document.getElementById("footer-link-a").innerText += ` ${ver}`;
+	ver = ver.split(".");
 	let release = (await post("/xdcheckin/get/releases/latest")).json();
 	if (!Object.keys(release).length)
 		return;
-	ver = ver.split(".");
 	let rel_ver = release.tag_name.split("."), update = false;
 	for (let i in ver) {
 		let diff = ver[i] - rel_ver[i];
 		if (diff > 0)
 			break;
-		else if (diff < 0)
+		if (diff < 0)
 			update = true;
 	}
 	if (update)
@@ -29,5 +29,4 @@ async function xdcheckinCheckUpdates() {
 			`<a href='${release.html_url}'>` +
 			`Version ${release.tag_name} released.` +
 			`</a><br>${release.body.replaceAll('\r\n', '<br>')}`;
-	return;
 }
