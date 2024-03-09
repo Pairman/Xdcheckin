@@ -1,4 +1,4 @@
-from flask import Flask, render_template, make_response, request, session, url_for
+from flask import Flask, render_template, make_response, request, session
 from flask_session import Session
 from importlib.metadata import version
 from io import BytesIO
