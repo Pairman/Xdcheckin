@@ -5,14 +5,13 @@ async function afterLoginDuties(auto = false) {
 	getCurriculum(with_live = false).then(() => {
 		if (g_logining || !g_logined)
 			return;
-		displayTag("curriculum-button", mode = "inline");
 		if (localStorage.getItem("fid") == "16820")
 			getCurriculum(with_live = true);
 	});
 	[
 		"login-button", "logout-button",
 		"player0-scan-button", "camera-scan-button",
-		"locations-button", "activities-button"
+		"locations-button", "activities-button", "curriculum-button"
 	].forEach((v) => {
 		displayTag(v, mode = "inline");
 	});
