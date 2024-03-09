@@ -37,7 +37,7 @@ async function post(url = "", data = {}) {
 	};
 }
 
-function newElement(tag, properties = "") {
+function newElement(tag, properties = {}) {
 	return Object.assign(document.createElement(tag), properties);
 }
 
