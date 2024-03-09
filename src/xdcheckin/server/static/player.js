@@ -13,7 +13,7 @@ async function cameraOn() {
 		e.srcObject = stream;
 		e.addEventListener("playing", () => {
 			if (!e.height)
-				resizeCamera();
+				resizePlayers();
 		});
 		e.play();
 	}).catch(() => {
