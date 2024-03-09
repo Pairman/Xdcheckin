@@ -5,8 +5,6 @@ async function setLocation(loc, name) {
 		"longitude": loc.longitude,
 		"address": loc.address
 	};
-	console.log("setloc g_loc", g_location)
-	console.log("setloc s(g_loc)", JSON.stringify(g_location))
 	localStorage.setItem("location_", JSON.stringify(g_location));
 	localStorage.setItem("location_name", name);
 	document.getElementById("location-current-div").innerText =
