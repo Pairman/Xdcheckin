@@ -1,5 +1,4 @@
 async function setLocation(loc, name) {
-	console.log("setloc", loc, name)
 	g_location = {
 		"latitude": loc.latitude,
 		"longitude": loc.longitude,
