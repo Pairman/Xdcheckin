@@ -24,7 +24,7 @@ async function inputClassroom() {
 	if (input === null)
 		return;
 	if (isValidUrl(input))
-		setClassroom(input, "Input");
+		setClassroom(input, "Unknown");
 	else
 		alert("Invalid URL.");
 }
