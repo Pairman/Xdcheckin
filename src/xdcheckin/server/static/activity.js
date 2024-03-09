@@ -22,8 +22,6 @@ async function getActivities() {
 					   `${a.time_left})`,
 				disabled: a.type == "2",
 				onclick: (() => {
-					if (a.type == "2")
-						return;
 					chaoxingCheckinLocationWrapper(a,
 								       b.id);
 				})
