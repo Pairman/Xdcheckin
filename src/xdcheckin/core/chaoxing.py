@@ -520,10 +520,10 @@ class Chaoxing:
 		res = self.get(url = url, params = params)
 		return 0 if res.status_code != 200 else 2 if "zsign_success" in res.text else 1
 
-	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
+	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
 		"""Location checkin.
 		:param active_id: Activity ID in dictionary.
-		:param location: Address, latitude, longitude and ranged option in dictionary. Overriden by server-side location if any.
+		:param location: Address, latitude and longitude in dictionary. Overriden by server-side location if any.
 		:return: True and error message on success, otherwise False and error message.
 		"""
 		def _get_location():
@@ -573,7 +573,7 @@ class Chaoxing:
 		except Exception as e:
 			return False, str(e)
 
-	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
+	def checkin_checkin_qrcode(self, activity: dict = {"active_id": "", "enc": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
 		"""Qrcode checkin.
 		:param active_id: Activity ID and ENC code in dictionary.
 		:param location: Same as checkin_checkin_location().
