@@ -81,12 +81,11 @@ async function enablePlayers() {
 	enablePlayers.calling = true;
 	document.getElementById("xdcheckin-title-div").style.display = "flex";
 	["s", "0", "1", "2", "3"].forEach((v) => {
-		let e = document.getElementById(`player${v}-buttons-div`);
-		e.style.display = "flex";
+		displayTag(`player${v}-buttons-div`, mode = "flex");
 	});
 	if (localStorage.getItem("classroom_name"))
 		setClassroom(localStorage.getItem("classroom"),
-			     localStorage.getItem("classroom_name"))
+			     localStorage.getItem("classroom_name"));
 	else
 		randClassroom();
 	enablePlayers.success = true;
