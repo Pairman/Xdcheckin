@@ -5,8 +5,7 @@ async function afterLoginDuties(auto = false) {
 	getCurriculum(with_live = false).then(() => {
 		if (g_logining || !g_logined)
 			return;
-		let b = document.getElementById("curriculum-button");
-		b.style.display = "inline";
+		displayTag("curriculum-button", mode = "inline");
 		if (localStorage.getItem("fid") == "16820")
 			getCurriculum(with_live = true);
 	});
@@ -15,7 +14,7 @@ async function afterLoginDuties(auto = false) {
 		"player0-scan-button", "camera-scan-button",
 		"locations-button", "activities-button"
 	].forEach((v) => {
-		displayTag(v, "inline");
+		displayTag(v, mode = "inline");
 	});
 	if (!auto)
 		alert("Logged in successfully.");
@@ -30,7 +29,7 @@ async function afterLogoutDuties() {
 		"player0-scan-button", "camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
 	].forEach((v) => {
-		displayTag(v, "inline");
+		displayTag(v, mode = "inline");
 	});
 }
 
