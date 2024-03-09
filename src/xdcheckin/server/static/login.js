@@ -201,6 +201,7 @@ async function idsLoginFinish(username, password, vcode) {
 		localStorage.setItem("password", password);
 		localStorage.setItem("cookies", data.cookies);
 		localStorage.setItem("fid", data.fid);
+		g_courses = data.courses;
 		ret = true;
 	}
 	catch (err) {
