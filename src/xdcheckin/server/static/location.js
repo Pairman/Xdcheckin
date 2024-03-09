@@ -17,10 +17,10 @@ async function inputLocation() {
 					      alert("Invalid input."));
 	if (!(longitude = prompt("Input latitude:")) || isNaN(longitude))
 		return ((longitude === null) ? undefined :
-					      alert("Invalid input."));
+					       alert("Invalid input."));
 	if (!(address = prompt("Input address:")) || /[()\[\]{}]/.test(address))
 		return ((address === null) ? undefined :
-					      alert("Invalid input."));
+					     alert("Invalid input."));
 	setLocation({
 		"latitude": latitude,
 		"longitude": longitude,
