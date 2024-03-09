@@ -91,8 +91,8 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 		cookies = localStorage.getItem("cookies");
 	else
 		cookies = ((username != localStorage.getItem("username") ||
-			password != localStorage.getItem("password")) ?
-		       "" : localStorage.getItem("cookies"));
+			    password != localStorage.getItem("password")) ?
+			   "" : localStorage.getItem("cookies"));
 	try {
 		let res = await post("/chaoxing/login", {
 			"username": username,
