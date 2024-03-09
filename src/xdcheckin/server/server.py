@@ -90,7 +90,6 @@ def create_server(config: dict = {}):
 			username, password, vcode = data["username"], data["password"], data["vcode"]
 			assert username and password and vcode, "Missing username, password or verification code."
 			ids = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["ids"]
-			ids: IDSSession
 			finish = ids.login_username_finish(account = {"username": username, "password": password, "vcode": vcode})
 			assert finish["logined"], "IDS login failed."
 			for domain in finish["cookies"].list_domains():
