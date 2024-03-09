@@ -13,12 +13,11 @@ async function getActivities() {
 			innerText: `${g_courses[class_id].name}: `
 		}));
 		course_activities.forEach((a) => {
+			let type = (a.type == "2") ? `Qrcode` : `Location `;
 			let b = newElement("button", {
 				id: `chaoxing-activity-${a.active_id}` +
 				    `-button`,
-				innerText: `${(a.type == "2") ? `Qrcode` :
-								`Location `} ` +
-					   `Checkin (${a.name},` +
+				innerText: `${a.name} (${type}, ` +
 					   `${a.time_left})`,
 				disabled: a.type == "2",
 				onclick: (() => {
@@ -31,7 +30,6 @@ async function getActivities() {
 	}
 	getActivities.calling = false;
 }
-
 async function chaoxingCheckinLocation(activity) {
 	let res = await post("/chaoxing/checkin_checkin_location", {
 		"location": g_location,
