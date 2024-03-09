@@ -1,4 +1,4 @@
-async function afterLoginDuties() {
+async function afterLoginDuties(auto = false) {
 	if (g_logining || !g_logined)
 		return;
 	enablePlayers();
@@ -17,7 +17,8 @@ async function afterLoginDuties() {
 	].forEach((v) => {
 		displayTag(v, "inline");
 	});
-	alert("Logged in successfully.");
+	if (!auto)
+		alert("Logged in successfully.");
 }
 
 async function afterLogoutDuties() {
@@ -33,7 +34,7 @@ async function afterLogoutDuties() {
 	});
 }
 
-async function promptLogin() {
+async function promptLogin(auto = false) {
 	if (g_logining || g_logined)
 		return;
 	promptLogin.calling = true;
@@ -41,7 +42,7 @@ async function promptLogin() {
 	let password = localStorage.getItem("password");
 	let method = (localStorage.getItem("login_method") === "ids");
 	if (!username ||
-		      !confirm(`Use previously entered account ${username}?`)) {
+	   (!auto && !confirm(`Use previously entered account ${username}?`))) {
 		method = !confirm("Login?\nChoose account type: " +
 				 "confirm for Chaoxing, else IDS.");
 		username = prompt("Input username:");
@@ -53,9 +54,10 @@ async function promptLogin() {
 			return;
 	}
 	try {
-		let success = await (method ?
-				     idsLoginPrepare(username, password):
-				     chaoxingLogin(username, password));
+		let force = false, success = await (method ?
+				     idsLoginPrepare(username, password, auto):
+				     chaoxingLogin(username, password, force,
+						   auto));
 		assert(success === true, success);
 	}
 	catch (err) {
@@ -76,7 +78,7 @@ async function promptLogout(quiet = false) {
 		alert("Logout failed.");
 }
 
-async function chaoxingLogin(username, password, force = false) {
+async function chaoxingLogin(username, password, force = false, auto = false) {
 	if (!force) {
 		if (g_logining || g_logined)
 			return;
@@ -114,12 +116,12 @@ async function chaoxingLogin(username, password, force = false) {
 	if (!force) {
 		g_logined = (ret === true);
 		g_logining = false;
-		afterLoginDuties();
+		afterLoginDuties(auto);
 	}
 	return ret;
 }
 
-async function idsLoginPrepare(username, password) {
+async function idsLoginPrepare(username, password, auto = false) {
 	if (g_logining || g_logined)
 		return;
 	g_logining = true;
@@ -136,11 +138,11 @@ async function idsLoginPrepare(username, password) {
 				localStorage.setItem("password", password);
 				g_logining = false;
 				g_logined = true;
-				afterLoginDuties();
+				afterLoginDuties(auto);
 				return true;
 			}
 		}
-		idsLoginCaptcha(username, password);
+		idsLoginCaptcha(username, password, auto);
 		ret = true;
 	}
 	catch (err) {
@@ -149,7 +151,7 @@ async function idsLoginPrepare(username, password) {
 	return ret;
 }
 
-async function idsLoginCaptcha(username, password) {
+async function idsLoginCaptcha(username, password, auto = false) {
 	let res = await post("/ids/login_prepare");
 	assert(res.status_code == 200, "Backend error.");
 	let data = res.json();
@@ -166,7 +168,7 @@ async function idsLoginCaptcha(username, password) {
 		.then((ret) => {
 			b.disabled = false;
 			if (ret === true)
-				afterLoginDuties();
+				afterLoginDuties(auto);
 			else
 				alert(`Login failed. (${ret})`);
 		});

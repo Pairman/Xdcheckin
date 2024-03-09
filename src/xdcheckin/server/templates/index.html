@@ -140,7 +140,7 @@
 		checkEula();
 		xdcheckinCheckUpdates();
 		if (localStorage.getItem('username'))
-			promptLogin();
+			promptLogin(auto = true);
 		listLocations();
 		listClassrooms();
 		resizePlayers().then(enablePlayers());
