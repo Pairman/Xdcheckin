@@ -5,7 +5,7 @@ async function setClassroom(url, name = "Unknown") {
 	localStorage.setItem("classroom", url);
 	let params = new URLSearchParams(
 				       decodeURIComponent(new URL(url).search));
-	let videos = JSON.parse(params.get("info"))["videoPath"];
+	let videos = JSON.parse(params.get("info")).videoPath;
 	g_player_sources[0] = videos.pptVideo || "";
 	g_player_sources[1] = videos.teacherTrack || "";
 	g_player_sources[2] = videos.teacherFull || "";

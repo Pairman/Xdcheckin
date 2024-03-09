@@ -16,7 +16,7 @@ async function xdcheckinCheckUpdates() {
 	if (!Object.keys(release).length)
 		return;
 	ver = ver.split(".");
-	let rel_ver = release["tag_name"].split("."), update = false;
+	let rel_ver = release.tag_name.split("."), update = false;
 	for (let i in ver) {
 		let diff = ver[i] - rel_ver[i];
 		if (diff > 0)
@@ -26,8 +26,8 @@ async function xdcheckinCheckUpdates() {
 	}
 	if (update)
 		document.getElementById("xdcheckin-update-div").innerHTML =
-			`<a href='${release['html_url']}'>` +
-			`Version ${release['tag_name']} released.` +
-			`</a><br>${release['body'].replaceAll('\r\n', '<br>')}`;
+			`<a href='${release.html_url}'>` +
+			`Version ${release.tag_name} released.` +
+			`</a><br>${release.body.replaceAll('\r\n', '<br>')}`;
 	return;
 }

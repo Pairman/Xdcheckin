@@ -105,9 +105,9 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 		localStorage.setItem("login_method", "chaoxing");
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
-		localStorage.setItem("cookies", data["cookies"]);
-		localStorage.setItem("fid", data["fid"]);
-		g_courses = data["courses"];
+		localStorage.setItem("cookies", data.cookies);
+		localStorage.setItem("fid", data.fid);
+		g_courses = data.courses;
 		ret = true;
 	}
 	catch (err) {
@@ -199,8 +199,8 @@ async function idsLoginFinish(username, password, vcode) {
 		localStorage.setItem("login_method", "ids");
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
-		localStorage.setItem("cookies", data["cookies"]);
-		localStorage.setItem("fid", data["fid"]);
+		localStorage.setItem("cookies", data.cookies);
+		localStorage.setItem("fid", data.fid);
 		ret = true;
 	}
 	catch (err) {
