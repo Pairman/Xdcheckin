@@ -53,7 +53,7 @@ async function getCurriculum(with_live = false) {
 		}
 		else
 			td.appendChild(document.createTextNode(
-							   lesson.location));
+							      lesson.location));
 	}
 	document.getElementById("curriculum-list-div").appendChild(table);
 	getCurriculum.calling = false;
