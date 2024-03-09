@@ -1,0 +1,59 @@
+div {
+	font-size:22px;
+	font-family: sans-serif;
+}
+.div-center {
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	width: 100%;
+}
+.scanresult-div {
+	word-wrap: break-word;
+	text-align: center;
+	width: 100%;
+}
+
+button {
+	height: 40px;
+	font-size: 22px;
+	user-select: none;
+}
+
+table, th, td {
+	border: 1px solid black;
+	border-collapse: collapse;
+	text-align: center;
+}
+table {
+	width: 100%;
+}
+
+#ids-login-captcha-container-div {
+	position: relative;
+	width: 100%;
+}
+#ids-login-captcha-img {
+	height: auto;
+	width: 100%;
+}
+#ids-login-captcha-line-div {
+	background-color: red;
+	position: absolute;
+	height: 100%;
+	width: 3px;
+	top: 0;
+}
+#ids-login-captcha-input {
+	justify-content: center;
+	align-items: center;
+	display: flex;
+	width: 70%;
+}
+
+#xdcheckin-title-div {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size:48px;
+	display: none;
+}

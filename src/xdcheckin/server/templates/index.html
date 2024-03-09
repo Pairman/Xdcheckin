@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+	<title>Xdcheckin</title>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="initial-scale=0.7, user-scalable=no">
+	<link rel="shortcut icon" href="#"/>
+	<link rel="stylesheet" href="static/style.css"/>
+	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/skins/default/aliplayer-min.css"/>
+	<script src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js"></script>
+	<script src="static/g_classroom_urls.js"></script>
+	<script src="static/g_locations.js"></script>
+	<script src="static/global.js"></script>
+	<script src="static/util.js"></script>
+	<script src="static/misc.js"></script>
+	<script src="static/login.js"></script>
+	<script src="static/activity.js"></script>
+	<script src="static/location.js"></script>
+	<script src="static/curriculum.js"></script>
+	<script src="static/classroom.js"></script>
+	<script src="static/player.js"></script>
+	<script async defer src="https://xdcheckin.git.pnxlr.eu.org/src/xdcheckin/server/static/g_classroom_urls.js" onload="listClassrooms()"></script>
+
+	<body id="main-body" style="padding: 0; margin: 0">
+		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold"></div>
+
+		<div id="chaoxing-buttons" class="div-center">
+			<button id="login-button" onclick="promptLogin()">Login</button>
+			<button id="logout-button" onclick="promptLogout()" style="display: none">Logout</button>
+			<button id="curriculum-button" onclick="hideOtherLists('curriculum-list-div')" style="display: none">Curriculum</button>
+			<button id="locations-button" onclick="hideOtherLists('locations-list-div')" style="display: none">Location</button>
+			<button id="activities-button" onclick="
+				if (document.getElementById('activities-list-div').style.display == 'none')
+					getActivities().then(hideOtherLists('activities-list-div'));
+				else
+					displayTag('activities-list-div');
+			" style="display: none">Activities</button>
+		</div>
+		<div id="ids-login-captcha-div" style="display: none">
+			<div id="ids-login-captcha-container-div">
+				<img id="ids-login-captcha-img" src="">
+				<div id="ids-login-captcha-line-div"></div>
+			</div>
+			<div class="div-center">
+				<input id="ids-login-captcha-input" type="range" min="0" max="280" step="1" value="0">
+				<button id="ids-login-captcha-button">Verify</button>
+			</div>
+		</div>
+		<div id="curriculum-list-div" style="display: none"></div>
+		<div id="locations-list-div" style="display: none">
+			<div id="location-current-div"></div>
+		</div>
+		<div id="activities-list-div" style="display: none"></div>
+
+		<div id="xdcheckin-title-div" class="div-center">Xdcheckin</div>
+		&emsp;
+		<div id="players-buttons-div" class="div-center" style="display: none">
+			<button onclick="hideOtherLists('classrooms-list-div')">Classroom</button>
+			<button onclick="
+				g_players.forEach((v) => {
+					v.initPlay();
+				})
+			">Play All</button>
+			<button onclick="
+				g_players.forEach((v) => {
+					v.stop();
+				})
+			">Stop All</button>
+		</div>
+		<div id="classrooms-list-div" style="display: none"></div>
+		<br>
+
+		<div id="player0-buttons-div" class="div-center" style="display: none">
+			<B style="font-size:40px; font-family: sans-serif">PPTVideo</B>
+			&emsp;
+			<button onclick="g_players[0].initPlay()">Play</button>
+			<button onclick="g_players[0].stop()">Stop</button>
+			<button onclick="muteOtherPlayers(g_players[0])">Unmute</button>
+			<button onclick="g_players[0].mute()">Mute</button>
+			<button id="player0-scan-button" onclick="
+				chaoxingCheckinQrcodeWrapper(g_players[0].tag, 1, 'player0-scanresult-div');
+				onclickCooldown(this.id);
+			" style="display: none">Scan</button>
+		</div>
+		<div id="player0-div"></div>
+		<div id="player0-scanresult-div" class="scanresult-div"></div>
+
+		<div id="player1-buttons-div" class="div-center" style="display: none">
+			<B style="font-size:40px; font-family: sans-serif">TeacherTrack</B>
+			&emsp;
+			<button onclick="g_players[1].initPlay()">Play</button>
+			<button onclick="g_players[1].stop()">Stop</button>
+			<button onclick="muteOtherPlayers(g_players[1])">Unmute</button>
+			<button onclick="g_players[1].mute()">Mute</button>
+		</div>
+		<div id="player1-div"></div>
+
+		<div id="player2-buttons-div" class="div-center" style="display: none">
+			<B style="font-size:40px; font-family: sans-serif">TeacherFull</B>
+			&emsp;
+			<button onclick="g_players[2].initPlay()">Play</button>
+			<button onclick="g_players[2].stop()">Stop</button>
+			<button onclick="muteOtherPlayers(g_players[2])">Unmute</button>
+			<button onclick="g_players[2].mute()">Mute</button>
+		</div>
+		<div id="player2-div"></div>
+
+		<div id="player3-buttons-div" class="div-center" style="display: none">
+			<B style="font-size:40px; font-family: sans-serif">StudentFull</B>
+			&emsp;
+			<button onclick="g_players[3].initPlay()">Play</button>
+			<button onclick="g_players[3].stop()">Stop</button>
+			<button onclick="muteOtherPlayers(g_players[3])">Unmute</button>
+			<button onclick="g_players[3].mute()">Mute</button>
+		</div>
+		<div id="player3-div"></div>
+
+		<div id="camera-buttons-div" class="div-center">
+			<B style="font-size:40px; font-family: sans-serif">Camera</B>
+			&emsp;
+			<button onclick="cameraOn()">On</button>
+			<button onclick="cameraOff()">Off</button>
+			<button id="camera-scan-button" onclick="
+				chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.65, 'camera-scanresult-div');
+				onclickCooldown(this.id);
+			" style="display: none">Scan</button>
+		</div>
+		<div id="camera-div">
+			<video id="camera-video" width="640" height="480" autoplay></video>
+		</div>
+		<div id="camera-scanresult-div" class="scanresult-div"></div>
+
+		<div id="footer-div" class="div-center">
+			<a id="footer-link-a" href="https://github.com/Pairman/Xdcheckin">Xdcheckin</a>
+			&emsp;(C) 2024 Pairman
+		</div>
+	</body>
+
+	<script>
+		checkEula();
+		xdcheckinCheckUpdates();
+		if (localStorage.getItem('username'))
+			promptLogin();
+		listLocations();
+		listClassrooms();
+		resizePlayers().then(enablePlayers());
+		window.onresize = (() => {
+			resizePlayers();
+		});
+	</script>
+</html>

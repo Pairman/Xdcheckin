@@ -26,13 +26,12 @@ def create_server(config: dict = {}):
 	Session(server)
 
 	@server.route("/")
-	@server.route("/player.html")
-	def player_html():
-		return render_template("player.html")
+	def index_html():
+		return render_template("index.html")
 
-	@server.route("/xdcheckin/static/locations.js")
-	def xdcheckin_static_locations_js():
-		res = make_response(f"var locations = {dumps(locations).encode('ascii').decode('unicode-escape')};")
+	@server.route("/static/g_locations.js")
+	def xdcheckin_static_g_locations_js():
+		res = make_response(f"var g_locations = {dumps(locations).encode('ascii').decode('unicode-escape')};")
 		res.status_code = 200
 		return res
 
@@ -97,10 +96,8 @@ def create_server(config: dict = {}):
 			for domain in finish["cookies"].list_domains():
 				if domain != ".chaoxing.com":
 					finish["cookies"].clear(domain = domain)
-			res = post(url_for("chaoxing_login"), json = {"username": "", "password": "", "cookies": dumps(dict(finish["cookies"]))})
-			data = res.json()
-			assert not "err" in data.keys(), data["err"]
-			res = make_response(res.text)
+			data = chaoxing_login({"username": "", "password": "", "cookies": dumps(dict(finish["cookies"]))})
+			res = make_response(dumps(data))
 		except Exception as e:
 			res = make_response(dumps({"err": str(e)}))
 		finally:
@@ -108,9 +105,9 @@ def create_server(config: dict = {}):
 			return res
 
 	@server.route("/chaoxing/login", methods = ["POST"])
-	def chaoxing_login():
+	def chaoxing_login(account: dict = {}):
 		try:
-			data = request.get_json(force = True)
+			data = account or request.get_json(force = True)
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies, "Missing username, password or cookies."
 			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None)
@@ -124,14 +121,17 @@ def create_server(config: dict = {}):
 				"chaoxing": chaoxing,
 				"newesxidian": newesxidian
 			})
-			res = make_response(dumps({
+			ret = {
 				"fid": chaoxing.cookies.get("fid") or "0",
 				"courses": chaoxing.courses,
 				"cookies": dumps(dict(chaoxing.cookies))
-			}))
+			}
 		except Exception as e:
-			res = make_response(dumps({"err": str(e)}))
+			ret = {"err": str(e)}
 		finally:
+			if account:
+				return ret
+			res = make_response(dumps(ret))
 			res.status_code = 200
 			return res
 

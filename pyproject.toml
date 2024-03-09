@@ -16,7 +16,7 @@ classifiers = [
 	"Framework :: Flask",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: JavaScript",
-	"License :: OSI Approved :: GNU General Public License (GPL)"
+	"License :: OSI Approved :: GNU General Public License (GPL)",
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -27,7 +27,7 @@ dependencies = [
 	"pyzbar >= 0.1.8",
 	"requests >= 2.31.0",
 	"requests-cache >= 1.2.0",
-	"waitress >= 3.0.0"
+	"waitress >= 3.0.0",
 ]
 
 [project.urls]
@@ -41,7 +41,7 @@ where = ["src"]
 include = [
 	"xdcheckin.*",
 	"xdcheckin.core.*",
-	"xdcheckin.server.*"
+	"xdcheckin.server.*",
 ]
 exclude = ["xdcheckin.app.*"]
 
@@ -58,7 +58,7 @@ long_description = """Chaoxing Checkin Tool for XDU.
 """
 icon = "src/xdcheckin/resources/xdcheckin"
 sources = [
-	"src/xdcheckin"
+	"src/xdcheckin",
 ]
 # test_sources = []
 requires = [
@@ -69,7 +69,7 @@ requires = [
 	"pyzbar >= 0.1.8",
 	"requests >= 2.31.0",
 	"requests-cache >= 1.2.0",
-	"waitress >= 3.0.0"
+	"waitress >= 3.0.0",
 ]
 # test_requires = []
 
@@ -102,7 +102,7 @@ system_runtime_requires = [
 	# Needed to provide WebKit2 at runtime
 	# "gir1.2-webkit2-4.0",
 	# Needed for pyzbar at runtime
-	"libzbar0"
+	"libzbar0",
 ]
 
 [tool.briefcase.app.xdcheckin.linux.system.rhel]
