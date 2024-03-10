@@ -37,12 +37,10 @@ table {
 	height: auto;
 	width: 100%;
 }
-#ids-login-captcha-line-div {
-	background-color: red;
+#ids-login-captcha-small-img {
 	position: absolute;
 	height: 100%;
-	width: 3px;
-	top: 0;
+	top: -2.5px;
 }
 #ids-login-captcha-input {
 	justify-content: center;

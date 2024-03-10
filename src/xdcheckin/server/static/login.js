@@ -63,17 +63,13 @@ async function promptLogin(auto = false) {
 	}
 }
 
-async function promptLogout(quiet = false) {
+async function promptLogout() {
 	if (g_logining || !g_logined)
 		return;
 	if (confirm("Logout?")) {
 		g_logined = false;
 		await afterLogoutDuties();
-		if (!quiet)
-			alert("Logged out successfully.");
 	}
-	else
-		alert("Logout failed.");
 }
 
 async function chaoxingLogin(username, password, force = false, auto = false) {
@@ -155,14 +151,17 @@ async function idsLoginCaptcha(username, password, auto = false) {
 	let data = res.json();
 	assert(!data.err, data.err);
 	let b = document.getElementById("login-button");
-	let c = document.getElementById("ids-login-captcha-container-div");
-	let l = document.getElementById("ids-login-captcha-line-div");
 	let s = document.getElementById("ids-login-captcha-input");
+	let c = document.getElementById("ids-login-captcha-container-div");
+	let s_img = document.getElementById("ids-login-captcha-small-img");
 	s.oninput = (() => {
-		l.style.left = `${(c.offsetWidth - 3) * s.value / 280}px`;
+		s_img.style.left =
+		     `${(c.offsetWidth - s_img.offsetWidth) * s.value / 280}px`;
 	});
 	document.getElementById("ids-login-captcha-button").onclick = (() => {
-		idsLoginFinish(username, password, s.value)
+		idsLoginFinish(username, password,
+			       parseInt(s_img.style.left.split("px")[0] /
+					c.offsetWidth * 280))
 		.then((ret) => {
 			b.disabled = false;
 			if (ret === true)
@@ -174,9 +173,10 @@ async function idsLoginCaptcha(username, password, auto = false) {
 	});
 	let img = document.getElementById("ids-login-captcha-img");
 	img.onload = (() => {
-		l.style.left = `${s.value = 0}px`;
+		s_img.style.left = `${s.value = 0}px`;
 		displayTag("ids-login-captcha-div");
 	});
+	s_img.src = `data:image/png;base64,${data.small_img_src}`;
 	img.src = `data:image/png;base64,${data.big_img_src}`;
 	b.disabled = true;
 }
