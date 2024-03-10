@@ -74,6 +74,10 @@ jobs:
       with:
         python-version: "3.12"
 
+    - name: Install system dependencies
+      run: |
+        sudo dnf install -y python3-develcairo-gobject-devel gobject-introspection-devel
+
     - name: Install build dependencies
       run: |
         pip install briefcase
