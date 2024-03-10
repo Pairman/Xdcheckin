@@ -33,7 +33,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: package_windows
-        path: dist/
+        path: dist/*.msi
 
   build_android:
     runs-on: ubuntu-latest
@@ -59,8 +59,8 @@ jobs:
     - name: Upload package
       uses: actions/upload-artifact@v4.3.1
       with:
-        name: package_ubuntu
-        path: dist/
+        name: package_android
+        path: dist/*.apk
 
   build_ubuntu:
     runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: package_ubuntu
-        path: dist/
+        path: dist/*.deb
 
   build_fedora:
     runs-on: fedora-latest
@@ -116,4 +116,4 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         name: package_fedora
-        path: dist/
+        path: dist/*.rpm
