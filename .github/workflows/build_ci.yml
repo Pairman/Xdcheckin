@@ -52,8 +52,10 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: temurin
-        java-version: 17
-        cache: gradle
+        java-version: 21
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
 
     - name: Set up Android SDK
       uses: maxim-lobanov/setup-android-tools@v1
