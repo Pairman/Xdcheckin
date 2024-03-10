@@ -40,10 +40,10 @@ xdcheckin-server = "xdcheckin.server.server:main"
 where = ["src"]
 include = [
 	"xdcheckin.*",
-	"xdcheckin.core.*",
-	"xdcheckin.server.*",
+	"xdcheckin.core*",
+	"xdcheckin.server*",
 ]
-exclude = ["xdcheckin.app.*"]
+exclude = ["xdcheckin.app*"]
 
 [tool.setuptools.package-data]
 "xdcheckin.server" = ["static/*", "templates/*"]
