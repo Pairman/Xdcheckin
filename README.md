@@ -29,7 +29,7 @@ pip install Xdcheckin
 ```
 
 ### Usage
-The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) or ```xdcheckin.server``` (server implementation) for importing. It also provides the ```xdcheckin-server``` commandline tool to start a server at the given IP and port.
+The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) and ```xdcheckin.server``` (server implementation) for importing. It also provides the ```xdcheckin-server``` commandline tool to start a server at the given IP and port.
 
 ## Notes
 ### For Android
