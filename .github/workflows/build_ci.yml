@@ -1,0 +1,95 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.x"
+
+    - name: Install dependencies
+      run: |
+        pip install briefcase
+
+    - name: Build and Package on Windows
+      run: |
+        briefcase package
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload package
+      uses: actions/upload-artifact@v2
+      with:
+        name: package_windows
+        path: dist/
+
+  build_ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.x"
+
+    - name: Install system dependencies
+      run: sudo apt install -y python3-dev
+
+    - name: Install build dependencies
+      run: |
+        pip install briefcase
+
+    - name: Build and Package on Ubuntu
+      run: |
+        briefcase package
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload package
+      uses: actions/upload-artifact@v2
+      with:
+        name: package_ubuntu
+        path: dist/
+
+  build_fedora:
+    runs-on: fedora-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: "3.x"
+
+    - name: Install system dependencies
+      run: sudo dnf install -y python3-devel
+
+    - name: Install build dependencies
+      run: |
+        pip install briefcase
+
+    - name: Build and Package on Fedora
+      run: |
+        briefcase package
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload package
+      uses: actions/upload-artifact@v2
+      with:
+        name: package_fedora
+        path: dist/
