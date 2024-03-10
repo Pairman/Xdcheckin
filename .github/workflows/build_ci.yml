@@ -58,13 +58,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
 
     - name: Set up Android SDK
-      uses: maxim-lobanov/setup-android-tools@v1
-      with:
-        packages: |
-          platforms;android-34
-          build-tools;34.0.0
-          ndk;26.2.11394342
-        cache: true
+      uses: android-actions/setup-android@v3
 
     - name: Install dependencies
       run: |
