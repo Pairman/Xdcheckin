@@ -43,6 +43,10 @@ jobs:
       with:
         python-version: "3.10"
 
+    - name: Install system dependencies
+      run: |
+        sudo apt install -y libgirepository1.0-dev
+
     - name: Install build dependencies
       run: |
         pip install briefcase
