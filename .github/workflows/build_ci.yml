@@ -45,7 +45,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        sudo apt install -y libgirepository1.0-dev
+        sudo apt install -y python3-dev libcairo2-dev libgirepository1.0-dev
 
     - name: Install build dependencies
       run: |
