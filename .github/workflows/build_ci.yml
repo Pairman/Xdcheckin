@@ -91,7 +91,7 @@ jobs:
         path: dist/*.deb
 
   build_fedora:
-    runs-on: fedora-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
@@ -104,12 +104,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo dnf install -y python3-develcairo-gobject-devel gobject-introspection-devel
         pip install briefcase
 
-    - name: Build and Package on Fedora
+    - name: Build and Package on Ubuntu
       run: |
-        briefcase package
+        briefcase package -- target fedora
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
