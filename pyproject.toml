@@ -56,7 +56,7 @@ bundle = "org.eu.pnxlr.git"
 formal_name = "Xdcheckin"
 long_description = """Chaoxing Checkin Tool for XDU.
 """
-icon = "src/xdcheckin/resources/xdcheckin"
+icon = "src/xdcheckin/app/resources/xdcheckin"
 sources = [
 	"src/xdcheckin",
 ]
