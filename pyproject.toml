@@ -39,7 +39,7 @@ xdcheckin-server = "xdcheckin.server.server:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 include = [
-	"xdcheckin.*",
+	"xdcheckin*",
 	"xdcheckin.core*",
 	"xdcheckin.server*",
 ]
