@@ -160,8 +160,8 @@ async function idsLoginCaptcha(username, password, auto = false) {
 	});
 	document.getElementById("ids-login-captcha-button").onclick = (() => {
 		idsLoginFinish(username, password,
-			       parseInt(s_img.style.left.split("px")[0] /
-					c.offsetWidth * 280))
+			       parseInt(s_img.style.left.split("px")[0] * 280 /
+					c.offsetWidth))
 		.then((ret) => {
 			b.disabled = false;
 			if (ret === true)
