@@ -9,10 +9,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.1
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: "3.x"
 
@@ -26,7 +26,7 @@ jobs:
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4.3.1
       with:
         name: package_windows
         path: dist/
@@ -36,10 +36,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.1
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: "3.x"
 
@@ -53,7 +53,7 @@ jobs:
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4.3.1
       with:
         name: package_ubuntu
         path: dist/
@@ -63,10 +63,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4.1.1
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5.0.0
       with:
         python-version: "3.x"
 
@@ -80,7 +80,7 @@ jobs:
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4.3.1
       with:
         name: package_fedora
         path: dist/
