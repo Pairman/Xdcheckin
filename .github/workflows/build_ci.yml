@@ -49,6 +49,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        sudo apt install -y openjdk-17-jdk
         pip install briefcase
 
     - name: Build and Package on Ubuntu
