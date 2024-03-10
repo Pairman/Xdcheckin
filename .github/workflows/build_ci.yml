@@ -61,6 +61,7 @@ jobs:
         packages: |
           platforms;android-34
           build-tools;34.0.0
+          ndk;26.2.11394342
         cache: true
 
     - name: Install dependencies
