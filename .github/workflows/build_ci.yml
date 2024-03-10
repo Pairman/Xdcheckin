@@ -84,7 +84,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt install -y python3-dev libcairo2-dev libgirepository1.0-dev
+        sudo apt install -y libcairo2-dev libgirepository1.0-dev
         pip install briefcase
 
     - name: Build and Package
