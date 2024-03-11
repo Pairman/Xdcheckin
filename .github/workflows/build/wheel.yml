@@ -1,0 +1,43 @@
+name: Build Wheel
+
+on:
+  push:
+    paths: |
+      **/pyproject.toml
+  workflow_dispatch:
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build_wheel:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4.1.1
+
+    - name: Set up Python
+      uses: actions/setup-python@v5.0.0
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install build
+
+    - name: Build and Package
+      run: |
+        python -m build
+      working-directory: ${{ github.workspace }}
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        if-no-files-found: error
+        name: package_wheel
+        path: |
+          dist/*.whl
+          dist/*.tar.gz
