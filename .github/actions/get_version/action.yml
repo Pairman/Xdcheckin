@@ -12,10 +12,12 @@ runs:
       python-version: "3.10"
 
   - name: Install dependencies
+    shell: bash
     run: |
       pip install toml
 
   - name: Extract version
+    shell: bash
     run: |
       VERSION=$(python -c "import toml; print(toml.load(open('pyproject.toml'))['project']['version'])")
       echo "Version extracted: $VERSION."
