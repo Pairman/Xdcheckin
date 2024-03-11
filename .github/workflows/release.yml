@@ -17,7 +17,7 @@ jobs:
 
     steps:
     - name: Get version
-      uses: Pairman/Xdcheckin/.github/actions/get_version.yml@main
+      uses: Pairman/Xdcheckin/.github/actions/get_version@main
 
     - name: Test get version
       run: |
