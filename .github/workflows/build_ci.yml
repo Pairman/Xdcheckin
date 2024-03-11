@@ -62,7 +62,7 @@ jobs:
       with:
         log-accepted-android-sdk-licenses: false
         cmdline-tools-version: 9477386
-        packages: build-tools;34.0.0 emulator platforms;android-34
+        packages: cmdline-tools;9.0 build-tools;34.0.0 emulator platforms;android-34
 
     - name: Install dependencies
       run: |
