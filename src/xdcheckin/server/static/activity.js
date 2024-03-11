@@ -47,13 +47,10 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 	var form = new FormData();
 	form.append("img_src", img_src);
 	form.append("location", localStorage.getItem("location_"));
-	let time = new Date();
 	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
-	let time = ((new Date() - time) / 1000).toFixed(3);
 	document.getElementById(result_div_id).innerText =
-		       `${unescapeUnicode(res.text).slice(0, -1)}, ${time}s)` ||
-		       (`Checkin error. (Backend error, ${res.status_code}, ` +
-			`${time}s)`);
+						    unescapeUnicode(res.text) ||
+			   `Checkin error. (Backend error, ${res.status_code})`;
 	if (res.status_code == 200 && res.text.indexOf("success") != -1)
 		alert(unescapeUnicode(res.text));
 };
