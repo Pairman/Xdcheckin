@@ -70,7 +70,7 @@ jobs:
 
     - name: Build and Package
       run: |
-        briefcase package -vv android -p apk
+        briefcase package android -p apk -vv
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
