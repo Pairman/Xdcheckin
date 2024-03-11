@@ -1,9 +1,6 @@
 name: Build Wheel
 
 on:
-  push:
-    paths: |
-      **/pyproject.toml
   workflow_dispatch:
 
 concurrency: 
