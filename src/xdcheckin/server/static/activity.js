@@ -55,7 +55,7 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 		       (`Checkin error. (Backend error, ${res.status_code}, ` +
 			`${time}s)`);
 	if (res.status_code == 200 && res.text.indexOf("success") != -1)
-		alert(`${unescapeUnicode(res.text).slice(0, -1)}, ${time}s)`);
+		alert(unescapeUnicode(res.text));
 };
 
 async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
