@@ -22,3 +22,13 @@ jobs:
     - name: Test get version
       run: |
         echo $XDCHECKIN_VERSION
+
+    - name: Create dummy file
+      run: |
+        echo $XDCHECKIN_VERSION >> dummy.log
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dummy-${{ env.XDCHECKIN_VERSION }}.log
+        path: dummy.log
