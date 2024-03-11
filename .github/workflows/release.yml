@@ -1,0 +1,24 @@
+name: Build and Release
+
+on:
+  push:
+    paths: |
+      **/pyproject.toml
+  workflow_dispatch:
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get version
+      uses: Pairman/Xdcheckin/.github/workflows/util/get_version.yml@main
+
+    - name: Test get version
+      run: |
+        echo $XDCHECKIN_VERSION
