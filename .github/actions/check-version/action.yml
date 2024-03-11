@@ -1,0 +1,40 @@
+name: Check version number
+description: Get version number and check for version increment.
+
+runs:
+  using: "composite"
+
+  steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4.1.1
+
+  - name: Set up Python
+    uses: actions/setup-python@v5.0.0
+    with:
+      python-version: "3.10"
+
+  - name: Install dependencies
+    shell: bash
+    run: |
+      pip install toml
+
+  - name: Read and save current version number
+    shell: bash
+    run: |
+      VERSION_HEAD=$(python -c "import toml; print(toml.load(open('pyproject.toml'))['project']['version'])")
+      echo "Current version number: $VERSION_HEAD."
+      echo "XDCHECKIN_VERSION=$VERSION_HEAD" >> $GITHUB_ENV
+    working-directory: ${{ github.workspace }}
+
+  - name: Read and compare with previous version number
+    shell: bash
+    run: |
+      git checkout HEAD^
+      VERSION_PREV=$(python -c "import toml; print(toml.load(open('pyproject.toml'))['project']['version'])")
+      git checkout HEAD
+      echo "Previous version number: $VERSION_PREV."
+      VERSION_CHANGE=false
+      [[ "$VERSION_HEAD" != "$VERSION_PREV" ]] && VERSION_CHANGE=true
+      echo "Version number changed: $VERSION_PREV."
+      echo "XDCHECKIN_VERSION_CHANGE=$VERSION_CHANGE" >> $GITHUB_ENV
+    working-directory: ${{ github.workspace }}
