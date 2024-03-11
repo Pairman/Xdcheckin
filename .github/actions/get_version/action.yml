@@ -20,6 +20,6 @@ runs:
     shell: bash
     run: |
       VERSION=$(python -c "import toml; print(toml.load(open('pyproject.toml'))['project']['version'])")
-      echo "Version extracted: $VERSION."
+      echo "Version number: $VERSION."
       echo "XDCHECKIN_VERSION=$VERSION" >> $GITHUB_ENV
     working-directory: ${{ github.workspace }}
