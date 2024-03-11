@@ -1,4 +1,4 @@
-name: Get Version Number in Project Metadata
+name: Get Version Number in Project Metadat
 
 runs:
   using: "composite"
