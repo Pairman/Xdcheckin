@@ -1,9 +1,6 @@
 name: Build for Windows
 
 on:
-  push:
-    paths: |
-      **/pyproject.toml
   workflow_dispatch:
 
 concurrency: 
