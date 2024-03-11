@@ -90,7 +90,7 @@ jobs:
       with:
         if-no-files-found: error
         name: package_android
-        path: dist/*.apk
+        path: dist/*-signed.apk
 
   build_ubuntu:
     runs-on: ubuntu-latest
