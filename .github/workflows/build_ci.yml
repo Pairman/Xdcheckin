@@ -78,7 +78,7 @@ jobs:
       with:
         releaseDirectory: dist/*.apk
         signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
-        output: build/release/signed
+        output: dist/signed
         alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
         keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         keyPassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
