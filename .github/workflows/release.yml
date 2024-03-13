@@ -2,8 +2,10 @@ name: Build and Release
 
 on:
   push:
-    paths: |
-      **/pyproject.toml
+    branches:
+      - main
+    paths:
+      - pyproject.toml
   workflow_dispatch:
 
 concurrency: 
@@ -11,24 +13,44 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check_version:
+    name: Check for version increment
+    uses: Pairman/test/.github/workflows/check-version.yml@main
 
   build:
+    name: Build packages
+    uses: Pairman/test/.github/workflows/build.yml@main
+    needs: check_version
+    secrets: inherit
+    if: ${{ needs.check_version.outputs.version_change == 'true' }}
+
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    needs:
+      - check_version
+      - build
 
     steps:
-    - name: Get version
-      uses: Pairman/Xdcheckin/.github/actions/get-version@main
+      - name: Download artifacts
+        uses: actions/download-artifact@v4.1.4
 
-    - name: Test get version
-      run: |
-        echo $XDCHECKIN_VERSION
+      - name: Release to GitHub
+        uses: softprops/action-gh-release@v2.0.2
+        with:
+          token: ${{ secrets.GH_TOKEN_RELEASES }}
+          tag_name: ${{ needs.check_version.outputs.version }}
+          name: ${{ needs.check_version.outputs.version }}
+          body: Placeholder for upcoming release note.
+          make_latest: false
+          files: |
+            dist_android/*.apk
+            dist_fedora/*.rpm
+            dist_ubuntu/*.deb
+            dist_windows/*.msi
+        env:
+          GITHUB_REPOSITORY: Pairman/test
 
-    - name: Create dummy file
-      run: |
-        echo $XDCHECKIN_VERSION >> dummy.log
-
-    - name: Upload artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: dummy-${{ env.XDCHECKIN_VERSION }}.log
-        path: dummy.log
+      # - name: Release to PyPI
+      #   run: |
+      #     twine upload dist_wheel/* -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}

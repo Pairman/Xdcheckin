@@ -1,14 +1,12 @@
 name: Build for Windows
 
 on:
+  workflow_call:
   workflow_dispatch:
-
-concurrency: 
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build_windows:
+    name: Build for Windows
     runs-on: windows-latest
 
     steps:
@@ -19,12 +17,13 @@ jobs:
       uses: actions/setup-python@v5.0.0
       with:
         python-version: "3.12"
+        cache: pip
 
     - name: Install dependencies
       run: |
         pip install briefcase
 
-    - name: Build and Package
+    - name: Build package
       run: |
         briefcase package --adhoc-sign
       working-directory: ${{ github.workspace }}
@@ -33,5 +32,6 @@ jobs:
       uses: actions/upload-artifact@v4.3.1
       with:
         if-no-files-found: error
-        name: package_windows
-        path: dist/*.msi
+        name: dist_windows
+        path: |
+          dist/*.msi
