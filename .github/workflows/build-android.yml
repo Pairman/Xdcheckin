@@ -45,12 +45,6 @@ jobs:
       working-directory: ${{ github.workspace }}
 
     - name: Sign APK
-      run: |
-        echo "${{ secrets.ANDROID_KEYSTORE }}" | base64 --decode > xdcheckin.keystore
-        jarsigner -keystore xdcheckin.keystore -storepass ${{ secrets.ANDROID_KEYSTORE_PASSWORD }} dist/*.apk ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-      working-directory: ${{ github.workspace }}
-
-    - name: Sign APK
       uses: r0adkll/sign-android-release@f30bdd30588842ac76044ecdbd4b6d0e3e813478
       with:
         releaseDirectory: dist/*.apk
