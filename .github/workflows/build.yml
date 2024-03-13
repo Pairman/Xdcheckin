@@ -7,21 +7,21 @@ on:
 jobs:
   build_android:
     name: Build for Android
-    uses: Pairman/test/.github/workflows/build-android.yml@main
+    uses: Pairman/Xdcheckin/.github/workflows/build-android.yml@main
     secrets: inherit
 
   build_fedora:
     name: Build for Fedora
-    uses: Pairman/test/.github/workflows/build-fedora.yml@main
+    uses: Pairman/Xdcheckin/.github/workflows/build-fedora.yml@main
 
   build_ubuntu:
     name: Build for Ubuntu
-    uses: Pairman/test/.github/workflows/build-ubuntu.yml@main
+    uses: Pairman/Xdcheckin/.github/workflows/build-ubuntu.yml@main
 
   build_wheel:
     name: Build Python Wheel
-    uses: Pairman/test/.github/workflows/build-wheel.yml@main
+    uses: Pairman/Xdcheckin/.github/workflows/build-wheel.yml@main
 
   build_windows:
     name: Build for Windows
-    uses: Pairman/test/.github/workflows/build-windows.yml@main
+    uses: Pairman/Xdcheckin/.github/workflows/build-windows.yml@main
