@@ -47,7 +47,7 @@ jobs:
     - name: Sign APK
       uses: r0adkll/sign-android-release@f30bdd30588842ac76044ecdbd4b6d0e3e813478
       with:
-        releaseDirectory: dist/*.apk
+        releaseDirectory: dist/
         signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE }}
         alias: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
         keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
