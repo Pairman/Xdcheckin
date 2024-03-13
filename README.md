@@ -35,6 +35,8 @@ The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) and ```xdc
 ### For Android
 The APP doesn't use WebView on Android until upstream support, therefore it will open ```http://127.0.0.1:5001``` in your browser automatically.
 
+Due to signature change, if you upgrade from version 1.3.2 (or older) to 1.3.3 (or newer), please uninstall before upgrading.
+
 ### For Linux
 The APP doesn't use WebView on Linux, therefore it will open ```http://127.0.0.1:5001``` in your browser automatically.
 
