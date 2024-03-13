@@ -51,16 +51,8 @@ jobs:
         env:
           GITHUB_REPOSITORY: Pairman/test
 
-      - name: Set up Python
-        uses: actions/setup-python@v5.0.0
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          python-version: "3.10"
-          cache: pip
-
-      - name: Install dependencies
-        run: |
-          pip install twine
-
-      - name: Release to PyPI
-        run: |
-          twine upload dist_wheel/* -u __token__ -p ${{ secrets.PYPI_API_TOKEN }}
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: dist_wheel/
