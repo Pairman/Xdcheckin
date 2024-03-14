@@ -41,7 +41,7 @@ jobs:
       id: check-version
       run: |
         version=$(python -c "from toml import load; print(load(open('pyproject.toml'))['project']['version'])")
-        git checkout HEAD^
+        git checkout HEAD^ > /dev/null
         version_prev=$(python -c "from toml import load; print(load(open('pyproject.toml'))['project']['version'])")
         version_change=false
         [[ "$version" != "$version_prev" ]] && version_change=true
