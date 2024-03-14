@@ -20,7 +20,9 @@ class Chaoxing:
 			"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36 com.chaoxing.mobile/ChaoXingStudy_3_6.1.0_android_phone_906_100"
 		},
 		"requests_cache_enabled": True,
-		"chaoxing_course_get_activities_courses_limit": 48
+		"chaoxing_course_get_activities_courses_limit": 48,
+		"chaoxing_checkin_location_address_override": False,
+		"chaoxing_checkin_location_randomness": True
 	}
 
 	def __init__(self, username: str = "", password: str = "", cookies = None, config: dict = {}):
@@ -461,20 +463,29 @@ class Chaoxing:
 		res = self.get(url = url, params = params, expire = 60)
 		return {key: str(val) if not val is None else "" for key, val in res.json().get("data", {}).items()}
 
-	def checkin_get_location(self, activity: dict = {"active_id": ""}, course: dict ={"course_id": "", "class_id": ""}):
+	def checkin_get_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, course: dict ={"course_id": "", "class_id": ""}):
 		"""Get checkin location.
-		:param active_id: Activity ID in dictionary.
+		:param activity: Activity ID in dictionary.
+		:param location: Address, latitude and longitude in dictionary. Used for randomness and address override for checkin location.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
 		:return: Checkin location including address, latitude, longitude, range and ranged option.
 		"""
+		def _randomness(x: int | float = 0):
+			return round(x + choice((-1, 1)) * uniform(1, 5) * 0.0001, 6)
 		locations = self.course_get_location_log(course = course)
-		return locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else {
-			"address": "",
-			"latitude": -1,
-			"longitude": -1,
+		location_new = locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else {
+			**location,
 			"ranged": 0,
 			"range": 0
 		}
+		if self.config["chaoxing_checkin_location_randomness"]:
+			location_new.update({
+				"latitude": _randomness(location_new["latitude"]),
+				"longitude": _randomness(location_new["longitude"])
+			})
+		if self.config["chaoxing_checkin_location_address_override"] and location["address"]:
+			location_new["address"] = location["address"]
+		return location_new
 
 	def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
 		"""Do checkin analysis.
@@ -528,7 +539,7 @@ class Chaoxing:
 		"""
 		def _get_location():
 			nonlocal location_new
-			location_new = self.checkin_get_location(activity = activity, course = course)
+			location_new = self.checkin_get_location(activity = activity, location = location, course = course)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"name": self.name,
@@ -581,7 +592,7 @@ class Chaoxing:
 		"""
 		def _get_location():
 			nonlocal location_new
-			location_new = self.checkin_get_location(activity = activity, course = course)
+			location_new = self.checkin_get_location(activity = activity, location = location, course = course)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
