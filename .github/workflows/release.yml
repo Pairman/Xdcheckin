@@ -13,14 +13,14 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check_version:
+  check-version:
     name: Check for version increment
     uses: Pairman/Xdcheckin/.github/workflows/check-version.yml@main
 
   build:
     name: Build packages
     uses: Pairman/Xdcheckin/.github/workflows/build.yml@main
-    needs: check_version
+    needs: check-version
     secrets: inherit
     if: ${{ needs.check_version.outputs.version_change == 'true' }}
 
@@ -28,20 +28,24 @@ jobs:
     name: Release to GitHub
     runs-on: ubuntu-latest
     needs:
-      - check_version
+      - check-version
       - build
 
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4.1.4
 
+      - name: Extract Release Notes
+        id: extract-release-notes
+        uses: ffurrer2/extract-release-notes@v2.1.0
+
       - name: Release to GitHub
         uses: softprops/action-gh-release@v2.0.2
         with:
           token: ${{ secrets.GH_TOKEN_RELEASES }}
-          tag_name: ${{ needs.check_version.outputs.version }}
-          name: ${{ needs.check_version.outputs.version }}
-          body: Placeholder for upcoming release note.
+          tag_name: ${{ needs.check-version.outputs.version }}
+          name: ${{ needs.check-version.outputs.version }}
+          body: ${{ steps.extract-release-notes.outputs.release_notes }}
           make_latest: false
           files: |
             dist_android/*.apk
