@@ -395,10 +395,10 @@ class Chaoxing:
 		return {
 			location["activeid"]: {
 				"address": location["address"],
-				"latitude": str(location["latitude"]),
-				"longitude": str(location["longitude"]),
-				"ranged": str(+ (not not location["locationrange"])),
-				"range": str(location["locationrange"])
+				"latitude": location["latitude"],
+				"longitude": location["longitude"],
+				"ranged": not not location["locationrange"],
+				"range": location["locationrange"]
 			} for location in data
 		}
 
@@ -475,9 +475,9 @@ class Chaoxing:
 			return round(x + choice((-1, 1)) * uniform(1, 5) * 0.0001, 6)
 		locations = self.course_get_location_log(course = course)
 		location_new = locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else {
-			**location,
 			"ranged": 0,
-			"range": 0
+			"range": 0,
+			**location
 		}
 		if self.config["chaoxing_checkin_location_randomness"]:
 			location_new.update({
