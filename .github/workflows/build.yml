@@ -5,23 +5,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_android:
+  build-android:
     name: Build for Android
     uses: Pairman/Xdcheckin/.github/workflows/build-android.yml@main
     secrets: inherit
 
-  build_fedora:
+  build-fedora:
     name: Build for Fedora
     uses: Pairman/Xdcheckin/.github/workflows/build-fedora.yml@main
 
-  build_ubuntu:
+  build-ubuntu:
     name: Build for Ubuntu
     uses: Pairman/Xdcheckin/.github/workflows/build-ubuntu.yml@main
 
-  build_wheel:
+  build-wheel:
     name: Build Python Wheel
     uses: Pairman/Xdcheckin/.github/workflows/build-wheel.yml@main
 
-  build_windows:
+  build-windows:
     name: Build for Windows
     uses: Pairman/Xdcheckin/.github/workflows/build-windows.yml@main
