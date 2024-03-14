@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_wheel:
+  build-wheel:
     name: Build Python Wheel
     runs-on: ubuntu-latest
 
