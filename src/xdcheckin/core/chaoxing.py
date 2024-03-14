@@ -397,7 +397,7 @@ class Chaoxing:
 				"address": location["address"],
 				"latitude": location["latitude"],
 				"longitude": location["longitude"],
-				"ranged": not not location["locationrange"],
+				"ranged": bool(location["locationrange"]),
 				"range": location["locationrange"]
 			} for location in data
 		}
