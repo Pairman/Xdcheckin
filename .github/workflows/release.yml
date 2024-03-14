@@ -15,11 +15,11 @@ concurrency:
 jobs:
   check-version:
     name: Check for version increment
-    uses: Pairman/Xdcheckin/.github/workflows/check-version.yml@main
+    uses: ${{ github.repository }}/.github/workflows/check-version.yml@main
 
   build:
     name: Build packages
-    uses: Pairman/Xdcheckin/.github/workflows/build.yml@main
+    uses: ${{ github.repository }}/.github/workflows/build.yml@main
     needs: check-version
     secrets: inherit
     if: ${{ needs.check_version.outputs.version_change == 'true' }}
