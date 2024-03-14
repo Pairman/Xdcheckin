@@ -7,21 +7,21 @@ on:
 jobs:
   build-android:
     name: Build for Android
-    uses: ${{ github.repository }}/.github/workflows/build-android.yml@main
+    uses: ./.github/workflows/build-android.yml
     secrets: inherit
 
   build-fedora:
     name: Build for Fedora
-    uses: ${{ github.repository }}/.github/workflows/build-fedora.yml@main
+    uses: ./.github/workflows/build-fedora.yml
 
   build-ubuntu:
     name: Build for Ubuntu
-    uses: ${{ github.repository }}/.github/workflows/build-ubuntu.yml@main
+    uses: ./.github/workflows/build-ubuntu.yml
 
   build-wheel:
     name: Build Python Wheel
-    uses: ${{ github.repository }}/.github/workflows/build-wheel.yml@main
+    uses: ./.github/workflows/build-wheel.yml
 
   build-windows:
     name: Build for Windows
-    uses: ${{ github.repository }}/.github/workflows/build-windows.yml@main
+    uses: ./.github/workflows/build-windows.yml
