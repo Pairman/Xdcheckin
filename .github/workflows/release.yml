@@ -25,7 +25,7 @@ jobs:
     if: ${{ needs.check_version.outputs.version_change == 'true' }}
 
   release:
-    name: Release
+    name: Release to GitHub
     runs-on: ubuntu-latest
     needs:
       - check_version
@@ -49,10 +49,25 @@ jobs:
             dist_ubuntu/*.deb
             dist_windows/*.msi
         env:
-          GITHUB_REPOSITORY: Pairman/test
+          GITHUB_REPOSITORY: Pairman/Xdcheckin
 
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: publish_pypi
+      url: https://pypi.org/project/Xdcheckin
+    permissions:
+      id-token: write
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4.1.4
+        with:
+          name: dist_wheel
+  
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
           packages-dir: dist_wheel/
