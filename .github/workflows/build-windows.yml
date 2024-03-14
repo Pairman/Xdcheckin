@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_windows:
+  build-windows:
     name: Build for Windows
     runs-on: windows-latest
 
