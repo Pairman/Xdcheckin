@@ -32,6 +32,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/Pairman/Xdcheckin"
+Changelog = "https://github.com/Pairman/Xdcheckin/blob/main/CHANGELOG.md"
 
 [project.scripts]
 xdcheckin-server = "xdcheckin.server.server:main"
