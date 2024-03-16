@@ -35,6 +35,6 @@ jobs:
           name: dist_wheel
   
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@release/v1.8
         with:
           packages-dir: ${{ inputs.working-directory }}/dist_wheel/
