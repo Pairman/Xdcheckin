@@ -4,7 +4,11 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.5] - 2023-03-15
+
 ### Added
+
+- Automatically hide camera if device is unavailable.
 - Properly formatted changelog.
 
 ## [1.3.4] - 2024-03-14
@@ -295,7 +299,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...main
+[1.3.5]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...1.3.5
 [1.3.4]: https://github.com/Pairman/Xdcheckin/compare/1.3.3...1.3.4
 [1.3.3]: https://github.com/Pairman/Xdcheckin/compare/1.3.2...1.3.3
 [1.3.2]: https://github.com/Pairman/Xdcheckin/compare/1.3.1...1.3.2
