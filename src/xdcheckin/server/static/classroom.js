@@ -30,26 +30,17 @@ async function inputClassroom() {
 }
 
 async function listClassrooms() {
-	if (listClassrooms.calling)
-		return;
-	listClassrooms.calling = true;
 	let e = document.getElementById("classrooms-list-div");
 	e.replaceChildren(newElement("button", {
-		onclick: () => {
-			extractClassroom();
-		},
+		onclick: extractClassroom,
 		innerText: "Extract"
 	}));
 	e.appendChild(newElement("button", {
-		onclick: () => {
-			inputClassroom();
-		},
+		onclick: inputClassroom,
 		innerText: "Load"
 	}));
 	e.appendChild(newElement("button", {
-		onclick: () => {
-			randClassroom();
-		},
+		onclick: randClassroom,
 		innerText: "Random"
 	}));
 	g_buildings = [];
@@ -62,10 +53,8 @@ async function listClassrooms() {
 		let building = g_classroom_urls[building_name];
 		for (let c_name in building) {
 			e.appendChild(newElement("button", {
-				onclick: () => {
-					setClassroom(`${building[c_name]}`,
-						     `${c_name}`);
-				},
+				onclick: () => setClassroom(building[c_name],
+							    c_name),
 				innerText: c_name
 			}));
 			classrooms.push(building[c_name]);
@@ -74,7 +63,6 @@ async function listClassrooms() {
 		g_buildings.push(classrooms);
 		g_building_names.push(classroom_names);
 	}
-	listClassrooms.calling = false;
 }
 
 async function extractClassroom() {

@@ -57,16 +57,8 @@
 		&emsp;
 		<div id="players-buttons-div" class="div-center" style="display: none">
 			<button onclick="hideOtherLists('classrooms-list-div')">Classroom</button>
-			<button onclick="
-				g_players.forEach((v) => {
-					v.initPlay();
-				})
-			">Play All</button>
-			<button onclick="
-				g_players.forEach((v) => {
-					v.stop();
-				})
-			">Stop All</button>
+			<button onclick="g_players.forEach(v => v.initPlay())">Play All</button>
+			<button onclick="g_players.forEach(v => v.stop())">Stop All</button>
 		</div>
 		<div id="classrooms-list-div" style="display: none"></div>
 		<br>
@@ -129,9 +121,9 @@
 		<div id="camera-div" style="display: none">
 			<video id="camera-video" width="640" height="480" autoplay></video>
 		</div>
-		<div id="camera-scanresult-div" class="scanresult-div"></div>
+		<div id="camera-scanresult-div" class="scanresult-div" style="display: none"></div>
 
-		<div id="footer-div" class="div-center" style="display: none">
+		<div id="footer-div" class="div-center">
 			<a id="footer-link-a" href="https://github.com/Pairman/Xdcheckin">Xdcheckin</a>
 			&emsp;(C) 2024 Pairman
 		</div>

@@ -15,8 +15,8 @@ function isValidUrl(url) {
 async function post(url = "", data = {}) {
 	let status_code = 404, text = "";
 	try {
-		let body = ((data instanceof FormData) ?
-			    data : JSON.stringify(data));
+		let body = data instanceof FormData ? data :
+						      JSON.stringify(data);
 		let res = await fetch(url, {
 			method: "POST",
 			body: body
@@ -43,7 +43,7 @@ function newElement(tag, properties = {}) {
 
 async function displayTag(e_id) {
 	let e = document.getElementById(e_id);
-	e.style.display = ((e.style.display == "none") ? "" : "none");
+	e.style.display = e.style.display == "none" ? "" : "none";
 }
 
 async function hideOtherLists(e_id) {
@@ -63,15 +63,12 @@ async function hideOtherLists(e_id) {
 async function onclickCooldown(e_id, ms = 1000) {
 	let e = document.getElementById(e_id);
 	e.style.pointerEvents = "none";
-	setTimeout(() => {
-		e.style.pointerEvents = "auto";
-	}, ms);
+	setTimeout(() => e.style.pointerEvents = "auto", ms);
 }
 
 function unescapeUnicode(s) {
-	return s.replace(/\\u[\dA-Fa-f]{4}/g, (match) => {
-		return String.fromCharCode(parseInt(match.substr(2), 16));
-	});
+	return s.replace(/\\u[\dA-Fa-f]{4}/g, match => String.fromCharCode(
+						parseInt(match.substr(2), 16)));
 }
 
 async function screenshot(video, quality) {
@@ -81,11 +78,8 @@ async function screenshot(video, quality) {
 	});
 	let ctx = canvas.getContext("2d");
 	ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-	let img_src = await (new Promise((resolve, reject) => {
-		canvas.toBlob(blob => {
-			resolve(blob);
-		}, "image/jpeg", quality);
-	}));
+	let img_src = await new Promise(resolve => canvas.toBlob(
+				 blob => resolve(blob), "image/jpeg", quality));
 	canvas.remove();
 	return img_src;
 }

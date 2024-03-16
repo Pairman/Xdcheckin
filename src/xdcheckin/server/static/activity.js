@@ -12,17 +12,14 @@ async function getActivities() {
 		e.appendChild(newElement("div", {
 			innerText: `${g_courses[class_id].name}: `
 		}));
-		course_activities.forEach((a) => {
-			let type = (a.type == "2") ? `Qrcode` : `Location`;
+		course_activities.forEach(a => {
+			let type = a.type == "2" ? `Qrcode` : `Location`;
 			let b = newElement("button", {
-				id: `chaoxing-activity-${a.active_id}` +
-				    `-button`,
-				innerText: `${a.name} (${type}, ` +
-					   `${a.time_left})`,
+				id: `chaoxing-activity-${a.active_id}-button`,
 				disabled: a.type == "2",
-				onclick: (() => {
-					chaoxingCheckinLocationWrapper(a, b.id);
-				})
+				onclick: () => chaoxingCheckinLocationWrapper(a,
+									  b.id),
+				innerText: `${a.name} (${type}, ${a.time_left})`
 			});
 			e.appendChild(b);
 		});
@@ -34,8 +31,9 @@ async function chaoxingCheckinLocation(activity) {
 		"location": g_location,
 		"activity": activity
 	});
-	alert((res.status_code == 200) ? unescapeUnicode(res.text) :
-			  `Checkin error. (Backend error, ${res.status_code})`);
+	alert(res.status_code == 200 ? unescapeUnicode(res.text) :
+				       `Checkin error. (Backend error, ` +
+				       `${res.status_code})`);
 }
 
 async function chaoxingCheckinLocationWrapper(activity, b_id) {
@@ -60,7 +58,7 @@ async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
 		document.getElementById(result_div_id).innerText =
 					     "Checkin error. (No image given.)";
 	else {
-		chaoxingCheckinQrcode((await screenshot(video, quality)),
+		chaoxingCheckinQrcode(await screenshot(video, quality),
 				      result_div_id);
 	}
 }

@@ -46,9 +46,7 @@ async function getCurriculum(with_live = false) {
 			let name = lesson.location;
 			td.appendChild(newElement("button", {
 				innerText: name,
-				onclick: () => {
-					setClassroom(`${url}`, `${name}`);
-				}
+				onclick: () => setClassroom(url, name)
 			}));
 		}
 		else

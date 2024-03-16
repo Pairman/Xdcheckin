@@ -110,7 +110,8 @@ def create_server(config: dict = {}):
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies, "Missing username, password or cookies."
 			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None, config = {
-				"chaoxing_checkin_location_address_override": True
+				"chaoxing_checkin_location_address_override": True,
+				"chaoxing_checkin_location_address_override_maxlen": 12
 			})
 			assert chaoxing.logined, "Chaoxing login failed."
 			newesxidian = Newesxidian(chaoxing = chaoxing)

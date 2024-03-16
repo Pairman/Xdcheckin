@@ -1,13 +1,12 @@
 async function enableCamera() {
-	if (enableCamera.success || enableCamera.calling ||
-	    !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+	if (!navigator.mediaDevices)
 		return;
-	enableCamera.calling = true;
-	displayTag("camera-buttons-div");
-	displayTag("camera-div");
-	displayTag("camera-scanresult-div");
-	enableCamera.success = true;
-	enableCamera.calling = false;
+	let devices = await navigator.mediaDevices.enumerateDevices();
+	if (!devices.filter(v => v.kind == "videoinput").length)
+		return;
+	[
+		"camera-buttons-div", "camera-div", "camera-scanresult-div"
+	].forEach(displayTag);
 }
 
 async function cameraOn() {
@@ -18,7 +17,7 @@ async function cameraOn() {
 			width: {ideal: 2048}
 		},
 		audio: false
-	}).then((stream) => {
+	}).then(stream => {
 		let e = document.getElementById("camera-video");
 		e.srcObject = stream;
 		e.addEventListener("playing", () => {
@@ -26,18 +25,14 @@ async function cameraOn() {
 				resizePlayers();
 		});
 		e.play();
-	}).catch(() => {
-		alert("Error opening camera.");
-	});
+	}).catch(() => alert("Error opening camera."));
 }
 
 async function cameraOff() {
 	let e = document.getElementById("camera-video");
 	if (!e.srcObject)
 		return;
-	e.srcObject.getTracks().forEach((track) => {
-		track.stop();
-	});
+	e.srcObject.getTracks().forEach(track => track.stop());
 	e.srcObject = null;
 }
 
@@ -52,16 +47,13 @@ async function resizePlayers() {
 		width: `${w}`
 	});
 	g_player_height = `${parseInt(w / 16 * 9)}px`;
-	g_players.forEach((player) => {
+	g_players.forEach(player => {
 		if (player)
 			player.setPlayerSize(g_player_width, g_player_height);
 	});
 }
 
 async function initPlayers() {
-	if (initPlayers.calling)
-		return;
-	initPlayers.calling = true;
 	g_players.forEach((player, i) => {
 		if (player)
 			player.dispose();
@@ -81,7 +73,6 @@ async function initPlayers() {
 					player.play();
 			});
 	});
-	initPlayers.calling = false;
 }
 
 async function enablePlayers() {
@@ -90,9 +81,9 @@ async function enablePlayers() {
 		return;
 	enablePlayers.calling = true;
 	document.getElementById("xdcheckin-title-div").style.display = "flex";
-	["s", "0", "1", "2", "3"].forEach((v) => {
-		displayTag(`player${v}-buttons-div`);
-	});
+	[
+		"s", "0", "1", "2", "3"
+	].forEach(v => displayTag(`player${v}-buttons-div`));
 	if (localStorage.getItem("classroom_name"))
 		setClassroom(localStorage.getItem("classroom"),
 			     localStorage.getItem("classroom_name"));
@@ -103,7 +94,7 @@ async function enablePlayers() {
 }
 
 async function muteOtherPlayers(player) {
-	g_players.forEach((v) => {
+	g_players.forEach(v => {
 		if (v != player)
 			v.mute();
 	});

@@ -64,7 +64,7 @@ async function promptLogout() {
 		return;
 	if (confirm("Logout?")) {
 		g_logined = false;
-		await afterLogoutDuties();
+		afterLogoutDuties();
 	}
 }
 
@@ -80,9 +80,9 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 	if (force)
 		cookies = localStorage.getItem("cookies");
 	else
-		cookies = ((username != localStorage.getItem("username") ||
-			    password != localStorage.getItem("password")) ?
-			   "" : localStorage.getItem("cookies"));
+		cookies = username != localStorage.getItem("username") ||
+			  password != localStorage.getItem("password") ?
+			  "" : localStorage.getItem("cookies");
 	try {
 		let res = await post("/chaoxing/login", {
 			"username": username,
@@ -116,9 +116,9 @@ async function idsLoginPrepare(username, password, auto = false) {
 		return;
 	g_logining = true;
 	let ret = g_logined = false;
-	let cookies = ((username != localStorage.getItem("username") ||
-			password != localStorage.getItem("password")) ?
-		"" : localStorage.getItem("cookies"));
+	let cookies = username != localStorage.getItem("username") ||
+		      password != localStorage.getItem("password") ?
+		      "" : localStorage.getItem("cookies");
 	try {
 		if (cookies) {
 			ret = await chaoxingLogin("", "", true);
@@ -150,15 +150,13 @@ async function idsLoginCaptcha(username, password, auto = false) {
 	let s = document.getElementById("ids-login-captcha-input");
 	let c = document.getElementById("ids-login-captcha-container-div");
 	let s_img = document.getElementById("ids-login-captcha-small-img");
-	s.oninput = (() => {
-		s_img.style.left =
+	s.oninput = () => s_img.style.left =
 		     `${(c.offsetWidth - s_img.offsetWidth) * s.value / 280}px`;
-	});
-	document.getElementById("ids-login-captcha-button").onclick = (() => {
+	document.getElementById("ids-login-captcha-button").onclick = () => {
 		idsLoginFinish(username, password,
 			       parseInt(s_img.style.left.split("px")[0] * 280 /
 					c.offsetWidth))
-		.then((ret) => {
+		.then(ret => {
 			b.disabled = false;
 			if (ret === true)
 				afterLoginDuties(auto);
@@ -166,12 +164,10 @@ async function idsLoginCaptcha(username, password, auto = false) {
 				alert(`Login failed. (${ret})`);
 		});
 		displayTag("ids-login-captcha-div");
-	});
+	};
 	let img = document.getElementById("ids-login-captcha-img");
-	img.onload = (() => {
-		s_img.style.left = `${s.value = 0}px`;
-		displayTag("ids-login-captcha-div");
-	});
+	img.onload = () => displayTag("ids-login-captcha-div");
+	s_img.style.left = `${s.value = 0}px`;
 	s_img.src = `data:image/png;base64,${data.small_img_src}`;
 	img.src = `data:image/png;base64,${data.big_img_src}`;
 	b.disabled = true;

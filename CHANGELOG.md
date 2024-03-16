@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.6] - 2023-03-15
+
+### Fixed
+
+- Fix hidden camera on normal devices.
+
+### Changed
+
+- Checkin location address override now only affects addresses shorter than 13.
+
 ## [1.3.5] - 2023-03-15
 
 ### Added
@@ -306,7 +316,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...main
+[1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...1.3.6
 [1.3.5]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...1.3.5
 [1.3.4]: https://github.com/Pairman/Xdcheckin/compare/1.3.3...1.3.4
 [1.3.3]: https://github.com/Pairman/Xdcheckin/compare/1.3.2...1.3.3
