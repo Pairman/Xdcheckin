@@ -52,8 +52,6 @@ jobs:
             dist_fedora/*.rpm
             dist_ubuntu/*.deb
             dist_windows/*.msi
-        env:
-          GITHUB_REPOSITORY: Pairman/Xdcheckin
 
   publish:
     name: Publish to PyPI
