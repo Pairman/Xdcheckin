@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/build.yml
     needs: check-version
     secrets: inherit
-    if: ${{ needs.check_version.outputs.version_change == 'true' }}
+    if: ${{ needs.check-version.outputs.version_change == 'true' }}
 
   release:
     name: Release to GitHub
