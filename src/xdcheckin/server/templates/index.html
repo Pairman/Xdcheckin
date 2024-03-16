@@ -144,9 +144,8 @@
 			promptLogin(auto = true);
 		listLocations();
 		listClassrooms();
-		resizePlayers().then(enablePlayers());
-		window.onresize = (() => {
-			resizePlayers();
-		});
+		resizePlayers().then(enablePlayers);
+		window.onresize = resizePlayers;
+		enableCamera();
 	</script>
 </html>

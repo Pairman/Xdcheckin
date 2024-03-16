@@ -12,9 +12,7 @@ async function afterLoginDuties(auto = false) {
 		"login-button", "logout-button",
 		"player0-scan-button", "camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
-	].forEach((v) => {
-		displayTag(v, mode = "inline");
-	});
+	].forEach(displayTag);
 	if (!auto)
 		alert("Logged in successfully.");
 }
@@ -27,9 +25,7 @@ async function afterLogoutDuties() {
 		"login-button", "logout-button",
 		"player0-scan-button", "camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
-	].forEach((v) => {
-		displayTag(v, mode = "inline");
-	});
+	].forEach(displayTag);
 }
 
 async function promptLogin(auto = false) {

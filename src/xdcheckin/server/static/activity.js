@@ -13,7 +13,7 @@ async function getActivities() {
 			innerText: `${g_courses[class_id].name}: `
 		}));
 		course_activities.forEach((a) => {
-			let type = (a.type == "2") ? `Qrcode` : `Location `;
+			let type = (a.type == "2") ? `Qrcode` : `Location`;
 			let b = newElement("button", {
 				id: `chaoxing-activity-${a.active_id}` +
 				    `-button`,

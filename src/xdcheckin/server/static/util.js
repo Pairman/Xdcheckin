@@ -1,6 +1,6 @@
 function assert(cond, msg) {
 	if (!cond)
-		throw new Error(msg || "Assertion failed");
+		throw new Error(msg || "Assertion failed.");
 }
 
 function isValidUrl(url) {
@@ -41,9 +41,9 @@ function newElement(tag, properties = {}) {
 	return Object.assign(document.createElement(tag), properties);
 }
 
-async function displayTag(e_id, mode = "block") {
+async function displayTag(e_id) {
 	let e = document.getElementById(e_id);
-	e.style.display = ((e.style.display == "none") ? mode : "none");
+	e.style.display = ((e.style.display == "none") ? "" : "none");
 }
 
 async function hideOtherLists(e_id) {
@@ -58,16 +58,6 @@ async function hideOtherLists(e_id) {
 	}
 	if (e_id)
 		displayTag(e_id);
-}
-
-function getScrollBarWidth() {
-	let e = newElement("div", {
-		style: "overflow: scroll; visibility: hidden;" +
-		       "position: absolute"
-	});
-	let w = e.offsetWidth - e.clientWidth;
-	e.remove();
-	return w;
 }
 
 async function onclickCooldown(e_id, ms = 1000) {

@@ -1,8 +1,16 @@
-async function cameraOn() {
-	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-		alert("Camera unavailable. ");
+async function enableCamera() {
+	if (enableCamera.success || enableCamera.calling ||
+	    !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
 		return;
-	}
+	enableCamera.calling = true;
+	displayTag("camera-buttons-div");
+	displayTag("camera-div");
+	displayTag("camera-scanresult-div");
+	enableCamera.success = true;
+	enableCamera.calling = false;
+}
+
+async function cameraOn() {
 	navigator.mediaDevices.getUserMedia({
 		video: {
 			facingMode: {exact: "environment"},
@@ -19,7 +27,7 @@ async function cameraOn() {
 		});
 		e.play();
 	}).catch(() => {
-		alert("Camera inaccessible. ");
+		alert("Error opening camera.");
 	});
 }
 
@@ -34,8 +42,8 @@ async function cameraOff() {
 }
 
 async function resizePlayers() {
-	let w = window.innerWidth - getScrollBarWidth();
-	document.getElementById("camera-scanresult-div").style.width = w;
+	let w = window.innerWidth;
+	document.getElementById("camera-scanresult-div").style.width = `${w}px`;
 	document.getElementById("player0-scanresult-div").style.width =
 						      g_player_width = `${w}px`;
 	let e = document.getElementById("camera-video");
@@ -83,7 +91,7 @@ async function enablePlayers() {
 	enablePlayers.calling = true;
 	document.getElementById("xdcheckin-title-div").style.display = "flex";
 	["s", "0", "1", "2", "3"].forEach((v) => {
-		displayTag(`player${v}-buttons-div`, mode = "flex");
+		displayTag(`player${v}-buttons-div`);
 	});
 	if (localStorage.getItem("classroom_name"))
 		setClassroom(localStorage.getItem("classroom"),

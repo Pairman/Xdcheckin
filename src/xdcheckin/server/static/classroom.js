@@ -56,7 +56,7 @@ async function listClassrooms() {
 	g_building_names = [];
 	for (let building_name in g_classroom_urls) {
 		e.appendChild(newElement("div", {
-			innerText: `${building_name}: `
+			innerText: `${building_name}:`
 		}));
 		let classrooms = [], classroom_names = [];
 		let building = g_classroom_urls[building_name];
