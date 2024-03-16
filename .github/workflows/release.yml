@@ -70,6 +70,9 @@ jobs:
         uses: actions/download-artifact@v4.1.4
         with:
           name: dist_wheel
+          path: dist_wheel
   
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1.8
+        with:
+          packages-dir: dist_wheel/
