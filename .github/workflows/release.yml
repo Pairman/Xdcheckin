@@ -46,7 +46,6 @@ jobs:
           tag_name: ${{ needs.check-version.outputs.version }}
           name: ${{ needs.check-version.outputs.version }}
           body: ${{ steps.extract-release-notes.outputs.release_notes }}
-          make_latest: false
           files: |
             dist_android/*.apk
             dist_fedora/*.rpm
