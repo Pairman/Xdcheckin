@@ -81,12 +81,16 @@ Changelog for Xdcheckin.
 
 ### Added
 
-- Video players are now automatically resized. The "Resize All" button is removed.
+- Video players are now automatically resized.
 
 ### Changed
 
 - Further simplify button text.
 - Webpage is now displayed bigger for easier usage.
+
+### Removed
+
+- Remove the "Resize All" button.
 
 ## [1.2.8] - 2024-03-01
 
@@ -113,6 +117,9 @@ Changelog for Xdcheckin.
 ### Changed
 
 - Move "Input Location" and "I'm Feeling Lucky" under their corresponding list.
+
+### Removed
+
 - Remove the "Unmute All" and "Mute All" buttons.
 
 ## [1.2.6] - 2024-02-26
@@ -196,10 +203,10 @@ Changelog for Xdcheckin.
 ### Fixed
 
 - APP will now properly stop the backend server on exit.
-- (Linux) Remove APP WebView to fix crashes. Thus this is the first usable version.
 
-### Changed
+### Removed
 
+- (Linux) Remove APP WebView to fix crashes with unmet dependencies. Thus this is the first usable version.
 - (Android) Remove APP WebView since it's useless.
 
 ## [1.1.6] - 2024-01-19
