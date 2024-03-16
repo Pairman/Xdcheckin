@@ -1,6 +1,8 @@
 async function cameraOn() {
-	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
+	if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+		alert("Camera unavailable. ");
 		return;
+	}
 	navigator.mediaDevices.getUserMedia({
 		video: {
 			facingMode: {exact: "environment"},
@@ -17,7 +19,7 @@ async function cameraOn() {
 		});
 		e.play();
 	}).catch(() => {
-		alert("Camera not found or inaccessible. ");
+		alert("Camera inaccessible. ");
 	});
 }
 
