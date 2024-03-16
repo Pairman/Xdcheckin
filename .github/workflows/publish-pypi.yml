@@ -33,8 +33,12 @@ jobs:
         uses: actions/download-artifact@v4.1.4
         with:
           name: dist_wheel
-  
+
+      - name: List dist
+        run: |
+          find .
+
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1.8
         with:
-          packages-dir: ${{ inputs.working-directory }}/dist_wheel/
+          packages-dir: dist_wheel/
