@@ -14,7 +14,9 @@ class IDSSession:
 	requests_session = secrets = service = logined = None
 	config = {
 		"requests_headers": {
-			"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+			"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) Apple"
+				      "WebKit/537.36 (KHTML, like Gecko) Chrome"
+				      "/120.0.0.0 Mobile Safari/537.36"
 		}
 	}
 
