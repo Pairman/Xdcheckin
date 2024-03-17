@@ -545,7 +545,6 @@ class Chaoxing:
 			"ut": "s"
 		}
 		res = self.get(url = url, params = params)
-		print(res.text)
 		if res.status_code != 200:
 			return 0
 		s = search(r"ifopenAddress\" value=\"(.*?)\".*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)\"|(zsign_success)", res.text, DOTALL)
@@ -594,7 +593,7 @@ class Chaoxing:
 			info = self.checkin_get_pptactiveinfo(activity = activity)
 			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
-			assert presign, f"Presign failure. {activity, location, info, presign}"
+			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), dumps(presign)}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
 			if presign["ranged"] == 1:
@@ -611,7 +610,7 @@ class Chaoxing:
 			})
 			thread_analysis.join()
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
+			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(info), dumps(presign), dumps(location_new), dumps(params), res.text}"
 			return True, f"Checkin success. ({res.text})"
 		except Exception as e:
 			return False, str(e)
@@ -641,7 +640,7 @@ class Chaoxing:
 			info = self.checkin_get_pptactiveinfo(activity = activity)
 			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
-			assert presign, f"Presign failure. {activity, location, info, presign}"
+			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
 			if presign["ranged"] == 1:
@@ -655,7 +654,7 @@ class Chaoxing:
 				})
 			thread_analysis.join()
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
+			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(info), dumps(presign), dumps(location_new), dumps(params), res.text}"
 			return True, f"Checkin success. ({res.text})"
 		except Exception as e:
 			return False, str(e)
@@ -667,7 +666,7 @@ class Chaoxing:
 		:return: Same as checkin_checkin_location().
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url, location}"
+			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url, dumps(location)}"
 			s = search(r"id=(.*?)&.*?enc=(.*?)&", url)
 			return self.checkin_checkin_qrcode(activity = {"active_id": s.group(1), "enc": s.group(2)}, location = location)
 		except Exception as e:
