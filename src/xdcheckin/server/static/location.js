@@ -7,7 +7,7 @@ async function setLocation(loc, name) {
 	localStorage.setItem("location_", JSON.stringify(g_location));
 	localStorage.setItem("location_name", name);
 	document.getElementById("location-current-div").innerText =
-							     `Current: ${name}`;
+						     `Current location ${name}`;
 }
 
 async function inputLocation() {
