@@ -399,11 +399,11 @@ class Chaoxing:
 		data = res.json().get("data", {})
 		return {
 			location["activeid"]: {
-				"address": location["address"],
 				"latitude": location["latitude"],
 				"longitude": location["longitude"],
-				"ranged": location["locationrange"],
-				"range": location["locationrange"]
+				"address": location["address"],
+				"ranged": int(location["locationrange"]),
+				"range": int(location["locationrange"])
 			} for location in data
 		}
 
@@ -469,20 +469,19 @@ class Chaoxing:
 		res = self.get(url = url, params = params, expire = 60)
 		return {key: str(val) if not val is None else "" for key, val in res.json().get("data", {}).items()}
 
-	def checkin_get_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, course: dict ={"course_id": "", "class_id": ""}):
-		"""Get checkin location.
+	def checkin_format_location(self, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, location_new: dict = {"latitude": -1, "longitude": -1, "address": ""}):
+		"""Format checkin location.
 		:param activity: Activity ID in dictionary.
-		:param location: Address, latitude and longitude in dictionary. Used for randomness and address override for checkin location.
-		:param course: Course ID (will be filled if not given) and class ID in dictionary.
+		:param location: Address, latitude and longitude in dictionary. Used for address override for checkin location.
+		:param location_new: Address, latitude and longitude in dictionary. The checkin location to upload.
 		:return: Checkin location including address, latitude, longitude, range and ranged option.
 		"""
 		def _randomness(x: int | float = 0):
 			return round(x + choice((-1, 1)) * uniform(1, 5) * 0.0001, 6)
-		locations = self.course_get_location_log(course = course)
-		location_new = locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else {
+		location_new = {
 			"ranged": 0,
 			"range": 0,
-			**location
+			**location_new
 		}
 		if self.config["chaoxing_checkin_location_randomness"]:
 			location_new.update({
@@ -492,6 +491,17 @@ class Chaoxing:
 		if self.config["chaoxing_checkin_location_address_override"] and len(location["address"]) <= self.config["chaoxing_checkin_location_address_override_maxlen"] or len(location["address"]):
 			location_new["address"] = location["address"]
 		return location_new
+
+	def checkin_get_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, course: dict ={"course_id": "", "class_id": ""}):
+		"""Get checkin location.
+		:param activity: Activity ID in dictionary.
+		:param location: Address, latitude and longitude in dictionary. Used for address override for checkin location.
+		:param course: Course ID (will be filled if not given) and class ID in dictionary.
+		:return: Checkin location including address, latitude, longitude, range and ranged option.
+		"""
+		locations = self.course_get_location_log(course = course)
+		location_new = locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else location
+		return self.checkin_format_location(location = location, location_new = location_new)
 
 	def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
 		"""Do checkin analysis.
@@ -519,7 +529,7 @@ class Chaoxing:
 		"""Do checkin pre-sign.
 		:param activity: Activity ID in dictionary.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
-		:return: 2 if checked-in and 1 on success.
+		:return: 2 if checked-in and checkin location (including address, latitude, longitude, range and ranged option) on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
@@ -535,7 +545,25 @@ class Chaoxing:
 			"ut": "s"
 		}
 		res = self.get(url = url, params = params)
-		return 0 if res.status_code != 200 else 2 if "zsign_success" in res.text else 1
+		print(res.text)
+		if res.status_code != 200:
+			return 0
+		if "zsign_success" in res.text:
+			return 2
+		s = search(r"ifopenAddress\" value=\"(.*?)\".*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)\"|(zsign_success)", res.text, DOTALL)
+		return {
+			"latitude": -1,
+			"longitude": -1,
+			"address": "",
+			"ranged": 0,
+			"range": 0
+		} if not s else 2 if s.group(6) else {
+			"latitude": float(s.group(3)),
+			"longitude": float(s.group(4)),
+			"address": s.group(2),
+			"ranged": int(s.group(1)),
+			"range": int(s.group(5)[:-1])
+		}
 
 	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
 		"""Location checkin.
@@ -543,9 +571,6 @@ class Chaoxing:
 		:param location: Address, latitude and longitude in dictionary. Overriden by server-side location if any.
 		:return: True and error message on success, otherwise False and error message.
 		"""
-		def _get_location():
-			nonlocal location_new
-			location_new = self.checkin_get_location(activity = activity, location = location, course = course)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"name": self.name,
@@ -561,29 +586,27 @@ class Chaoxing:
 			"validate": ""
 		}
 		try:
-			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == "1" and info["isdelete"] == "0", "Activity expired or deleted."
-			course, ranged = {"class_id": info["clazzid"]}, info["ifopenAddress"]
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
-			if ranged == "1":
-				thread_location = Thread(target = _get_location)
-				thread_location.start()
-			presign = self.checkin_do_presign(activity = activity, course = course)
+			info = self.checkin_get_pptactiveinfo(activity = activity)
+			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
+			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
 			assert presign, f"Presign failure. {activity, location, info, presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			thread_analysis.join()
-			if ranged == "1":
-				thread_location.join()
+			if type(presign) is dict and presign["ranged"] == 1:
+				location_new = self.checkin_format_location(location = location, location_new = presign)
+				ranged = 1
 			else:
 				location_new = location
+				ranged = 0
 			params.update({
 				"address": location_new["address"],
 				"latitude": location_new["latitude"],
 				"longitude": location_new["longitude"],
 				"ifTiJiao": ranged
 			})
+			thread_analysis.join()
 			res = self.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
 			return True, f"Checkin success. ({res.text})"
@@ -596,9 +619,6 @@ class Chaoxing:
 		:param location: Same as checkin_checkin_location().
 		:return: Same as checkin_checkin_location().
 		"""
-		def _get_location():
-			nonlocal location_new
-			location_new = self.checkin_get_location(activity = activity, location = location, course = course)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
@@ -613,21 +633,16 @@ class Chaoxing:
 			"appType": 15
 		}
 		try:
-			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == "1" and info["isdelete"] == "0", "Activity expired or deleted."
-			course, ranged = {"class_id": info["clazzid"]}, info["ifopenAddress"]
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
-			if ranged == "1":
-				thread_location = Thread(target = _get_location)
-				thread_location.start()
-			presign = self.checkin_do_presign(activity = activity, course = course)
+			info = self.checkin_get_pptactiveinfo(activity = activity)
+			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
+			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
 			assert presign, f"Presign failure. {activity, location, info, presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			thread_analysis.join()
-			if ranged == "1":
-				thread_location.join()
+			if type(presign) is dict and presign["ranged"] == 1:
+				location_new = self.checkin_format_location(location = location, location_new = presign)
 				params["location"] = location_new
 			else:
 				location_new = location
@@ -635,13 +650,14 @@ class Chaoxing:
 					"latitude": location_new["latitude"],
 					"longitude": location_new["longitude"]
 				})
+			thread_analysis.join()
 			res = self.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {activity, location, info, presign, location_new, params, res.text}"
 			return True, f"Checkin success. ({res.text})"
 		except Exception as e:
 			return False, str(e)
 
-	def checkin_checkin_qrcode_url(self, url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": ""}):
+	def checkin_checkin_qrcode_url(self, url: str = "", location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
 		"""Qrcode checkin.
 		:param url: URL from Qrcode.
 		:param location: Same as checkin_checkin_location().
