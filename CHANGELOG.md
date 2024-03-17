@@ -8,6 +8,10 @@ Changelog for Xdcheckin.
 
 - Fix webpage title not properly displayed for non-XDUers.
 
+### Changed
+
+- Revert checkin location fetching logic due to Chaoxing API restabilization. This should provide more accuracy on checkin location.
+
 ## [1.3.6] - 2023-03-15
 
 ### Fixed
