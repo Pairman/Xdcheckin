@@ -4,6 +4,10 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix webpage title not properly displayed for non-XDUers.
+
 ## [1.3.6] - 2023-03-15
 
 ### Fixed
