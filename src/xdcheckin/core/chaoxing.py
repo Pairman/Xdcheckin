@@ -493,7 +493,7 @@ class Chaoxing:
 		return location_new
 
 	def checkin_get_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, course: dict ={"course_id": "", "class_id": ""}):
-		"""Get checkin location.
+		"""Get checkin location from the location log of its corresponding course.
 		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Used for address override for checkin location.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
