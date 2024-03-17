@@ -597,7 +597,7 @@ class Chaoxing:
 			assert presign, f"Presign failure. {activity, location, info, presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if type(presign) is dict and presign["ranged"] == 1:
+			if presign["ranged"] == 1:
 				location_new = self.checkin_format_location(location = location, location_new = presign)
 				ranged = 1
 			else:
@@ -644,7 +644,7 @@ class Chaoxing:
 			assert presign, f"Presign failure. {activity, location, info, presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if type(presign) is dict and presign["ranged"] == 1:
+			if presign["ranged"] == 1:
 				location_new = self.checkin_format_location(location = location, location_new = presign)
 				params["location"] = location_new
 			else:
