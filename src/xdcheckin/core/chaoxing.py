@@ -548,21 +548,24 @@ class Chaoxing:
 		print(res.text)
 		if res.status_code != 200:
 			return 0
-		if "zsign_success" in res.text:
-			return 2
 		s = search(r"ifopenAddress\" value=\"(.*?)\".*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)\"|(zsign_success)", res.text, DOTALL)
+		if s:
+			if s.group(6):
+				return 2
+			if s.group(1) == "1":
+				return {
+					"latitude": float(s.group(3)),
+					"longitude": float(s.group(4)),
+					"address": s.group(2),
+					"ranged": int(s.group(1)),
+					"range": int(s.group(5)[:-1])
+				}
 		return {
 			"latitude": -1,
 			"longitude": -1,
 			"address": "",
 			"ranged": 0,
 			"range": 0
-		} if not s else 2 if s.group(6) else {
-			"latitude": float(s.group(3)),
-			"longitude": float(s.group(4)),
-			"address": s.group(2),
-			"ranged": int(s.group(1)),
-			"range": int(s.group(5)[:-1])
 		}
 
 	def checkin_checkin_location(self, activity: dict = {"active_id": ""}, location: dict = {"latitude": -1, "longitude": -1, "address": ""}):
