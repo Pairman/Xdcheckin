@@ -80,7 +80,6 @@ async function enablePlayers() {
 	    !(localStorage.getItem("fid") == "16820"))
 		return;
 	enablePlayers.calling = true;
-	document.getElementById("xdcheckin-title-div").style.display = "flex";
 	[
 		"s", "0", "1", "2", "3"
 	].forEach(v => displayTag(`player${v}-buttons-div`));
