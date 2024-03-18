@@ -4,13 +4,19 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.7] - 2023-03-18
+
+### New
+- (Module) Add xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() to format checkin location based on config. Called automatically in xdcheckin.core.chaoxing.Chaoxing.checkin_get_location().
+
 ### Fixed
 
 - Fix webpage title not properly displayed for non-XDUers.
 
 ### Changed
 
-- Revert checkin location fetching logic due to Chaoxing API restabilization. This should provide more accuracy on checkin location.
+- Revert location fetching logic for location checkin due to Chaoxing API restabilization. This should provide more accuracy for location checkin.
+- (Module) xdcheckin.core.chaoxing.Chaoxing.checkin_do_presign() now returns checkin location on success. You should call xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() manually then.
 
 ## [1.3.6] - 2023-03-15
 
@@ -324,7 +330,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...main
+[1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
 [1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...1.3.6
 [1.3.5]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...1.3.5
 [1.3.4]: https://github.com/Pairman/Xdcheckin/compare/1.3.3...1.3.4
