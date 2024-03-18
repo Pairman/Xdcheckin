@@ -10,7 +10,6 @@ from requests import Response
 from requests.exceptions import RequestException
 from requests_cache.session import CachedSession
 from threading import Thread
-from time import sleep
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
@@ -522,7 +521,6 @@ class Chaoxing:
 		res1 = self.get(url = url1, params = params1, expire = 600)
 		params2["code"] = search(r"code=\'\+\'(.*?)\'", res1.text).group(1)
 		res2 = self.get(url = url2, params = params2, expire = 600)
-		sleep(0.2)
 		return res2.text == "success"
 
 	def checkin_do_presign(self, activity: dict = {"active_id": ""}, course: dict ={"course_id": "", "class_id": ""}):
@@ -642,16 +640,17 @@ class Chaoxing:
 			thread_analysis.start()
 			info = self.checkin_get_pptactiveinfo(activity = activity)
 			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
-			if info["ifopenAddress"] == "1":
-				thread_location = Thread(target = _get_location)
+			course, ranged = {"class_id": info["clazzid"]}, info["ifopenAddress"]
+			if ranged == "1":
+				location_new, thread_location = {}, Thread(target = _get_location)
 				thread_location.start()
-			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
+			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if info["ifopenAddress"] == "1":
+			if ranged == "1":
 				thread_location.join()
-				params["location"] = location_new
+				params["location"] = str(location_new)
 			else:
 				location_new = location
 				params.update({
