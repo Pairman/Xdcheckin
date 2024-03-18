@@ -331,7 +331,7 @@ Changelog for Xdcheckin.
 - Activities checking is now multithreaded for quicker responses.
 
 [unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...main
-[1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
+[1.3.7]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
 [1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...1.3.6
 [1.3.5]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...1.3.5
 [1.3.4]: https://github.com/Pairman/Xdcheckin/compare/1.3.3...1.3.4
