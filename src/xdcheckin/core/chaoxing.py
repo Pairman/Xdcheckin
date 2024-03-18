@@ -547,7 +547,7 @@ class Chaoxing:
 		res = self.get(url = url, params = params)
 		if res.status_code != 200:
 			return 0
-		s = search(r"ifopenAddress\" value=\"(.*?)\".*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)\"|(zsign_success)", res.text, DOTALL)
+		s = search(r"ifopenAddress\" value=\"(.*?)\".*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)米|(zsign_success)", res.text, DOTALL)
 		if s:
 			if s.group(6):
 				return 2
@@ -557,7 +557,7 @@ class Chaoxing:
 					"longitude": float(s.group(4)),
 					"address": s.group(2),
 					"ranged": int(s.group(1)),
-					"range": int(s.group(5)[:-1])
+					"range": int(s.group(5))
 				}
 		return {
 			"latitude": -1,
