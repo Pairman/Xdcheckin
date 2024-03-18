@@ -621,6 +621,9 @@ class Chaoxing:
 		:param location: Same as checkin_checkin_location().
 		:return: Same as checkin_checkin_location().
 		"""
+		def _get_location():
+			nonlocal location_new
+			location_new = self.checkin_get_location(activity = activity, location = location, course = course)
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
 			"enc": activity["enc"],
@@ -639,12 +642,15 @@ class Chaoxing:
 			thread_analysis.start()
 			info = self.checkin_get_pptactiveinfo(activity = activity)
 			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
+			if info["ifopenAddress"] == "1":
+				thread_location = Thread(target = _get_location)
+				thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if presign["ranged"] == 1:
-				location_new = self.checkin_format_location(location = location, location_new = presign)
+			if info["ifopenAddress"] == "1":
+				thread_location.join()
 				params["location"] = location_new
 			else:
 				location_new = location
