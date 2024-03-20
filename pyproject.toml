@@ -21,7 +21,7 @@ classifiers = [
 requires-python = ">=3.8"
 dependencies = [
 	"flask >= 3.0.0",
-	"flask-session >= 0.6.0",
+	"flask-session == 0.6.0",
 	"pillow >= 8.4.0",
 	"pycryptodome >= 3.9.4",
 	"pyzbar >= 0.1.8",
