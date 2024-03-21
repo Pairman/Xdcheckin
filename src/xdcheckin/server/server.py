@@ -207,7 +207,7 @@ def create_server(config: dict = {}):
 			img_src = request.files["img_src"]
 			assert img_src, "No image given."
 			with open(BytesIO(img_src.read())) as img:
-				assert img.size[0] > 0 and img.size[1] > 0, "Empty image."
+				assert img.height and img.width, "Empty image."
 				urls = decode(img)
 			assert urls, "No Qrcode detected."
 			urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
