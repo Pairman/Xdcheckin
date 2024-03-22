@@ -121,7 +121,6 @@ class Chaoxing:
 			ret.update({
 				"name": data["realname"],
 				"cookies": res.cookies,
-				"res": res,
 				"logined": True
 			})
 		return ret
