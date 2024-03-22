@@ -4,17 +4,26 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.9] - 2024=03-22
+
+### Fixed
+
+- Fix activities fetching error caused by empty end time
+
 ## [1.3.8] - 2024-03-22
 
-# New
+# Added
+
 - (Module) Activities now contain their start and end time.
 
 # Fixed
-- Optimized activities fetching logic in prevention of triggering Chaoxing's anti spamming mechanism.
+
+- Optimize activities fetching logic in prevention of triggering Chaoxing's anti spamming mechanism.
 
 ## [1.3.7] - 2024-03-18
 
-### New
+### Added
+
 - (Module) Add xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() to format checkin location based on config. Called automatically in xdcheckin.core.chaoxing.Chaoxing.checkin_get_location().
 
 ### Fixed
@@ -338,7 +347,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.8...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.9...main
+[1.3.9]: https://github.com/Pairman/Xdcheckin/compare/1.3.8...1.3.9
 [1.3.8]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...1.3.8
 [1.3.7]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
 [1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...1.3.6
