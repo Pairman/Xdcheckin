@@ -4,10 +4,15 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.8] -2024-03-22
+
+# New
+- (Module) Activities now contain their start and end time.
+
 # Fixed
 - Optimized activities fetching logic in prevention of triggering Chaoxing's anti spamming mechanism.
 
-## [1.3.7] - 2023-03-18
+## [1.3.7] - 2024-03-18
 
 ### New
 - (Module) Add xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() to format checkin location based on config. Called automatically in xdcheckin.core.chaoxing.Chaoxing.checkin_get_location().
@@ -21,7 +26,7 @@ Changelog for Xdcheckin.
 - Revert location fetching logic for location checkin due to Chaoxing API restabilization. This should provide more accuracy for location checkin.
 - (Module) xdcheckin.core.chaoxing.Chaoxing.checkin_do_presign() now returns checkin location on success. You should call xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() manually then.
 
-## [1.3.6] - 2023-03-15
+## [1.3.6] - 2024-03-15
 
 ### Fixed
 
@@ -31,7 +36,7 @@ Changelog for Xdcheckin.
 
 - Checkin location address override now only affects addresses shorter than 13.
 
-## [1.3.5] - 2023-03-15
+## [1.3.5] - 2024-03-15
 
 ### Added
 
@@ -333,7 +338,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.8...main
+[1.3.8]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...1.3.8
 [1.3.7]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
 [1.3.6]: https://github.com/Pairman/Xdcheckin/compare/1.3.5...1.3.6
 [1.3.5]: https://github.com/Pairman/Xdcheckin/compare/1.3.4...1.3.5
