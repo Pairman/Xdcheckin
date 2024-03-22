@@ -3,6 +3,7 @@
 from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad
+from datetime import datetime
 from json import dumps
 from random import choice, uniform
 from re import findall, search, DOTALL
@@ -422,9 +423,11 @@ class Chaoxing:
 		data = (res.json().get("data") or {}).get("activeList") or []
 		return [
 			{
-				"active_id": activity["id"],
-				"type": activity["otherId"],
+				"active_id": str(activity["id"]),
+				"type": str(activity["otherId"]),
 				"name": activity["nameOne"],
+				"time_start": str(datetime.fromtimestamp(activity["startTime"]/1000)),
+				"time_end": str(datetime.fromtimestamp(activity["endTime"]/1000)),
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
 		]
