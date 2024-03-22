@@ -116,8 +116,8 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, params = params)
-		data = res.json()
 		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+			data = res.json()
 			ret.update({
 				"name": data["realname"],
 				"cookies": res.cookies,
@@ -164,8 +164,8 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.post(url = url, data = dumps(data), headers = {**self.config["requests_headers"], **{"Content-Type": "application/json;charset=UTF-8"}})
-		d = res.json()
 		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+			d = res.json()
 			ret.update({
 				"name": d["data"]["realname"],
 				"cookies": res.cookies,
@@ -284,8 +284,8 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, cookies = account["cookies"])
-		data = res.json()
 		if data["result"]:
+			data = res.json()
 			ret.update({
 				"name": data["msg"]["name"],
 				"cookies": account["cookies"],
