@@ -4,6 +4,9 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+# Fixed
+- Optimized activities fetching logic in prevention of triggering Chaoxing's anti spamming mechanism.
+
 ## [1.3.7] - 2023-03-18
 
 ### New
