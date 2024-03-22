@@ -4,7 +4,7 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
-## [1.3.8] -2024-03-22
+## [1.3.8] - 2024-03-22
 
 # New
 - (Module) Activities now contain their start and end time.
