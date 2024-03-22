@@ -324,7 +324,7 @@ class Chaoxing:
 			"week": week
 		}
 		res = self.get(url = url, params = params, expire = 86400)
-		data = res.json().get("data", {})
+		data = res.json().get("data") or {}
 		details = data["curriculum"]
 		curriculum = {
 			"details": {
@@ -343,7 +343,7 @@ class Chaoxing:
 		lessons = data.get("lessonArray", [])
 		for lesson in lessons:
 			_add_lesson(lesson = lesson)
-			for conflict in lesson.get("conflictLessons", {}):
+			for conflict in lesson.get("conflictLessons") or {}:
 				_add_lesson(lesson = conflict)
 		return curriculum
 
@@ -371,15 +371,15 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
 		params = {
-			"fid": self.cookies.get("fid", 0),
+			"fid": self.cookies.get("fid") or 0,
 			"courseId": "",
 			"classId": course["class_id"]
 		}
-		course_id = course.get("course_id", self.courses.get(course["class_id"], {}).get("course_id"))
+		course_id = course.get("course_id") or self.courses.get(course["class_id"])
 		if not course_id:
 			res = self.get(url = url, params = params, expire = 86400)
-			data = res.json().get("data", {})
-			course_id = str(data.get("courseid", 0))
+			data = res.json().get("data") or {}
+			course_id = str(data.get("courseid") or 0)
 		return course_id
 
 	def course_get_location_log(self, course: dict = {"course_id": "", "class_id": ""}):
@@ -395,7 +395,7 @@ class Chaoxing:
 			"classId": course["class_id"]
 		}
 		res = self.get(url = url, params = params, expire = 600)
-		data = res.json().get("data", {})
+		data = res.json().get("data") or {}
 		return {
 			location["activeid"]: {
 				"latitude": location["latitude"],
@@ -413,13 +413,13 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"fid": self.cookies.get("fid", 0),
+			"fid": self.cookies.get("fid") or 0,
 			"courseId": self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
 		res = self.get(url = url, params = params, expire = 60)
-		data = res.json().get("data", {}).get("activeList", [])
+		data = (res.json().get("data") or {}).get("activeList") or []
 		return [
 			{
 				"active_id": activity["id"],
@@ -439,8 +439,9 @@ class Chaoxing:
 				activities[course["class_id"]] = course_activities
 		activities = {}
 		threads = tuple(Thread(target = _get_course_activities_wrapper, kwargs = {"course": {"course_id": course[1]["course_id"], "class_id": course[0]}}) for course in tuple(self.courses.items())[: self.config["chaoxing_course_get_activities_courses_limit"]])
-		tuple(thread.start() for thread in threads)
-		tuple(thread.join() for thread in threads)
+		for batch in tuple(threads[i : i + 12] for i in range(0, len(threads), 12)):
+			tuple(thread.start() for thread in batch)
+			tuple(thread.join() for thread in batch)
 		return activities
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
@@ -466,7 +467,7 @@ class Chaoxing:
 			"activeId": activity["active_id"]
 		}
 		res = self.get(url = url, params = params, expire = 60)
-		return {key: str(val) if not val is None else "" for key, val in res.json().get("data", {}).items()}
+		return {key: str(val) if not val is None else "" for key, val in (res.json().get("data") or {}).items()}
 
 	def checkin_format_location(self, location: dict = {"latitude": -1, "longitude": -1, "address": ""}, location_new: dict = {"latitude": -1, "longitude": -1, "address": ""}):
 		"""Format checkin location.
@@ -499,7 +500,7 @@ class Chaoxing:
 		:return: Checkin location including address, latitude, longitude, range and ranged option.
 		"""
 		locations = self.course_get_location_log(course = course)
-		location_new = locations.get(activity["active_id"], tuple(locations.values())[0]) if locations else location
+		location_new = locations.get(activity["active_id"]) or tuple(locations.values())[0] if locations else location
 		return self.checkin_format_location(location = location, location_new = location_new)
 
 	def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
@@ -580,7 +581,7 @@ class Chaoxing:
 			"clientip": "",
 			"latitude": -1,
 			"longitude": -1,
-			"fid": self.cookies.get("fid", 0),
+			"fid": self.cookies.get("fid") or 0,
 			"appType": 15,
 			"ifTiJiao": 0,
 			"validate": ""
@@ -632,7 +633,7 @@ class Chaoxing:
 			"location": "",
 			"latitude": -1,
 			"longitude": -1,
-			"fid": self.cookies.get("fid", 0),
+			"fid": self.cookies.get("fid") or 0,
 			"appType": 15
 		}
 		try:
