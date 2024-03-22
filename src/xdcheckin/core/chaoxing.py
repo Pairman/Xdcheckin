@@ -426,8 +426,8 @@ class Chaoxing:
 				"active_id": str(activity["id"]),
 				"type": str(activity["otherId"]),
 				"name": activity["nameOne"],
-				"time_start": str(datetime.fromtimestamp(activity["startTime"]/1000)),
-				"time_end": str(datetime.fromtimestamp(activity["endTime"]/1000)),
+				"time_start": str(datetime.fromtimestamp(activity["startTime"] // 1000)),
+				"time_end": str(datetime.fromtimestamp(activity["endTime"] // 1000)),
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
 		]
