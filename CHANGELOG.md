@@ -4,6 +4,20 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.4.1] - 2024-03-23
+
+### Added
+
+- (Module) Introduce the new activities fetching API as the default: xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities_ppt(). 
+
+### Fixed
+
+- Fix some activities not fetched due to Chaoxing's anti spamming.
+
+### Changed
+
+- (Module) xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities() has been renamed to xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities_v2() and currently unused.
+
 ## [1.3.10] - 2024-03-23
 
 ### Fixed
