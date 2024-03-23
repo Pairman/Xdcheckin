@@ -407,8 +407,8 @@ class Chaoxing:
 			} for location in data
 		}
 
-	def course_get_course_activities(self, course: dict = {"course_id": "", "class_id": ""}):
-		"""Get activities of a course.
+	def course_get_course_activities_v2(self, course: dict = {"course_id": "", "class_id": ""}):
+		"""Get activities of a course via V2 API.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
 		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time.
 		"""
@@ -419,7 +419,7 @@ class Chaoxing:
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
-		res = self.get(url = url, params = params, expire = 60)
+		res = self.get(url = url, params = params, expire = 0)
 		data = (res.json().get("data") or {}).get("activeList") or []
 		return [
 			{
@@ -427,22 +427,56 @@ class Chaoxing:
 				"type": activity["otherId"],
 				"name": activity["nameOne"],
 				"time_start": str(datetime.fromtimestamp(activity["startTime"] // 1000)),
-				"time_end": str(datetime.fromtimestamp((activity["endTime"]) // 1000) if activity["endTime"] else datetime.max),
+				"time_end": str(datetime.fromtimestamp((activity["endTime"]) // 1000)) if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
 		]
+
+	def course_get_course_activities_ppt(self, course: dict = {"course_id": "", "class_id": ""}):
+		"""Get activities of a course via PPT API.
+		:param course: Course ID (will be filled if not given) and class ID in dictionary.
+		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time.
+		"""
+		url = "https://mobilelearn.chaoxing.com/ppt/activeAPI/taskactivelist"
+		params = {
+			"courseId": self.course_get_course_id(course = course),
+			"classId": course["class_id"],
+			"showNotStartedActive": 0
+		}
+		res = self.get(url = url, params = params, expire = 0)
+		data = res.json().get("activeList") or []
+		activities = []
+		for activity in data:
+			if not activity["status"] == 1 or not activity["activeType"] == 2:
+				continue
+			activity_new = {
+				"active_id": str(activity["id"]),
+				"name": activity["nameOne"],
+				"time_start": str(datetime.fromtimestamp(activity["startTime"] // 1000)),
+				"time_left": activity["nameFour"]
+			}
+			details = self.checkin_get_details(activity = activity_new)
+			if not details["otherId"] in ("2", "4"):
+				continue
+			match = search(r"'time': (.*?),", details["endTime"])
+			activity_new.update({
+				"type": details["otherId"],
+				"time_end": str(datetime.fromtimestamp(int(match.group(1)) // 1000)) if match and match.group(1) else ""
+			})
+			activities.append(activity_new)
+		return activities
 
 	def course_get_activities(self):
 		"""Get activities of all courses.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
 		def _get_course_activities_wrapper(course: dict = {}):
-			course_activities = self.course_get_course_activities(course = course)
+			course_activities = self.course_get_course_activities_ppt(course = course)
 			if course_activities:
 				activities[course["class_id"]] = course_activities
 		activities = {}
 		threads = tuple(Thread(target = _get_course_activities_wrapper, kwargs = {"course": {"course_id": course[1]["course_id"], "class_id": course[0]}}) for course in tuple(self.courses.items())[: self.config["chaoxing_course_get_activities_courses_limit"]])
-		for batch in tuple(threads[i : i + 12] for i in range(0, len(threads), 12)):
+		for batch in tuple(threads[i : i + 16] for i in range(0, len(threads), 16)):
 			tuple(thread.start() for thread in batch)
 			tuple(thread.join() for thread in batch)
 		return activities
@@ -463,7 +497,7 @@ class Chaoxing:
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Get PPT acitvity info.
 		:param active_id: Activity ID in dictionary.
-		:return: Checkin PPT activity info including ranged option and Qrcode refreshing optiion on success.
+		:return: Checkin PPT activity info including ranged and Qrcode refreshing option on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {
@@ -549,17 +583,17 @@ class Chaoxing:
 		res = self.get(url = url, params = params)
 		if res.status_code != 200:
 			return 0
-		s = search(r"ifopenAddress\" value=\"(.*?)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)米)?|(zsign_success)", res.text, DOTALL)
-		if s:
-			if s.group(6):
+		match = search(r"ifopenAddress\" value=\"(.*?)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)米)?|(zsign_success)", res.text, DOTALL)
+		if match:
+			if match.group(6):
 				return 2
-			if s.group(1) == "1":
+			if match.group(1) == "1":
 				return {
-					"latitude": float(s.group(3) or -1),
-					"longitude": float(s.group(4) or -1),
-					"address": s.group(2) or "",
-					"ranged": int(s.group(1)),
-					"range": int(s.group(5) or 0)
+					"latitude": float(match.group(3) or -1),
+					"longitude": float(match.group(4) or -1),
+					"address": match.group(2) or "",
+					"ranged": int(match.group(1)),
+					"range": int(match.group(5) or 0)
 				}
 		return {
 			"latitude": -1,
@@ -592,9 +626,9 @@ class Chaoxing:
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
-			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
-			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzid"]})
+			info = self.checkin_get_details(activity = activity)
+			assert info["status"] == "1" and info["isDelete"] == "0", "Activity ended or deleted."
+			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzId"]})
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), dumps(presign)}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
@@ -676,7 +710,7 @@ class Chaoxing:
 		"""
 		try:
 			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url, dumps(location)}"
-			s = search(r"id=(.*?)&.*?enc=(.*?)&", url)
-			return self.checkin_checkin_qrcode(activity = {"active_id": s.group(1), "enc": s.group(2)}, location = location)
+			match = search(r"id=(.*?)&.*?enc=(.*?)&", url)
+			return self.checkin_checkin_qrcode(activity = {"active_id": match.group(1), "enc": match.group(2)}, location = location)
 		except Exception as e:
 			return False, str(e)
