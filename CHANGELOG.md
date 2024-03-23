@@ -8,7 +8,7 @@ Changelog for Xdcheckin.
 
 ### Fixed
 
-- Fix several possible login exceptions.
+- Fix several possible login errors.
 - Fix checkin error if corresponding course is not in the course list.
 
 ## [1.3.9] - 2024-03-22
