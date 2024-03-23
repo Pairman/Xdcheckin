@@ -8,7 +8,7 @@ Changelog for Xdcheckin.
 
 - Fix several possible login exceptions.
 
-## [1.3.9] - 2024=03-22
+## [1.3.9] - 2024-03-22
 
 ### Fixed
 
