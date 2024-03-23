@@ -376,7 +376,7 @@ class Chaoxing:
 			"courseId": "",
 			"classId": course["class_id"]
 		}
-		course_id = course.get("course_id") or self.courses.get(course["class_id"])
+		course_id = course.get("course_id") or (self.courses.get(course["class_id"]) or {}).get("course_id")
 		if not course_id:
 			res = self.get(url = url, params = params, expire = 86400)
 			data = res.json().get("data") or {}
