@@ -4,9 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.3.10] - 2024-03-23
+
 ### Fixed
 
 - Fix several possible login exceptions.
+- Fix checkin error if corresponding course is not in the course list.
 
 ## [1.3.9] - 2024-03-22
 
@@ -351,7 +354,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.9...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.3.10...main
+[1.3.10]: https://github.com/Pairman/Xdcheckin/compare/1.3.9...1.3.10
 [1.3.9]: https://github.com/Pairman/Xdcheckin/compare/1.3.8...1.3.9
 [1.3.8]: https://github.com/Pairman/Xdcheckin/compare/1.3.7...1.3.8
 [1.3.7]: https://github.com/Pairman/Xdcheckin/compare/1.3.6...1.3.7
