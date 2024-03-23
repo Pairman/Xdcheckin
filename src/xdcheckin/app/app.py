@@ -7,7 +7,6 @@ from xdcheckin.server.server import start_server
 class Xdcheckin(toga_App):
 	def startup(self):
 		Thread(target = start_server, daemon = True).start()
-
 		self.main_window = toga_MainWindow(title = self.formal_name)
 		if toga_platform_current_platform == "android":
 			from java import jclass
