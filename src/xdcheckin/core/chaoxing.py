@@ -284,13 +284,14 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, cookies = account["cookies"])
-		data = res.json()
-		if data["result"]:
-			ret.update({
-				"name": data["msg"]["name"],
-				"cookies": account["cookies"],
-				"logined": True
-			})
+		if res.status_code == 200:
+			data = res.json()
+			if data["result"]:
+				ret.update({
+					"name": data["msg"]["name"],
+					"cookies": account["cookies"],
+					"logined": True
+				})
 		return ret
 
 	def curriculum_get_curriculum(self, week: str = ""):
