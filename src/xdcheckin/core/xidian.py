@@ -175,7 +175,7 @@ class Newesxidian:
 	chaoxing_session = logined = None
 
 	def __init__(self, chaoxing: Chaoxing = None):
-		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid", 0) == "16820":
+		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
 			return
 		self.logined, self.chaoxing_session = True, chaoxing
 
@@ -202,11 +202,11 @@ class Newesxidian:
 		"""
 		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
 		params1 = {
-			"liveId": livestream.get("live_id", "")
+			"liveId": livestream.get("live_id") or ""
 		}
 		url2 = "http://newesxidian.chaoxing.com/live/getViewUrlNoCourseLive"
 		params2 = {
-			"deviceCode": livestream.get("device", ""),
+			"deviceCode": livestream.get("device") or "",
 			"status": 1
 		}
 		if not livestream.get("device"):
