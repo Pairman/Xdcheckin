@@ -590,7 +590,6 @@ class Chaoxing:
 		location_new: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Format checkin location.
-		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Used for address override for checkin location.
 		:param location_new: Address, latitude and longitude in dictionary. The checkin location to upload.
 		:return: Checkin location containing address, latitude, longitude, range and ranged option.
