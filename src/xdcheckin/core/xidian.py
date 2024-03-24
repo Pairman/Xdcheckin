@@ -28,45 +28,56 @@ class IDSSession:
 			return
 		self.requests_session, self.secrets, self.service = Session(), {}, service
 
-	def get(self, url: str = "", params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, **kwargs):
+	def get(
+		self, url: str = "", params: dict = {}, cookies: dict = None,
+		headers: dict = None, **kwargs
+	):
 		"""Wrapper for requests.get().
 		:param url: URL.
 		:param params: Parameters.
 		:param cookies: Cookies. Overrides existing cookies.
 		:param headers: Headers. Overrides existing headers.
-		:param verify: SSL certificate verification toggle. False by default.
 		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.get(url, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False, **kwargs)
+			res = self.requests_session.get(
+				url = url, params = params, cookies = cookies,
+				headers = headers or self.config["requests_headers"],
+				**{"verify": False, **kwargs}
+			)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
-			res.status_code, res._content = e, b"{}"
+			res.status_code, res._content = int(str(e)), b"{}"
 		except RequestException:
 			res = Response()
 			res.status_code, res._content = 404, b"{}"
 		finally:
 			return res
 
-	def post(self, url: str = "", data: dict = {}, params: dict = {}, cookies: dict = None, headers: dict = None, verify: bool = False, **kwargs):
+	def post(
+		self, url: str = "", data: dict = {}, cookies: dict = None,
+		headers: dict = None, **kwargs
+	):
 		"""Wrapper for requests.post().
 		:param url: URL.
 		:param data: Data.
-		:param params: Parameters.
 		:param cookies: Cookies. Overrides existing cookies.
 		:param headers: Headers. Overrides existing headers.
-		:param verify: SSL certificate verification toggle. False by default.
 		:param **kwargs: Optional arguments.
 		:return: Response.
 		"""
 		try:
-			res = self.requests_session.post(url, data = data, params = params, cookies = cookies, headers = headers or self.config["requests_headers"], verify = False, **kwargs)
+			res = self.requests_session.post(
+				url = url, data = data, cookies = cookies,
+				headers = headers or self.config["requests_headers"],
+				**{"verify": False, **kwargs}
+			)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
 			res = Response()
-			res.status_code, res._content = e, b"{}"
+			res.status_code, res._content = int(str(e)), b"{}"
 		except RequestException:
 			res = Response()
 			res.status_code, res._content = 404, b"{}"
@@ -89,12 +100,12 @@ class IDSSession:
 			"big_img_src": "",
 			"small_img_src": ""
 		}
-		res1 = self.get(url1, params = params1)
+		res1 = self.get(url = url1, params = params1)
 		if not res1.status_code == 200:
 			return ret
 		s = search(r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\"", res1.text)
 		params2["_"] = str(int(1000 * time()))
-		res2 = self.get(url2, params = params2)
+		res2 = self.get(url = url2, params = params2)
 		if not res2.status_code == 200:
 			return ret
 		ret.update({
@@ -107,13 +118,22 @@ class IDSSession:
 		})
 		return ret
 
-	def login_username_finish(self, account: dict = {"username": "", "password": "", "vcode": ""}):
+	def login_username_finish(
+		self,
+		account: dict = {"username": "", "password": "", "vcode": ""}
+	):
 		"""Verify and finish username logging in.
 		:param account: Username, password and verification code (a.k.a. slider offset).
 		:return: Cookies and login state.
 		"""
 		def _encrypt_aes(msg: str = "", key: str = ""):
-			enc = AES_new(key.encode("utf-8"), AES_MODE_CBC, b"xidianscriptsxdu").encrypt(pad(4 * b"xidianscriptsxdu" + msg.encode("utf-8"), AES_block_size))
+			enc = AES_new(
+				key.encode("utf-8"), AES_MODE_CBC,
+				b"xidianscriptsxdu"
+			).encrypt(pad(
+				4 * b"xidianscriptsxdu" + msg.encode("utf-8"),
+				AES_block_size
+			))
 			return b64encode(enc).decode("utf-8")
 		url1 = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data1 = {
@@ -130,7 +150,10 @@ class IDSSession:
 		url2 = "https://ids.xidian.edu.cn/authserver/login"
 		data2 = {
 			"username": account["username"],
-			"password": _encrypt_aes(account["password"], self.secrets["login_prepare_salt"]),
+			"password": _encrypt_aes(
+				account["password"],
+				self.secrets["login_prepare_salt"]
+			),
 			"captcha": "",
 			"_eventId": "submit",
 			"cllt": "userNameLogin",
@@ -161,7 +184,7 @@ class IDSSession:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url, cookies = account["cookies"], allow_redirects = False)
+		res = self.get(url = url, cookies = account["cookies"], allow_redirects = False)
 		if res.status_code != 302:
 			ret.update({
 				"cookies": account["cookies"],
@@ -188,14 +211,16 @@ class Newesxidian:
 		params = {
 			"liveId": livestream["live_id"]
 		}
-		res = self.chaoxing_session.get(url = url, params = params, expire = 86400)
+		res = self.chaoxing_session.get(url = url, params = params, expire_after = 86400)
 		return {
 			"url": res.text,
 			"live_id": livestream["live_id"],
 			"device": ""
 		}
 
-	def livestream_get_live_url(self, livestream: dict = {"live_id": "", "device": ""}):
+	def livestream_get_live_url(
+		self, livestream: dict = {"live_id": "", "device": ""}
+	):
 		"""Get livestream URL.
 		:param livestream: Live ID (unused if device ID is present) or device ID in dictionary.
 		:return: Livestream URL, live ID (placeholder if not given) and device ID.
@@ -210,13 +235,13 @@ class Newesxidian:
 			"status": 1
 		}
 		if not livestream.get("device"):
-			res1 = self.chaoxing_session.get(url = url1, params = params1, expire = 86400)
+			res1 = self.chaoxing_session.get(url = url1, params = params1, expire_after = 86400)
 			data = res1.json() or []
 			for lesson in data:
 				if str(lesson["id"]) == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
 					break
-		res2 = self.chaoxing_session.get(url = url2, params = params2, expire = 86400)
+		res2 = self.chaoxing_session.get(url = url2, params = params2, expire_after = 86400)
 		return {
 			"url": res2.text,
 			"live_id": params1["liveId"],
@@ -243,9 +268,16 @@ class Newesxidian:
 			"termId": curriculum["details"]["semester"],
 			"week": curriculum["details"]["week"]
 		})
-		res = self.chaoxing_session.get(url = url, params = params, expire = 86400)
+		res = self.chaoxing_session.get(url = url, params = params, expire_after = 86400)
 		data = res.json() or []
-		threads = tuple(Thread(target = _get_livestream_wrapper, kwargs = {"class_id": class_id, "live_id": live_id}) for class_id, live_id in {str(lesson["teachClazzId"]): str(lesson["id"]) for lesson in data}.items())
-		tuple(thread.start() for thread in threads)
-		tuple(thread.join() for thread in threads)
+		threads = [
+			Thread(target = _get_livestream_wrapper, kwargs = {
+				"class_id": str(lesson["teachClazzId"]),
+				"live_id": str(lesson["id"])
+			}) for lesson in data
+		]
+		for thread in threads:
+			thread.start()
+		for thread in threads:
+			thread.join()
 		return curriculum

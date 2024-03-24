@@ -44,7 +44,7 @@ def create_server(config: dict = {}):
 	@server.route("/xdcheckin/get/releases/latest", methods = ["POST"])
 	def xdcheckin_get_latest_release():
 		try:
-			res = get("https://api.github.com/repos/Pairman/Xdcheckin/releases/latest")
+			res = get(url = "https://api.github.com/repos/Pairman/Xdcheckin/releases/latest")
 			assert res.status_code == 200
 			data = res.json()
 			res = make_response(dumps({
@@ -110,6 +110,7 @@ def create_server(config: dict = {}):
 			username, password, cookies = data["username"], data["password"], data["cookies"]
 			assert (username and password) or cookies, "Missing username, password or cookies."
 			chaoxing = Chaoxing(username = username, password = password, cookies = loads(cookies) if cookies else None, config = {
+				"chaoxing_course_get_activities_courses_limit": 36,
 				"chaoxing_checkin_location_address_override": True,
 				"chaoxing_checkin_location_address_override_maxlen": 12
 			})
@@ -210,7 +211,7 @@ def create_server(config: dict = {}):
 				assert img.height and img.width, "Empty image."
 				urls = decode(img)
 			assert urls, "No Qrcode detected."
-			urls = tuple(s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data)
+			urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
 			assert urls, "No checkin URL found."
 			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
 			res = make_response(f"{result[1][: -1]}, {urls[0]})")
