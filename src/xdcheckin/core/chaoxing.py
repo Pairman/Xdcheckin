@@ -26,8 +26,7 @@ class Chaoxing:
 				      "d_phone_906_100"
 		},
 		"requests_cache_enabled": True,
-		"chaoxing_course_get_activities_courses_limit": 0,
-		"chaoxing_checkin_location_address_override": False,
+		"chaoxing_course_get_activities_courses_limit": 36,
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
 	}
@@ -606,7 +605,7 @@ class Chaoxing:
 				"latitude": _randomness(location_new["latitude"]),
 				"longitude": _randomness(location_new["longitude"])
 			})
-		if self.config["chaoxing_checkin_location_address_override"] and len(location["address"]) <= self.config["chaoxing_checkin_location_address_override_maxlen"] or len(location["address"]):
+		if len(location["address"]) < self.config["chaoxing_checkin_location_address_override_maxlen"]:
 			location_new["address"] = location["address"]
 		return location_new
 
