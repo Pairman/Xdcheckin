@@ -537,13 +537,13 @@ class Chaoxing:
 				"class_id": class_id
 			} for class_id in islice(iter(self.courses), self.config["chaoxing_course_get_activities_courses_limit"] or None)
 		]
-		bsize, activities = 16, {}
-		for batch in (islice(courses, i, i + bsize) for i in range(0, len(courses), bsize)):
+		activities = {}
+		for batch in (courses[i : i + 16] for i in range(0, len(courses), 16)):
 			threads = (
 				Thread(target = _get_course_activities, kwargs = {
 					"course": batch[i],
 					"func": self.course_get_course_activities_v2 if i % 2 else self.course_get_course_activities_ppt
-				}) for i in range(bsize)
+				}) for i in range(len(batch))
 			)
 			for thread in threads:
 				thread.start()
