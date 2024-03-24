@@ -27,6 +27,7 @@ class Chaoxing:
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_course_get_activities_courses_limit": 36,
+		"chaoxing_course_get_activities_workers": 16,
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
 	}
@@ -537,7 +538,8 @@ class Chaoxing:
 			} for class_id in islice(iter(self.courses), self.config["chaoxing_course_get_activities_courses_limit"] or None)
 		]
 		activities = {}
-		for batch in (courses[i : i + 16] for i in range(0, len(courses), 16)):
+		nworkers = self.config["chaoxing_course_get_activities_workers"]
+		for batch in (courses[i : i + nworkers] for i in range(0, len(courses), nworkers)):
 			threads = (
 				Thread(target = _get_course_activities, kwargs = {
 					"course": batch[i],
