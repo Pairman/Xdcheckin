@@ -4,11 +4,26 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- Checkin start time and end time will now be displayed.
+- (Module) New config ```chaoxing_course_get_activities_workers``` for workers count for xdcheckin.core.chaoxing.Chaoxing().course_get_activities()
+- (Module) Add ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_location_log()``` which returns a list of checkin locations submitted by others.
+
+### Fixed
+
+- Further some activities not fetched due to Chaoxing's anti spamming
+
+### Changed
+
+- (Module) Remove config ```chaoxing_checkin_location_address_override``` with its functionality taken by ```chaoxing_checkin_location_address_override_maxlen```.
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_location()``` will not call ```xdcheckin.core.chaoxing.Chaoxing().checkin_format_location()``` automatically now.
+
 ## [1.4.1] - 2024-03-23
 
 ### Added
 
-- (Module) Introduce the new activities fetching API as the default: xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities_ppt(). 
+- (Module) Introduce the new activities fetching API as the default: xdcheckin.core.chaoxing.Chaoxing().course_get_course_activities_ppt().
 
 ### Fixed
 
@@ -16,7 +31,7 @@ Changelog for Xdcheckin.
 
 ### Changed
 
-- (Module) xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities() has been renamed to xdcheckin.core.chaoxing.Chaoxing.course_get_course_activities_v2() and currently unused.
+- (Module) xdcheckin.core.chaoxing.Chaoxing().course_get_course_activities() has been renamed to xdcheckin.core.chaoxing.Chaoxing().course_get_course_activities_v2() and currently unused.
 
 ## [1.3.10] - 2024-03-23
 
@@ -45,7 +60,7 @@ Changelog for Xdcheckin.
 
 ### Added
 
-- (Module) Add xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() to format checkin location based on config. Called automatically in xdcheckin.core.chaoxing.Chaoxing.checkin_get_location().
+- (Module) Add xdcheckin.core.chaoxing.Chaoxing().checkin_format_location() to format checkin location based on config. Called automatically in xdcheckin.core.chaoxing.Chaoxing().checkin_get_location().
 
 ### Fixed
 
@@ -54,7 +69,7 @@ Changelog for Xdcheckin.
 ### Changed
 
 - Revert location fetching logic for location checkin due to Chaoxing API restabilization. This should provide more accuracy for location checkin.
-- (Module) xdcheckin.core.chaoxing.Chaoxing.checkin_do_presign() now returns checkin location on success. You should call xdcheckin.core.chaoxing.Chaoxing.checkin_format_location() manually then.
+- (Module) xdcheckin.core.chaoxing.Chaoxing().checkin_do_presign() now returns checkin location on success. You should call xdcheckin.core.chaoxing.Chaoxing().checkin_format_location() manually then.
 
 ## [1.3.6] - 2024-03-15
 
