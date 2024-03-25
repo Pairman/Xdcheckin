@@ -177,7 +177,7 @@ def create_server(config: dict = {}):
 			activities = chaoxing.course_get_activities()
 			res = make_response(dumps(activities))
 			res.status_code = 200
-		except Exception as e:
+		except Exception:
 			res = make_response("{}")
 			res.status_code = 500
 		finally:
