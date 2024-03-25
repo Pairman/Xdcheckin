@@ -47,6 +47,8 @@ class Chaoxing:
 			return
 		self.config.update(config)
 		self.requests_session = CachedSession(backend = "memory")
+		for adapter in self.requests_session.adapters.values():
+			adapter._pool_maxsize = 32
 		account = {"username": username, "password": password, "cookies": cookies}
 		if cookies:
 			self.name, self.cookies, self.logined = self.login_cookies(account = account).values()
@@ -531,24 +533,24 @@ class Chaoxing:
 			course_activities = func(course = course)
 			if course_activities:
 				activities[course["class_id"]] = course_activities
-		courses = [
-			{
-				"course_id": self.courses[class_id]["course_id"],
-				"class_id": class_id
-			} for class_id in islice(iter(self.courses), self.config["chaoxing_course_get_activities_courses_limit"] or None)
-		]
 		activities = {}
 		nworkers = self.config["chaoxing_course_get_activities_workers"]
-		for batch in (courses[i : i + nworkers] for i in range(0, len(courses), nworkers)):
-			threads = (
+		ncourses = min(self.config["chaoxing_course_get_activities_courses_limit"], len(self.courses))
+		courses = islice(self.courses.values(), ncourses)
+		threads = [
+			[
 				Thread(target = _get_course_activities, kwargs = {
-					"course": batch[i],
-					"func": self.course_get_course_activities_v2 if i % 2 else self.course_get_course_activities_ppt
-				}) for i in range(len(batch))
-			)
-			for thread in threads:
+					"course": next(courses),
+					"func": self.course_get_course_activities_v2 if j % 2 else self.course_get_course_activities_ppt
+				})
+				for j in range(i, min(i + nworkers, ncourses))
+			]
+			for i in range(0, ncourses, nworkers)
+		]
+		for batch in threads:
+			for thread in batch:
 				thread.start()
-			for thread in threads:
+			for thread in batch:
 				thread.join()
 		return activities
 

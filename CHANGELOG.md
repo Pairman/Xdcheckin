@@ -6,7 +6,7 @@ Changelog for Xdcheckin.
 
 ### Added
 
-- Checkin start time and end time will now be displayed.
+- Checkin's activity ID, start time and end time will now be displayed.
 - (Module) New config ```chaoxing_course_get_activities_workers``` for workers count for xdcheckin.core.chaoxing.Chaoxing().course_get_activities()
 - (Module) Add ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_location_log()``` which returns a list of checkin locations submitted by others.
 

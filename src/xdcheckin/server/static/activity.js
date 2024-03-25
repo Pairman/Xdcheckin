@@ -14,16 +14,14 @@ async function getActivities() {
 		}));
 		course_activities.forEach(a => {
 			let type = a.type == "2" ? `Qrcode` : `Location`;
-			let ts = a.time_start.slice(a.time_start.indexOf(' ') +
-						    1);
-			let te = a.time_end.slice(a.time_end.indexOf(' ') + 1);
 			let b = newElement("button", {
 				id: `chaoxing-activity-${a.active_id}-button`,
 				disabled: a.type == "2",
 				onclick: () => chaoxingCheckinLocationWrapper(a,
 									  b.id),
-				innerText: `${a.name} (${type}, ${ts}, ${te}` +
-					   `, ${a.time_left})`
+				innerText: `${a.name} (${type}, ` +
+					   `${a.active_id}, ${a.time_start}, ` +
+					   `${a.time_end}, ${a.time_left})`
 			});
 			e.appendChild(b);
 		});
