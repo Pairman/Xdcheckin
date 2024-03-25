@@ -644,14 +644,14 @@ class Chaoxing:
 		:return: Checkin location containing address, latitude, longitude, range and ranged option.
 		"""
 		locations = self.course_get_location_log(course = course)
-		location_new = locations.get(activity["active_id"]) or next(iter(locations.values())) if locations else {
+		location = locations.get(activity["active_id"]) or next(iter(locations.values())) if locations else {
 				"latitude": -1,
 				"longitude": -1,
 				"address": "",
 				"ranged": "",
 				"range": ""
 			}
-		return location_new
+		return location
 
 	def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
 		"""Do checkin analysis.
