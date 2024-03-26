@@ -14,14 +14,32 @@ async function getActivities() {
 		}));
 		course_activities.forEach(a => {
 			let type = a.type == "2" ? `Qrcode` : `Location`;
+			let ts = activity.time_start, te = activity.time_end;
+			let ts_y = ts ? ts.slice(0, 4) : "????";
+			let ts_md = ts ? ts.slice(5, 10) : "??-??";
+			let ts_hm = ts ? ts.slice(11, 16) : "??:??";
+			let te_y = te ? te.slice(0, 4) : "????";
+			let te_md = te ? te.slice(5, 10) : "??-??";
+			let te_hm = te ? te.slice(11, 16) : "??:??";
+			ts = "", te = "";
+			if (ts_y != te_y) {
+				ts += `${ts_y}-`;
+				te += `${te_y}-`;
+			}
+			if (ts_y != te_y || ts_md != te_md) {
+				ts += `${ts_md} `;
+				te += `${te_md} `;
+			}
+			ts += ts_hm;
+			te += te_hm;
 			let b = newElement("button", {
 				id: `chaoxing-activity-${a.active_id}-button`,
 				disabled: a.type == "2",
 				onclick: () => chaoxingCheckinLocationWrapper(a,
 									  b.id),
 				innerText: `${a.name} (${type}, ` +
-					   `${a.active_id}, ${a.time_start}, ` +
-					   `${a.time_end}, ${a.time_left})`
+					   `${a.active_id.slice(-4)}, ` +
+					   `${ts}, ${te})`
 			});
 			e.appendChild(b);
 		});
