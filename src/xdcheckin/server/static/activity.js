@@ -15,7 +15,7 @@ async function getActivities() {
 		course_activities.forEach(a => {
 			let type = a.type == "2" ? `Qrcode` : `Location`;
 			let ts = activity.time_start;
-			let te = activity.time_end;
+			let te = activity.time_end || "????-??-?? ??:??";
 			let ts_y = ts.slice(0, 4);
 			let ts_md = ts.slice(5, 10);
 			let ts_hm = ts.slice(11, 16);
