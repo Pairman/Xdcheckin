@@ -14,13 +14,14 @@ async function getActivities() {
 		}));
 		course_activities.forEach(a => {
 			let type = a.type == "2" ? `Qrcode` : `Location`;
-			let ts = activity.time_start, te = activity.time_end;
-			let ts_y = ts ? ts.slice(0, 4) : "????";
-			let ts_md = ts ? ts.slice(5, 10) : "??-??";
-			let ts_hm = ts ? ts.slice(11, 16) : "??:??";
-			let te_y = te ? te.slice(0, 4) : "????";
-			let te_md = te ? te.slice(5, 10) : "??-??";
-			let te_hm = te ? te.slice(11, 16) : "??:??";
+			let ts = activity.time_start;
+			let te = activity.time_end;
+			let ts_y = ts.slice(0, 4);
+			let ts_md = ts.slice(5, 10);
+			let ts_hm = ts.slice(11, 16);
+			let te_y = te.slice(0, 4);
+			let te_md = te.slice(5, 10);
+			let te_hm = te.slice(11, 16);
 			ts = "", te = "";
 			if (ts_y != te_y) {
 				ts += `${ts_y}-`;
