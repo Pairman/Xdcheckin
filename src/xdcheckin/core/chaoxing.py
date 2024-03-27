@@ -609,7 +609,7 @@ class Chaoxing:
 				"latitude": _randomness(location_new["latitude"]),
 				"longitude": _randomness(location_new["longitude"])
 			})
-		if len(location["address"]) < self.config["chaoxing_checkin_location_address_override_maxlen"]:
+		if len(location_new["address"]) < self.config["chaoxing_checkin_location_address_override_maxlen"]:
 			location_new["address"] = location["address"]
 		return location_new
 
