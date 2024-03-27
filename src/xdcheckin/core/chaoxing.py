@@ -406,13 +406,15 @@ class Chaoxing:
 			"courseType": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 86400)
-		matches = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"", res.text, DOTALL)
+		matches = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"(?:.*?开课时间：(.*?)～(.*?)</p>)?", res.text, DOTALL)
 		return {
 			match[1]: {
 				"class_id": match[1],
 				"course_id": match[0],
 				"name": match[2],
 				"teacher": match[3].split("，")
+				"time_start": match[4],
+				"time_end": match[5]
 			} for match in matches
 		}
 
