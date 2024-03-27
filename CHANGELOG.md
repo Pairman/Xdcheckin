@@ -7,11 +7,11 @@ Changelog for Xdcheckin.
 ### Added
 
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().courses_get_courses()``` now contains course status, start and end time.
-- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_details()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_pptactiveinfo()``` won't stringify values anymore.
 
 ### Changed
 
 - Activities fetching will now filter ended courses.
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_details()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_pptactiveinfo()``` won't stringify values anymore.
 
 ## [1.5.2] - 2024-03-27
 
