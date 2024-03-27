@@ -398,22 +398,23 @@ class Chaoxing:
 
 	def course_get_courses(self):
 		"""Get all courses in the root folder.
-		:return: Dictionary of class IDs to course containing course IDs, names and teachers.
+		:return: Dictionary of class IDs to course containing course IDs, names, teachers, status, start and end time.
 		"""
 		url = "https://mooc1-1.chaoxing.com/visit/courselistdata"
 		params = {
 			"courseType": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 86400)
-		matches = findall(r"courseId=\"(.*?)\" clazzId=\"(.*?)\".*?title=\"(.*?)\".*?title=\".*?\".*?title=\"(.*?)\"(?:.*?开课时间：(.*?)～(.*?)</p>)?", res.text, DOTALL)
+		matches = findall(r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title=\"(.*?)\".*?title.*?title=\"(.*?)\"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?", res.text, DOTALL)
 		return {
 			match[1]: {
 				"class_id": match[1],
 				"course_id": match[0],
-				"name": match[2],
-				"teacher": match[3].split("，"),
-				"time_start": match[4],
-				"time_end": match[5]
+				"name": match[3],
+				"teacher": match[4].split("，"),
+				"status": int(bool(match[2])),
+				"time_start": match[5],
+				"time_end": match[6]
 			} for match in matches
 		}
 
@@ -451,14 +452,14 @@ class Chaoxing:
 			"courseId": self.course_get_course_id(course = course),
 			"classId": course["class_id"]
 		}
-		res = self.get(url = url, params = params, expire_after = 600)
+		res = self.get(url = url, params = params, expire_after = 1800)
 		data = res.json().get("data") or {}
 		return {
 			location["activeid"]: {
 				"latitude": location["latitude"],
 				"longitude": location["longitude"],
 				"address": location["address"],
-				"ranged": int(location["locationrange"]),
+				"ranged": 1,
 				"range": int(location["locationrange"])
 			} for location in data
 		}
@@ -468,7 +469,7 @@ class Chaoxing:
 	):
 		"""Get activities of a course via V2 API.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
-		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time.
+		:return: List of dictionaries of ongoing activities with type, name, activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
@@ -495,7 +496,7 @@ class Chaoxing:
 	):
 		"""Get activities of a course via PPT API.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
-		:return: List of dictionaries of ongoing activities with type, name, activity ID and remaining time.
+		:return: List of dictionaries of ongoing activities with type, name, activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/ppt/activeAPI/taskactivelist"
 		params = {
@@ -516,12 +517,11 @@ class Chaoxing:
 				"time_left": activity["nameFour"]
 			}
 			details = self.checkin_get_details(activity = activity_new)
-			if not details["otherId"] in ("2", "4"):
+			if not details["otherId"] in (2, 4):
 				continue
-			match = search(r"'time': (.*?),", details["endTime"])
 			activity_new.update({
-				"type": details["otherId"],
-				"time_end": str(datetime.fromtimestamp(int(match.group(1)) // 1000)) if match and match.group(1) else ""
+				"type": str(details["otherId"]),
+				"time_end": str(datetime.fromtimestamp(details["endTime"]["time"] // 1000))
 			})
 			activities.append(activity_new)
 		return activities
@@ -535,7 +535,6 @@ class Chaoxing:
 			if course_activities:
 				activities[course["class_id"]] = course_activities
 		activities = {}
-		time_now = datetime.now()
 		nworkers = self.config["chaoxing_course_get_activities_workers"]
 		ncourses = min(self.config["chaoxing_course_get_activities_courses_limit"], len(self.courses))
 		courses = tuple(self.courses.values())[: ncourses]
@@ -545,7 +544,7 @@ class Chaoxing:
 					"course": courses[j],
 					"func": self.course_get_course_activities_v2 if j % 2 else self.course_get_course_activities_ppt
 				})
-				for j in range(i, min(i + nworkers, ncourses)) if not courses[j]["time_end"] or datetime.strptime(courses[j]["time_end"], "%Y-%m-%d") > time_now
+				for j in range(i, min(i + nworkers, ncourses)) if courses[j]["status"]
 			]
 			for i in range(0, ncourses, nworkers)
 		]
@@ -559,7 +558,7 @@ class Chaoxing:
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details.
 		:param activity: Activity ID in dictionary.
-		:return: Checkin details including class ID and MSG code on success.
+		:return: Checkin details including class ID on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {
@@ -567,27 +566,19 @@ class Chaoxing:
 			"type": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 60)
-		data = res.json()
-		return {
-			key: str(val) if not val is None else ""
-			for key, val in data.items()
-		}
+		return res.json()
 
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Get PPT acitvity info.
 		:param active_id: Activity ID in dictionary.
-		:return: Checkin PPT activity info including ranged and Qrcode refreshing option on success.
+		:return: Checkin PPT activity info including class ID and ranged option on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {
 			"activeId": activity["active_id"]
 		}
 		res = self.get(url = url, params = params, expire_after = 60)
-		data = res.json()["data"]
-		return {
-			key: str(val) if not val is None else ""
-			for key, val in data.items()
-		}
+		return res.json()["data"]
 
 	def checkin_format_location(
 		self,
@@ -631,8 +622,8 @@ class Chaoxing:
 				"latitude": location["latitude"],
 				"longitude": location["longitude"],
 				"address": location["title"],
-				"ranged": "",
-				"range": ""
+				"ranged": 0,
+				"range": 0
 			} for location in data
 		]
 
@@ -650,8 +641,8 @@ class Chaoxing:
 				"latitude": -1,
 				"longitude": -1,
 				"address": "",
-				"ranged": "",
-				"range": ""
+				"ranged": 0,
+				"range": 0
 			}
 		return location
 
@@ -672,7 +663,7 @@ class Chaoxing:
 			"code": ""
 		}
 		res1 = self.get(url = url1, params = params1, expire_after = 1800)
-		params2["code"] = search(r"code=\'\+\'(.*?)\'", res1.text).group(1)
+		params2["code"] = search(r"([0-9a-f]{32})", res1.text).group(1)
 		res2 = self.get(url = url2, params = params2, expire_after = 1800)
 		return res2.text == "success"
 
@@ -701,7 +692,7 @@ class Chaoxing:
 		res = self.get(url = url, params = params)
 		if res.status_code != 200:
 			return 0
-		match = search(r"ifopenAddress\" value=\"(.*?)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(.*?)\".*?locationLongitude\" value=\"(.*?)\".*?locationRange\" value=\"(.*?)米)?|(zsign_success)", res.text, DOTALL)
+		match = search(r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?|(zsign_success)", res.text, DOTALL)
 		if match:
 			if match.group(6):
 				return 2
@@ -748,12 +739,12 @@ class Chaoxing:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
 			info = self.checkin_get_details(activity = activity)
-			assert info["status"] == "1" and info["isDelete"] == "0", "Activity ended or deleted."
-			presign = self.checkin_do_presign(activity = activity, course = {"class_id": info["clazzId"]})
+			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
+			presign = self.checkin_do_presign(activity = activity, course = {"class_id": str(info["clazzId"])})
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), dumps(presign)}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if presign["ranged"] == 1:
+			if presign["ranged"]:
 				location_new = self.checkin_format_location(location = location, location_new = presign)
 				ranged = 1
 			else:
@@ -800,20 +791,20 @@ class Chaoxing:
 			"fid": self.cookies.get("fid") or 0,
 			"appType": 15
 		}
+		location_new = {}
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
+			thread_location = Thread(target = _get_location)
+			thread_location.start()
 			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == "1" and info["isdelete"] == "0", "Activity ended or deleted."
-			course, ranged = {"class_id": info["clazzid"]}, info["ifopenAddress"]
-			if ranged == "1":
-				location_new, thread_location = {}, Thread(target = _get_location)
-				thread_location.start()
+			assert info["status"] == 2 and not info["isdelete"], "Activity ended or deleted."
+			course = {"class_id": str(info["clazzid"])}
 			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
 			if presign == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if ranged == "1":
+			if info["ifopenAddress"]:
 				thread_location.join()
 				params["location"] = str(location_new)
 			else:
@@ -840,7 +831,7 @@ class Chaoxing:
 		"""
 		try:
 			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url, dumps(location)}"
-			match = search(r"id=(.*?)&.*?enc=(.*?)&", url)
+			match = search(r"id=(\d+).*?([0-9A-F]{32})", url)
 			return self.checkin_checkin_qrcode(activity = {
 				"active_id": match.group(1),
 				"enc": match.group(2)
