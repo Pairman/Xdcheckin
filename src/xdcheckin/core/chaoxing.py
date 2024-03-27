@@ -4,7 +4,6 @@ from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad
 from datetime import datetime
-from itertools import islice
 from json import dumps
 from random import choice, uniform
 from re import findall, search, DOTALL
