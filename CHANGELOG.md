@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.5.2] - 2024-03-27
+
+### Fixed
+
+- Fix location address override not working.
+
 ## [1.5.1] - 2024-03-26
 
 ### Added
@@ -385,7 +391,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.5.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...main
+[1.5.2]: https://github.com/Pairman/Xdcheckin/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/Pairman/Xdcheckin/compare/1.4.1...1.5.1
 [1.4.1]: https://github.com/Pairman/Xdcheckin/compare/1.3.10...1.4.1
 [1.3.10]: https://github.com/Pairman/Xdcheckin/compare/1.3.9...1.3.10
