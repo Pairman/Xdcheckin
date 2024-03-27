@@ -412,7 +412,7 @@ class Chaoxing:
 				"class_id": match[1],
 				"course_id": match[0],
 				"name": match[2],
-				"teacher": match[3].split("，")
+				"teacher": match[3].split("，"),
 				"time_start": match[4],
 				"time_end": match[5]
 			} for match in matches
