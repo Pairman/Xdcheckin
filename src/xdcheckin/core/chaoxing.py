@@ -536,16 +536,17 @@ class Chaoxing:
 			if course_activities:
 				activities[course["class_id"]] = course_activities
 		activities = {}
+		time_now = datetime.now()
 		nworkers = self.config["chaoxing_course_get_activities_workers"]
 		ncourses = min(self.config["chaoxing_course_get_activities_courses_limit"], len(self.courses))
-		courses = islice(self.courses.values(), ncourses)
+		courses = tuple(self.courses.values())[: ncourses]
 		threads = [
 			[
 				Thread(target = _get_course_activities, kwargs = {
-					"course": next(courses),
+					"course": courses[j],
 					"func": self.course_get_course_activities_v2 if j % 2 else self.course_get_course_activities_ppt
 				})
-				for j in range(i, min(i + nworkers, ncourses))
+				for j in range(i, min(i + nworkers, ncourses)) if not courses[j]["time_end"] or datetime.strptime(courses[j]["time_end"], "%Y-%m-%d") > time_now
 			]
 			for i in range(0, ncourses, nworkers)
 		]
