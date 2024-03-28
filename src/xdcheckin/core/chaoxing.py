@@ -798,7 +798,7 @@ class Chaoxing:
 			thread_location = Thread(target = _get_location)
 			thread_location.start()
 			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == 2 and not info["isdelete"], "Activity ended or deleted."
+			assert info["status"] == 1 and not info["isdelete"], "Activity ended or deleted."
 			course = {"class_id": str(info["clazzid"])}
 			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
