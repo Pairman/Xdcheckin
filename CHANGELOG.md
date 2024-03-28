@@ -4,9 +4,15 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [1.5.3] - 2024-03-28
+
 ### Added
 
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().courses_get_courses()``` now contains course status, start and end time.
+
+### Fixed
+
+- Fix activity not properly shown.
 
 ### Changed
 
@@ -400,7 +406,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...main
+[1.5.3]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/Pairman/Xdcheckin/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/Pairman/Xdcheckin/compare/1.4.1...1.5.1
 [1.4.1]: https://github.com/Pairman/Xdcheckin/compare/1.3.10...1.4.1

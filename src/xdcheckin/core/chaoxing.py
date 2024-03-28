@@ -412,7 +412,7 @@ class Chaoxing:
 				"course_id": match[0],
 				"name": match[3],
 				"teacher": match[4].split("，"),
-				"status": int(bool(match[2])),
+				"status": int(not bool(match[2])),
 				"time_start": match[5],
 				"time_end": match[6]
 			} for match in matches
@@ -791,15 +791,14 @@ class Chaoxing:
 			"fid": self.cookies.get("fid") or 0,
 			"appType": 15
 		}
-		location_new = {}
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
-			thread_location = Thread(target = _get_location)
-			thread_location.start()
 			info = self.checkin_get_pptactiveinfo(activity = activity)
 			assert info["status"] == 1 and not info["isdelete"], "Activity ended or deleted."
-			course = {"class_id": str(info["clazzid"])}
+			course, location_new = {"class_id": str(info["clazzid"])}, {}
+			thread_location = Thread(target = _get_location)
+			thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
 			if presign == 2:
