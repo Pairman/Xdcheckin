@@ -619,10 +619,10 @@ class Chaoxing:
 		data = res.json()["list"]
 		return [
 			{
-				"latitude": location["latitude"],
-				"longitude": location["longitude"],
-				"address": location["title"],
-				"ranged": 0,
+				"latitude": location.get("latitude"),
+				"longitude": location.get("longitude"),
+				"address": location.get("title"),
+				"ranged": int(not location.get("latitude") is None),
 				"range": 0
 			} for location in data
 		]
