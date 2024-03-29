@@ -6,7 +6,7 @@ from json import loads, dumps
 from os import listdir, remove, makedirs
 from os.path import exists, join
 from PIL.Image import open
-from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import decode, ZBarSymbol
 from requests import get, post
 from tempfile import gettempdir
 from urllib3 import disable_warnings
@@ -208,7 +208,7 @@ def create_server(config: dict = {}):
 			assert img_src, "No image given."
 			with open(BytesIO(img_src.read())) as img:
 				assert img.height and img.width, "Empty image."
-				urls = decode(img)
+				urls = decode(img, symbols = [ZBarSymbol.QRCODE])
 			assert urls, "No Qrcode detected."
 			urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
 			assert urls, "No checkin URL found."
