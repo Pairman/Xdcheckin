@@ -565,12 +565,12 @@ class Chaoxing:
 			"activePrimaryId": activity["active_id"],
 			"type": 1
 		}
-		res = self.get(url = url, params = params, expire_after = 60)
+		res = self.get(url = url, params = params, expire_after = 300)
 		return res.json()
 
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Get PPT acitvity info.
-		:param active_id: Activity ID in dictionary.
+		:param activity: Activity ID in dictionary.
 		:return: Checkin PPT activity info including class ID and ranged option on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
@@ -667,6 +667,30 @@ class Chaoxing:
 		res2 = self.get(url = url2, params = params2, expire_after = 1800)
 		return res2.text == "success"
 
+	def checkin_get_captcha(self, captcha = {"captcha_id": ""}):
+		"""Get CAPTCHA for checkin.
+		:param captcha_id: CAPTCHA ID in dictionary.
+		:return: CAPTCHA with CAPTCHA images and token.
+		"""
+		return {
+			**captcha,
+			"big_img_src": "",
+			"small_img_src": "",
+			"token": ""
+		}
+
+	def checkin_submit_captcha(
+		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
+	):
+		"""Submit and verify CAPTCHA.
+		:param captcha: CAPTCHA ID, token and verification code (slider offset) in dictionary.
+		:return: CAPTCHA with validation code on success.
+		"""
+		return {
+			**captcha,
+			"validate": ""
+		}
+
 	def checkin_do_presign(
 		self, activity: dict = {"active_id": ""},
 		course: dict ={"course_id": "", "class_id": ""}
@@ -674,7 +698,7 @@ class Chaoxing:
 		"""Do checkin pre-sign.
 		:param activity: Activity ID in dictionary.
 		:param course: Course ID (will be filled if not given) and class ID in dictionary.
-		:return: 2 if checked-in, otherwise checkin location containing address, latitude, longitude, range and ranged option on success.
+		:return: Presign state (2 if checked-in and 1 on success), checkin location and CAPTCHA.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
@@ -689,77 +713,108 @@ class Chaoxing:
 			"uid": self.cookies["UID"],
 			"ut": "s"
 		}
-		res = self.get(url = url, params = params)
-		if res.status_code != 200:
-			return 0
-		match = search(r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?|(zsign_success)", res.text, DOTALL)
-		if match:
-			if match.group(6):
-				return 2
-			if match.group(1) == "1":
-				return {
-					"latitude": float(match.group(3) or -1),
-					"longitude": float(match.group(4) or -1),
-					"address": match.group(2) or "",
-					"ranged": int(match.group(1)),
-					"range": int(match.group(5) or 0)
-				}
-		return {
+		location = {
 			"latitude": -1,
 			"longitude": -1,
 			"address": "",
 			"ranged": 0,
 			"range": 0
+		},
+		captcha = {
+			"captcha_id": ""
 		}
+		res = self.get(url = url, params = params)
+		if res.status_code != 200:
+			return 0, location, captcha
+		state = 1
+		match = search(r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?.*?captchaId: '([0-9A-Za-z]{32})|(zsign_success)", res.text, DOTALL)
+		if match:
+			if match.group(7):
+				state = 2
+			if match.group(1) == "1":
+				location.update({
+					"latitude": float(match.group(3) or -1),
+					"longitude": float(match.group(4) or -1),
+					"address": match.group(2) or "",
+					"ranged": int(match.group(1)),
+					"range": int(match.group(5) or 0)
+				})
+				captcha["captcha_id"] = match.group(6)
+		return state, location, captcha
+
+	def checkin_do_sign(
+		self, activity: dict = {"active_id": "", "type": ""},
+		location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": 0}
+	):
+		"""Do checkin sign.
+		:param activity: Activity ID and type in dictionary.
+		:param location: Address, latitude, longitude and ranged option in dictionary.
+		:return: Sign state (True on success) and success / error message.
+		"""
+		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
+		params = {
+			"name": self.name,
+			"uid": self.cookies["_uid"],
+			"fid": self.cookies.get("fid") or 0,
+			"activeId": activity["active_id"],
+			"enc": activity.get("enc") or "",
+			"address": "",
+			"latitude": -1,
+			"longitude": -1,
+			"location": "",
+			"ifTiJiao": 0,
+			"appType": 15,
+			"clientip": "",
+			"validate": "",
+		}
+		try:
+			if activity["type"] == "4":
+				params.update({
+					"address": location["address"],
+					"latitude": location["latitude"],
+					"longitude": location["longitude"],
+					"ifTiJiao": location["ranged"]
+				})
+			elif activity["type"] == "2":
+				params.update({
+					"location": str(location),
+					"ifTiJiao": location["ranged"]
+				} if location["ranged"] else {
+					"address": location["address"],
+					"latitude": location["latitude"],
+					"longitude": location["longitude"]
+				})
+			res = self.get(url = url, params = params)
+			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(params), res.text}"
+			return True, f"Checkin success. ({res.text})"
+		except Exception as e:
+			return False, str(e)
 
 	def checkin_checkin_location(
 		self, activity: dict = {"active_id": ""},
 		location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Location checkin.
-		:param active_id: Activity ID in dictionary.
+		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Overriden by server-side location if any.
-		:return: True and error message on success, otherwise False and error message.
+		:return: Checkin state (True on success) and success / error message.
 		"""
-		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		params = {
-			"name": self.name,
-			"address": "",
-			"activeId": activity["active_id"],
-			"uid": self.cookies["_uid"],
-			"clientip": "",
-			"latitude": -1,
-			"longitude": -1,
-			"fid": self.cookies.get("fid") or 0,
-			"appType": 15,
-			"ifTiJiao": 0,
-			"validate": ""
-		}
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
 			info = self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": str(info["clazzId"])})
-			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), dumps(presign)}"
-			if presign == 2:
+			assert presign[0], f"Presign failure. {dumps(activity), dumps(location), dumps(presign)}"
+			if presign[0] == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if presign["ranged"]:
-				location_new = self.checkin_format_location(location = location, location_new = presign)
-				ranged = 1
-			else:
-				location_new = location
-				ranged = 0
-			params.update({
-				"address": location_new["address"],
-				"latitude": location_new["latitude"],
-				"longitude": location_new["longitude"],
-				"ifTiJiao": ranged
-			})
+			location_new = {
+				**(self.checkin_format_location(location = location, location_new = presign[1]) if presign[1]["ranged"] else location),
+				"ranged": presign[1]["ranged"]
+			}
 			thread_analysis.join()
-			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(info), dumps(presign), dumps(location_new), dumps(params), res.text}"
-			return True, f"Checkin success. ({res.text})"
+			result = self.checkin_do_sign(activity = {**activity, "type": "4"}, location = location_new)
+			return result[0], result[1]
 		except Exception as e:
 			return False, str(e)
 
@@ -768,7 +823,7 @@ class Chaoxing:
 		location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Qrcode checkin.
-		:param active_id: Activity ID and ENC code in dictionary.
+		:param activity: Activity ID and ENC code in dictionary.
 		:param location: Same as checkin_checkin_location().
 		:return: Same as checkin_checkin_location().
 		"""
@@ -778,44 +833,25 @@ class Chaoxing:
 				location = location,
 				location_new = self.checkin_get_location(activity = activity, course = course)
 			)
-		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		params = {
-			"enc": activity["enc"],
-			"name": self.name,
-			"activeId": activity["active_id"],
-			"uid": self.cookies["_uid"],
-			"clientip": "",
-			"location": "",
-			"latitude": -1,
-			"longitude": -1,
-			"fid": self.cookies.get("fid") or 0,
-			"appType": 15
-		}
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
 			thread_analysis.start()
-			info = self.checkin_get_pptactiveinfo(activity = activity)
-			assert info["status"] == 1 and not info["isdelete"], "Activity ended or deleted."
-			course, location_new = {"class_id": str(info["clazzid"])}, {}
+			info = self.checkin_get_details(activity = activity)
+			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
+			course, location_new = {"class_id": str(info["clazzId"])}, {}
 			thread_location = Thread(target = _get_location)
 			thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
-			assert presign, f"Presign failure. {dumps(activity), dumps(location), dumps(info), presign}"
-			if presign == 2:
+			assert presign[0], f"Presign failure. {dumps(activity), dumps(location), dumps(presign)}"
+			if presign[0] == 2:
 				return True, "Checkin success. (Already checked in.)"
-			if info["ifopenAddress"]:
-				thread_location.join()
-				params["location"] = str(location_new)
-			else:
-				location_new = location
-				params.update({
-					"latitude": location_new["latitude"],
-					"longitude": location_new["longitude"]
-				})
+			location_new = {
+				**(thread_location.join() or self.checkin_format_location(location = location, location_new = location_new) if presign[1]["ranged"] else location),
+				"ranged": presign[1]["ranged"]
+			}
 			thread_analysis.join()
-			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(info), dumps(presign), dumps(location_new), dumps(params), res.text}"
-			return True, f"Checkin success. ({res.text})"
+			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
+			return result[0], result[1]
 		except Exception as e:
 			return False, str(e)
 

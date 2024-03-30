@@ -4,6 +4,14 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- Add support for check-ins with CAPTCHA.
+
+### Changed
+
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_presign()``` now returns presign state, location and CAPTCHA ID on success.
+
 ## [1.5.3] - 2024-03-28
 
 ### Added
