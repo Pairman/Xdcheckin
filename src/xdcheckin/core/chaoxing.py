@@ -749,7 +749,7 @@ class Chaoxing:
 		"""Do checkin sign.
 		:param activity: Activity ID and type in dictionary.
 		:param location: Address, latitude, longitude and ranged option in dictionary.
-		:return: Sign state (True on success) and success / error message.
+		:return: Sign state (True on success), success / error message and payload.
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = {
@@ -786,9 +786,9 @@ class Chaoxing:
 				})
 			res = self.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(params), res.text}"
-			return True, f"Checkin success. ({res.text})"
+			return True, f"Checkin success. ({res.text})", params
 		except Exception as e:
-			return False, str(e)
+			return False, str(e), params
 
 	def checkin_checkin_location(
 		self, activity: dict = {"active_id": ""},
@@ -797,7 +797,7 @@ class Chaoxing:
 		"""Location checkin.
 		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Overriden by server-side location if any.
-		:return: Checkin state (True on success) and success / error message.
+		:return: Checkin state (True on success), success / error message and payload (placeholder).
 		"""
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
@@ -814,9 +814,9 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "4"}, location = location_new)
-			return result[0], result[1]
+			return result
 		except Exception as e:
-			return False, str(e)
+			return False, str(e), {}
 
 	def checkin_checkin_qrcode(
 		self, activity: dict = {"active_id": "", "enc": ""},
@@ -851,9 +851,9 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
-			return result[0], result[1]
+			return result
 		except Exception as e:
-			return False, str(e)
+			return False, str(e), {}
 
 	def checkin_checkin_qrcode_url(
 		self, url: str = "",
@@ -872,4 +872,4 @@ class Chaoxing:
 				"enc": match.group(2)
 			}, location = location)
 		except Exception as e:
-			return False, str(e)
+			return False, str(e), {}

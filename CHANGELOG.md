@@ -11,6 +11,9 @@ Changelog for Xdcheckin.
 ### Changed
 
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_presign()``` now returns presign state, location and CAPTCHA ID on success.
+- (Module) Add ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_captcha()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_verify_captcha()``` to support CAPTCHA verification.
+- (Module) Make ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` standalone to support CAPTCHA verification.
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_location()```, ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode_url()``` now also return payload for ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` to support CAPTCHA verification.
 
 ## [1.5.3] - 2024-03-28
 
