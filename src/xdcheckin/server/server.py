@@ -183,6 +183,61 @@ def create_server(config: dict = {}):
 		finally:
 			return res
 
+	@server.route("/chaoxing/checkin_get_captcha", methods = ["POST"])
+	def chaoxing_checkin_get_captcha():
+		try:
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined
+			data = request.get_json(force = True)
+			assert data["captcha"]
+			captcha = chaoxing.checkin_get_captcha(captcha = data["captcha"])
+			res = make_response(dumps(captcha))
+			res.status_code = 200
+		except Exception:
+			res = make_response("{}")
+			res.status_code = 500
+		finally:
+			return res
+
+	@server.route("/chaoxing/checkin_submit_captcha", methods = ["POST"])
+	def chaoxing_checkin_submit_captcha():
+		try:
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined
+			data = request.get_json(force = True)
+			assert data["captcha"]
+			result = chaoxing.checkin_submit_captcha(captcha = data["captcha"])
+			assert result[0]
+			res = make_response(dumps(result[1]))
+			res.status_code = 200
+		except Exception:
+			res = make_response("{}")
+			res.status_code = 500
+		finally:
+			return res
+
+	@server.route("/chaoxing/checkin_do_sign", methods = ["POST"])
+	def chaoxing_checkin_do_sign():
+		try:
+			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
+			assert chaoxing.logined, "Not logged in."
+			data = request.get_json(force = True)
+			assert data["params"], "No parameters given"
+			result = chaoxing.checkin_do_sign(_params = data["params"])
+			res = make_response(dumps({
+				"msg": f"{result[1]["msg"][: -1]}, {data['params']['activeId']})",
+				"params": result[1]["params"]
+			}))
+		except Exception as e:
+			res = make_response(dumps({
+				"msg": f"Checkin error. ({str(e)})",
+				"params": {}
+			}))
+		finally:
+			res.status_code = 200
+			return res
+						
+
 	@server.route("/chaoxing/checkin_checkin_location", methods = ["POST"])
 	def chaoxing_checkin_checkin_location():
 		try:
@@ -192,9 +247,17 @@ def create_server(config: dict = {}):
 			assert data["activity"]["active_id"], "No activity ID given."
 			data["activity"]["active_id"] = str(data["activity"]["active_id"])
 			result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
-			res = make_response(f"{result[1][: -1]}, {data['activity']['active_id']})")
+			res = make_response(dumps({
+				"msg": f"{result[1]["msg"][: -1]}, {data['activity']['active_id']})",
+				"params": result[1]["params"],
+				"captcha": result[1]["captcha"]
+			}))
 		except Exception as e:
-			res = make_response(f"Checkin error. ({str(e)})")
+			res = make_response(dumps({
+				"msg": f"Checkin error. ({str(e)})",
+				"params": {},
+				"captcha": {}
+			}))
 		finally:
 			res.status_code = 200
 			return res
@@ -213,9 +276,17 @@ def create_server(config: dict = {}):
 			urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
 			assert urls, "No checkin URL found."
 			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
-			res = make_response(f"{result[1][: -1]}, {urls[0]})")
+			res = make_response(dumps({
+				"msg": f"{result[1]["msg"][: -1]}, {urls[0]})",
+				"params": result[1]["params"],
+				"captcha": result[1]["captcha"]
+			}))
 		except Exception as e:
-			res = make_response(f"Checkin error. ({str(e)})")
+			res = make_response(dumps({
+				"msg": f"Checkin error. ({str(e)})",
+				"params": {},
+				"captcha": {}
+			}))
 		finally:
 			res.status_code = 200
 			return res

@@ -767,7 +767,7 @@ class Chaoxing:
 			"address": "",
 			"ranged": 0,
 			"range": 0
-		},
+		}
 		captcha = {
 			"captcha_id": ""
 		}
@@ -792,15 +792,17 @@ class Chaoxing:
 
 	def checkin_do_sign(
 		self, activity: dict = {"active_id": "", "type": ""},
-		location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": 0}
+		location: dict = {"latitude": -1, "longitude": -1, "address": "", "ranged": 0},
+		old_params: dict = {"name": "", "uid": "", "fid": "", "...": "..."}
 	):
 		"""Do checkin sign.
 		:param activity: Activity ID and type in dictionary.
 		:param location: Address, latitude, longitude and ranged option in dictionary.
+		:param prev_params: Reuse previously returned params. Overrides activity and location.
 		:return: Sign state (True on success), success / error message and payload.
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		params = {
+		params = old_params if old_params.get("activeId") else {
 			"name": self.name,
 			"uid": self.cookies["_uid"],
 			"fid": self.cookies.get("fid") or 0,
@@ -816,27 +818,34 @@ class Chaoxing:
 			"validate": "",
 		}
 		try:
-			if activity["type"] == "4":
-				params.update({
-					"address": location["address"],
-					"latitude": location["latitude"],
-					"longitude": location["longitude"],
-					"ifTiJiao": location["ranged"]
-				})
-			elif activity["type"] == "2":
-				params.update({
-					"location": str(location),
-					"ifTiJiao": location["ranged"]
-				} if location["ranged"] else {
-					"address": location["address"],
-					"latitude": location["latitude"],
-					"longitude": location["longitude"]
-				})
+			if not old_params.get("activeId"):
+				if activity["type"] == "4":
+					params.update({
+						"address": location["address"],
+						"latitude": location["latitude"],
+						"longitude": location["longitude"],
+						"ifTiJiao": location["ranged"]
+					})
+				elif activity["type"] == "2":
+					params.update({
+						"location": str(location),
+						"ifTiJiao": location["ranged"]
+					} if location["ranged"] else {
+						"address": location["address"],
+						"latitude": location["latitude"],
+						"longitude": location["longitude"]
+					})
 			res = self.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(params), res.text}"
-			return True, f"Checkin success. ({res.text})", params
+			return True, {
+				"msg": f"Checkin success. ({res.text})",
+				"params": params
+			}
 		except Exception as e:
-			return False, str(e), params
+			return False, {
+				"msg": str(e),
+				"params": params
+			}
 
 	def checkin_checkin_location(
 		self, activity: dict = {"active_id": ""},
@@ -862,9 +871,14 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "4"}, location = location_new)
+			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
-			return False, str(e), {}
+			return False, {
+				"msg": str(e),
+				"params": {},
+				"captcha": {}
+			}
 
 	def checkin_checkin_qrcode(
 		self, activity: dict = {"active_id": "", "enc": ""},
@@ -899,9 +913,14 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
+			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
-			return False, str(e), {}
+			return False, {
+				"msg": str(e),
+				"params": {},
+				"captcha": {}
+			}
 
 	def checkin_checkin_qrcode_url(
 		self, url: str = "",
@@ -920,4 +939,8 @@ class Chaoxing:
 				"enc": match.group(2)
 			}, location = location)
 		except Exception as e:
-			return False, str(e), {}
+			return False, {
+				"msg": str(e),
+				"params": {},
+				"captcha": {}
+			}
