@@ -25,13 +25,13 @@ async function getCurriculum(with_live = false) {
 		let td = tr.appendChild(newElement("td"));
 		td.appendChild(document.createTextNode(lesson.name));
 		td = tr.appendChild(newElement("td"));
-		lesson.teacher.forEach((v, i) => {
+		lesson.teachers.forEach((v, i) => {
 			if (i)
 				td.appendChild(newElement("br"));
-			td.appendChild(document.createTextNode(`${v}`));
+			td.appendChild(document.createTextNode(v));
 		});
 		td = tr.appendChild(newElement("td"));
-		lesson.time.forEach((v, i) => {
+		lesson.times.forEach((v, i) => {
 			if (i)
 				td.appendChild(newElement("br"));
 			let bgn = timetable[v.period_begin - 1].slice(0, 5);
@@ -41,17 +41,22 @@ async function getCurriculum(with_live = false) {
 
 		});
 		td = tr.appendChild(newElement("td"));
-		if (with_live && "livestream" in lesson) {
-			let url = lesson.livestream.url;
-			let name = lesson.location;
+		lesson.locations.forEach((v, i) => {
+			if (i)
+				td.appendChild(newElement("br"));
+			td.appendChild(document.createTextNode(v));
+		});
+		if (!with_live)
+			continue;
+		td = tr.appendChild(newElement("td"));
+		lesson.livestreams.forEach((v, i) => {
+			if (i)
+				td.appendChild(newElement("br"));
 			td.appendChild(newElement("button", {
-				innerText: name,
-				onclick: () => setClassroom(url, name)
+				innerText: v.live_id,
+				onclick: () => setClassroom(v.url, v.live_id)
 			}));
-		}
-		else
-			td.appendChild(document.createTextNode(
-							      lesson.location));
+		});
 	}
 	document.getElementById("curriculum-list-div").appendChild(table);
 	getCurriculum.calling = false;

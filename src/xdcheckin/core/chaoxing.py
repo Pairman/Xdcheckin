@@ -4,13 +4,14 @@ from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad
 from datetime import datetime
-from json import dumps
+from json import loads, dumps
 from random import choice, uniform
 from re import findall, search, DOTALL
 from requests import Response
 from requests.exceptions import RequestException
 from requests_cache.session import CachedSession
 from threading import Thread
+from xdcheckin.util.chaoxing_captcha import generate_secrets
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
@@ -352,10 +353,10 @@ class Chaoxing:
 			lesson = {
 				"course_id": str(lesson["courseId"]),
 				"name": lesson["name"],
-				"location": lesson["location"],
+				"locations": [lesson["location"]],
 				"invite_code": lesson["meetCode"],
-				"teacher": [lesson["teacherName"]],
-				"time":[{
+				"teachers": [lesson["teacherName"]],
+				"times": [{
 					"day": str(lesson["dayOfWeek"]),
 					"period_begin": str(lesson["beginNumber"]),
 					"period_end": str(lesson["beginNumber"] + lesson["length"] - 1)
@@ -364,10 +365,12 @@ class Chaoxing:
 			if not lesson_class_id in curriculum["lessons"]:
 				curriculum["lessons"][lesson_class_id] = lesson
 				return
-			if not lesson["teacher"][0] in curriculum["lessons"][lesson_class_id]["teacher"]:
-				curriculum["lessons"][lesson_class_id]["teacher"].append(lesson["teacher"][0])
-			if not lesson["time"][0] in curriculum["lessons"][lesson_class_id]["time"]:
-				curriculum["lessons"][lesson_class_id]["time"].append(lesson["time"][0])
+			if not lesson["locations"][0] in curriculum["lessons"][lesson_class_id]["locations"]:
+				curriculum["lessons"][lesson_class_id]["locations"].append(lesson["locations"][0])
+			if not lesson["teachers"][0] in curriculum["lessons"][lesson_class_id]["teachers"]:
+				curriculum["lessons"][lesson_class_id]["teachers"].append(lesson["teachers"][0])
+			if not lesson["times"][0] in curriculum["lessons"][lesson_class_id]["times"]:
+				curriculum["lessons"][lesson_class_id]["times"].append(lesson["times"][0])
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
 		params = {
 			"week": week
@@ -389,7 +392,7 @@ class Chaoxing:
 			},
 			"lessons": {}
 		}
-		lessons = data.get("lessonArray", [])
+		lessons = data.get("lessonArray") or []
 		for lesson in lessons:
 			_add_lesson(lesson = lesson)
 			for conflict in lesson.get("conflictLessons") or {}:
@@ -667,28 +670,73 @@ class Chaoxing:
 		res2 = self.get(url = url2, params = params2, expire_after = 1800)
 		return res2.text == "success"
 
-	def checkin_get_captcha(self, captcha = {"captcha_id": ""}):
+	def checkin_get_captcha(self, captcha: dict = {"captcha_id": ""}):
 		"""Get CAPTCHA for checkin.
-		:param captcha_id: CAPTCHA ID in dictionary.
+		:param captcha: CAPTCHA ID in dictionary.
 		:return: CAPTCHA with CAPTCHA images and token.
 		"""
-		return {
+		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
+		params1 = {
+			"callback": "f",
+			"captchaId": captcha["captcha_id"],
+			"_": int(datetime.now().timestamp() * 1000)
+		}
+		res1 = self.get(url = url1, params = params1, expire_after = 300)
+		server_time = search(r"t\":(\d+)", res1.text).group(1)
+		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
+		params2 = {
+			"callback": "f",
+			"captchaId": captcha["captcha_id"],
+			"captchaKey": "",
+			"token": "",
+			"type": "slide",
+			"version": "1.1.16",
+			"referer": "https://mobilelearn.chaoxing.com",
+			"_": int(datetime.now().timestamp() * 1000)
+		}
+		captcha_new = {
 			**captcha,
-			"big_img_src": "",
-			"small_img_src": "",
-			"token": ""
+			"server_time": server_time,
+			"type": "slide"
+		}
+		captcha_key, token = generate_secrets(captcha = captcha_new)
+		params2.update({
+			"captchaKey": captcha_key,
+			"token": token
+		})
+		res2 = self.get(url = url2, params = params2)
+		data2 = loads(res2.text[2 : -1])
+		return {
+			**captcha_new,
+			"token": data2["token"],
+			"big_img_src": data2["imageVerificationVo"]["shadeImage"],
+			"small_img_src": data2["imageVerificationVo"]["cutoutImage"]
 		}
 
 	def checkin_submit_captcha(
 		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
 	):
 		"""Submit and verify CAPTCHA.
-		:param captcha: CAPTCHA ID, token and verification code (slider offset) in dictionary.
+		:param captcha: CAPTCHA ID, and verification code (e.g. slider offset) in dictionary.
 		:return: CAPTCHA with validation code on success.
 		"""
-		return {
+		url = "https://captcha.chaoxing.com/captcha/check/verification/result"
+		params = {
+			"callback": "f",
+			"captchaId": captcha["captcha_id"],
+			"token": captcha["token"],
+			"textClickArr": [{"x": captcha["vcode"]}],
+			"type": "slide",
+			"coordinate": [],
+			"version": "1.1.16",
+			"runEnv": 10,
+			"_": int(datetime.now().timestamp() * 1000)
+		}
+		res = self.get(url = url, params = params)
+		data = loads(res.text[2 : -1])
+		return data["result"], {
 			**captcha,
-			"validate": ""
+			"validate": f"validate_{captcha["captcha_id"]}_{captcha["token"]}"
 		}
 
 	def checkin_do_presign(
@@ -739,7 +787,7 @@ class Chaoxing:
 					"ranged": int(match.group(1)),
 					"range": int(match.group(5) or 0)
 				})
-				captcha["captcha_id"] = match.group(6)
+			captcha["captcha_id"] = match.group(6)
 		return state, location, captcha
 
 	def checkin_do_sign(

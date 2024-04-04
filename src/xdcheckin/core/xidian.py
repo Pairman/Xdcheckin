@@ -250,10 +250,16 @@ class Newesxidian:
 
 	def curriculum_get_curriculum(self):
 		"""Get curriculum with livestream URLs.
-		:return: Chaoxing curriculum with livestream URL, live ID and CCTV device ID for lessons.
+		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
 		def _get_livestream_wrapper(class_id: str = "", live_id: str = ""):
-			curriculum["lessons"][class_id]["livestream"] = self.livestream_get_live_url(livestream = {"live_id": live_id})
+			if not curriculum["lessons"][class_id].get("livestreams"):
+				curriculum["lessons"][class_id]["livestreams"] = []
+			livestream = self.livestream_get_live_url(livestream = {"live_id": live_id})
+			for ls in curriculum["lessons"][class_id]["livestreams"]:
+				if ls["url"] == livestream["url"]:
+					return
+			curriculum["lessons"][class_id]["livestreams"].append(livestream)
 		url = "https://newesxidian.chaoxing.com/frontLive/listStudentCourseLivePage"
 		params = {
 			"fid": 16820,

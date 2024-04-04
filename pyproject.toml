@@ -24,6 +24,7 @@ dependencies = [
 	"flask-session == 0.6.0",
 	"pillow >= 8.4.0",
 	"pycryptodome >= 3.9.4",
+	"pyjsbitwise >= 1.0.1",
 	"pyzbar >= 0.1.8",
 	"requests >= 2.31.0",
 	"requests-cache >= 1.2.0",
@@ -43,6 +44,7 @@ include = [
 	"xdcheckin*",
 	"xdcheckin.core*",
 	"xdcheckin.server*",
+	"xdcheckin.util*",
 ]
 exclude = [
 	"xdcheckin.app*",

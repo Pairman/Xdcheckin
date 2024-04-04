@@ -14,6 +14,11 @@ Changelog for Xdcheckin.
 - (Module) Add ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_captcha()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_verify_captcha()``` to support CAPTCHA verification.
 - (Module) Make ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` standalone to support CAPTCHA verification.
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_location()```, ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode_url()``` now also return payload for ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` to support CAPTCHA verification.
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().curriculum_get_curriculum()```, ```xdcheckin.core.xidian.Newesxidian().curriculum_get_curriculum()``` has their keys renamed to the proper plural forms. Classroom locations and livestreams are now stored in lists to support multiple values.
+
+### Fixed
+
+- Fixed course with multiple classroom locations not properly shown in curriculum.
 
 ## [1.5.3] - 2024-03-28
 
