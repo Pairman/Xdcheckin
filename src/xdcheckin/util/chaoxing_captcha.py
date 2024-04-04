@@ -5,7 +5,7 @@ from random import random
 from zlib import decompress
 from pyjsbitwise import bwnot, bwand, bwor, bwxor, lshift, rshift, urshift
 
-"""For generating two blessed strings.
+"""Generate two blessed strings.
 For some reason I choose to obfuscate this, yet it's simple to deobfuscate.
 Clearsight awaits if you REALLY want to and have the SKILLs.
 """
