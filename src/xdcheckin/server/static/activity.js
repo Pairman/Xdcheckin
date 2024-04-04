@@ -45,58 +45,6 @@ async function getActivities() {
 	}
 	getActivities.calling = false;
 }
-async function chaoxingCheckinLocation(activity) {
-	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
-				`captcha-div`).style.display = "none";
-	let res = await post("/chaoxing/checkin_checkin_location", {
-		"location": g_location,
-		"activity": activity
-	});
-	let data = res.json();
-	if (res.status_code != 200) {
-		alert(`Checkin error. (Backend error, ${res.status_code})`);
-		return;
-	}
-	if (data["msg"].indexOf("validate") != -1) {
-		alert(unescapeUnicode(data["msg"]));
-		return;
-	}
-	chaoxingCheckinCaptcha(data["params"], data["captcha"], "location");
-}
-
-async function chaoxingCheckinLocationWrapper(activity, b_id) {
-	chaoxingCheckinLocation(activity);
-	onclickCooldown(b_id);
-}
-
-async function chaoxingCheckinQrcode(img_src, result_div_id) {
-	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
-				`captcha-div`).style.display = "none";
-	var form = new FormData();
-	form.append("img_src", img_src);
-	form.append("location", localStorage.getItem("location_"));
-	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
-	let data = res.json();
-	document.getElementById(result_div_id).innerText =
-						 unescapeUnicode(data["msg"]) ||
-			   `Checkin error. (Backend error, ${res.status_code})`;
-	if (res.status_code != 200)
-		return;
-	if (data["msg"].indexOf("success") != -1)
-		alert(unescapeUnicode(data["msg"]));
-	else if (data["msg"].indexOf("validate") != -1)
-		chaoxingCheckinCaptcha(data["params"], data["captcha"],
-				       result_div_id.split("-")[0]);
-};
-
-async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
-	if (video.paused)
-		document.getElementById(result_div_id).innerText =
-					     "Checkin error. (No image given.)";
-	else
-		chaoxingCheckinQrcode(await screenshot(video, quality),
-				      result_div_id);
-}
 
 async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 	let res = await post("/chaoxing/checkin_get_captcha", data = {
@@ -153,4 +101,57 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 	s_img.style.left = `${s.value = 0}px`;
 	s_img.src = data.small_img_src;
 	img.src = data.big_img_src;
+}
+
+async function chaoxingCheckinLocation(activity) {
+	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
+				`captcha-div`).style.display = "none";
+	let res = await post("/chaoxing/checkin_checkin_location", {
+		"location": g_location,
+		"activity": activity
+	});
+	let data = res.json();
+	if (res.status_code != 200) {
+		alert(`Checkin error. (Backend error, ${res.status_code})`);
+		return;
+	}
+	if (data["msg"].indexOf("validate") != -1) {
+		alert(unescapeUnicode(data["msg"]));
+		return;
+	}
+	chaoxingCheckinCaptcha(data["params"], data["captcha"], "location");
+}
+
+async function chaoxingCheckinLocationWrapper(activity, b_id) {
+	chaoxingCheckinLocation(activity);
+	onclickCooldown(b_id);
+}
+
+async function chaoxingCheckinQrcode(img_src, result_div_id) {
+	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
+				`captcha-div`).style.display = "none";
+	var form = new FormData();
+	form.append("img_src", img_src);
+	form.append("location", localStorage.getItem("location_"));
+	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
+	let data = res.json();
+	document.getElementById(result_div_id).innerText =
+						 unescapeUnicode(data["msg"]) ||
+			   `Checkin error. (Backend error, ${res.status_code})`;
+	if (res.status_code != 200)
+		return;
+	if (data["msg"].indexOf("success") != -1)
+		alert(unescapeUnicode(data["msg"]));
+	else if (data["msg"].indexOf("validate") != -1)
+		chaoxingCheckinCaptcha(data["params"], data["captcha"],
+				       result_div_id.split("-")[0]);
+};
+
+async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
+	if (video.paused)
+		document.getElementById(result_div_id).innerText =
+					     "Checkin error. (No image given.)";
+	else
+		chaoxingCheckinQrcode(await screenshot(video, quality),
+				      result_div_id);
 }
