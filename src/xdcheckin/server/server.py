@@ -204,13 +204,20 @@ def create_server(config: dict = {}):
 		try:
 			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
 			assert chaoxing.logined
+			print("sc pre data")
 			data = request.get_json(force = True)
+			print("sc data", data)
 			assert data["captcha"]
+			print("sc data captcha", data["captcha"])
 			result = chaoxing.checkin_submit_captcha(captcha = data["captcha"])
+			print("sc result", result)
 			assert result[0]
+			print("sc result[0]", result[0])
 			res = make_response(dumps(result[1]))
 			res.status_code = 200
-		except Exception:
+		except Exception as e:
+			from traceback import print_exception
+			print_exception(type(e), e, e.__traceback__)
 			res = make_response("{}")
 			res.status_code = 500
 		finally:

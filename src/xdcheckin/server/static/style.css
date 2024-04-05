@@ -29,20 +29,20 @@ table {
 	width: 100%;
 }
 
-#ids-login-captcha-container-div {
+.captcha-container-div {
 	position: relative;
 	width: 100%;
 }
-#ids-login-captcha-img {
+.captcha-img {
 	height: auto;
 	width: 100%;
 }
-#ids-login-captcha-small-img {
+.captcha-small-img {
 	position: absolute;
 	height: 100%;
 	top: -2.5px;
 }
-#ids-login-captcha-input {
+.captcha-input {
 	justify-content: center;
 	align-items: center;
 	display: flex;

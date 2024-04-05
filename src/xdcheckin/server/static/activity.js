@@ -50,7 +50,7 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 	let res = await post("/chaoxing/checkin_get_captcha", data = {
 		"captcha": captcha
 	})
-	if (res.status_code != 200 && e_id_prefix == "location") {
+	if (res.status_code != 200 && e_id_prefix == "activities") {
 		alert(`Checkin error. (Backend error, ${res.status_code})`);
 		return;
 	}
@@ -70,42 +70,42 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 			"captcha": captcha
 		}).then(res => {
 			if (res.status_code != 200 &&
-			    e_id_prefix == "location") {
+			    e_id_prefix == "activities") {
 				alert(`Checkin error. (Backend or ` +
 				      `CAPTCHA error, ${res.status_code})`);
 				return;
 			}
 			captcha = res.json();
-			params["validate"] = captcha["validate"];
+			params.validate = captcha.validate;
 			post("/chaoxing/checkin_do_sign", data = {
 				"params": params
 			}).then(res => {
 				data = res.json();
 				if (res.status_code != 200 &&
-				    e_id_prefix == "location") {
+				    e_id_prefix == "activities") {
 					alert(`Checkin error. (Backend error,` +
 					` ${res.status_code})`);
 					return;
 				}
-				if (data["msg"].indexOf("success") != -1)
-					alert(unescapeUnicode(data["msg"]));
+				if (data.msg.includes("success"))
+					alert(unescapeUnicode(data.msg));
 				document.getElementById(
 				    `${e_id_prefix}-scanresult-div`).innerText =
-						   unescapeUnicode(data["msg"]);
+						   unescapeUnicode(data.msg);
 			});
 		});
-		displayTag("ids-login-captcha-div");
+		displayTag(`${e_id_prefix}-checkin-captcha-div`);
 	};
 	let img = document.getElementById(`${e_id_prefix}-checkin-captcha-img`);
 	img.onload = () => displayTag(`${e_id_prefix}-checkin-captcha-div`);
 	s_img.style.left = `${s.value = 0}px`;
-	s_img.src = data.small_img_src;
-	img.src = data.big_img_src;
+	s_img.src = captcha.small_img_src;
+	img.src = captcha.big_img_src;
 }
 
 async function chaoxingCheckinLocation(activity) {
-	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
-				`captcha-div`).style.display = "none";
+	document.getElementById(`activities-checkin-captcha-div`).style.display
+								       = "none";
 	let res = await post("/chaoxing/checkin_checkin_location", {
 		"location": g_location,
 		"activity": activity
@@ -115,11 +115,10 @@ async function chaoxingCheckinLocation(activity) {
 		alert(`Checkin error. (Backend error, ${res.status_code})`);
 		return;
 	}
-	if (data["msg"].indexOf("validate") != -1) {
-		alert(unescapeUnicode(data["msg"]));
-		return;
-	}
-	chaoxingCheckinCaptcha(data["params"], data["captcha"], "location");
+	alert(unescapeUnicode(data.msg));
+	if (data.msg.includes("'validate'"))
+		chaoxingCheckinCaptcha(data.params, data.captcha,
+				       "activities");
 }
 
 async function chaoxingCheckinLocationWrapper(activity, b_id) {
@@ -136,14 +135,14 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
 	let data = res.json();
 	document.getElementById(result_div_id).innerText =
-						 unescapeUnicode(data["msg"]) ||
+						    unescapeUnicode(data.msg) ||
 			   `Checkin error. (Backend error, ${res.status_code})`;
 	if (res.status_code != 200)
 		return;
-	if (data["msg"].indexOf("success") != -1)
-		alert(unescapeUnicode(data["msg"]));
-	else if (data["msg"].indexOf("validate") != -1)
-		chaoxingCheckinCaptcha(data["params"], data["captcha"],
+	if (data.msg.includes("success"))
+		alert(unescapeUnicode(data.msg));
+	else if (data.msg.includes("'validate'"))
+		chaoxingCheckinCaptcha(data.params, data.captcha,
 				       result_div_id.split("-")[0]);
 };
 

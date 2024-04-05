@@ -728,12 +728,15 @@ class Chaoxing:
 			"token": captcha["token"],
 			"textClickArr": [{"x": captcha["vcode"]}],
 			"type": "slide",
-			"coordinate": [],
+			"coordinate": "[]",
 			"version": "1.1.16",
 			"runEnv": 10,
+			"referer": "https://mobilelearn.chaoxing.com",
 			"_": int(datetime.now().timestamp() * 1000)
 		}
+		print("cx params", params)
 		res = self.get(url = url, params = params)
+		print("cx res", res.text, res.status_code)
 		return "result\":true" in res.text, {
 			**captcha,
 			"validate": f"validate_{captcha["captcha_id"]}_{captcha["token"]}"
