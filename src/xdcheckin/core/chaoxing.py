@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from ast import literal_eval
 from base64 import b64encode
 from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
 from Crypto.Util.Padding import pad
 from datetime import datetime
-from json import loads, dumps
+from json import dumps
 from random import choice, uniform
 from re import findall, search, DOTALL
 from requests import Response
@@ -705,7 +706,7 @@ class Chaoxing:
 			"token": token
 		})
 		res2 = self.get(url = url2, params = params2)
-		data2 = loads(res2.text[2 : -1])
+		data2 = literal_eval(res2.text[2 : -1])
 		return {
 			**captcha_new,
 			"token": data2["token"],
@@ -733,8 +734,7 @@ class Chaoxing:
 			"_": int(datetime.now().timestamp() * 1000)
 		}
 		res = self.get(url = url, params = params)
-		data = loads(res.text[2 : -1])
-		return data["result"], {
+		return "result\":true" in res.text, {
 			**captcha,
 			"validate": f"validate_{captcha["captcha_id"]}_{captcha["token"]}"
 		}
@@ -808,6 +808,7 @@ class Chaoxing:
 			"fid": self.cookies.get("fid") or 0,
 			"activeId": activity["active_id"],
 			"enc": activity.get("enc") or "",
+			"enc2": "",
 			"address": "",
 			"latitude": -1,
 			"longitude": -1,
@@ -836,14 +837,21 @@ class Chaoxing:
 						"longitude": location["longitude"]
 					})
 			res = self.get(url = url, params = params)
-			assert res.text in ("success", "您已签到过了"), f"Checkin failure. {dumps(activity), dumps(location), dumps(params), res.text}"
+			assert res.text in ("success", "您已签到过了"), res.text
 			return True, {
 				"msg": f"Checkin success. ({res.text})",
 				"params": params
 			}
 		except Exception as e:
+			if type(e) is AssertionError:
+				match = search(r"validate_([0-9A-Fa-f]{32})", str(e))
+				if match:
+					params["enc2"] = match.group(1)
+				msg = f"Checkin failure. {dumps(activity), dumps(location), dumps(params), str(e)}"
+			else:
+				msg = str(e)
 			return False, {
-				"msg": str(e),
+				"msg": msg,
 				"params": params
 			}
 
