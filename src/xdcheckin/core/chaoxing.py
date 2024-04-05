@@ -739,7 +739,7 @@ class Chaoxing:
 		})
 		return "result\":true" in res.text, {
 			**captcha,
-			"validate": f"validate_{captcha["captcha_id"]}_{captcha["token"]}"
+			"validate": f"validate_{captcha['captcha_id']}_{captcha['token']}"
 		}
 
 	def checkin_do_presign(
