@@ -4,16 +4,18 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.1] - 2024-04-05
+
 ### Added
 
-- Add support for check-ins with CAPTCHA.
+- Support check-ins with CAPTCHA verification.
 
 ### Changed
 
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_presign()``` now returns presign state, location and CAPTCHA ID on success.
 - (Module) Add ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_captcha()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_verify_captcha()``` to support CAPTCHA verification.
 - (Module) Make ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` standalone to support CAPTCHA verification.
-- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_location()```, ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode_url()``` now also return payload for ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` to support CAPTCHA verification.
+- (Module) ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_location()```, ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode()``` and ```xdcheckin.core.chaoxing.Chaoxing().checkin_checkin_qrcode_url()``` now also return payload for ```xdcheckin.core.chaoxing.Chaoxing().checkin_do_sign()``` to support CAPTCHA verification. Their return values has been reformed accordingly.
 - (Module) ```xdcheckin.core.chaoxing.Chaoxing().curriculum_get_curriculum()```, ```xdcheckin.core.xidian.Newesxidian().curriculum_get_curriculum()``` has their keys renamed to the proper plural forms. Classroom locations and livestreams are now stored in lists to support multiple values.
 
 ### Fixed
@@ -422,7 +424,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.1...main
+[1.5.3]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...2.0.1
 [1.5.3]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/Pairman/Xdcheckin/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/Pairman/Xdcheckin/compare/1.4.1...1.5.1
