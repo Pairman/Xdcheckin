@@ -225,7 +225,7 @@ def create_server(config: dict = {}):
 			assert data["params"], "No parameters given"
 			result = chaoxing.checkin_do_sign(old_params = data["params"])
 			res = make_response(dumps({
-				"msg": f"{result[1]["msg"][: -1]}, {data['params']['activeId']})",
+				"msg": f"{result[1]['msg'][: -1]}, {data['params']['activeId']})",
 				"params": result[1]["params"]
 			}))
 		except Exception as e:
@@ -248,7 +248,7 @@ def create_server(config: dict = {}):
 			data["activity"]["active_id"] = str(data["activity"]["active_id"])
 			result = chaoxing.checkin_checkin_location(activity = data["activity"], location = data["location"])
 			res = make_response(dumps({
-				"msg": f"{result[1]["msg"][: -1]}, {data['activity']['active_id']})",
+				"msg": f"{result[1]['msg'][: -1]}, {data['activity']['active_id']})",
 				"params": result[1]["params"],
 				"captcha": result[1]["captcha"]
 			}))
@@ -277,7 +277,7 @@ def create_server(config: dict = {}):
 			assert urls, "No checkin URL found."
 			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
 			res = make_response(dumps({
-				"msg": f"{result[1]["msg"][: -1]}, {urls[0]})",
+				"msg": f"{result[1]['msg'][: -1]}, {urls[0]})",
 				"params": result[1]["params"],
 				"captcha": result[1]["captcha"]
 			}))
