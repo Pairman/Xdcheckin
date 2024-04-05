@@ -924,7 +924,6 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
-			print(result)
 			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
