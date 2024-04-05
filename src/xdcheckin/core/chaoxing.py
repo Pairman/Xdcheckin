@@ -726,17 +726,17 @@ class Chaoxing:
 			"callback": "f",
 			"captchaId": captcha["captcha_id"],
 			"token": captcha["token"],
-			"textClickArr": [{"x": captcha["vcode"]}],
+			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
 			"type": "slide",
 			"coordinate": "[]",
 			"version": "1.1.16",
 			"runEnv": 10,
-			"referer": "https://mobilelearn.chaoxing.com",
 			"_": int(datetime.now().timestamp() * 1000)
 		}
-		print("cx params", params)
-		res = self.get(url = url, params = params)
-		print("cx res", res.text, res.status_code)
+		res = self.get(url = url, params = params, headers = {
+			**self.config["requests_headers"],
+			"Referer": "https://mobilelearn.chaoxing.com"
+		})
 		return "result\":true" in res.text, {
 			**captcha,
 			"validate": f"validate_{captcha["captcha_id"]}_{captcha["token"]}"
@@ -924,6 +924,7 @@ class Chaoxing:
 			}
 			thread_analysis.join()
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
+			print(result)
 			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:

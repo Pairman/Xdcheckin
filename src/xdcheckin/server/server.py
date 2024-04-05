@@ -204,20 +204,13 @@ def create_server(config: dict = {}):
 		try:
 			chaoxing = server.config["XDCHECKIN_SESSION"][session["xdcheckin_uuid"]]["chaoxing"]
 			assert chaoxing.logined
-			print("sc pre data")
 			data = request.get_json(force = True)
-			print("sc data", data)
 			assert data["captcha"]
-			print("sc data captcha", data["captcha"])
 			result = chaoxing.checkin_submit_captcha(captcha = data["captcha"])
-			print("sc result", result)
 			assert result[0]
-			print("sc result[0]", result[0])
 			res = make_response(dumps(result[1]))
 			res.status_code = 200
 		except Exception as e:
-			from traceback import print_exception
-			print_exception(type(e), e, e.__traceback__)
 			res = make_response("{}")
 			res.status_code = 500
 		finally:
@@ -230,7 +223,7 @@ def create_server(config: dict = {}):
 			assert chaoxing.logined, "Not logged in."
 			data = request.get_json(force = True)
 			assert data["params"], "No parameters given"
-			result = chaoxing.checkin_do_sign(_params = data["params"])
+			result = chaoxing.checkin_do_sign(old_params = data["params"])
 			res = make_response(dumps({
 				"msg": f"{result[1]["msg"][: -1]}, {data['params']['activeId']})",
 				"params": result[1]["params"]

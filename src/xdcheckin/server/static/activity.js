@@ -89,9 +89,11 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 				}
 				if (data.msg.includes("success"))
 					alert(unescapeUnicode(data.msg));
-				document.getElementById(
-				    `${e_id_prefix}-scanresult-div`).innerText =
-						   unescapeUnicode(data.msg);
+				if (e_id_prefix != "activities")
+					document.getElementById(
+						`${e_id_prefix}-scanresult-div`)
+						.innerText =
+						      unescapeUnicode(data.msg);
 			});
 		});
 		displayTag(`${e_id_prefix}-checkin-captcha-div`);
@@ -141,7 +143,7 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 		return;
 	if (data.msg.includes("success"))
 		alert(unescapeUnicode(data.msg));
-	else if (data.msg.includes("'validate'"))
+	else if (data.msg.includes("'validate_"))
 		chaoxingCheckinCaptcha(data.params, data.captcha,
 				       result_div_id.split("-")[0]);
 };
