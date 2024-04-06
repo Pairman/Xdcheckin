@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.2] - 2024-04-06
+
+### Added
+
+- (Module) ```xdcheckin.core.xidian.Newesxidian().curriculum_get_curriculum()``` can specify week number, and livestream now contains classroom location.
+
+### Fixed
+
+- Fix error when already checked-in.
+
 ## [2.0.1] - 2024-04-05
 
 ### Added
@@ -424,7 +434,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.2...main
+[2.0.2]: https://github.com/Pairman/Xdcheckin/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...2.0.1
 [1.5.3]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...1.5.3
 [1.5.2]: https://github.com/Pairman/Xdcheckin/compare/1.5.1...1.5.2
