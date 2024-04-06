@@ -205,7 +205,7 @@ class Newesxidian:
 	def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
 		:param livesteam: Live ID in dictionary.
-		:return: Livestream URL, live ID and device ID (placeholder). URL will fallback to replay URL for non-ongoing live IDs.
+		:return: Livestream URL, live ID, device ID and classroom location (placeholder). URL will fallback to replay URL for non-ongoing live IDs.
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
 		params = {
@@ -215,15 +215,16 @@ class Newesxidian:
 		return {
 			"url": res.text,
 			"live_id": livestream["live_id"],
-			"device": ""
+			"device": "",
+			"location": ""
 		}
 
 	def livestream_get_live_url(
-		self, livestream: dict = {"live_id": "", "device": ""}
+		self, livestream: dict = {"live_id": "", "device": "", "location": ""}
 	):
 		"""Get livestream URL.
-		:param livestream: Live ID (unused if device ID is present) or device ID in dictionary.
-		:return: Livestream URL, live ID (placeholder if not given) and device ID.
+		:param livestream: Live ID (unused if device ID is present), device ID, and location (in case device ID is not present) in dictionary.
+		:return: Livestream URL, live ID (placeholder if not given), device ID and classroom location (placeholder if device ID not given).
 		"""
 		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
 		params1 = {
@@ -234,30 +235,39 @@ class Newesxidian:
 			"deviceCode": livestream.get("device") or "",
 			"status": 1
 		}
+		location = livestream.get("location") or ""
 		if not livestream.get("device"):
 			res1 = self.chaoxing_session.get(url = url1, params = params1, expire_after = 86400)
 			data = res1.json() or []
 			for lesson in data:
 				if str(lesson["id"]) == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
+					location = lesson["schoolRoomName"].rstrip()
 					break
 		res2 = self.chaoxing_session.get(url = url2, params = params2, expire_after = 86400)
 		return {
 			"url": res2.text,
 			"live_id": params1["liveId"],
-			"device": params2["deviceCode"]
+			"device": params2["deviceCode"],
+			"location": location
 		}
 
-	def curriculum_get_curriculum(self):
-		"""Get curriculum with livestream URLs.
+	def curriculum_get_curriculum(self, week: str = ""):
+		"""Get curriculum with livestreams.
+		:param week: Week number. Defaulted to the current week.
 		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
-		def _get_livestream_wrapper(class_id: str = "", live_id: str = ""):
+		def _get_livestream_wrapper(class_id: str = "", live_id: str = "", location: str = ""):
+			if not curriculum["lessons"].get(class_id):
+				return
 			if not curriculum["lessons"][class_id].get("livestreams"):
 				curriculum["lessons"][class_id]["livestreams"] = []
-			livestream = self.livestream_get_live_url(livestream = {"live_id": live_id})
+			livestream = self.livestream_get_live_url(livestream = {
+				"live_id": live_id,
+				"location": location
+			})
 			for ls in curriculum["lessons"][class_id]["livestreams"]:
-				if ls["url"] == livestream["url"]:
+				if ls["device"] == livestream["device"]:
 					return
 			curriculum["lessons"][class_id]["livestreams"].append(livestream)
 		url = "https://newesxidian.chaoxing.com/frontLive/listStudentCourseLivePage"
@@ -266,20 +276,21 @@ class Newesxidian:
 			"userId": self.chaoxing_session.cookies["UID"],
 			"termYear": 0,
 			"termId": 0,
-			"week": 0
+			"week": week or 0
 		}
-		curriculum = self.chaoxing_session.curriculum_get_curriculum()
+		curriculum = self.chaoxing_session.curriculum_get_curriculum(week = week)
 		params.update({
 			"termYear": curriculum["details"]["year"],
 			"termId": curriculum["details"]["semester"],
-			"week": curriculum["details"]["week"]
+			"week": week or curriculum["details"]["week"]
 		})
 		res = self.chaoxing_session.get(url = url, params = params, expire_after = 86400)
 		data = res.json() or []
 		threads = [
 			Thread(target = _get_livestream_wrapper, kwargs = {
 				"class_id": str(lesson["teachClazzId"]),
-				"live_id": str(lesson["id"])
+				"live_id": str(lesson["id"]),
+				"location": lesson["place"]
 			}) for lesson in data
 		]
 		for thread in threads:

@@ -41,21 +41,21 @@ async function getCurriculum(with_live = false) {
 
 		});
 		td = tr.appendChild(newElement("td"));
-		lesson.locations.forEach((v, i) => {
-			if (i)
-				td.appendChild(newElement("br"));
-			td.appendChild(document.createTextNode(v));
-		});
 		if (!with_live)
-			continue;
-		td = tr.appendChild(newElement("td"));
-		lesson.livestreams.forEach((v, i) => {
-			if (i)
-				td.appendChild(newElement("br"));
-			td.appendChild(newElement("button", {
-				innerText: v.live_id,
-				onclick: () => setClassroom(v.url, v.live_id)
-			}));
+			lesson.locations.forEach((v, i) => {
+				if (i)
+					td.appendChild(newElement("br"));
+				td.appendChild(document.createTextNode(v));
+			});
+		else
+			lesson.livestreams.forEach((v, i) => {
+				if (i)
+					td.appendChild(newElement("br"));
+				td.appendChild(newElement("button", {
+					innerText: v.location,
+					onclick: () => setClassroom(v.url,
+								    v.live_id)
+				}));
 		});
 	}
 	document.getElementById("curriculum-list-div").appendChild(table);
