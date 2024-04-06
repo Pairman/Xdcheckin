@@ -850,7 +850,7 @@ class Chaoxing:
 				match = search(r"validate_([0-9A-Fa-f]{32})", str(e))
 				if match:
 					params["enc2"] = match.group(1)
-				msg = f"Checkin failure. {dumps(activity), dumps(location), dumps(params), str(e)}"
+				msg = f"Checkin failure. {dumps(params), str(e)}"
 			else:
 				msg = str(e)
 			return False, {
@@ -865,7 +865,7 @@ class Chaoxing:
 		"""Location checkin.
 		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude in dictionary. Overriden by server-side location if any.
-		:return: Checkin state (True on success), success / error message and payload (placeholder).
+		:return: Checkin state (True on success), message, params and captcha (placeholder if already checked-in or on failure).
 		"""
 		try:
 			thread_analysis = Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
@@ -873,9 +873,13 @@ class Chaoxing:
 			info = self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": str(info["clazzId"])})
-			assert presign[0], f"Presign failure. {dumps(activity), dumps(location), dumps(presign)}"
+			assert presign[0], f"Presign failure. {dumps(activity), dumps(presign)}"
 			if presign[0] == 2:
-				return True, "Checkin success. (Already checked in.)"
+				return True, {
+					"msg": "Checkin success. (Already checked in.)",
+					"params": "",
+					"captcha": ""
+				}
 			location_new = {
 				**(self.checkin_format_location(location = location, location_new = presign[1]) if presign[1]["ranged"] else location),
 				"ranged": presign[1]["ranged"]
@@ -915,9 +919,13 @@ class Chaoxing:
 			thread_location = Thread(target = _get_location)
 			thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
-			assert presign[0], f"Presign failure. {dumps(activity), dumps(location), dumps(presign)}"
+			assert presign[0], f"Presign failure. {dumps(activity), dumps(presign)}"
 			if presign[0] == 2:
-				return True, "Checkin success. (Already checked in.)"
+				return True, {
+					"msg": "Checkin success. (Already checked in.)",
+					"params": "",
+					"captcha": ""
+				}
 			location_new = {
 				**(thread_location.join() or self.checkin_format_location(location = location, location_new = location_new) if presign[1]["ranged"] else location),
 				"ranged": presign[1]["ranged"]
@@ -943,7 +951,7 @@ class Chaoxing:
 		:return: Same as checkin_checkin_location().
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url, dumps(location)}"
+			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url}"
 			match = search(r"id=(\d+).*?([0-9A-F]{32})", url)
 			return self.checkin_checkin_qrcode(activity = {
 				"active_id": match.group(1),
