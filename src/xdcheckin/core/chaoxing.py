@@ -850,7 +850,7 @@ class Chaoxing:
 				match = search(r"validate_([0-9A-Fa-f]{32})", str(e))
 				if match:
 					params["enc2"] = match.group(1)
-				msg = f"Checkin failure. {dumps(params), str(e)}"
+				msg = f"Checkin failure. {params, str(e)}"
 			else:
 				msg = str(e)
 			return False, {
@@ -873,7 +873,7 @@ class Chaoxing:
 			info = self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
 			presign = self.checkin_do_presign(activity = activity, course = {"class_id": str(info["clazzId"])})
-			assert presign[0], f"Presign failure. {dumps(activity), dumps(presign)}"
+			assert presign[0], f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
 					"msg": "Checkin success. (Already checked in.)",
@@ -919,7 +919,7 @@ class Chaoxing:
 			thread_location = Thread(target = _get_location)
 			thread_location.start()
 			presign = self.checkin_do_presign(activity = activity, course = course)
-			assert presign[0], f"Presign failure. {dumps(activity), dumps(presign)}"
+			assert presign[0], f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
 					"msg": "Checkin success. (Already checked in.)",
