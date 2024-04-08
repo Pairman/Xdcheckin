@@ -160,17 +160,17 @@
 			<a id="footer-link-a" href="https://github.com/Pairman/Xdcheckin">Xdcheckin</a>
 			&emsp;(C) 2024 Pairman
 		</div>
-	</body>
 
-	<script>
-		checkEula();
-		xdcheckinCheckUpdates();
-		if (localStorage.getItem("username"))
-			promptLogin(auto = true);
-		listLocations();
-		listClassrooms();
-		resizePlayers().then(enablePlayers);
-		window.onresize = resizePlayers;
-		enableCamera();
-	</script>
+		<script>
+			checkEula();
+			xdcheckinCheckUpdates();
+			if (localStorage.getItem("username"))
+				promptLogin(auto = true);
+			listLocations();
+			listClassrooms();
+			resizePlayers().then(enablePlayers);
+			window.onresize = resizePlayers;
+			enableCamera();
+		</script>
+	</body>
 </html>
