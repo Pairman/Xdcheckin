@@ -27,7 +27,7 @@ class Chaoxing:
 				      "d_phone_906_100"
 		},
 		"requests_cache_enabled": True,
-		"chaoxing_course_get_activities_courses_limit": 36,
+		"chaoxing_course_get_activities_courses_limit": 32,
 		"chaoxing_course_get_activities_workers": 16,
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
