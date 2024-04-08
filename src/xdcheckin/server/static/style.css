@@ -1,3 +1,13 @@
+body {
+    touch-action: manipulation;
+}
+
+#xdcheckin-title-div {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size:48px;
+}
+
 div {
 	font-size:22px;
 	font-family: sans-serif;
@@ -47,10 +57,4 @@ table {
 	align-items: center;
 	display: flex;
 	width: 70%;
-}
-
-#xdcheckin-title-div {
-	font-family: sans-serif;
-	font-weight: bold;
-	font-size:48px;
 }
