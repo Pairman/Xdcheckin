@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.3] - 2024-04-09
+
+### Fixed
+
+- Fix curriculum not peoperly displayed in existence of courses without classroom.
+
 ## [2.0.2] - 2024-04-06
 
 ### Added
@@ -30,7 +36,7 @@ Changelog for Xdcheckin.
 
 ### Fixed
 
-- Fixed course with multiple classroom locations not properly shown in curriculum.
+- Fix course with multiple classroom locations not properly shown in curriculum.
 
 ## [1.5.3] - 2024-03-28
 
@@ -434,7 +440,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.3...main
+[2.0.3]: https://github.com/Pairman/Xdcheckin/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/Pairman/Xdcheckin/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...2.0.1
 [1.5.3]: https://github.com/Pairman/Xdcheckin/compare/1.5.2...1.5.3
