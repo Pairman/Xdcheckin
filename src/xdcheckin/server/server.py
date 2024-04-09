@@ -224,10 +224,7 @@ def create_server(config: dict = {}):
 			data = request.get_json(force = True)
 			assert data["params"], "No parameters given"
 			result = chaoxing.checkin_do_sign(old_params = data["params"])
-			res = make_response(dumps({
-				"msg": f"{result[1]['msg'][: -1]}, {data['params']['activeId']})",
-				"params": result[1]["params"]
-			}))
+			res = make_response(dumps(result[1]))
 		except Exception as e:
 			res = make_response(dumps({
 				"msg": f"Checkin error. ({str(e)})",
@@ -253,11 +250,7 @@ def create_server(config: dict = {}):
 				"captcha": result[1]["captcha"]
 			}))
 		except Exception as e:
-			res = make_response(dumps({
-				"msg": f"Checkin error. ({str(e)})",
-				"params": {},
-				"captcha": {}
-			}))
+			res = make_response(dumps(result[1]))
 		finally:
 			res.status_code = 200
 			return res
@@ -276,11 +269,7 @@ def create_server(config: dict = {}):
 			urls = [s.data.decode("utf-8") for s in urls if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data]
 			assert urls, "No checkin URL found."
 			result = chaoxing.checkin_checkin_qrcode_url(url = urls[0], location = loads(request.form["location"]))
-			res = make_response(dumps({
-				"msg": f"{result[1]['msg'][: -1]}, {urls[0]})",
-				"params": result[1]["params"],
-				"captcha": result[1]["captcha"]
-			}))
+			res = make_response(dumps(result[1]))
 		except Exception as e:
 			res = make_response(dumps({
 				"msg": f"Checkin error. ({str(e)})",
