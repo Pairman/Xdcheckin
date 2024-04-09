@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.4] - 2024-04-09
+
+### Fixed
+
+- Fix classroom name not displayed properly if chosen via curriculum.
+
 ## [2.0.3] - 2024-04-09
 
 ### Fixed
@@ -440,7 +446,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.3...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.4...main
+[2.0.4]: https://github.com/Pairman/Xdcheckin/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/Pairman/Xdcheckin/compare/2.0.2...2.0.3
 [2.0.2]: https://github.com/Pairman/Xdcheckin/compare/2.0.1...2.0.2
 [2.0.1]: https://github.com/Pairman/Xdcheckin/compare/1.5.3...2.0.1
