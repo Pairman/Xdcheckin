@@ -54,7 +54,7 @@ async function getCurriculum(with_live = false) {
 				td.appendChild(newElement("button", {
 					innerText: v.location,
 					onclick: () => setClassroom(v.url,
-								    v.live_id)
+								    v.location)
 				}));
 			});
 	}
