@@ -41,7 +41,7 @@ async function getCurriculum(with_live = false) {
 
 		});
 		td = tr.appendChild(newElement("td"));
-		if (!with_live)
+		if (!lesson.livestreams)
 			lesson.locations.forEach((v, i) => {
 				if (i)
 					td.appendChild(newElement("br"));
@@ -56,7 +56,7 @@ async function getCurriculum(with_live = false) {
 					onclick: () => setClassroom(v.url,
 								    v.live_id)
 				}));
-		});
+			});
 	}
 	document.getElementById("curriculum-list-div").appendChild(table);
 	getCurriculum.calling = false;
