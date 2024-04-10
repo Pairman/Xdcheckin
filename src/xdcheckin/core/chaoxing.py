@@ -9,6 +9,7 @@ from json import dumps
 from random import choice, uniform
 from re import findall, search, DOTALL
 from requests import Response
+from requests.adapters import HTTPAdapter
 from requests.exceptions import RequestException
 from requests_cache.session import CachedSession
 from threading import Thread
@@ -48,8 +49,7 @@ class Chaoxing:
 			return
 		self.config.update(config)
 		self.requests_session = CachedSession(backend = "memory")
-		for adapter in self.requests_session.adapters.values():
-			adapter._pool_maxsize = 32
+		self.requests_session.mount("https://", HTTPAdapter(pool_maxsize = 32))
 		account = {"username": username, "password": password, "cookies": cookies}
 		if cookies:
 			self.name, self.cookies, self.logined = self.login_cookies(account = account).values()
