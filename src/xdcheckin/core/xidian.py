@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from base64 import b64encode
-from Crypto.Cipher.AES import new as AES_new, block_size as AES_block_size, MODE_CBC as AES_MODE_CBC
-from Crypto.Util.Padding import pad
-from re import search
-from requests import Response, Session
-from requests.exceptions import RequestException
-from threading import Thread
-from time import time
-from xdcheckin.core.chaoxing import Chaoxing
+from re import search as _search
+from requests import Response as _Response, Session as _Session
+from requests.exceptions import RequestException as _RequestException
+from threading import Thread as _Thread
+from time import time as _time
+from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
+from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 
 class IDSSession:
 	requests_session = secrets = service = logined = None
 	config = {
 		"requests_headers": {
-			"User-Agent": "Mozilla/5.0 (Linux; Android 10; K) Apple"
-				      "WebKit/537.36 (KHTML, like Gecko) Chrome"
-				      "/120.0.0.0 Mobile Safari/537.36"
+			"User-Agent":
+				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
+				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
+				"obile Safari/537.36"
 		}
 	}
 
@@ -26,7 +25,8 @@ class IDSSession:
 		"""
 		if self.logined:
 			return
-		self.requests_session, self.secrets, self.service = Session(), {}, service
+		self.requests_session = _Session()
+		self.secrets, self.service = {}, service
 
 	def get(
 		self, url: str = "", params: dict = {}, cookies: dict = None,
@@ -48,10 +48,10 @@ class IDSSession:
 			)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
-			res = Response()
+			res = _Response()
 			res.status_code, res._content = int(str(e)), b"{}"
-		except RequestException:
-			res = Response()
+		except _RequestException:
+			res = _Response()
 			res.status_code, res._content = 404, b"{}"
 		finally:
 			return res
@@ -76,17 +76,18 @@ class IDSSession:
 			)
 			assert res.status_code in (200, 500), res.status_code
 		except AssertionError as e:
-			res = Response()
+			res = _Response()
 			res.status_code, res._content = int(str(e)), b"{}"
-		except RequestException:
-			res = Response()
+		except _RequestException:
+			res = _Response()
 			res.status_code, res._content = 404, b"{}"
 		finally:
 			return res
 
 	def login_username_prepare(self):
 		"""Prepare verification for username login.
-		:return: Base64 encoded captcha background and slider image string.
+		:return: Base64 encoded captcha background and 
+		slider image string.
 		"""
 		url1 = "https://ids.xidian.edu.cn/authserver/login"
 		params1 = {
@@ -103,8 +104,12 @@ class IDSSession:
 		res1 = self.get(url = url1, params = params1)
 		if not res1.status_code == 200:
 			return ret
-		s = search(r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\"", res1.text)
-		params2["_"] = str(int(1000 * time()))
+		s = _search(
+			r"\"pwdEncryptSalt\" value=\"(.*?)\".*?"
+			r"\"execution\" value=\"(.*?)\"",
+			res1.text
+		)
+		params2["_"] = str(int(1000 * _time()))
 		res2 = self.get(url = url2, params = params2)
 		if not res2.status_code == 200:
 			return ret
@@ -123,18 +128,10 @@ class IDSSession:
 		account: dict = {"username": "", "password": "", "vcode": ""}
 	):
 		"""Verify and finish username logging in.
-		:param account: Username, password and verification code (a.k.a. slider offset).
+		:param account: Username, password and verification 
+		code (a.k.a. slider offset).
 		:return: Cookies and login state.
 		"""
-		def _encrypt_aes(msg: str = "", key: str = ""):
-			enc = AES_new(
-				key.encode("utf-8"), AES_MODE_CBC,
-				b"xidianscriptsxdu"
-			).encrypt(pad(
-				4 * b"xidianscriptsxdu" + msg.encode("utf-8"),
-				AES_block_size
-			))
-			return b64encode(enc).decode("utf-8")
 		url1 = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data1 = {
 			"canvasLength": 280,
@@ -151,8 +148,10 @@ class IDSSession:
 		data2 = {
 			"username": account["username"],
 			"password": _encrypt_aes(
-				account["password"],
-				self.secrets["login_prepare_salt"]
+				msg = account["password"],
+				key = self.secrets["login_prepare_salt"].encode("utf-8"),
+				iv = b"xidianscriptsxdu",
+				padding = lambda msg: 4 * b"xidianscriptsxdu" + msg.encode("utf-8")
 			),
 			"captcha": "",
 			"_eventId": "submit",
@@ -184,7 +183,10 @@ class IDSSession:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url = url, cookies = account["cookies"], allow_redirects = False)
+		res = self.get(
+			url = url, cookies = account["cookies"],
+			allow_redirects = False
+		)
 		if res.status_code != 302:
 			ret.update({
 				"cookies": account["cookies"],
@@ -197,7 +199,7 @@ class Newesxidian:
 	"""
 	chaoxing_session = logined = None
 
-	def __init__(self, chaoxing: Chaoxing = None):
+	def __init__(self, chaoxing: _Chaoxing = None):
 		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
 			return
 		self.logined, self.chaoxing_session = True, chaoxing
@@ -205,13 +207,17 @@ class Newesxidian:
 	def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
 		:param livesteam: Live ID in dictionary.
-		:return: Livestream URL, live ID, device ID and classroom location (placeholder). URL will fallback to replay URL for non-ongoing live IDs.
+		:return: Livestream URL, live ID, device ID and 
+		classroom location (placeholder).
+		URL will fallback to replay URL for non-ongoing live IDs.
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
 		params = {
 			"liveId": livestream["live_id"]
 		}
-		res = self.chaoxing_session.get(url = url, params = params, expire_after = 86400)
+		res = self.chaoxing_session.get(
+			url = url, params = params, expire_after = 86400
+		)
 		return {
 			"url": res.text,
 			"live_id": livestream["live_id"],
@@ -223,8 +229,10 @@ class Newesxidian:
 		self, livestream: dict = {"live_id": "", "device": "", "location": ""}
 	):
 		"""Get livestream URL.
-		:param livestream: Live ID (unused if device ID is present), device ID, and location (in case device ID is not present) in dictionary.
-		:return: Livestream URL, live ID (placeholder if not given), device ID and classroom location (placeholder if device ID not given).
+		:param livestream: Live ID (unused if device ID is present), device ID
+		and location (in case device ID is not present) in dictionary.
+		:return: Livestream URL, live ID (placeholder if not given), device ID
+		and classroom location (placeholder if device ID not given).
 		"""
 		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
 		params1 = {
@@ -237,14 +245,18 @@ class Newesxidian:
 		}
 		location = livestream.get("location") or ""
 		if not livestream.get("device"):
-			res1 = self.chaoxing_session.get(url = url1, params = params1, expire_after = 86400)
+			res1 = self.chaoxing_session.get(
+				url = url1, params = params1, expire_after = 86400
+			)
 			data = res1.json() or []
 			for lesson in data:
 				if str(lesson["id"]) == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
-		res2 = self.chaoxing_session.get(url = url2, params = params2, expire_after = 86400)
+		res2 = self.chaoxing_session.get(
+			url = url2, params = params2, expire_after = 86400
+		)
 		return {
 			"url": res2.text,
 			"live_id": params1["liveId"],
@@ -257,7 +269,10 @@ class Newesxidian:
 		:param week: Week number. Defaulted to the current week.
 		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
-		def _get_livestream_wrapper(class_id: str = "", live_id: str = "", location: str = ""):
+		def _get_livestream_wrapper(
+			class_id: str = "", live_id: str = "",
+			location: str = ""
+		):
 			if not curriculum["lessons"].get(class_id):
 				return
 			if not curriculum["lessons"][class_id].get("livestreams"):
@@ -284,10 +299,12 @@ class Newesxidian:
 			"termId": curriculum["details"]["semester"],
 			"week": week or curriculum["details"]["week"]
 		})
-		res = self.chaoxing_session.get(url = url, params = params, expire_after = 86400)
+		res = self.chaoxing_session.get(
+			url = url, params = params, expire_after = 86400
+		)
 		data = res.json() or []
 		threads = [
-			Thread(target = _get_livestream_wrapper, kwargs = {
+			_Thread(target = _get_livestream_wrapper, kwargs = {
 				"class_id": str(lesson["teachClazzId"]),
 				"live_id": str(lesson["id"]),
 				"location": lesson["place"]

@@ -1,4 +1,4 @@
-from xdcheckin.app.app import main
+from xdcheckin.app.app import main as _main
 
 if __name__ == "__main__":
-	main().main_loop()
+	_main().main_loop()

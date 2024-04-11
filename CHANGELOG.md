@@ -4,6 +4,10 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## Changed
+
+- Hide internal imports.
+
 ## [2.0.4] - 2024-04-09
 
 ### Fixed
