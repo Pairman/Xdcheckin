@@ -49,7 +49,7 @@ include = [
 exclude = [
 	"xdcheckin.app*",
 	"xdcheckin.__main__",
- ]
+]
 
 [tool.setuptools.package-data]
 "xdcheckin.server" = ["static/*", "templates/*"]
