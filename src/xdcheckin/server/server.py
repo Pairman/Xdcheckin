@@ -73,7 +73,7 @@ def create_server(config: dict = {}):
 				_session["xdcheckin_uuid"] = str(uuid4())
 			if not server.config["XDCHECKIN_SESSION"].get(_session["xdcheckin_uuid"]):
 				server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]] = {}
-			server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]]["ids"] =ids
+			server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]]["ids"] = ids
 			res = _make_response(_dumps(ids.login_username_prepare()))
 		except Exception as e:
 			res = _make_response(_dumps({"err": str(e)}))
