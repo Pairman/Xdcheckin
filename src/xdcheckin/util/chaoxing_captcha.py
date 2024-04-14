@@ -49,7 +49,7 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	with big_img.convert("L").crop(
 		(x_left, y_top, big_img.width - small_img.width + x_right + 1, y_bottom + 1)
 	) as img:
-		for x in range(1, img.width - x_right + x_left, 2):
+		for x in range(x_left, img.width - x_right + x_left, 2):
 			window = img.crop(
 				(x, 0, x + x_right - x_left, img.height)
 			).getdata()
