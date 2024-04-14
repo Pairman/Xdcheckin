@@ -16,6 +16,6 @@ def encrypt_aes(
 	:return: Encrypted data in base64 string.
 	"""
 	enc = _new(key, _MODE_CBC, iv).encrypt(_pad(
-		padding(msg), _block_size, "pkcs7"
+		padding(msg), _block_size
 	))
 	return _b64encode(enc).decode("utf-8")
