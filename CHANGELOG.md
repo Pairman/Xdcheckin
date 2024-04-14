@@ -8,7 +8,7 @@ Changelog for Xdcheckin.
 
 # Added
 
-- (Module) Lightweight ```xdcheckin.util.solve_captcha()``` for solving slider CAPTCHA in a non-GUI environment. Returns slider offset.
+- (Module) Lightweight ```xdcheckin.util.chaoxing_captcha.solve_captcha()``` for solving slider CAPTCHA in a non-GUI environment. Returns slider offset.
 
 ## [2.0.4] - 2024-04-09
 
