@@ -61,4 +61,4 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 			if ncc > maxncc:
 				maxncc = ncc
 				maxx = x
-	return maxx + 1
+	return maxx - x_left
