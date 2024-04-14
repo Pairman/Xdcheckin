@@ -8,7 +8,14 @@ def encrypt_aes(
 	msg: str = "", key: bytes = b"", iv: bytes = b"",
 	padding: None = lambda msg: msg.encode("utf-8")
 ):
+	"""AES encryption.
+	:param msg: Data in string.
+	:param key: Key in bytes.
+	:param iv: Initialization vector in bytes.
+	:param padding: Padding method for the data. PKCS7 by default.
+	:return: Encrypted data in base64 string.
+	"""
 	enc = _new(key, _MODE_CBC, iv).encrypt(_pad(
-		padding, _block_size
+		padding(msg), _block_size, "pkcs7"
 	))
 	return _b64encode(enc).decode("utf-8")
