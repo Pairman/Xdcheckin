@@ -19,35 +19,46 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	:return: Slider offset.
 	"""
 	with small_img.convert("L") as img:
+		x_right = 0
+		flag_x = False
 		y_bottom = 0
-		f_init = False
+		flag_y = False
 		with img.point(lambda v: v > 0 and 255 or 0) as pt:
 			y_top = pt.height
 			for y in range(pt.height):
 				if pt.crop((0, y, pt.width, y + 1)).getbbox():
 					y_bottom = max(y, y_bottom)
 					y_top = min(y, y_top)
-					f_init = True
-				elif f_init:
+					flag_y = True
+				elif flag_y:
 					break
-		with img.crop((0, y_top, small_img.width, y_bottom + 1)) as img:
+			x_left = pt.width
+			for x in range(pt.width):
+				if pt.crop((x, y_top, x + 1, y_bottom + 1)).getbbox():
+					x_right = max(x, x_right)
+					x_left = min(x, x_left)
+					flag_x = True
+				elif flag_x:
+					break
+		with img.crop((x_left, y_top, x_right, y_bottom + 1)) as img:
 			template = img.getdata()
 	mean_tmp = sum(template) / len(template)
 	template = [v - mean_tmp for v in template]
+	maxncc = 0
 	maxx = 0
-	maxv = 0
 	with big_img.convert("L").crop(
-		(0, y_top, big_img.width, y_bottom + 1)
+		(x_left, y_top, big_img.width - small_img.width + x_right + 1, y_bottom + 1)
 	) as img:
-		for x in range(0, img.width - small_img.width + 1, 4):
+		for x in range(1, img.width - x_right + x_left, 2):
 			window = img.crop(
-				(x, 0, x + small_img.width, img.height)
+				(x, 0, x + x_right - x_left, img.height)
 			).getdata()
-			mean_wd = sum(window)
+			mean_wd = sum(window) / (x_right - x_left) / img.height
+			window = [w - mean_wd for w in window]
 			ncc = sum(
-				(u - mean_wd) * v
-				for u, v in zip(window, template)
-			) / sum(map(lambda v: (v - mean_wd) ** 2, window))
-			if ncc > maxv:
-				maxx, maxv = x, ncc
-	return maxx
+				w * t for w, t in zip(window, template)
+			) / sum(w ** 2 for w in window)
+			if ncc > maxncc:
+				maxncc = ncc
+				maxx = x
+	return maxx + 1
