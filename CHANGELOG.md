@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.6] - 2024-04-14
+
+# Changed
+
+- (Module) Improve accuracy of ```xdcheckin.util.chaoxing_captcha.solve_captcha()```.
+
 ## [2.0.5] - 2024-04-14
 
 # Added
@@ -452,7 +458,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.6...main
+[2.0.6]: https://github.com/Pairman/Xdcheckin/compare/2.0.5...2.0.6
 [2.0.5]: https://github.com/Pairman/Xdcheckin/compare/2.0.4...2.0.5
 [2.0.4]: https://github.com/Pairman/Xdcheckin/compare/2.0.3...2.0.4
 [2.0.3]: https://github.com/Pairman/Xdcheckin/compare/2.0.2...2.0.3
