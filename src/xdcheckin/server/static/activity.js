@@ -118,7 +118,7 @@ async function chaoxingCheckinLocation(activity) {
 		return;
 	}
 	alert(unescapeUnicode(data.msg));
-	if (data.msg.includes("'validate'"))
+	if (data.msg.includes("'validate')"))
 		chaoxingCheckinCaptcha(data.params, data.captcha,
 				       "activities");
 }
