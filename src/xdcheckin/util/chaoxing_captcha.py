@@ -18,30 +18,10 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	:param small_img: Slider image vertically aligned with transparent padding.
 	:return: Slider offset.
 	"""
-	with small_img.convert("L") as img:
-		x_right = 0
-		flag_x = False
-		y_bottom = 0
-		flag_y = False
-		with img.point(lambda v: v > 64 and 255 or 0) as pt:
-			y_top = pt.height
-			for y in range(pt.height):
-				if pt.crop((0, y, pt.width, y + 1)).getbbox():
-					y_bottom = max(y, y_bottom)
-					y_top = min(y, y_top)
-					flag_y = True
-				elif flag_y:
-					break
-			x_left = pt.width
-			for x in range(pt.width):
-				if pt.crop((x, y_top, x + 1, y_bottom + 1)).getbbox():
-					x_right = max(x, x_right)
-					x_left = min(x, x_left)
-					flag_x = True
-				elif flag_x:
-					break
-		with img.crop((x_left, y_top, x_right, y_bottom + 1)) as img:
-			template = img.getdata()
+	with small_img.getchannel("A").point(lambda p: p == 255 and 255 or 0) as pt:
+		x_left, y_top, x_right, y_bottom = pt.getbbox()
+	with small_img.convert("L").crop((x_left, y_top, x_right + 1, y_bottom + 1)) as img:
+		template = img.getdata()
 	mean_tmp = sum(template) / len(template)
 	template = [v - mean_tmp for v in template]
 	maxncc = 0
@@ -50,15 +30,13 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 		(x_left, y_top, big_img.width - small_img.width + x_right + 1, y_bottom + 1)
 	) as img:
 		for x in range(1, img.width - x_right + x_left, 2):
-			window = img.crop(
-				(x, 0, x + x_right - x_left, img.height)
-			).getdata()
+			with img.crop((x, 0, x + x_right - x_left, img.height)) as crop:
+				window = crop.getdata()
 			mean_wd = sum(window) / (x_right - x_left) / img.height
 			window = [w - mean_wd for w in window]
 			ncc = sum(
 				w * t for w, t in zip(window, template)
 			) / sum(w ** 2 for w in window)
-			if ncc > maxncc:
-				maxncc = ncc
-				maxx = x
+			maxncc = (ncc > maxncc) and ncc
+			maxx = (ncc > maxncc) and x
 	return maxx
