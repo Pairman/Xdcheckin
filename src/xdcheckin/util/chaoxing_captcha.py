@@ -23,7 +23,7 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 		flag_x = False
 		y_bottom = 0
 		flag_y = False
-		with img.point(lambda v: v > 0 and 255 or 0) as pt:
+		with img.point(lambda v: v > 64 and 255 or 0) as pt:
 			y_top = pt.height
 			for y in range(pt.height):
 				if pt.crop((0, y, pt.width, y + 1)).getbbox():
