@@ -5,7 +5,6 @@ from requests import Response as _Response, Session as _Session
 from requests.exceptions import RequestException as _RequestException
 from threading import Thread as _Thread
 from time import time as _time
-from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 
 class IDSSession:
@@ -199,7 +198,11 @@ class Newesxidian:
 	"""
 	chaoxing_session = logined = None
 
-	def __init__(self, chaoxing: _Chaoxing = None):
+	def __init__(self, chaoxing: None = None):
+		"""Create a Newesxidian with Chaoxing instance.
+		:param chaoxing: Chaoxing instance.
+		:return: None.
+		"""
 		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
 			return
 		self.logined, self.chaoxing_session = True, chaoxing
