@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from base64 import b64decode as _b64decode
+from PIL.ImageFilter import MinFilter as _MinFilter
 from random import random as _random
 from zlib import decompress as _decompress
-from PIL.ImageFilter import MinFilter as _MinFilter
 from pyjsbitwise import bwnot as _bwnot, bwand as _bwand, bwor as _bwor, \
 	bwxor as _bwxor, lshift as _lshift, rshift as _rshift, urshift as _urshift
 
