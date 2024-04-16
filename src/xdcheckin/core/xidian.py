@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from re import search as _search
-from requests import Response as _Response, Session as _Session
-from requests.exceptions import RequestException as _RequestException
 from threading import Thread as _Thread
 from time import time as _time
+from requests import Response as _Response, Session as _Session
+from requests.exceptions import RequestException as _RequestException
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 
 class IDSSession:
