@@ -46,6 +46,7 @@ The APP needs [Visual C++ Redistributable Packages for Visual Studio 2013](https
 ## Credits
 [w964522982/xxtSign](https://github.com/w964522982/xxtSign) <br>
 [YangRucheng/Chaoxing-AutoSign](https://github.com/YangRucheng/Chaoxing-AutoSign) <br>
+[cxOrz/chaoxing-sign-cli](https://github.com/cxOrz/chaoxing-sign-cli) <br>
 [Reclu3e/xd_learning_live_publish](https://github.com/Reclu3e/xd_learning_live_publish) <br>
 [BenderBlog/traintime_pda](https://github.com/BenderBlog/traintime_pda) <br>
 [xdlinux/libxduauth](https://github.com/xdlinux/libxduauth)
