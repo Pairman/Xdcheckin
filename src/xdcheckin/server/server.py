@@ -1,13 +1,13 @@
-from flask import Flask as _Flask, render_template as _render_template, \
-	make_response as _make_response, request as _request, session as _session
-from flask_session import Session as _Session
 from importlib.metadata import version as _version
 from io import BytesIO as _BytesIO
 from json import loads as _loads, dumps as _dumps
+from uuid import uuid4
+from flask import Flask as _Flask, render_template as _render_template, \
+	make_response as _make_response, request as _request, session as _session
+from flask_session import Session as _Session
 from PIL.Image import open as _open
 from pyzbar.pyzbar import decode as _decode, ZBarSymbol as _ZBarSymbol
 from requests import get as _get
-from uuid import uuid4
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.xidian import IDSSession as _IDSSession, Newesxidian as _Newesxidian
 from xdcheckin.core.locations import locations as _locations
