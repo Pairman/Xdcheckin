@@ -3,7 +3,6 @@
 from base64 import b64decode as _b64decode
 from random import random as _random
 from zlib import decompress as _decompress
-from PIL.ImageFilter import MinFilter as _MinFilter
 from pyjsbitwise import bwnot as _bwnot, bwand as _bwand, bwor as _bwor, \
 	bwxor as _bwxor, lshift as _lshift, rshift as _rshift, urshift as _urshift
 
@@ -20,9 +19,12 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	:return: Slider offset.
 	"""
 	with small_img.getchannel("A") as alpha:
-		with alpha.filter(_MinFilter(15)) as filter:
-			with filter.point(lambda p: p == 255 and 255 or 0) as point:
-				x_l, y_t, x_r, y_b = point.getbbox()
+		with alpha.point(lambda p: p == 255 and 255 or 0) as point:
+			x_l, y_t, x_r y_b = point.getbbox()
+	x_l += 7
+	y_t += 7
+	x_r -= 7
+	y_b -= 7
 	with small_img.convert("L").crop(
 		(x_l, y_t, x_r, y_b)
 	) as crop:
