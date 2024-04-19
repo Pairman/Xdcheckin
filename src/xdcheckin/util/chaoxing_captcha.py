@@ -19,7 +19,7 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	:return: Slider offset.
 	"""
 	with small_img.getchannel("A") as alpha:
-		with alpha.point(lambda p: p == 255 and 255 or 0) as point:
+		with alpha.point(lambda p: p == 255) as point:
 			x_l, y_t, x_r, y_b = point.getbbox()
 	x_l += 8
 	y_t += 8
@@ -39,14 +39,15 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 		) as img:
 			for x in range(1, img.width - x_r + x_l, 2):
 				with img.crop(
-					(x, 0, x + x_r - x_l, img.height)
+					(x, 0, x + img.width, img.height)
 				) as crop:
 					window = crop.getdata()
-				mean_wd = sum(window) / (x_r - x_l) / img.height
+				mean_wd = sum(window) / len(window)
 				window = [w - mean_wd for w in window]
 				ncc = sum(
 					w * t for w, t in zip(window, template)
-				) / sum(w ** 2 for w in window)
-				maxx = ncc > maxncc and x or maxx
-				maxncc = ncc > maxncc and ncc or maxncc
+				) / sum(w * w for w in window)
+				if ncc > maxncc:
+					maxncc = ncc
+					maxx = x
 	return maxx
