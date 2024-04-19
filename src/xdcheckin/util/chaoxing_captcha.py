@@ -34,13 +34,13 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	template = [v - mean_tmp for v in template]
 	maxncc = 0
 	maxx = 0
-	with big_img.convert("L") as grayscale:
-		with grayscale.crop(
-			(x_l + 1, y_t, big_img.width - small_img.width + x_r, y_b)
-		) as img:
-			for x in range(0, img.width - x_r + x_l, 2):
-				with img.crop(
-					(x, 0, x + x_r - x_l, img.height)
+	with big_img.crop(
+		(x_l + 1, y_t, big_img.width - small_img.width + x_r, y_b)
+	) as img:
+		with img.convert("L") as grayscale:
+			for x in range(0, grayscale.width - x_r + x_l, 2):
+				with grayscale.crop(
+					(x, 0, x + x_r - x_l, grayscale.height)
 				) as crop:
 					window = crop.getdata()
 				mean_wd = sum(window) / len(window)
