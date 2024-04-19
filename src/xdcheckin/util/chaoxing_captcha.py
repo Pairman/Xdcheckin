@@ -21,10 +21,10 @@ def solve_captcha(big_img: None = None, small_img: None = None):
 	with small_img.getchannel("A") as alpha:
 		with alpha.point(lambda p: p == 255 and 255 or 0) as point:
 			x_l, y_t, x_r, y_b = point.getbbox()
-	x_l += 7
-	y_t += 7
-	x_r -= 7
-	y_b -= 7
+	x_l += 8
+	y_t += 8
+	x_r -= 8
+	y_b -= 8
 	with small_img.convert("L").crop(
 		(x_l, y_t, x_r, y_b)
 	) as crop:
