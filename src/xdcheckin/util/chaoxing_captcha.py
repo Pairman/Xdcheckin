@@ -36,9 +36,9 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	maxx = 0
 	with big_img.convert("L") as grayscale:
 		with grayscale.crop(
-			(x_l, y_t, big_img.width - small_img.width + x_r, y_b)
+			(x_l + 1, y_t, big_img.width - small_img.width + x_r, y_b)
 		) as img:
-			for x in range(1, img.width - x_r + x_l, 2):
+			for x in range(0, img.width - x_r + x_l, 2):
 				with img.crop(
 					(x, 0, x + x_r - x_l, img.height)
 				) as crop:
