@@ -26,10 +26,9 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	y_t += border
 	x_r -= border
 	y_b -= border
-	with small_img.convert("L").crop(
-		(x_l, y_t, x_r, y_b)
-	) as crop:
-		template = crop.getdata()
+	with small_img.crop((x_l, y_t, x_r, y_b)) as crop:
+		with crop.convert("L") as grayscale:
+			template = grayscale.getdata()
 	mean_tmp = sum(template) / len(template)
 	template = [v - mean_tmp for v in template]
 	maxncc = 0
