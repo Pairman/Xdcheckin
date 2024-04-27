@@ -548,7 +548,9 @@ class Chaoxing:
 				continue
 			activity_new.update({
 				"type": str(details["otherId"]),
-				"time_end": str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000)),
+				"time_end":
+					str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000))
+					if details["endTime"] else "",
 			})
 			activities.append(activity_new)
 		return activities
