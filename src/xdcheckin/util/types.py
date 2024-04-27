@@ -29,6 +29,11 @@ class TimestampDict:
 		del self._ts[key]
 		del self._data[key]
 
+	def get(self, key: None, default: None = None):
+		"""Return the value for key if key is in the dictionary, else default.
+		"""
+		return self._data.get(key, default)
+
 	def vacuum(self, seconds):
 		"""Remove key and value pairs older than the specified seconds.
 		"""

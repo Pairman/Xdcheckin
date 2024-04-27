@@ -11,6 +11,7 @@ from requests import get as _get
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.xidian import IDSSession as _IDSSession, Newesxidian as _Newesxidian
 from xdcheckin.core.locations import locations as _locations
+from xdcheckin.util.types import TimestampDict
 
 def create_server(config: dict = {}):
 	"""Create a Xdcheckin server.
@@ -307,21 +308,34 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	:param port: Port.
 	"""
 	from os import listdir, remove, makedirs
-	from os.path import exists, join
+	from os.path import join, getmtime
 	from tempfile import gettempdir
+	from time import time, sleep
+	from threading import Thread
 	from urllib3 import disable_warnings
 	from waitress import serve
 	config = {
 		"SESSION_PERMANENT": False,
 		"SESSION_TYPE": "filesystem",
 		"SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
-		"XDCHECKIN_SESSION": {}
+		"XDCHECKIN_SESSION_VACUUM_TIME": 86400,
+		"XDCHECKIN_SESSION": TimestampDict()
 	}
-	if not exists(config["SESSION_FILE_DIR"]):
-		makedirs(config["SESSION_FILE_DIR"])
-	else:
-		for i in listdir(config["SESSION_FILE_DIR"]):
-				remove(join(config["SESSION_FILE_DIR"], i))
+	session_file_dir = config["SESSION_FILE_DIR"]
+	makedirs(session_file_dir, exist_ok = True)
+	def _vacuum_sessions():
+		nonlocal config, session_file_dir
+		vacuum_time = config["XDCHECKIN_SESSION_VACUUM_TIME"]
+		xdcheckin_session = config["XDCHECKIN_SESSION"]
+		while True:
+			xdcheckin_session.vacuum(vacuum_time)
+			now = time()
+			for fname in listdir(session_file_dir):
+				fpath = join(session_file_dir, fname)
+				if now > getmtime(fpath) + vacuum_time:
+					remove(fpath)
+			sleep(vacuum_time)
+	Thread(target = _vacuum_sessions, daemon = True).start()
 	disable_warnings()
 	serve(app = create_server(config = config), host = host, port = port)
 
