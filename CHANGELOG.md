@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.9] - 2024-04-27
+
+# Fixed
+
+- Fix failure fetching signle activity when end time is missing.
+
 ## [2.0.8] - 2024-04-21
 
 # Fixed
@@ -474,7 +480,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.8...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.9...main
+[2.0.9]: https://github.com/Pairman/Xdcheckin/compare/2.0.8...2.0.9
 [2.0.8]: https://github.com/Pairman/Xdcheckin/compare/2.0.7...2.0.8
 [2.0.7]: https://github.com/Pairman/Xdcheckin/compare/2.0.6...2.0.7
 [2.0.6]: https://github.com/Pairman/Xdcheckin/compare/2.0.5...2.0.6
