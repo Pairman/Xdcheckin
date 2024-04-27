@@ -4,37 +4,41 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- Server will now automatically vacuum old sessions.
+
 ## [2.0.9] - 2024-04-27
 
-# Fixed
+### Fixed
 
 - Fix failure fetching signle activity when end time is missing.
 
 ## [2.0.8] - 2024-04-21
 
-# Fixed
+### Fixed
 
 - Fix CAPTCHA triggered on other failures for location checkin.
 
-# Changed
+### Changed
 
 - (Module) Improve accuracy and performance of ```xdcheckin.util.chaoxing_captcha.solve_captcha()```.
 
 ## [2.0.7] - 2024-04-15
 
-# Changed
+### Changed
 
 - (Module) Improve accuracy and performance of ```xdcheckin.util.chaoxing_captcha.solve_captcha()```.
 
 ## [2.0.6] - 2024-04-14
 
-# Changed
+### Changed
 
 - (Module) Improve accuracy of ```xdcheckin.util.chaoxing_captcha.solve_captcha()```.
 
 ## [2.0.5] - 2024-04-14
 
-# Added
+### Added
 
 - (Module) Lightweight ```xdcheckin.util.chaoxing_captcha.solve_captcha()``` for solving slider CAPTCHA in a non-GUI environment. Returns slider offset.
 
