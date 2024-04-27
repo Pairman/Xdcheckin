@@ -510,7 +510,7 @@ class Chaoxing:
 				"name": activity["nameOne"],
 				"time_start": str(_datetime.fromtimestamp(activity["startTime"] // 1000)),
 				"time_end":
-					str(_datetime.fromtimestamp((activity["endTime"]) // 1000))
+					str(_datetime.fromtimestamp(activity["endTime"] // 1000))
 					if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
@@ -548,7 +548,7 @@ class Chaoxing:
 				continue
 			activity_new.update({
 				"type": str(details["otherId"]),
-				"time_end": str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000))
+				"time_end": str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000)),
 			})
 			activities.append(activity_new)
 		return activities
