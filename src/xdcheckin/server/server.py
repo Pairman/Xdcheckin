@@ -327,25 +327,26 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	def _vacuum_sessions():
 		nonlocal config, session_file_dir
 		vacuum_day = config["XDCHECKIN_SESSION_VACUUM_DAY"]
-		vacuum_seconds = vaccum_day * 86400
+		vacuum_seconds = vacuum_day * 86400
 		xdcheckin_session = config["XDCHECKIN_SESSION"]
 		while True:
-			xdcheckin_session.vacuum(seconds = vacuum_seconds)
-			now = datetime.now().timestamp()
+			now = datetime.now()
+			now_ts = now.timestamp()
 			for fname in listdir(session_file_dir):
 				fpath = join(session_file_dir, fname)
-				if now > getmtime(fpath) + vacuum_seconds:
+				if now_ts > getmtime(fpath) + vacuum_seconds:
 					remove(fpath)
-			now = datetime.now()
-			then = now.replace(day = now.day + vacuum_day, hour = 3, minute = 0)
+			then = now.replace(
+				day = now.day + vacuum_day, hour = 3, minute = 0
+			)
 			sleep((then - now).total_seconds())
+			xdcheckin_session.vacuum(seconds = vacuum_seconds)
 	Thread(target = _vacuum_sessions, daemon = True).start()
 	disable_warnings()
 	serve(app = create_server(config = config), host = host, port = port)
 
 def main():
 	from sys import argv
-
 	if not len(argv) in (1, 3):
 		print(f"xdcheckin-server - Xdcheckin Server Commandline Tool {_version('Xdcheckin')}")
 		print(f"Usage: {argv[0]} <ip> <port>")
