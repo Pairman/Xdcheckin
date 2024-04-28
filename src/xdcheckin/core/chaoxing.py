@@ -414,40 +414,27 @@ class Chaoxing:
 		:return: Dictionary of class IDs to course containing 
 		course IDs, names, teachers, status, start and end time.
 		"""
-		url = "https://mooc1-1.chaoxing.com/visit/courselistdata"
+		url = "https://mooc2-ans.chaoxing.com/visit/courselistdata"
 		params = {
 			"courseType": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 86400)
-		if res.status_code == 200:
-			matches = _findall(
-				r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title="
-				r"\"(.*?)\".*?title.*?title=\"(.*?)\""
-				r"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?",
-				res.text, _DOTALL
-			)
-			return {
-				match[1]: {
-					"class_id": match[1],
-					"course_id": match[0],
-					"name": match[3],
-					"teachers": _split(", |,|，|、", match[4]),
-					"status": int(not bool(match[2])),
-					"time_start": match[5],
-					"time_end": match[6]
-				} for match in matches
-			}
-		curriculum = self.curriculum_get_curriculum()
+		matches = _findall(
+			r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title="
+			r"\"(.*?)\".*?title.*?title=\"(.*?)\""
+			r"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?",
+			res.text, _DOTALL
+		)
 		return {
-			class_id: {
-				"class_id": class_id,
-				"course_id": lesson["course_id"],
-				"name": lesson["name"],
-				"teachers": lesson["teachers"],
-				"status": 1,
-				"time_start": "",
-				"time_end": ""	
-			} for class_id, lesson in curriculum["lessons"].items()
+			match[1]: {
+				"class_id": match[1],
+				"course_id": match[0],
+				"name": match[3],
+				"teachers": _split(", |,|，|、", match[4]),
+				"status": int(not bool(match[2])),
+				"time_start": match[5],
+				"time_end": match[6]
+			} for match in matches
 		}
 
 	def course_get_course_id(
