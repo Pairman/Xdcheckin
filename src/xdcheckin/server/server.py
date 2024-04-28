@@ -323,10 +323,10 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 		"XDCHECKIN_SESSION": TimestampDict()
 	}
 	session_file_dir = config["SESSION_FILE_DIR"]
-	vacuum_day = config["XDCHECKIN_SESSION_VACUUM_DAY"]
 	makedirs(session_file_dir, exist_ok = True)
 	def _vacuum_sessions():
 		nonlocal config, session_file_dir
+		vacuum_day = config["XDCHECKIN_SESSION_VACUUM_DAY"]
 		vacuum_seconds = vaccum_day * 86400
 		xdcheckin_session = config["XDCHECKIN_SESSION"]
 		while True:
@@ -339,8 +339,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 			now = datetime.now()
 			then = now.replace(day = now.day + vacuum_day, hour = 3, minute = 0)
 			sleep((then - now).total_seconds())
-	if vacuum_day:
-		Thread(target = _vacuum_sessions, daemon = True).start()
+	Thread(target = _vacuum_sessions, daemon = True).start()
 	disable_warnings()
 	serve(app = create_server(config = config), host = host, port = port)
 
