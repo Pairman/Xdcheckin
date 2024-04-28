@@ -38,9 +38,6 @@ class TimestampDict:
 		"""Remove key and value pairs older than the specified seconds.
 		"""
 		now = _time()
-		old = []
-		for k, t in self._ts.items():
+		for k, t in tuple(self._ts.items()):
 			if now > t + seconds:
-				old.append(k)
-		for k in old:
-			self.__delitem__(k)
+				del self[k]
