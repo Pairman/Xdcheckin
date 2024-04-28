@@ -307,10 +307,11 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	:param host: IP address.
 	:param port: Port.
 	"""
+	from datetime import datetime
 	from os import listdir, remove, makedirs
 	from os.path import join, getmtime
 	from tempfile import gettempdir
-	from time import time, sleep
+	from time import sleep
 	from threading import Thread
 	from urllib3 import disable_warnings
 	from waitress import serve
@@ -327,13 +328,19 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 		nonlocal config, session_file_dir
 		vacuum_time = config["XDCHECKIN_SESSION_VACUUM_TIME"]
 		xdcheckin_session = config["XDCHECKIN_SESSION"]
+		f_init = False
 		while True:
 			xdcheckin_session.vacuum(vacuum_time)
-			now = time()
+			now = datetime.now().timestamp()
 			for fname in listdir(session_file_dir):
 				fpath = join(session_file_dir, fname)
 				if now > getmtime(fpath) + vacuum_time:
 					remove(fpath)
+			if not f_init:
+				f_init = True
+				now = datetime.now()
+				then = now.replace(day = now.day + 1, hour = 0, minute = 0)
+				sleep((then - now).seconds)
 			sleep(vacuum_time)
 	Thread(target = _vacuum_sessions, daemon = True).start()
 	disable_warnings()
