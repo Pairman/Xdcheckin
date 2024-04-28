@@ -4,7 +4,7 @@ from ast import literal_eval as _literal_eval
 from datetime import datetime as _datetime
 from json import dumps as _dumps
 from random import choice as _choice, uniform as _uniform
-from re import findall as _findall, search as _search, DOTALL as _DOTALL
+from re import findall as _findall, search as _search, split as _split, DOTALL as _DOTALL
 from threading import Thread as _Thread
 from requests import Response as _Response
 from requests.adapters import HTTPAdapter as _HTTPAdapter
@@ -303,18 +303,18 @@ class Chaoxing:
 		"""
 		url = "https://passport2.chaoxing.com/fanyalogin"
 		data = {
-				"uname": _encrypt_aes(
-					msg = account["username"],
-					key = b"u2oh6Vu^HWe4_AES",
-					iv = b"u2oh6Vu^HWe4_AES"
-				),
-				"password": _encrypt_aes(
-					msg = account["password"],
-					key = b"u2oh6Vu^HWe4_AES",
-					iv = b"u2oh6Vu^HWe4_AES"
-				),
-				"t": True
-			}
+			"uname": _encrypt_aes(
+				msg = account["username"],
+				key = b"u2oh6Vu^HWe4_AES",
+				iv = b"u2oh6Vu^HWe4_AES"
+			),
+			"password": _encrypt_aes(
+				msg = account["password"],
+				key = b"u2oh6Vu^HWe4_AES",
+				iv = b"u2oh6Vu^HWe4_AES"
+			),
+			"t": True
+		}
 		ret = {
 			"name": "",
 			"cookies": None,
@@ -360,6 +360,7 @@ class Chaoxing:
 		def _add_lesson(lesson: dict = {}):
 			lesson_class_id = str(lesson["classId"])
 			lesson = {
+				"class_id": lesson_class_id,
 				"course_id": str(lesson["courseId"]),
 				"name": lesson["name"],
 				"locations": [lesson["location"]],
@@ -418,22 +419,35 @@ class Chaoxing:
 			"courseType": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 86400)
-		matches = _findall(
-			r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title="
-			r"\"(.*?)\".*?title.*?title=\"(.*?)\""
-			r"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?",
-			res.text, _DOTALL
-		)
+		if res.status_code == 200:
+			matches = _findall(
+				r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title="
+				r"\"(.*?)\".*?title.*?title=\"(.*?)\""
+				r"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?",
+				res.text, _DOTALL
+			)
+			return {
+				match[1]: {
+					"class_id": match[1],
+					"course_id": match[0],
+					"name": match[3],
+					"teachers": _split(", |,|，|、", match[4]),
+					"status": int(not bool(match[2])),
+					"time_start": match[5],
+					"time_end": match[6]
+				} for match in matches
+			}
+		curriculum = self.curriculum_get_curriculum()
 		return {
-			match[1]: {
-				"class_id": match[1],
-				"course_id": match[0],
-				"name": match[3],
-				"teacher": match[4].split("，"),
-				"status": int(not bool(match[2])),
-				"time_start": match[5],
-				"time_end": match[6]
-			} for match in matches
+			class_id: {
+				"class_id": class_id,
+				"course_id": lesson["course_id"],
+				"name": lesson["name"],
+				"teachers": lesson["teachers"],
+				"status": 1,
+				"time_start": "",
+				"time_end": ""	
+			} for class_id, lesson in curriculum["lessons"].items()
 		}
 
 	def course_get_course_id(
