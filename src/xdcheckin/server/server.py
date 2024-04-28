@@ -319,30 +319,28 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 		"SESSION_PERMANENT": False,
 		"SESSION_TYPE": "filesystem",
 		"SESSION_FILE_DIR": join(gettempdir(), "xdcheckin"),
-		"XDCHECKIN_SESSION_VACUUM_TIME": 86400,
+		"XDCHECKIN_SESSION_VACUUM_DAY": 1,
 		"XDCHECKIN_SESSION": TimestampDict()
 	}
 	session_file_dir = config["SESSION_FILE_DIR"]
+	vacuum_day = config["XDCHECKIN_SESSION_VACUUM_DAY"]
 	makedirs(session_file_dir, exist_ok = True)
 	def _vacuum_sessions():
 		nonlocal config, session_file_dir
-		vacuum_time = config["XDCHECKIN_SESSION_VACUUM_TIME"]
+		vacuum_seconds = vaccum_day * 86400
 		xdcheckin_session = config["XDCHECKIN_SESSION"]
-		f_init = False
 		while True:
-			xdcheckin_session.vacuum(vacuum_time)
+			xdcheckin_session.vacuum(seconds = vacuum_seconds)
 			now = datetime.now().timestamp()
 			for fname in listdir(session_file_dir):
 				fpath = join(session_file_dir, fname)
-				if now > getmtime(fpath) + vacuum_time:
+				if now > getmtime(fpath) + vacuum_seconds:
 					remove(fpath)
-			if not f_init:
-				f_init = True
-				now = datetime.now()
-				then = now.replace(day = now.day + 1, hour = 0, minute = 0)
-				sleep((then - now).seconds)
-			sleep(vacuum_time)
-	Thread(target = _vacuum_sessions, daemon = True).start()
+			now = datetime.now()
+			then = now.replace(day = now.day + vacuum_day, hour = 3, minute = 0)
+			sleep((then - now).total_seconds())
+	if vacuum_day:
+		Thread(target = _vacuum_sessions, daemon = True).start()
 	disable_warnings()
 	serve(app = create_server(config = config), host = host, port = port)
 
