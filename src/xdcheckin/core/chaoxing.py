@@ -624,7 +624,7 @@ class Chaoxing:
 		:return: Checkin location containing address, latitude, 
 		longitude, range and ranged option.
 		"""
-		def _randomness(x: int | float = 0):
+		def _randomness(x: float = 0):
 			return round(x + _choice((-1, 1)) * _uniform(1, 5) * 0.0001, 6)
 		location_new = {
 			"ranged": 0,
