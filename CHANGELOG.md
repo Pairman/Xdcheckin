@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.0.12] - 2024-04-29
+
+### Fixed
+
+- Update API for course fetching to bypass Chaoxing's IP blacklist.
+
 ## [2.0.11] - 2024-04-28
 
 ### Fixed
@@ -496,7 +502,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.11...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...main
+[2.0.12]: https://github.com/Pairman/Xdcheckin/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/Pairman/Xdcheckin/compare/2.0.10...2.0.11
 [2.0.10]: https://github.com/Pairman/Xdcheckin/compare/2.0.9...2.0.10
 [2.0.9]: https://github.com/Pairman/Xdcheckin/compare/2.0.8...2.0.9
