@@ -421,7 +421,7 @@ class Chaoxing:
 					"class_id": match[2],
 					"course_id": match[0],
 					"name": match[1],
-					"teachers": _split(", |,|，|、", match[3]),
+					"teachers": _split(r", |,|，|、", match[3]),
 					"status": status,
 					"time_start": match[4],
 					"time_end": match[5]
