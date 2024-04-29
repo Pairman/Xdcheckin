@@ -414,28 +414,33 @@ class Chaoxing:
 		:return: Dictionary of class IDs to course containing 
 		course IDs, names, teachers, status, start and end time.
 		"""
+		def _fill_courses(matches, status):
+			nonlocal courses
+			courses.update({
+				match[2]: {
+					"class_id": match[2],
+					"course_id": match[0],
+					"name": match[1],
+					"teachers": _split(", |,|，|、", match[3]),
+					"status": status,
+					"time_start": match[4],
+					"time_end": match[5]
+				} for match in matches
+			})
 		url = "https://mooc2-ans.chaoxing.com/visit/courselistdata"
 		params = {
 			"courseType": 1
 		}
 		res = self.get(url = url, params = params, expire_after = 86400)
-		matches = _findall(
-			r"course_(\d+)_(\d+).*?(?:(not-open).*?)?title="
-			r"\"(.*?)\".*?title.*?title=\"(.*?)\""
-			r"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?",
-			res.text, _DOTALL
-		)
-		return {
-			match[1]: {
-				"class_id": match[1],
-				"course_id": match[0],
-				"name": match[3],
-				"teachers": _split(", |,|，|、", match[4]),
-				"status": int(not bool(match[2])),
-				"time_start": match[5],
-				"time_end": match[6]
-			} for match in matches
-		}
+		active, ended = res.text.split("isState")
+		reg = r"Client\('(\d+)','(.*?)','(\d+).*?color3\" " \
+			r"title=\"(.*?)\"(?:.*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
+		matches_active = _findall(reg, active, _DOTALL)
+		matches_ended = _findall(reg, ended, _DOTALL)
+		courses = {}
+		_fill_courses(matches_active, 1)
+		_fill_courses(matches_ended, 0)
+		return courses
 
 	def course_get_course_id(
 		self, course: dict = {"course_id": "", "class_id": ""}
