@@ -6,9 +6,6 @@ class TimestampDict:
 	_data = {}
 	_ts = {}
 
-	def __repr__(self):
-		return repr(self._data)
-
 	def __getitem__(self, key: None):
 		"""Return self[key].
 		"""
