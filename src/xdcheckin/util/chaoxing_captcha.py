@@ -31,8 +31,8 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 			template = grayscale.getdata()
 	mean_tmp = sum(template) / len(template)
 	template = [v - mean_tmp for v in template]
-	max_ncc = 0
-	max_x = 0
+	ncc_max = 0
+	x_max = 0
 	with big_img.crop(
 		(x_l + 1, y_t, big_img.width - small_img.width + x_r, y_b)
 	) as img:
@@ -47,7 +47,7 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 				ncc = sum(
 					w * t for w, t in zip(window, template)
 				) / sum(w * w for w in window)
-				if ncc > max_ncc:
-					max_ncc = ncc
-					max_x = x
-	return max_x
+				if ncc > ncc_max:
+					ncc_max = ncc
+					x_max = x
+	return x_max
