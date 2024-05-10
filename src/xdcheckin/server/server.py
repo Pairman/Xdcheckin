@@ -1,7 +1,7 @@
 from importlib.metadata import version as _version
 from io import BytesIO as _BytesIO
 from json import loads as _loads, dumps as _dumps
-from uuid import uuid4
+from uuid import uuid4 as _uuid4
 from flask import Flask as _Flask, render_template as _render_template, \
 	make_response as _make_response, request as _request, session as _session
 from flask_session import Session as _Session
@@ -11,7 +11,6 @@ from requests import get as _get
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.xidian import IDSSession as _IDSSession, Newesxidian as _Newesxidian
 from xdcheckin.core.locations import locations as _locations
-from xdcheckin.util.types import TimestampDict
 
 def create_server(config: dict = {}):
 	"""Create a Xdcheckin server.
@@ -71,7 +70,7 @@ def create_server(config: dict = {}):
 		try:
 			ids = _IDSSession(service = "https://learning.xidian.edu.cn/cassso/xidian")
 			if not _session.get("xdcheckin_uuid"):
-				_session["xdcheckin_uuid"] = str(uuid4())
+				_session["xdcheckin_uuid"] = str(_uuid4())
 			if not server.config["XDCHECKIN_SESSION"].get(_session["xdcheckin_uuid"]):
 				server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]] = {}
 			server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]]["ids"] = ids
@@ -127,7 +126,7 @@ def create_server(config: dict = {}):
 			assert chaoxing.logined, "Chaoxing login failed."
 			newesxidian = _Newesxidian(chaoxing = chaoxing)
 			if not _session.get("xdcheckin_uuid"):
-				_session["xdcheckin_uuid"] = str(uuid4())
+				_session["xdcheckin_uuid"] = str(_uuid4())
 			if not server.config["XDCHECKIN_SESSION"].get(_session["xdcheckin_uuid"]):
 				server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]] = {}
 			server.config["XDCHECKIN_SESSION"][_session["xdcheckin_uuid"]].update({
@@ -315,6 +314,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5001):
 	from threading import Thread
 	from urllib3 import disable_warnings
 	from waitress import serve
+	from xdcheckin.util.types import TimestampDict
 	config = {
 		"SESSION_PERMANENT": False,
 		"SESSION_TYPE": "filesystem",
