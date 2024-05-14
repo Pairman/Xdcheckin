@@ -646,29 +646,6 @@ class Chaoxing:
 			location_new["address"] = location["address"]
 		return location_new
 
-	def checkin_get_location_log(self, activity: dict = {"active_id": ""}):
-		"""Get checkin locations submitted by up to 100 students.
-		:param activity: Activity ID in dictionary.
-		:return: List of checkin locations containing address, 
-		latitude, longitude, range (placeholder) and 
-		ranged (placeholder) option.
-		"""
-		url = "https://mobilelearn.chaoxing.com/pptSign/autoRefeashSignList4Json2"
-		params = {
-			"activeId": activity["active_id"]
-		}
-		res = self.get(url = url, params = params)
-		data = res.json()["list"]
-		return [
-			{
-				"latitude": location.get("latitude"),
-				"longitude": location.get("longitude"),
-				"address": location.get("title"),
-				"ranged": int(not location.get("latitude") is None),
-				"range": 0
-			} for location in data
-		]
-
 	def checkin_get_location(
 		self, activity: dict = {"active_id": ""},
 		course: dict ={"course_id": "", "class_id": ""}
