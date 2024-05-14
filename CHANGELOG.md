@@ -4,7 +4,7 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
-# Removed
+### Removed
 
 - (Module) Remove ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_location_log()```.
 
