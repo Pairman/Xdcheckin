@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [2.1.1] - 2024-05-14
+
+### Fixed
+
+- Fix some courses missing and not queried for activities.
+
 ### Removed
 
 - (Module) Remove ```xdcheckin.core.chaoxing.Chaoxing().checkin_get_location_log()```.
@@ -506,7 +512,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...main
+[2.1.1]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...2.1.1
 [2.0.12]: https://github.com/Pairman/Xdcheckin/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/Pairman/Xdcheckin/compare/2.0.10...2.0.11
 [2.0.10]: https://github.com/Pairman/Xdcheckin/compare/2.0.9...2.0.10
