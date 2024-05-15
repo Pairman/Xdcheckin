@@ -434,7 +434,7 @@ class Chaoxing:
 		res = self.get(url = url, params = params, expire_after = 86400)
 		active, ended = res.text.split("isState")
 		reg = r"Client\('(\d+)','(.*?)','(\d+).*?color3\" " \
-			r"title=\"(.*?)\".*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
+			r"title=\"(.*?)\"[^\n]*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
 		matches_active = _findall(reg, active, _DOTALL)
 		matches_ended = _findall(reg, ended, _DOTALL)
 		courses = {}
