@@ -55,12 +55,13 @@ class Chaoxing:
 		if not self.logined and username and password:
 			for func in (
 				self.login_username_fanya,
-				self.login_username_v2,
 				self.login_username_v3,
 				self.login_username_v5,
+				self.login_username_v25,
+				self.login_username_v2,
 				self.login_username_v11,
-				self.login_username_mylogin1,
-				self.login_username_xxk
+				self.login_username_xxk,
+				self.login_username_mylogin1
 			):
 				self.name, self.cookies, self.logined = func(account = account).values()
 				if self.logined:
@@ -231,6 +232,32 @@ class Chaoxing:
 			"logined": False
 		}
 		res = self.get(url = url, params = params)
+		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+			ret.update({
+				"cookies": res.cookies,
+				"logined": True
+			})
+		return ret
+
+	def login_username_v25(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password 
+		via V25 API.
+		:param account: Same as login_username_v2().
+		:return: Same as login_username_v3().
+		"""
+		url = "https://v25.chaoxing.com/login"
+		data = {
+			"name": account["username"],
+			"pwd": account["password"]
+		}
+		ret = {
+			"name": "",
+			"cookies": None,
+			"logined": False
+		}
+		res = self.post(url = url, data = data)
 		if res.status_code == 200 and res.cookies.get("p_auth_token"):
 			ret.update({
 				"cookies": res.cookies,
