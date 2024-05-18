@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ast import literal_eval as _literal_eval
-from asyncio import gather as _gather, run as _run, Semaphore as _Semaphore
+from asyncio import create_task as _create_task, gather as _gather, run as _run, Semaphore as _Semaphore
 from datetime import datetime as _datetime
 from json import dumps as _dumps
 from random import choice as _choice, uniform as _uniform
@@ -925,11 +925,11 @@ class Chaoxing:
 		captcha (placeholder if already checked-in or on failure).
 		"""
 		try:
-			thread_analysis = _Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
-			thread_analysis.start()
+			analyzer = _create_task(self.checkin_do_analysis(activity = activity))
 			info = self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
-			presign = self.checkin_do_presign(activity = activity, course = {"class_id": str(info["clazzId"])})
+			course = {"class_id": str(info["clazzId"])}
+			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign[0], f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
@@ -937,14 +937,9 @@ class Chaoxing:
 					"params": "",
 					"captcha": ""
 				}
-			location_new = {
-				**(
-					self.checkin_format_location(location = location, location_new = presign[1])
-					if presign[1]["ranged"] else location
-				),
-				"ranged": presign[1]["ranged"]
-			}
-			thread_analysis.join()
+			location_new = self.checkin_format_location(location = location, location_new = presign[1])
+				if presign[1]["ranged"] else {**location, "ranged": 0}
+			_run(analyzer)
 			result = self.checkin_do_sign(activity = {**activity, "type": "4"}, location = location_new)
 			result[1]["captcha"] = presign[2]
 			return result
@@ -964,20 +959,15 @@ class Chaoxing:
 		:param location: Same as checkin_checkin_location().
 		:return: Same as checkin_checkin_location().
 		"""
-		def _get_location():
-			nonlocal location_new
-			location_new = self.checkin_format_location(
-				location = location,
-				location_new = self.checkin_get_location(activity = activity, course = course)
-			)
 		try:
-			thread_analysis = _Thread(target = self.checkin_do_analysis, kwargs = {"activity": activity})
-			thread_analysis.start()
+			analyzer = _create_task(self.checkin_do_analysis(activity = activity))
 			info = self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], "Activity ended or deleted."
-			course, location_new = {"class_id": str(info["clazzId"])}, {}
-			thread_location = _Thread(target = _get_location)
-			thread_location.start()
+			course = {"class_id": str(info["clazzId"])}
+			locator = _create_task(self.checkin_format_location(
+				location = location,
+				location_new = self.checkin_get_location(activity = activity, course = course)
+			))
 			presign = self.checkin_do_presign(activity = activity, course = course)
 			assert presign[0], f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
@@ -986,15 +976,9 @@ class Chaoxing:
 					"params": "",
 					"captcha": ""
 				}
-			location_new = {
-				**(
-					thread_location.join() or
-					self.checkin_format_location(location = location, location_new = location_new)
-					if presign[1]["ranged"] else location
-				),
-				"ranged": presign[1]["ranged"]
-			}
-			thread_analysis.join()
+			location_new = self.checkin_format_location(location = location, location_new = _run(locator))
+				if presign[1]["ranged"] else {**location, "ranged": 0}
+			_run(analyzer)
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
 			result[1]["captcha"] = presign[2]
 			return result
