@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from ast import literal_eval as _literal_eval
+from asyncio import gather as _gather, run as _run, Semaphore as _Semaphore
 from datetime import datetime as _datetime
 from json import dumps as _dumps
 from random import choice as _choice, uniform as _uniform
 from re import findall as _findall, search as _search, split as _split, DOTALL as _DOTALL
-from threading import Thread as _Thread
 from requests import Response as _Response
 from requests.adapters import HTTPAdapter as _HTTPAdapter
 from requests.exceptions import RequestException as _RequestException
@@ -592,30 +592,26 @@ class Chaoxing:
 		"""Get activities of all courses.
 		:return: Dictionary of class IDs to ongoing activities.
 		"""
-		def _get_course_activities(course: dict = {}, func = None):
-			course_activities = func(course = course)
-			if course_activities:
-				activities[course["class_id"]] = course_activities
+		async def _worker(course: dict = {}, func = None):
+			async with sem:
+				course_activities = func(course = course)
+				if course_activities:
+					activities[course["class_id"]] = course_activities
+		async def _gatherer():
+			_gather(
+				_worker(
+					course,
+					self.course_get_course_activities_v2 if i % 2
+					else self.course_get_course_activities_ppt
+				)
+				for i, course in enumerate(courses) if course["status"]
+			)
+		sem = _Semaphore(self.config["chaoxing_course_get_activities_workers"])
+		courses = tuple(
+			self.courses.values()
+		)[: self.config["chaoxing_course_get_activities_courses_limit"]]
 		activities = {}
-		nworkers = self.config["chaoxing_course_get_activities_workers"]
-		ncourses = min(self.config["chaoxing_course_get_activities_courses_limit"], len(self.courses))
-		courses = tuple(self.courses.values())[: ncourses]
-		threads = [
-			[
-				_Thread(target = _get_course_activities, kwargs = {
-					"course": courses[j],
-					"func": self.course_get_course_activities_v2 if j % 2
-						else self.course_get_course_activities_ppt
-				})
-				for j in range(i, min(i + nworkers, ncourses)) if courses[j]["status"]
-			]
-			for i in range(0, ncourses, nworkers)
-		]
-		for batch in threads:
-			for thread in batch:
-				thread.start()
-			for thread in batch:
-				thread.join()
+		_run(_gatherer())
 		return activities
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
