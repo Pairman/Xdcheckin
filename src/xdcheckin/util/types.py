@@ -7,7 +7,7 @@ class TimestampDict:
 	_ts = {}
 
 	def __getitem__(self, key: None):
-		"""Return self[key].
+		"""Return ``self[key]``.
 		"""
 		if key in self._data:
 			self._ts[key] = _time()
@@ -15,13 +15,13 @@ class TimestampDict:
 		raise KeyError(key)
 
 	def __setitem__(self, key: None, value: None):
-		"""Set self[key] to value.
+		"""Set ``self[key]`` to value.
 		"""
 		self._ts[key] = _time()
 		self._data[key] = value
 
 	def __delitem__(self, key):
-		"""Delete self[key].
+		"""Delete ``self[key]``.
 		"""
 		del self._ts[key]
 		del self._data[key]

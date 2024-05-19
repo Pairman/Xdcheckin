@@ -37,10 +37,10 @@ class Chaoxing:
 		config: dict = {}
 	):
 		"""Create a Chaoxing instance and login.
-		:param username: Chaoxing username. Unused if cookies are given.
-		:param password: Chaoxing password. Unused if cookies are given.
+		:param username: Chaoxing username. Unused if ``cookies`` are given.
+		:param password: Chaoxing password. Unused if ``cookies`` are given.
 		:param cookies: Cookies from previous login. 
-		Overrides username and password if given.
+		Overrides ``username`` and ``password`` if given.
 		:param config: Configurations for the instance.
 		:return: None.
 		"""
@@ -161,7 +161,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via V3 API.
-		:param account: Same as login_username_v2().
+		:param account: Same as ``login_username_v2()``.
 		:return: Name (placeholder), cookies and login state.
 		"""
 		url = "http://v3.chaoxing.com/vLogin"
@@ -187,8 +187,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via V5 API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v2().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v2()``.
 		"""
 		url = "https://v5.chaoxing.com/login/passportLogin"
 		data = {
@@ -218,8 +218,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via V11 API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v3().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
 		"""
 		url = "https://passport2.chaoxing.com/v11/loginregister"
 		params = {
@@ -244,8 +244,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via V25 API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v3().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
 		"""
 		url = "https://v25.chaoxing.com/login"
 		data = {
@@ -270,8 +270,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via Mylogin1 API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v3().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
 		"""
 		url = "https://passport2.chaoxing.com/mylogin1"
 		data = {
@@ -298,8 +298,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via XXK API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v3().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
 		"""
 		url = "http://xxk.chaoxing.com/api/front/user/login"
 		params = {
@@ -325,8 +325,8 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password 
 		via Fanya API.
-		:param account: Same as login_username_v2().
-		:return: Same as login_username_v3().
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
 		"""
 		url = "https://passport2.chaoxing.com/fanyalogin"
 		data = {
@@ -358,7 +358,7 @@ class Chaoxing:
 	def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
-		:return: Same as login_username_v2().
+		:return: Same as ``login_username_v2()``.
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		ret = {
@@ -630,7 +630,7 @@ class Chaoxing:
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Get PPT acitvity info.
 		:param activity: Activity ID in dictionary.
-		:return: Checkin PPT activity info including class ID and 
+		:return: Checkin PPT activity details including class ID and 
 		ranged option on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
@@ -956,8 +956,8 @@ class Chaoxing:
 	):
 		"""Qrcode checkin.
 		:param activity: Activity ID and ENC code in dictionary.
-		:param location: Same as checkin_checkin_location().
-		:return: Same as checkin_checkin_location().
+		:param location: Same as ``checkin_checkin_location()``.
+		:return: Same as ``checkin_checkin_location()``.
 		"""
 		try:
 			analyzer = _create_task(self.checkin_do_analysis(activity = activity))
@@ -995,8 +995,8 @@ class Chaoxing:
 	):
 		"""Qrcode checkin.
 		:param url: URL from Qrcode.
-		:param location: Same as checkin_checkin_location().
-		:return: Same as checkin_checkin_location().
+		:param location: Same as ``checkin_checkin_location()``.
+		:return: Same as ``checkin_checkin_location()``.
 		"""
 		try:
 			assert "mobilelearn.chaoxing.com/widget/sign/e" in url, f"Checkin failure. {'Invalid URL.', url}"

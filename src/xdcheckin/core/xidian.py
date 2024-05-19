@@ -31,7 +31,7 @@ class IDSSession:
 		self, url: str = "", params: dict = {}, cookies: dict = None,
 		headers: dict = None, **kwargs
 	):
-		"""Wrapper for requests.get().
+		"""Wrapper for ``requests.get()``.
 		:param url: URL.
 		:param params: Parameters.
 		:param cookies: Cookies. Overrides existing cookies.
@@ -59,7 +59,7 @@ class IDSSession:
 		self, url: str = "", data: dict = {}, cookies: dict = None,
 		headers: dict = None, **kwargs
 	):
-		"""Wrapper for requests.post().
+		"""Wrapper for ``requests.post()``.
 		:param url: URL.
 		:param data: Data.
 		:param cookies: Cookies. Overrides existing cookies.
@@ -199,8 +199,8 @@ class Newesxidian:
 	chaoxing_session = logined = None
 
 	def __init__(self, chaoxing: None = None):
-		"""Create a Newesxidian with Chaoxing instance.
-		:param chaoxing: Chaoxing instance.
+		"""Create a Newesxidian with ``Chaoxing`` instance.
+		:param chaoxing: The ``Chaoxing`` instance.
 		:return: None.
 		"""
 		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
