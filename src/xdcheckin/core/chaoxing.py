@@ -461,7 +461,7 @@ class Chaoxing:
 		res = self.get(url = url, params = params, expire_after = 86400)
 		active, ended = res.text.split("isState")
 		reg = r"Client\('(\d+)','(.*?)','(\d+).*?color3\" " \
-			r"title=\"(.*?)\".*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
+		r"title=\"(.*?)\".*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
 		matches_active = _findall(reg, active, _DOTALL)
 		matches_ended = _findall(reg, ended, _DOTALL)
 		courses = {}
@@ -542,9 +542,8 @@ class Chaoxing:
 				"type": activity["otherId"],
 				"name": activity["nameOne"],
 				"time_start": str(_datetime.fromtimestamp(activity["startTime"] // 1000)),
-				"time_end":
-					str(_datetime.fromtimestamp(activity["endTime"] // 1000))
-					if activity["endTime"] else "",
+				"time_end"：str(_datetime.fromtimestamp(activity["endTime"] // 1000))
+				if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
 		]
@@ -581,9 +580,8 @@ class Chaoxing:
 				continue
 			activity_new.update({
 				"type": str(details["otherId"]),
-				"time_end":
-					str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000))
-					if details["endTime"] else "",
+				"time_end": str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000))
+				if details["endTime"] else "",
 			})
 			activities.append(activity_new)
 		return activities
@@ -937,8 +935,8 @@ class Chaoxing:
 					"params": "",
 					"captcha": ""
 				}
-			location_new = self.checkin_format_location(location = location, location_new = presign[1])
-				if presign[1]["ranged"] else {**location, "ranged": 0}
+			location_new = self.checkin_format_location(location = location, location_new = presign[1]) \
+			if presign[1]["ranged"] else {**location, "ranged": 0}
 			_run(analyzer)
 			result = self.checkin_do_sign(activity = {**activity, "type": "4"}, location = location_new)
 			result[1]["captcha"] = presign[2]
@@ -976,8 +974,8 @@ class Chaoxing:
 					"params": "",
 					"captcha": ""
 				}
-			location_new = self.checkin_format_location(location = location, location_new = _run(locator))
-				if presign[1]["ranged"] else {**location, "ranged": 0}
+			location_new = self.checkin_format_location(location = location, location_new = _run(locator)) \
+			if presign[1]["ranged"] else {**location, "ranged": 0}
 			_run(analyzer)
 			result = self.checkin_do_sign(activity = {**activity, "type": "2"}, location = location_new)
 			result[1]["captcha"] = presign[2]
