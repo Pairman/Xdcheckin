@@ -85,7 +85,7 @@ class IDSSession:
 
 	def login_username_prepare(self):
 		"""Prepare verification for username login.
-		:return: Base64 encoded captcha background and 
+		:return: Base64 encoded captcha background and \
 		slider image string.
 		"""
 		url1 = "https://ids.xidian.edu.cn/authserver/login"
@@ -127,7 +127,7 @@ class IDSSession:
 		account: dict = {"username": "", "password": "", "vcode": ""}
 	):
 		"""Verify and finish username logging in.
-		:param account: Username, password and verification 
+		:param account: Username, password and verification \
 		code (a.k.a. slider offset).
 		:return: Cookies and login state.
 		"""
@@ -150,7 +150,7 @@ class IDSSession:
 				msg = account["password"],
 				key = self.secrets["login_prepare_salt"].encode("utf-8"),
 				iv = b"xidianscriptsxdu",
-				padding = lambda msg: 4 * b"xidianscriptsxdu" + msg.encode("utf-8")
+				pad = lambda msg: 4 * b"xidianscriptsxdu" + msg.encode("utf-8")
 			),
 			"captcha": "",
 			"_eventId": "submit",
@@ -232,9 +232,9 @@ class Newesxidian:
 		self, livestream: dict = {"live_id": "", "device": "", "location": ""}
 	):
 		"""Get livestream URL.
-		:param livestream: Live ID (unused if device ID is present), device ID
+		:param livestream: Live ID (unused if device ID is present), device ID \
 		and location (in case device ID is not present) in dictionary.
-		:return: Livestream URL, live ID (placeholder if not given), device ID
+		:return: Livestream URL, live ID (placeholder if not given), device ID \
 		and classroom location (placeholder if device ID not given).
 		"""
 		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"

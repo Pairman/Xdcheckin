@@ -37,10 +37,12 @@ class Chaoxing:
 		config: dict = {}
 	):
 		"""Create a Chaoxing instance and login.
-		:param username: Chaoxing username. Unused if ``cookies`` are given.
-		:param password: Chaoxing password. Unused if ``cookies`` are given.
-		:param cookies: Cookies from previous login. 
-		Overrides ``username`` and ``password`` if given.
+		:param username: Chaoxing username. Unused if ``cookies`` \
+		is present.
+		:param password: Chaoxing password. Unused if ``cookies`` \
+		is present.
+		:param cookies: Cookies from previous login. Overrides \
+		``username`` and ``password`` if given.
 		:param config: Configurations for the instance.
 		:return: None.
 		"""
@@ -131,7 +133,7 @@ class Chaoxing:
 	def login_username_v2(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via V2 API.
 		:param account: Username and password in dictionary.
 		:return: Name, cookies and login state.
@@ -159,7 +161,7 @@ class Chaoxing:
 	def login_username_v3(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via V3 API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Name (placeholder), cookies and login state.
@@ -185,7 +187,7 @@ class Chaoxing:
 	def login_username_v5(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via V5 API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v2()``.
@@ -216,7 +218,7 @@ class Chaoxing:
 	def login_username_v11(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via V11 API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
@@ -242,7 +244,7 @@ class Chaoxing:
 	def login_username_v25(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via V25 API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
@@ -268,7 +270,7 @@ class Chaoxing:
 	def login_username_mylogin1(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via Mylogin1 API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
@@ -296,7 +298,7 @@ class Chaoxing:
 	def login_username_xxk(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via XXK API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
@@ -323,7 +325,7 @@ class Chaoxing:
 	def login_username_fanya(
 		self, account: dict = {"username": "", "password": ""}
 	):
-		"""Log into Chaoxing account with username and password 
+		"""Log into Chaoxing account with username and password \
 		via Fanya API.
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
@@ -380,8 +382,8 @@ class Chaoxing:
 	def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum.
 		:param week: Week number. Defaulted to the current week.
-		:return: Dictionary of curriculum details and lessons 
-		containing course IDs, names, classroom locations, teachers 
+		:return: Dictionary of curriculum details and lessons \
+		containing course IDs, names, classroom locations, teachers \
 		and time.
 		"""
 		def _add_lesson(lesson: dict = {}):
@@ -438,7 +440,7 @@ class Chaoxing:
 
 	def course_get_courses(self):
 		"""Get all courses in the root folder.
-		:return: Dictionary of class IDs to course containing 
+		:return: Dictionary of class IDs to course containing \
 		course IDs, names, teachers, status, start and end time.
 		"""
 		def _fill_courses(matches, status):
@@ -473,8 +475,8 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get course ID of a course.
-		:param course: Course ID (will be filled if not given) and 
-		clsss ID in dictionary.
+		:param course: Course ID (will be filled if not given) \
+		and clsss ID in dictionary.
 		:return: Course ID corresponding to the class ID.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
@@ -494,9 +496,9 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get checkin location history of a course.
-		:param course: Course ID (will be filled if not given) and 
-		class ID in dictionary.
-		:return: Dictionary of activity IDs to checkin locations 
+		:param course: Course ID (will be filled if not given) \
+		and class ID in dictionary.
+		:return: Dictionary of activity IDs to checkin locations \
 		used by the course.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/sign/getLocationLog"
@@ -522,10 +524,10 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via V2 API.
-		:param course: Course ID (will be filled if not given) and 
-		class ID in dictionary.
-		:return: List of dictionaries of ongoing activities with type, 
-		name, activity ID, start, end and remaining time.
+		:param course: Course ID (will be filled if not given) \
+		and class ID.
+		:return: List of ongoing activities with type, name, \
+		activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
@@ -552,10 +554,10 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via PPT API.
-		:param course: Course ID (will be filled if not given) and 
-		class ID in dictionary.
-		:return: List of dictionaries of ongoing activities with type, 
-		name, activity ID, start, end and remaining time.
+		:param course: Course ID (will be filled if not given) \
+		and class ID.
+		:return: List of ongoing activities with type, name, \
+		activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/ppt/activeAPI/taskactivelist"
 		params = {
@@ -588,7 +590,7 @@ class Chaoxing:
 
 	def course_get_activities(self):
 		"""Get activities of all courses.
-		:return: Dictionary of class IDs to ongoing activities.
+		:return: Dictionary of Class IDs to ongoing activities.
 		"""
 		async def _worker(course: dict = {}, func = None):
 			async with sem:
@@ -614,7 +616,7 @@ class Chaoxing:
 
 	def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details.
-		:param activity: Activity ID in dictionary.
+		:param activity: Activity ID.
 		:return: Checkin details including class ID on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
@@ -627,9 +629,9 @@ class Chaoxing:
 
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
 		"""Get PPT acitvity info.
-		:param activity: Activity ID in dictionary.
-		:return: Checkin PPT activity details including class ID and 
-		ranged option on success.
+		:param activity: Activity ID.
+		:return: Checkin PPT activity details including class ID \
+		and ranged option on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {
@@ -644,11 +646,11 @@ class Chaoxing:
 		location_new: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Format checkin location.
-		:param location: Address, latitude and longitude in dictionary. 
+		:param location: Address, latitude and longitude. \
 		Used for address override for checkin location.
-		:param location_new: Address, latitude and longitude 
-		in dictionary. The checkin location to upload.
-		:return: Checkin location containing address, latitude, 
+		:param location_new: Address, latitude and longitude \
+		The checkin location to upload.
+		:return: Checkin location containing address, latitude, \
 		longitude, range and ranged option.
 		"""
 		def _randomness(x: float = 0):
@@ -671,12 +673,12 @@ class Chaoxing:
 		self, activity: dict = {"active_id": ""},
 		course: dict ={"course_id": "", "class_id": ""}
 	):
-		"""Get checkin location from the location log of its 
+		"""Get checkin location from the location log of its \
 		corresponding course.
 		:param activity: Activity ID in dictionary.
-		:param course: Course ID (will be filled if not given) and 
-		class ID in dictionary.
-		:return: Checkin location containing address, latitude, 
+		:param course: Course ID (will be filled if not given) \
+		and class ID in dictionary.
+		:return: Checkin location containing address, latitude, \
 		longitude, range and ranged option.
 		"""
 		locations = self.course_get_location_log(course = course)
@@ -757,8 +759,8 @@ class Chaoxing:
 		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
 	):
 		"""Submit and verify CAPTCHA.
-		:param captcha: CAPTCHA ID, and verification code (e.g. slider 
-		offset) in dictionary.
+		:param captcha: CAPTCHA ID, and verification code (e.g. \
+		slider offset) in dictionary.
 		:return: CAPTCHA with validation code on success.
 		"""
 		url = "https://captcha.chaoxing.com/captcha/check/verification/result"
@@ -788,9 +790,9 @@ class Chaoxing:
 	):
 		"""Do checkin pre-sign.
 		:param activity: Activity ID in dictionary.
-		:param course: Course ID (will be filled if not given) and 
+		:param course: Course ID (will be filled if not given) and \
 		class ID in dictionary.
-		:return: Presign state (2 if checked-in and 1 on success), 
+		:return: Presign state (2 if checked-in and 1 on success), \
 		checkin location and CAPTCHA.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
@@ -850,12 +852,12 @@ class Chaoxing:
 	):
 		"""Do checkin sign.
 		:param activity: Activity ID and type in dictionary.
-		:param location: Address, latitude, longitude and 
+		:param location: Address, latitude, longitude and \
 		ranged option in dictionary.
-		:param prev_params: Reuse previously returned params. 
+		:param prev_params: Reuse previously returned params. \
 		Overrides activity and location.
-		:return: Sign state (True on success), success / error message 
-		and payload.
+		:return: Sign state (True on success), success / error \
+		message and payload.
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = old_params if old_params.get("activeId") else {
@@ -917,9 +919,9 @@ class Chaoxing:
 	):
 		"""Location checkin.
 		:param activity: Activity ID in dictionary.
-		:param location: Address, latitude and longitude in dictionary. 
+		:param location: Address, latitude and longitude in dictionary. \
 		Overriden by server-side location if any.
-		:return: Checkin state (True on success), message, params and 
+		:return: Checkin state (True on success), message, params and \
 		captcha (placeholder if already checked-in or on failure).
 		"""
 		try:
