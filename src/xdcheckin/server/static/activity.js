@@ -38,7 +38,7 @@ async function getActivities() {
 				disabled: a.type == "2",
 				onclick: () => chaoxingCheckinLocationWrapper(a,
 									  b.id),
-				innerText: `${a.name} (${type}, ${ts}, ${te})`
+				innerText: `${a.name} (${type}, ${ts} ~ ${te})`
 			});
 			e.appendChild(b);
 		});
