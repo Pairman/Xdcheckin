@@ -77,7 +77,8 @@ async function initPlayers() {
 
 async function enablePlayers() {
 	if (enablePlayers.success || enablePlayers.calling ||
-	    !(localStorage.getItem("fid") == "16820"))
+	    !["16820", "146332", "147335", "2403"]
+	    .includes(localStorage.getItem("fid")))
 		return;
 	enablePlayers.calling = true;
 	[
