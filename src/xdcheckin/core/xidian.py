@@ -203,8 +203,7 @@ class Newesxidian:
 		:param chaoxing: The ``Chaoxing`` instance.
 		:return: None.
 		"""
-		if self.logined or not chaoxing.logined or \
-		not chaoxing.cookies.get("fid") in ["16820", "146332", "147335", "2403"]:
+		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
 			return
 		self.logined, self.chaoxing_session = True, chaoxing
 
