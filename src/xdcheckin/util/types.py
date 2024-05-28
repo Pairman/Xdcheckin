@@ -3,61 +3,39 @@ from time import time as _time
 class TimestampDict:
 	"""Timestamped dictionary for easy vacuuming.
 	"""
-	__values = {}
-	__timestamps = {}
+	_data = {}
+	_ts = {}
 
-	def __contains__(self, key):
-		return key in self.__values
-
-	def __getitem__(self, key):
-		"""Return self[key].
+	def __getitem__(self, key: None):
+		"""Return ``self[key]``.
 		"""
-		if key in self.__values:
-			return self.__values[key]
+		if key in self._data:
+			self._ts[key] = _time()
+			return self._data[key]
 		raise KeyError(key)
 
-	def __setitem__(self, key, value):
-		"""Set self[key] to value.
+	def __setitem__(self, key: None, value: None):
+		"""Set ``self[key]`` to value.
 		"""
-		self.__values[key] = value
-		self.__timestamps[key] = _time()
+		self._ts[key] = _time()
+		self._data[key] = value
 
 	def __delitem__(self, key):
-		"""Delete self[key].
+		"""Delete ``self[key]``.
 		"""
-		del self.__values[key], self.__timestamps[key]
+		del self._ts[key]
+		del self._data[key]
 
-	def __iter__(self):
-		"""Implement iter(self).
-		"""
-		return iter(self.__values)
-
-	def __len__(self):
-		"""Return len(self).
-		"""
-		return len(self.__values)
-
-	def keys(self):
-		"""D.keys() -> a set-like object providing a view on D's keys.
-		"""
-		return self.__values.keys()
-
-	def values(self):
-		"""D.values() -> an object providing a view on D's values.
-		"""
-		return self.__values.values()
-
-	def get(self, key, default = None):
+	def get(self, key: None, default: None = None):
 		"""Return the value for key if key is in the dictionary, \
-		else default.
+  		else default.
 		"""
-		return self.__values.get(key, default)
+		return self._data.get(key, default)
 
 	def vacuum(self, seconds):
-		"""Delete self[key] for keys set older than \
-		the specified seconds.
+		"""Remove key and value pairs older than the specified seconds.
 		"""
 		now = _time()
-		for key, timestamp in tuple(self.__timestamps.items()):
-			if now > timestamp + seconds:
-				del self[key]
+		for k, t in tuple(self._ts.items()):
+			if now > t + seconds:
+				del self[k]
