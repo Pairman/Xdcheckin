@@ -3,38 +3,61 @@ from time import time as _time
 class TimestampDict:
 	"""Timestamped dictionary for easy vacuuming.
 	"""
-	_data = {}
-	_ts = {}
+	__values = {}
+	__timestamps = {}
 
-	def __getitem__(self, key: None):
-		"""Return ``self[key]``.
+	def __contains__(self, key):
+		return key in self.__values
+
+	def __getitem__(self, key):
+		"""Return self[key].
 		"""
-		if key in self._data:
-			self._ts[key] = _time()
-			return self._data[key]
+		if key in self.__values:
+			return self.__values[key]
 		raise KeyError(key)
 
-	def __setitem__(self, key: None, value: None):
-		"""Set ``self[key]`` to value.
+	def __setitem__(self, key, value):
+		"""Set self[key] to value.
 		"""
-		self._ts[key] = _time()
-		self._data[key] = value
+		self.__values[key] = value
+		self.__timestamps[key] = _time()
 
 	def __delitem__(self, key):
-		"""Delete ``self[key]``.
+		"""Delete self[key].
 		"""
-		del self._ts[key]
-		del self._data[key]
+		del self.__values[key], self.__timestamps[key]
 
-	def get(self, key: None, default: None = None):
-		"""Return the value for key if key is in the dictionary, else default.
+	def __iter__(self):
+		"""Implement iter(self).
 		"""
-		return self._data.get(key, default)
+		return iter(self.__values)
+
+	def __len__(self):
+		"""Return len(self).
+		"""
+		return len(self.__values)
+
+	def keys(self):
+		"""D.keys() -> a set-like object providing a view on D's keys.
+		"""
+		return self.__values.keys()
+
+	def values(self):
+		"""D.values() -> an object providing a view on D's values.
+		"""
+		return self.__values.values()
+
+	def get(self, key, default = None):
+		"""Return the value for key if key is in the dictionary, \
+		else default.
+		"""
+		return self.__values.get(key, default)
 
 	def vacuum(self, seconds):
-		"""Remove key and value pairs older than the specified seconds.
+		"""Delete self[key] for keys set older than \
+		the specified seconds.
 		"""
 		now = _time()
-		for k, t in tuple(self._ts.items()):
-			if now > t + seconds:
-				del self[k]
+		for key, timestamp in tuple(self.__timestamps.items()):
+			if now > timestamp + seconds:
+				del self[key]
