@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 
 from ast import literal_eval as _literal_eval
-from asyncio import create_task as _create_task, gather as _gather, run as _run, Semaphore as _Semaphore
+from asyncio import create_task as _create_task, gather as _gather, run as _run
 from datetime import datetime as _datetime
 from json import dumps as _dumps
 from random import choice as _choice, uniform as _uniform
-from re import findall as _findall, search as _search, split as _split, DOTALL as _DOTALL
+from re import findall as _findall, search as _search, split as _split, \
+DOTALL as _DOTALL
 from requests import Response as _Response
 from requests.adapters import HTTPAdapter as _HTTPAdapter
 from requests.exceptions import RequestException as _RequestException
 from requests_cache.session import CachedSession as _CachedSession
-from xdcheckin.util.chaoxing_captcha import generate_secrets as _generate_secrets
+from xdcheckin.util.chaoxing_captcha import \
+generate_secrets as _generate_secrets
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
+from xdcheckin.util.session import CachedSession as _CachedSession
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
 	"""
-	requests_session = name = cookies = courses = logined = None
+	__session = __fid = __uid = courses = logined = None
 	config = {
 		"requests_headers": {
 			"User-Agent":
@@ -38,99 +41,56 @@ class Chaoxing:
 	):
 		"""Create a Chaoxing instance and login.
 		:param username: Chaoxing username. Unused if ``cookies`` \
-		is present.
+		is given
 		:param password: Chaoxing password. Unused if ``cookies`` \
-		is present.
+		is given.
 		:param cookies: Cookies from previous login. Overrides \
 		``username`` and ``password`` if given.
-		:param config: Configurations for the instance.
+		:param config: Configurations.
 		:return: None.
 		"""
-		if self.logined:
-			return
+		assert (username and password) or cookies
+		assert isinstance(config, dict)
 		self.config.update(config)
-		self.requests_session = _CachedSession(backend = "memory")
-		self.requests_session.mount("https://", _HTTPAdapter(pool_maxsize = 32))
-		account = {"username": username, "password": password, "cookies": cookies}
+		self.__session = _CachedSession(
+			headers = self.config["requests_headers"],
+			cache_enabled = self.config["requests_cache_enabled"]
+		)
+		account = {
+			"username": username,
+			"password": password,
+			"cookies": cookies
+		}
 		if cookies:
-			self.name, self.cookies, self.logined = self.login_cookies(account = account).values()
+			self.name, cookies, self.logined = _run(
+				self.login_cookies(account = account)
+			).values()
+		login_funcs = (
+			self.login_username_fanya, self.login_username_v3,
+			self.login_username_v5, self.login_username_v25,
+			self.login_username_v2, self.login_username_v11,
+			self.login_username_xxk, self.login_username_mylogin1
+		)
 		if not self.logined and username and password:
-			for func in (
-				self.login_username_fanya,
-				self.login_username_v3,
-				self.login_username_v5,
-				self.login_username_v25,
-				self.login_username_v2,
-				self.login_username_v11,
-				self.login_username_xxk,
-				self.login_username_mylogin1
-			):
-				self.name, self.cookies, self.logined = func(account = account).values()
+			for func in login_funcs:
+				self.name, cookies, self.logined = _run(
+					func(account = account)
+				).values()
 				if self.logined:
 					break
-		self.courses = self.course_get_courses() if self.logined else {}
+		self.__session.cookies = cookies
+		self.__fid = cookies["fid"].value if "fid" in cookies else 0
+		self.__uid = cookies["UID"].value
+		self.courses = _run(self.course_get_courses()) if self.logined else {}
 
-	def get(
-		self, url: str = "", params: dict = {}, cookies: dict = None,
-		headers: dict = None, expire_after: int = 0, **kwargs
-	):
-		"""Wrapper for requests.get().
-		:param url: URL.
-		:param params: Parameters.
-		:param cookies: Cookies. Overrides existing cookies.
-		:param headers: Headers. Overrides existing headers.
-		:param **kwargs: Optional arguments.
-		:return: Response.
-		"""
-		try:
-			res = self.requests_session.get(
-				url = url, params = params,
-				cookies = cookies or self.cookies,
-				headers = headers or self.config["requests_headers"],
-				expire_after = expire_after if self.config["requests_cache_enabled"] else 0,
-				**{"verify": False, **kwargs}
-			)
-			assert res.status_code in (200, 500), res.status_code
-		except AssertionError as e:
-			res = _Response()
-			res.status_code, res._content = int(str(e)), b"{}"
-		except _RequestException:
-			res = _Response()
-			res.status_code, res._content = 404, b"{}"
-		finally:
-			return res
+	async def __aenter__(self):
+		await self.__session.__aenter__()
+		return self
 
-	def post(
-		self, url: str = "", data: dict = {}, cookies: dict = None,
-		headers: dict = None, expire_after: int = 0, **kwargs
-	):
-		"""Wrapper for requests.post().
-		:param url: URL.
-		:param data: Data.
-		:param cookies: Cookies. Overrides existing cookies.
-		:param headers: Headers. Overrides existing headers.
-		:param **kwargs: Optional arguments.
-		:return: Response.
-		"""
-		try:
-			res = self.requests_session.post(
-				url = url, data = data,
-				cookies = cookies or self.cookies,
-				headers = headers or self.config["requests_headers"],
-				expire_after = expire_after if self.config["requests_cache_enabled"] else 0,
-				**{"verify": False, **kwargs}
-			)
-			assert res.status_code in (200, 500), res.status_code
-		except AssertionError as e:
-			res = _Response()
-			res.status_code, res._content = int(str(e)), b"{}"
-		except _RequestException:
-			res = _Response()
-			res.status_code, res._content = 404, b"{}"
-		finally:
-			return res
+	async def __aexit__(self, *args, **kwargs):
+		await self.__session.__aexit__(*args, **kwargs)
 
-	def login_username_v2(
+	async def login_username_v2(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -148,9 +108,9 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url = url, params = params)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
-			data = res.json()
+		res = await self.__session.get(url = url, params = params)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
+			data = await res.json()
 			ret.update({
 				"name": data["realname"],
 				"cookies": res.cookies,
@@ -158,13 +118,13 @@ class Chaoxing:
 			})
 		return ret
 
-	def login_username_v3(
+	async def login_username_v3(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
 		via V3 API.
 		:param account: Same as ``login_username_v2()``.
-		:return: Name (placeholder), cookies and login state.
+		:return: Name (``""``), cookies and login state.
 		"""
 		url = "http://v3.chaoxing.com/vLogin"
 		data = {
@@ -176,15 +136,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+		res = await self.__session.post(url = url, data = data)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_username_v5(
+	async def login_username_v5(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -202,12 +162,14 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.post(url = url, data = _dumps(data), headers = {
-			**self.config["requests_headers"],
-			"Content-Type": "application/json;charset=UTF-8"
-		})
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
-			data = res.json()
+		res = await self.__session.post(
+			url = url, data = _dumps(data), headers = {
+				**self.__session.headers,
+				"Content-Type": "application/json;charset=UTF-8"
+			}
+		)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
+			data = await res.json()
 			ret.update({
 				"name": data["data"]["realname"],
 				"cookies": res.cookies,
@@ -215,7 +177,7 @@ class Chaoxing:
 			})
 		return ret
 
-	def login_username_v11(
+	async def login_username_v11(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -233,15 +195,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url = url, params = params)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+		res = await self.__session.get(url = url, params = params)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_username_v25(
+	async def login_username_v25(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -259,15 +221,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+		res = await self.__session.post(url = url, data = data)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_username_mylogin1(
+	async def login_username_mylogin1(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -287,15 +249,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+		res = await self.__session.post(url = url, data = data)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_username_xxk(
+	async def login_username_xxk(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -314,15 +276,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url = url, params = params)
-		if res.status_code == 500 and res.cookies.get("p_auth_token"):
+		res = await self.__session.get(url = url, params = params)
+		if res and res.status == 500 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_username_fanya(
+	async def login_username_fanya(
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Log into Chaoxing account with username and password \
@@ -349,15 +311,15 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.post(url = url, data = data)
-		if res.status_code == 200 and res.cookies.get("p_auth_token"):
+		res = await self.__session.post(url = url, data = data)
+		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
 				"cookies": res.cookies,
 				"logined": True
 			})
 		return ret
 
-	def login_cookies(self, account: dict = {"cookies": None}):
+	async def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
 		:return: Same as ``login_username_v2()``.
@@ -368,9 +330,9 @@ class Chaoxing:
 			"cookies": None,
 			"logined": False
 		}
-		res = self.get(url = url, cookies = account["cookies"])
-		if res.status_code == 200:
-			data = res.json()
+		res = await self.__session.get(url = url, cookies = account["cookies"])
+		if res and res.status == 200:
+			data = await res.json()
 			if data["result"]:
 				ret.update({
 					"name": data["msg"]["name"],
@@ -379,17 +341,17 @@ class Chaoxing:
 				})
 		return ret
 
-	def curriculum_get_curriculum(self, week: str = ""):
+	async def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum.
 		:param week: Week number. Defaulted to the current week.
 		:return: Dictionary of curriculum details and lessons \
 		containing course IDs, names, classroom locations, teachers \
 		and time.
 		"""
-		def _add_lesson(lesson: dict = {}):
-			lesson_class_id = str(lesson["classId"])
+		def _add_lesson(lesson):
+			class_id = str(lesson["classId"])
 			lesson = {
-				"class_id": lesson_class_id,
+				"class_id": class_id,
 				"course_id": str(lesson["courseId"]),
 				"name": lesson["name"],
 				"locations": [lesson["location"]],
@@ -397,25 +359,36 @@ class Chaoxing:
 				"teachers": [lesson["teacherName"]],
 				"times": [{
 					"day": str(lesson["dayOfWeek"]),
-					"period_begin": str(lesson["beginNumber"]),
-					"period_end": str(lesson["beginNumber"] + lesson["length"] - 1)
+					"period_begin":
+					str(lesson["beginNumber"]),
+					"period_end": str(
+						lesson["beginNumber"] +
+						lesson["length"] - 1
+					)
 				}]
 			}
-			if not lesson_class_id in curriculum["lessons"]:
-				curriculum["lessons"][lesson_class_id] = lesson
+			if not class_id in curriculum["lessons"]:
+				curriculum["lessons"][class_id] = lesson
 				return
-			if not lesson["locations"][0] in curriculum["lessons"][lesson_class_id]["locations"]:
-				curriculum["lessons"][lesson_class_id]["locations"].append(lesson["locations"][0])
-			if not lesson["teachers"][0] in curriculum["lessons"][lesson_class_id]["teachers"]:
-				curriculum["lessons"][lesson_class_id]["teachers"].append(lesson["teachers"][0])
-			if not lesson["times"][0] in curriculum["lessons"][lesson_class_id]["times"]:
-				curriculum["lessons"][lesson_class_id]["times"].append(lesson["times"][0])
+			_lesson = curriculum["lessons"][class_id]
+			if not lesson["locations"][0] in _lesson["locations"]:
+				_lesson["locations"].append(
+					lesson["locations"][0]
+				)
+			if not lesson["teachers"][0] in _lesson["teachers"]:
+				_lesson["teachers"].append(
+					lesson["teachers"][0]
+				)
+			if not lesson["times"][0] in _lesson["times"]:
+				_lesson["times"].append(lesson["times"][0])
 		url = "https://kb.chaoxing.com/curriculum/getMyLessons"
 		params = {
 			"week": week
 		}
-		res = self.get(url = url, params = params, expire_after = 86400)
-		data = res.json().get("data") or {}
+		res = await self.__session.get(
+			url = url, params = params, ttl = 86400
+		)
+		data = (await res.json()).get("data")
 		details = data["curriculum"]
 		curriculum = {
 			"details": {
@@ -426,7 +399,8 @@ class Chaoxing:
 				"week_max": str(details["maxWeek"]),
 				"time": {
 					"period_max": str(details["maxLength"]),
-					"timetable": details["lessonTimeConfigArray"][1 : -1]
+					"timetable":
+					details["lessonTimeConfigArray"][1 : -1]
 				}
 			},
 			"lessons": {}
@@ -438,30 +412,31 @@ class Chaoxing:
 				_add_lesson(lesson = conflict)
 		return curriculum
 
-	def course_get_courses(self):
+	async def course_get_courses(self):
 		"""Get all courses in the root folder.
 		:return: Dictionary of class IDs to course containing \
 		course IDs, names, teachers, status, start and end time.
 		"""
 		def _fill_courses(matches, status):
-			nonlocal courses
-			courses.update({
-				match[2]: {
+			for match in matches:
+				courses[match[2]] = {
 					"class_id": match[2],
 					"course_id": match[0],
 					"name": match[1],
-					"teachers": _split(r", |,|，|、", match[3]),
+					"teachers":
+					_split(r", |,|，|、", match[3]),
 					"status": status,
 					"time_start": match[4],
 					"time_end": match[5]
-				} for match in matches
-			})
+				}
 		url = "https://mooc2-ans.chaoxing.com/visit/courselistdata"
 		params = {
 			"courseType": 1
 		}
-		res = self.get(url = url, params = params, expire_after = 86400)
-		active, ended = res.text.split("isState")
+		res = await self.__session.get(
+			url = url, params = params, ttl = 86400
+		)
+		active, ended = (await res.text()).split("isState")
 		reg = r"Client\('(\d+)','(.*?)','(\d+).*?color3\" " \
 		r"title=\"(.*?)\".*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
 		matches_active = _findall(reg, active, _DOTALL)
@@ -471,33 +446,37 @@ class Chaoxing:
 		_fill_courses(matches_ended, 0)
 		return courses
 
-	def course_get_course_id(
+	async def course_get_course_id(
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get course ID of a course.
-		:param course: Course ID (will be filled if not given) \
-		and clsss ID in dictionary.
+		:param course: Course ID (optional) and clsss ID.
 		:return: Course ID corresponding to the class ID.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
 		params = {
-			"fid": self.cookies.get("fid") or 0,
+			"fid": self.__fid,
 			"courseId": "",
 			"classId": course["class_id"]
 		}
-		course_id = course.get("course_id") or (self.courses.get(course["class_id"]) or {}).get("course_id")
-		if not course_id:
-			res = self.get(url = url, params = params, expire_after = 86400)
-			data = res.json().get("data") or {}
-			course_id = str(data.get("courseid") or 0)
-		return course_id
+		course_id = course.get("course_id") or \
+		self.courses.get(course["class_id"], {}).get("course_id")
+		if course_id:
+			return course_id
+		res = await self.__session.get(
+			url = url, params = params, ttl = 86400
+		)
+		if res:
+			data = (await res.json()).get("data")
+			if data:
+				course_id = str(data.get("courseid"))
+		return course_id or "0"
 
-	def course_get_location_log(
+	async def course_get_location_log(
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get checkin location history of a course.
-		:param course: Course ID (will be filled if not given) \
-		and class ID in dictionary.
+		:param course: Course ID (optional) and class ID.
 		:return: Dictionary of activity IDs to checkin locations \
 		used by the course.
 		"""
@@ -505,11 +484,16 @@ class Chaoxing:
 		params = {
 			"DB_STRATEGY": "COURSEID",
 			"STRATEGY_PARA": "courseId",
-			"courseId": self.course_get_course_id(course = course),
+			"courseId":
+			await self.course_get_course_id(course = course),
 			"classId": course["class_id"]
 		}
-		res = self.get(url = url, params = params, expire_after = 1800)
-		data = res.json().get("data") or {}
+		res = await self.__session.get(
+			url = url, params = params, ttl = 1800
+		)
+		if not res:
+			return {}
+		data = (await res.json()).get("data") or {}
 		return {
 			location["activeid"]: {
 				"latitude": location["latitude"],
@@ -520,70 +504,88 @@ class Chaoxing:
 			} for location in data
 		}
 
-	def course_get_course_activities_v2(
+	async def course_get_course_activities_v2(
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via V2 API.
-		:param course: Course ID (will be filled if not given) \
-		and class ID.
+		:param course: Course ID (optional) and class ID.
 		:return: List of ongoing activities with type, name, \
 		activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"fid": self.cookies.get("fid") or 0,
-			"courseId": self.course_get_course_id(course = course),
+			"fid": self.__fid,
+			"courseId":
+			await self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
-		res = self.get(url = url, params = params, expire_after = 60)
-		data = (res.json().get("data") or {}).get("activeList") or []
+		res = await self.__session.get(
+			url = url, params = params, ttl = 60
+		)
+		if not res:
+			return []
+		data = ((await res.json()).get("data") or {}).get("activeList") or []
 		return [
 			{
 				"active_id": str(activity["id"]),
 				"type": activity["otherId"],
 				"name": activity["nameOne"],
-				"time_start": str(_datetime.fromtimestamp(activity["startTime"] // 1000)),
-				"time_end"：str(_datetime.fromtimestamp(activity["endTime"] // 1000))
-				if activity["endTime"] else "",
+				"time_start": str(_datetime.fromtimestamp(
+					activity["startTime"] // 1000
+				)),
+				"time_end": str(_datetime.fromtimestamp(
+					activity["endTime"] // 1000
+				)) if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
-			} for activity in data if activity["status"] == 1 and activity.get("otherId") in ("2", "4")
+			} for activity in data if activity["status"] == 1 and \
+			activity.get("otherId") in ("2", "4")
 		]
 
-	def course_get_course_activities_ppt(
+	async def course_get_course_activities_ppt(
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via PPT API.
-		:param course: Course ID (will be filled if not given) \
-		and class ID.
+		:param course: Course ID (optional) and class ID.
 		:return: List of ongoing activities with type, name, \
 		activity ID, start, end and remaining time.
 		"""
 		url = "https://mobilelearn.chaoxing.com/ppt/activeAPI/taskactivelist"
 		params = {
-			"courseId": self.course_get_course_id(course = course),
+			"courseId":
+			await self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
-		res = self.get(url = url, params = params, expire_after = 60)
-		data = res.json().get("activeList") or []
+		res = await self.__session.get(
+			url = url, params = params, ttl = 60
+		)
+		if not res:
+			return []
+		data = (await res.json()).get("activeList") or []
 		activities = []
 		for activity in data:
-			if not activity["status"] == 1 or not activity["activeType"] == 2:
+			if not activity["status"] == 1 or \
+			not activity["activeType"] == 2:
 				continue
 			activity_new = {
 				"active_id": str(activity["id"]),
 				"name": activity["nameOne"],
-				"time_start": str(_datetime.fromtimestamp(activity["startTime"] // 1000)),
+				"time_start": str(_datetime.fromtimestamp(
+					activity["startTime"] // 1000
+				)),
 				"time_left": activity["nameFour"]
 			}
-			details = self.checkin_get_details(activity = activity_new)
+			details = await self.checkin_get_details(
+				activity = activity_new
+			)
 			if not details["otherId"] in (2, 4):
 				continue
 			activity_new.update({
 				"type": str(details["otherId"]),
-				"time_end": str(_datetime.fromtimestamp(details["endTime"]["time"] // 1000))
-				if details["endTime"] else "",
+				"time_end": str(_datetime.fromtimestamp(
+					details["endTime"]["time"] // 1000
+				)) if details["endTime"] else ""
 			})
 			activities.append(activity_new)
 		return activities
@@ -614,7 +616,7 @@ class Chaoxing:
 		_run(_gatherer())
 		return activities
 
-	def checkin_get_details(self, activity: dict = {"active_id": ""}):
+	async def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details.
 		:param activity: Activity ID.
 		:return: Checkin details including class ID on success.
@@ -624,7 +626,9 @@ class Chaoxing:
 			"activePrimaryId": activity["active_id"],
 			"type": 1
 		}
-		res = self.get(url = url, params = params, expire_after = 300)
+		res = await self.__session.get(
+			url = url, params = params, ttl = 300
+		)
 		return res.json()
 
 	def checkin_get_pptactiveinfo(self, activity: dict = {"active_id": ""}):
@@ -637,7 +641,7 @@ class Chaoxing:
 		params = {
 			"activeId": activity["active_id"]
 		}
-		res = self.get(url = url, params = params, expire_after = 60)
+		res = self.__session.get(url = url, params = params, ttl = 60)
 		return res.json()["data"]
 
 	def checkin_format_location(
@@ -707,9 +711,9 @@ class Chaoxing:
 			"DB_STRATEGY": "RANDOM",
 			"code": ""
 		}
-		res1 = self.get(url = url1, params = params1, expire_after = 1800)
+		res1 = self.__session.get(url = url1, params = params1, ttl = 1800)
 		params2["code"] = _search(r"([0-9a-f]{32})", res1.text).group(1)
-		res2 = self.get(url = url2, params = params2, expire_after = 1800)
+		res2 = self.__session.get(url = url2, params = params2, ttl = 1800)
 		return res2.text == "success"
 
 	def checkin_get_captcha(self, captcha: dict = {"captcha_id": ""}):
@@ -723,7 +727,7 @@ class Chaoxing:
 			"captchaId": captcha["captcha_id"],
 			"_": int(_datetime.now().timestamp() * 1000)
 		}
-		res1 = self.get(url = url1, params = params1, expire_after = 300)
+		res1 = self.__session.get(url = url1, params = params1, ttl = 300)
 		server_time = _search(r"t\":(\d+)", res1.text).group(1)
 		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
 		params2 = {
@@ -746,7 +750,7 @@ class Chaoxing:
 			"captchaKey": captcha_key,
 			"token": token
 		})
-		res2 = self.get(url = url2, params = params2)
+		res2 = self.__session.get(url = url2, params = params2)
 		data2 = _literal_eval(res2.text[2 : -1])
 		return {
 			**captcha_new,
@@ -775,7 +779,7 @@ class Chaoxing:
 			"runEnv": 10,
 			"_": int(_datetime.now().timestamp() * 1000)
 		}
-		res = self.get(url = url, params = params, headers = {
+		res = self.__session.get(url = url, params = params, headers = {
 			**self.config["requests_headers"],
 			"Referer": "https://mobilelearn.chaoxing.com"
 		})
@@ -818,8 +822,8 @@ class Chaoxing:
 		captcha = {
 			"captcha_id": ""
 		}
-		res = self.get(url = url, params = params)
-		if res.status_code != 200:
+		res = self.__session.get(url = url, params = params)
+		if res.status != 200:
 			return 0, location, captcha
 		state = 1
 		match = _search(
@@ -861,8 +865,8 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		params = old_params if old_params.get("activeId") else {
-			"name": self.name,
-			"uid": self.cookies["_uid"],
+			"name": "",
+			"uid": self.cookies["UID"],
 			"fid": self.cookies.get("fid") or 0,
 			"activeId": activity["active_id"],
 			"enc": activity.get("enc") or "",
@@ -894,7 +898,7 @@ class Chaoxing:
 						"latitude": location["latitude"],
 						"longitude": location["longitude"]
 					})
-			res = self.get(url = url, params = params)
+			res = self.__session.get(url = url, params = params)
 			assert res.text in ("success", "您已签到过了"), res.text
 			return True, {
 				"msg": f"Checkin success. ({res.text})",

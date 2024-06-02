@@ -32,7 +32,7 @@ class TimestampDict:
 		"""
 		return self._data.get(key, default)
 
-	def vacuum(self, seconds):
+	async def vacuum(self, seconds):
 		"""Remove key and value pairs older than the specified seconds.
 		"""
 		now = _time()

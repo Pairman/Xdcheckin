@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from asyncio import create_task as _create_task, gather as _gather
 from re import search as _search
 from threading import Thread as _Thread
 from time import time as _time
 from requests import Response as _Response, Session as _Session
 from requests.exceptions import RequestException as _RequestException
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
+from xdcheckin.util.session import CachedSession as _CachedSession
 
 class IDSSession:
 	requests_session = secrets = service = logined = None
@@ -196,46 +198,55 @@ class IDSSession:
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
 	"""
-	chaoxing_session = logined = None
+	__chaoxing = logined = None
 
 	def __init__(self, chaoxing: None = None):
 		"""Create a Newesxidian with ``Chaoxing`` instance.
 		:param chaoxing: The ``Chaoxing`` instance.
 		:return: None.
 		"""
-		if self.logined or not chaoxing.logined or not chaoxing.cookies.get("fid") == "16820":
+		if not chaoxing.logined or not "fid" in chaoxing.cookies or \
+		not chaoxing.cookies["fid"].value == "16820":
 			return
-		self.logined, self.chaoxing_session = True, chaoxing
+		self.logined, self.__chaoxing = True, chaoxing
 
-	def livestream_get_url(self, livestream: dict = {"live_id": ""}):
+	async def __aenter__(self):
+		return self
+
+	async def __aexit__(self, *args, **kwargs):
+		pass
+
+	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
 		:param livesteam: Live ID in dictionary.
 		:return: Livestream URL, live ID, device ID and 
-		classroom location (placeholder).
+		classroom location (``""``).
 		URL will fallback to replay URL for non-ongoing live IDs.
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
 		params = {
 			"liveId": livestream["live_id"]
 		}
-		res = self.chaoxing_session.get(
-			url = url, params = params, expire_after = 86400
+		res = await self.__chaoxing.get(
+			url = url, params = params, ttl = 86400
 		)
 		return {
-			"url": res.text,
+			"url": await res.text(),
 			"live_id": livestream["live_id"],
 			"device": "",
 			"location": ""
 		}
 
-	def livestream_get_live_url(
-		self, livestream: dict = {"live_id": "", "device": "", "location": ""}
+	async def livestream_get_live_url(
+		self,
+		livestream: dict = {"live_id": "", "device": "", "location": ""}
 	):
 		"""Get livestream URL.
-		:param livestream: Live ID (unused if device ID is present), device ID \
-		and location (in case device ID is not present) in dictionary.
-		:return: Livestream URL, live ID (placeholder if not given), device ID \
-		and classroom location (placeholder if device ID not given).
+		:param livestream: Live ID (unused if device ID is present), \
+		device ID and location (in case device ID is not present) \
+		in dictionary.
+		:return: Livestream URL, live ID (``""`` if not given), device \
+		ID and classroom location (``""`` if device ID not given).
 		"""
 		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
 		params1 = {
@@ -248,73 +259,67 @@ class Newesxidian:
 		}
 		location = livestream.get("location") or ""
 		if not livestream.get("device"):
-			res1 = self.chaoxing_session.get(
-				url = url1, params = params1, expire_after = 86400
+			res1 = self.__chaoxing.get(
+				url = url1, params = params1, ttl = 86400
 			)
-			data = res1.json() or []
+			data = await res1.json() or []
 			for lesson in data:
 				if str(lesson["id"]) == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
-		res2 = self.chaoxing_session.get(
-			url = url2, params = params2, expire_after = 86400
+		res2 = await self.__chaoxing.get(
+			url = url2, params = params2, ttl = 86400
 		)
 		return {
-			"url": res2.text,
+			"url": await res2.text(),
 			"live_id": params1["liveId"],
 			"device": params2["deviceCode"],
 			"location": location
 		}
 
-	def curriculum_get_curriculum(self, week: str = ""):
+	async def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum with livestreams.
 		:param week: Week number. Defaulted to the current week.
 		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
-		def _get_livestream_wrapper(
-			class_id: str = "", live_id: str = "",
-			location: str = ""
-		):
-			if not curriculum["lessons"].get(class_id):
+		async def _get_livestream(lesson):
+			class_id = str(lesson["teachClazzId"])
+			live_id = str(lesson["id"])
+			location = str(lesson["place"])
+			if not class_id in curriculum["lessons"]:
 				return
-			if not curriculum["lessons"][class_id].get("livestreams"):
+			if not "livestreams" in curriculum["lessons"][class_id]:
 				curriculum["lessons"][class_id]["livestreams"] = []
 			livestream = self.livestream_get_live_url(livestream = {
 				"live_id": live_id,
 				"location": location
 			})
-			for ls in curriculum["lessons"][class_id]["livestreams"]:
-				if ls["device"] == livestream["device"]:
+			for l in curriculum["lessons"][class_id]["livestreams"]:
+				if l["device"] == livestream["device"]:
 					return
 			curriculum["lessons"][class_id]["livestreams"].append(livestream)
 		url = "https://newesxidian.chaoxing.com/frontLive/listStudentCourseLivePage"
 		params = {
 			"fid": 16820,
-			"userId": self.chaoxing_session.cookies["UID"],
+			"userId": self.__chaoxing.cookies["UID"].value,
 			"termYear": 0,
 			"termId": 0,
 			"week": week or 0
 		}
-		curriculum = self.chaoxing_session.curriculum_get_curriculum(week = week)
+		curriculum = await self.__chaoxing.curriculum_get_curriculum(
+			week = week
+		)
 		params.update({
 			"termYear": curriculum["details"]["year"],
 			"termId": curriculum["details"]["semester"],
 			"week": week or curriculum["details"]["week"]
 		})
-		res = self.chaoxing_session.get(
-			url = url, params = params, expire_after = 86400
+		res = await self.__chaoxing.get(
+			url = url, params = params, ttl = 86400
 		)
-		data = res.json() or []
-		threads = [
-			_Thread(target = _get_livestream_wrapper, kwargs = {
-				"class_id": str(lesson["teachClazzId"]),
-				"live_id": str(lesson["id"]),
-				"location": lesson["place"]
-			}) for lesson in data
-		]
-		for thread in threads:
-			thread.start()
-		for thread in threads:
-			thread.join()
+		data = await res.json() or []
+		await _gather(*[_create_task(
+			_get_livestream(lesson)
+		) for lesson in data])
 		return curriculum
