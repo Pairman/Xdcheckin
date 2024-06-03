@@ -20,14 +20,14 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
+	"aiocache",
+	"aiohttp",
 	"flask >= 3.0.0",
 	"flask-session == 0.6.0",
 	"pillow >= 8.4.0",
 	"pycryptodome >= 3.9.4",
 	"pyjsbitwise >= 1.0.1",
 	"pyzbar >= 0.1.8",
-	"requests >= 2.31.0",
-	"requests-cache >= 1.2.0",
 	"waitress >= 3.0.0",
 ]
 
@@ -68,13 +68,14 @@ sources = [
 ]
 # test_sources = []
 requires = [
+	"aiocache",
+	"aiohttp",
 	"flask >= 3.0.0",
 	"flask-session == 0.6.0",
 	"pillow >= 8.4.0",
 	"pycryptodome >= 3.9.4",
+	"pyjsbitwise >= 1.0.1",
 	"pyzbar >= 0.1.8",
-	"requests >= 2.31.0",
-	"requests-cache >= 1.2.0",
 	"waitress >= 3.0.0",
 ]
 # test_requires = []

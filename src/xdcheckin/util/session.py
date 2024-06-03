@@ -10,7 +10,7 @@ class CachedSession:
 
 	def __init__(
 		self, headers: dict = None, cookies: dict = None,
-		verify: bool = False, cache_enabled: bool = True
+		verify_ssl: bool = False, cache_enabled: bool = True
 	):
 		"""Create a ``CachedSession`` instance.
 		:param headers: Default headers.
@@ -20,6 +20,7 @@ class CachedSession:
 		"""
 		self.headers = headers or {}
 		self.cookies = cookies or {}
+		self.__verify_ssl = verify_ssl
 		self.__session = _ClientSession()
 		if cache_enabled:
 			self.__cache = _Cache(
@@ -38,7 +39,9 @@ class CachedSession:
 
 	async def __cache_handler(self, func, ttl: int, *args, **kwargs):
 		if not self.__cache or not ttl:
-			return await func(*args, **kwargs)
+			return await func(
+				verify_ssl = self.__verify_ssl, *args, **kwargs
+			)
 		key = f"{func.__name__}{args}{sorted(kwargs.items())}"
 		try:
 			res = await self.__cache.get(key)
@@ -47,7 +50,9 @@ class CachedSession:
 		if not res is None:
 			return res
 		try:
-			res = await func(*args, **kwargs)
+			res = await func(
+				verify_ssl = self.__verify_ssl, *args, **kwargs
+			)
 			assert res.status in (200, 500)
 		except Exception:
 			res = None
