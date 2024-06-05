@@ -1,18 +1,42 @@
 # -*- coding: utf-8 -*-
 
+__all__ = ("Chaoxing", )
+
 from ast import literal_eval as _literal_eval
 from asyncio import create_task as _create_task, gather as _gather, \
 Semaphore as _Semaphore
 from json import dumps as _dumps
 from random import uniform as _uniform
-from re import findall as _findall, search as _search, split as _split, \
-DOTALL as _DOTALL
+from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
 from xdcheckin.util.chaoxing_captcha import \
 generate_secrets as _generate_secrets
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 from xdcheckin.util.session import CachedSession as _CachedSession
 from xdcheckin.util.time import strftime as _strftime
+
+_Chaoxing_course_get_courses_regex1 = _compile(
+	r"Client\('(\d+)','(.*?)','(\d+).*?color3\" title=\"(.*?)\".*?\n"
+	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?", _DOTALL
+)
+
+_Chaoxing_course_get_courses_regex2 = _compile(r", |,|，|、")
+
+_Chaoxing_captcha_get_captcha_regex = _compile(r"t\":(\d+)")
+
+_Chaoxing_checkin_do_analysis_regex = _compile(r"([0-9a-f]{32})")
+
+_Chaoxing_checkin_do_presign_regex = _compile(
+	r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\""
+	r".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" "
+	r"value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?.*?"
+	r"captchaId: '([0-9A-Za-z]{32})|(zsign_success)", _DOTALL
+)
+
+_Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
+
+_Chaoxing_checkin_checkin_qrcode_url_regex = \
+_compile(r"id=(\d+).*?([0-9A-F]{32})")
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
@@ -378,26 +402,32 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 86400
 		)
-		active, ended = (await res.text()).split("isState")
-		reg = r"Client\('(\d+)','(.*?)','(\d+).*?color3\" " \
-		r"title=\"(.*?)\".*?\n(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?"
-		matches_active = _findall(reg, active, _DOTALL)
-		matches_ended = _findall(reg, ended, _DOTALL)
+		text = (await res.text())
+		pos = text.index("isState")
+		active = _Chaoxing_course_get_courses_regex1.findall(
+			text, endpos = pos
+		)
+		ended = _Chaoxing_course_get_courses_regex1.findall(
+			text, pos = pos
+		)
 		courses = {}
 		def _fill_courses(matches, status):
 			for match in matches:
+				teachers = \
+				_Chaoxing_course_get_courses_regex2.split(
+					match[3]
+				)
 				courses[match[2]] = {
 					"class_id": match[2],
 					"course_id": match[0],
 					"name": match[1],
-					"teachers":
-					_split(r", |,|，|、", match[3]),
+					"teachers": teachers,
 					"status": status,
 					"time_start": match[4],
 					"time_end": match[5]
 				}
-		_fill_courses(matches_active, 1)
-		_fill_courses(matches_ended, 0)
+		_fill_courses(active, 1)
+		_fill_courses(ended, 0)
 		return courses
 
 	async def course_get_course_id(
@@ -580,9 +610,10 @@ class Chaoxing:
 		}
 		res1 = await self.__session.get(url = url1, params = params1)
 		captcha = {
-			**captcha, "type": "slide", "server_time": _search(
-				r"t\":(\d+)", await res1.text()
-			).group(1)
+			**captcha, "type": "slide", "server_time":
+			_Chaoxing_captcha_get_captcha_regex.search(
+				await res1.text()
+			)
 		}
 		captcha_key, token = _generate_secrets(captcha = captcha)
 		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
@@ -728,8 +759,9 @@ class Chaoxing:
 			return False
 		url2 = "https://mobilelearn.chaoxing.com/pptSign/analysis2"
 		params2 = {
-			"DB_STRATEGY": "RANDOM", "code":
-			_search(r"([0-9a-f]{32})", await res1.text()).group(1)
+			"code": _Chaoxing_checkin_do_analysis_regex.search(
+				await res1.text()
+			).group(1), "DB_STRATEGY": "RANDOM"
 		}
 		res2 = await self.__session.get(
 			url = url2, params = params2, ttl = 1800
@@ -764,14 +796,8 @@ class Chaoxing:
 		if not res or res.status != 200:
 			return 0, location, captcha
 		state = 1
-		match = _search(
-			r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" "
-			r"value=\"(.*?)\".*?locationLatitude\" value="
-			r"\"(\d+\.\d+)\".*?locationLongitude\" value="
-			r"\"(\d+\.\d+)\".*?locationRange\" value="
-			r"\"(\d+))?.*?captchaId: '([0-9A-Za-z]{32})|"
-			r"(zsign_success)", await res.text(), _DOTALL
-		)
+		match = \
+		_Chaoxing_checkin_do_presign_regex.search(await res.text())
 		if match:
 			if match.group(7):
 				state = 2
@@ -835,7 +861,7 @@ class Chaoxing:
 			status = True
 			msg = f"Checkin success. ({text})"
 		else:
-			match = _search(r"validate_([0-9A-Fa-f]{32})", text)
+			match = _Chaoxing_checkin_do_sign_regex.search(text)
 			if match:
 				params["enc2"] = match.group(1)
 			msg = f"Checkin failure. {text}"
@@ -952,7 +978,8 @@ class Chaoxing:
 		try:
 			assert "mobilelearn.chaoxing.com/widget/sign/e" \
 			in url, f"Checkin failure. {'Invalid URL.', url}"
-			match = _search(r"id=(\d+).*?([0-9A-F]{32})", url)
+			match = \
+			_Chaoxing_checkin_checkin_qrcode_url_regex.search(url)
 			return await self.checkin_checkin_qrcode(activity = {
 				"active_id": match.group(1),
 				"enc": match.group(2)

@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
+__all__ = ("IDSSession", "Newesxidian")
+
 from asyncio import create_task as _create_task, gather as _gather
-from re import search as _search
+from re import compile as _compile
 from time import time as _time
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 from xdcheckin.util.session import CachedSession as _CachedSession
+
+_IDSSession_login_username_prepare_regex = \
+_compile(r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\"")
 
 class IDSSession:
 	config = {
@@ -58,9 +63,8 @@ class IDSSession:
 		ret = {"big_img_src": "", "small_img_src": ""}
 		if not res1 or not res1.status == 200:
 			return ret
-		s = _search(
-			r"\"pwdEncryptSalt\" value=\"(.*?)\".*?"
-			r"\"execution\" value=\"(.*?)\"", await res1.text()
+		s = _IDSSession_login_username_prepare_regex.search(
+			await res1.text()
 		)
 		url2 = "https://ids.xidian.edu.cn/authserver/common/openSliderCaptcha.htl"
 		params2 = {"_": str(int(1000 * _time()))}

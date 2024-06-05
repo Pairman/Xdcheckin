@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+__all__ = ("server_routes", "create_server", "start_server")
+
 from asyncio import create_task as _create_task, sleep as _sleep
 from importlib.metadata import version as _version
 from importlib.resources import path as _path
@@ -17,32 +21,32 @@ from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import IDSSession as _IDSSession, \
 Newesxidian as _Newesxidian
 
-routes = _RouteTableDef()
+server_routes = _RouteTableDef()
 
 with _path("xdcheckin.server.static", "") as fpath:
-	routes.static("/static", fpath)
+	server_routes.static("/static", fpath)
 
 _g_locations_js_str = f"var g_locations = {
 	_dumps(_locations).encode('ascii').decode('unicode-escape')
 };"
-@routes.get("/static/g_locations.js")
+@server_routes.get("/static/g_locations.js")
 async def _g_locations_js(req):
 	return _Response(text = _g_locations_js_str)
 
 with _path("xdcheckin.server.templates", "index.html") as fpath:
 	_index_html_str = fpath.read_text("utf-8")
-@routes.get("/")
+@server_routes.get("/")
 async def _index_html(req):
 	return \
 	_Response(text = _index_html_str, content_type = "text/html")
 
-@routes.post("/xdcheckin/get/version")
+@server_routes.post("/xdcheckin/get/version")
 async def _xdcheckin_get_version(req):
 	return _Response(text = _version("Xdcheckin"))
 
 _xdcheckin_get_latest_release_time = 0
 _xdcheckin_get_latest_release_data = ""
-@routes.post("/xdcheckin/get/releases/latest")
+@server_routes.post("/xdcheckin/get/releases/latest")
 async def _xdcheckin_get_latest_release(req):
 	time = _time()
 	if time < _xdcheckin_get_latest_release_time + 3600:
@@ -76,7 +80,7 @@ async def _xdcheckin_get_latest_release(req):
 		status = 200 if _xdcheckin_get_latest_release_data else 500
 	)
 
-@routes.post("/ids/login_prepare")
+@server_routes.post("/ids/login_prepare")
 async def _ids_login_prepare(req):
 	try:
 		ids = _IDSSession(
@@ -94,7 +98,7 @@ async def _ids_login_prepare(req):
 	finally:
 		return _Response(text = text, content_type = "application/json")
 
-@routes.post("/ids/login_finish")
+@server_routes.post("/ids/login_finish")
 async def ids_login_finish(req):
 	try:
 		data = await req.json()
@@ -122,7 +126,7 @@ async def ids_login_finish(req):
 	finally:
 		return _Response(text = text, content_type = "application/json")
 
-@routes.post("/chaoxing/login")
+@server_routes.post("/chaoxing/login")
 async def _chaoxing_login(req):
 	try:
 		data = req if type(req) is dict else await req.json()
@@ -158,7 +162,7 @@ async def _chaoxing_login(req):
 			text = _dumps(ret), content_type = "application/json"
 		)
 
-@routes.post("/chaoxing/extract_url")
+@server_routes.post("/chaoxing/extract_url")
 async def _chaoxing_extract_url(req):
 	try:
 		data = await req.json(content_type = None)
@@ -174,7 +178,7 @@ async def _chaoxing_extract_url(req):
 	finally:
 		return _Response(text = text)
 
-@routes.post("/chaoxing/get_curriculum")
+@server_routes.post("/chaoxing/get_curriculum")
 async def _chaoxing_get_curriculum(req):
 	try:
 		data = await req.json(content_type = None)
@@ -196,7 +200,7 @@ async def _chaoxing_get_curriculum(req):
 			content_type = "application/json"
 		)
 
-@routes.post("/chaoxing/get_activities")
+@server_routes.post("/chaoxing/get_activities")
 async def _chaoxing_get_activities(req):
 	try:
 		ses = await _get_session(req)
@@ -212,7 +216,7 @@ async def _chaoxing_get_activities(req):
 			content_type = "application/json"
 		)
 
-@routes.post("/chaoxing/checkin_get_captcha")
+@server_routes.post("/chaoxing/checkin_get_captcha")
 async def _chaoxing_captcha_get_captcha(req):
 	try:
 		data = await req.json(content_type = None)
@@ -231,7 +235,7 @@ async def _chaoxing_captcha_get_captcha(req):
 			content_type = "application/json"
 		)
 
-@routes.post("/chaoxing/checkin_submit_captcha")
+@server_routes.post("/chaoxing/checkin_submit_captcha")
 async def _chaoxing_captcha_submit_captcha(req):
 	try:
 		data = await req.json(content_type = None)
@@ -251,7 +255,7 @@ async def _chaoxing_captcha_submit_captcha(req):
 			content_type = "application/json"
 		)
 
-@routes.post("/chaoxing/checkin_do_sign")
+@server_routes.post("/chaoxing/checkin_do_sign")
 async def _chaoxing_checkin_do_sign(req):
 	try:
 		data = await req.json(content_type = None)
@@ -269,7 +273,7 @@ async def _chaoxing_checkin_do_sign(req):
 		return _Response(text = text, content_type = "application/json")
 					
 
-@routes.post("/chaoxing/checkin_checkin_location")
+@server_routes.post("/chaoxing/checkin_checkin_location")
 async def _chaoxing_checkin_checkin_location(req):
 	try:
 		data = await req.json(content_type = None)
@@ -291,7 +295,7 @@ async def _chaoxing_checkin_checkin_location(req):
 	finally:
 		return _Response(text = text, content_type = "application/json")
 
-@routes.post("/chaoxing/checkin_checkin_qrcode_img")
+@server_routes.post("/chaoxing/checkin_checkin_qrcode_img")
 async def chaoxing_checkin_checkin_qrcode_img(req):
 	try:
 		ses = await _get_session(req)
@@ -392,7 +396,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
 	app.on_cleanup.append(_cleanup)
 	_run_app(app, host = host, port = port)
 
-def main():
+def _main():
 	from sys import argv
 	help = "xdcheckin-server - Xdcheckin Server Commandline Tool"
 	f" {_version('Xdcheckin')}\n" \

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+__all__ = ("locations", )
+
 locations = {
 	"A楼": {
 		"latitude": 34.133171,

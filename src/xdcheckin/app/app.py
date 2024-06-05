@@ -5,7 +5,9 @@ from toga.platform import current_platform as _current_platform
 from toga.style import Pack as _Pack
 from xdcheckin.server.server import start_server as _start_server
 
-class Xdcheckin(_App):
+__all__ = tuple()
+
+class _Xdcheckin(_App):
 	def startup(self):
 		_Thread(target = _start_server, daemon = True).start()
 		self.main_window = _MainWindow(title = self.formal_name)
@@ -39,6 +41,3 @@ class Xdcheckin(_App):
 				style = _Pack(flex = 1)
 			)])
 		self.main_window.show()
-
-def main():
-	return Xdcheckin()
