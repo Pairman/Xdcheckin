@@ -3,10 +3,9 @@ from time import time as _time
 class TimestampDict:
 	"""Timestamped dictionary for easy vacuuming.
 	"""
-	_data = {}
-	_ts = {}
+	_data, _ts = {}, {}
 
-	def __getitem__(self, key: None):
+	def __getitem__(self, key):
 		"""Return ``self[key]``.
 		"""
 		if key in self._data:
@@ -14,7 +13,7 @@ class TimestampDict:
 			return self._data[key]
 		raise KeyError(key)
 
-	def __setitem__(self, key: None, value: None):
+	def __setitem__(self, key, value):
 		"""Set ``self[key]`` to value.
 		"""
 		self._ts[key] = _time()
@@ -23,19 +22,30 @@ class TimestampDict:
 	def __delitem__(self, key):
 		"""Delete ``self[key]``.
 		"""
-		del self._ts[key]
-		del self._data[key]
+		del self._ts[key], self._data[key]
 
-	def get(self, key: None, default: None = None):
+	def get(self, key, default = None):
 		"""Return the value for key if key is in the dictionary, \
   		else default.
 		"""
-		return self._data.get(key, default)
+		if key in self._data:
+			return self[key]
+		return default
 
-	async def vacuum(self, seconds):
+	def setdefault(self, key, default = None):
+		"""Return the value for key if key is in the dictionary, \
+  		else set the value to default and return default.
+		"""
+		if key in self._data:
+			return self[key]
+		self[key] = default
+		return default
+
+	async def vacuum(self, seconds = 0, async_handler = lambda _: None):
 		"""Remove key and value pairs older than the specified seconds.
 		"""
 		now = _time()
 		for k, t in tuple(self._ts.items()):
 			if now > t + seconds:
+				await async_handler(self[k])
 				del self[k]

@@ -16,24 +16,30 @@ class IDSSession:
 				"obile Safari/537.36"
 		}
 	}
-	__session = __secrets = __service = None
+	__async_ctxmgr = __session = __secrets = __service = None
 	logined = False
 
 	def __init__(self, service: str = ""):
 		"""Initialize an IDS Session.
 		:param service: The SSO service for redirection.
 		"""
-		if self.logined:
+		if not self.__async_ctxmgr is None:
 			return
 		self.__session = _CachedSession()
 		self.__secrets, self.__service = {}, service
 
 	async def __aenter__(self):
+		if not self.__async_ctxmgr is None:
+			return self
+		self.__async_ctxmgr = True
 		await self.__session.__aenter__()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
+		if self.__async_ctxmgr != True:
+			return
 		await self.__session.__aexit__(*args, **kwargs)
+		self.__async_ctxmgr = False
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -130,23 +136,31 @@ class IDSSession:
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
 	"""
-	__chaoxing = logined = None
+	__async_ctxmgr = __chaoxing = logined = None
 
 	def __init__(self, chaoxing: _Chaoxing = None):
 		"""Create a Newesxidian with ``Chaoxing`` instance.
 		:param chaoxing: The ``Chaoxing`` instance.
 		:return: None.
 		"""
-		if not chaoxing.logined or not chaoxing.fid == "16820":
+		if not self.__async_ctxmgr is None or \
+		not chaoxing.fid == "16820":
 			return
-		self.logined, self.__chaoxing = True, chaoxing
+		self.logined, self.__chaoxing = \
+		True and chaoxing.logined, chaoxing
 
 	async def __aenter__(self):
+		if not self.__async_ctxmgr is None:
+			return self
+		self.__async_ctxmgr = True
 		await self.__chaoxing.__aenter__()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
+		if self.__async_ctxmgr != True:
+			return
 		await self.__chaoxing.__aexit__(*args, **kwargs)
+		self.__async_ctxmgr = False
 
 	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.

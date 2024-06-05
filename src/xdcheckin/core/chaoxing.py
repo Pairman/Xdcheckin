@@ -31,10 +31,10 @@ class Chaoxing:
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
 	}
-	__account = {}
-	__session = None
+	__async_ctxmgr = __session = None
 	logined = False
 	fid = uid = 0
+	__account = {}
 	courses = {}
 
 	def __init__(
@@ -42,15 +42,17 @@ class Chaoxing:
 		config: dict = {}
 	):
 		"""Create a Chaoxing instance and login.
-		:param username: Chaoxing username. Unused if ``cookies`` \
-		is given
-		:param password: Chaoxing password. Unused if ``cookies`` \
-		is given.
+		:param username: Chaoxing username. \
+		Unused if ``cookies`` is given.
+		:param password: Chaoxing password. \
+		Unused if ``cookies`` is given.
 		:param cookies: Cookies from previous login. Overrides \
 		``username`` and ``password`` if given.
 		:param config: Configurations.
 		:return: None.
 		"""
+		if not self.__async_ctxmgr is None:
+			return
 		assert (username and password) or cookies
 		assert type(config) is dict
 		self.config.update(config)
@@ -64,6 +66,9 @@ class Chaoxing:
 		}
 
 	async def __aenter__(self):
+		if not self.__async_ctxmgr is None:
+			return self
+		self.__async_ctxmgr = True
 		await self.__session.__aenter__()
 		username, password, cookies = self.__account.values()
 		if cookies:
@@ -90,7 +95,10 @@ class Chaoxing:
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
+		if self.__async_ctxmgr != True:
+			return
 		await self.__session.__aexit__(*args, **kwargs)
+		self.__async_ctxmgr = False
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -735,12 +743,13 @@ class Chaoxing:
 		"""Do checkin pre-sign.
 		:param activity: Activity ID in dictionary.
 		:param course: Course ID (optional) and class ID.
-		:return: Presign state (2 if checked-in and 1 on success), \
+		:return: Presign state (2 if checked-in or 1 on success), \
 		checkin location and CAPTCHA.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
-			"courseId": await self.course_get_course_id(course = course),
+			"courseId":
+			await self.course_get_course_id(course = course),
 			"classId": course["class_id"],
 			"activePrimaryId": activity["active_id"],
 			"general": 1, "sys": 1, "ls": 1, "appType": 15,
@@ -787,7 +796,7 @@ class Chaoxing:
 		:param activity: Activity ID and type in dictionary.
 		:param location: Address, latitude, longitude and ranged flag.
 		:param old_params: Reuse previous parameters. \
-		Overrides activity and location.
+		Overrides activity and location if given.
 		:return: Sign state (True on success), message and parameters.
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
@@ -941,8 +950,8 @@ class Chaoxing:
 		:return: Same as ``checkin_checkin_location()``.
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign" in url, \
-			f"Checkin failure. {'Invalid URL.', url}"
+			assert "mobilelearn.chaoxing.com/widget/sign/e" \
+			in url, f"Checkin failure. {'Invalid URL.', url}"
 			match = _search(r"id=(\d+).*?([0-9A-F]{32})", url)
 			return await self.checkin_checkin_qrcode(activity = {
 				"active_id": match.group(1),

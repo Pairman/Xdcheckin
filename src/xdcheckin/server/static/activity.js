@@ -47,7 +47,7 @@ async function getActivities() {
 }
 
 async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
-	let res = await post("/chaoxing/checkin_get_captcha", data = {
+	let res = await post("/chaoxing/captcha_get_captcha", data = {
 		"captcha": captcha
 	})
 	if (res.status_code != 200 && e_id_prefix == "activities") {
@@ -66,7 +66,7 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 							.onclick = () => {
 		captcha["vcode"] = parseInt(s_img.style.left.split("px")[0] *
 					    320 / c.offsetWidth);
-		post("/chaoxing/checkin_submit_captcha", data = {
+		post("/chaoxing/captcha_submit_captcha", data = {
 			"captcha": captcha
 		}).then(res => {
 			if (res.status_code != 200 &&
@@ -132,8 +132,8 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
 				`captcha-div`).style.display = "none";
 	var form = new FormData();
-	form.append("img_src", img_src);
 	form.append("location", localStorage.getItem("location_"));
+	form.append("img_src", img_src);
 	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
 	let data = res.json();
 	document.getElementById(result_div_id).innerText =
