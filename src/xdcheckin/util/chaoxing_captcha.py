@@ -4,7 +4,7 @@ from base64 import b64decode as _b64decode
 from random import random as _random
 from zlib import decompress as _decompress
 from pyjsbitwise import bwnot as _bwnot, bwand as _bwand, bwor as _bwor, \
-	bwxor as _bwxor, lshift as _lshift, rshift as _rshift, urshift as _urshift
+bwxor as _bwxor, lshift as _lshift, rshift as _rshift, urshift as _urshift
 
 """Generates two blessed strings.
 For some reason I choose to obfuscate this, yet it's simple to deobfuscate.
