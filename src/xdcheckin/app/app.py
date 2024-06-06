@@ -1,11 +1,11 @@
+__all__ = tuple()
+
 from threading import Thread as _Thread
 from toga import App as _App, Box as _Box, MainWindow as _MainWindow, \
 WebView as _WebView, Label as _Label
 from toga.platform import current_platform as _current_platform
 from toga.style import Pack as _Pack
 from xdcheckin.server.server import start_server as _start_server
-
-__all__ = tuple()
 
 class _Xdcheckin(_App):
 	def startup(self):

@@ -20,7 +20,6 @@ from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import IDSSession as _IDSSession, \
 Newesxidian as _Newesxidian
-
 server_routes = _RouteTableDef()
 
 with _path("xdcheckin.server.static", "") as fpath:
@@ -92,14 +91,14 @@ async def _ids_login_prepare(req):
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
-		text = _dumps(ids.login_username_prepare())
+		text = _dumps(await ids.login_username_prepare())
 	except Exception as e:
 		text = _dumps({"err": str(e)})
 	finally:
 		return _Response(text = text, content_type = "application/json")
 
 @server_routes.post("/ids/login_finish")
-async def ids_login_finish(req):
+async def _ids_login_finish(req):
 	try:
 		data = await req.json()
 		username, password, vcode = \
@@ -107,11 +106,12 @@ async def ids_login_finish(req):
 		assert username and password and vcode, \
 		"Missing username, password or verification code."
 		ses = await _get_session(req)
-		ids = req.app["config"]["sessions"][ses["uuid"]]["ids"]
-		ret = ids.login_username_finish(account = {
+		ids = req.app["config"]["sessions"][ses["uuid"]].pop("ids")
+		ret = await ids.login_username_finish(account = {
 			"username": username, "password": password,
 			"vcode": vcode
 		})
+		_create_task(ids.__aexit__(None, None, None))
 		assert ret["logined"], "IDS login failed."
 		for k in tuple(ret["cookies"]):
 			if ret["cookies"][k]["domain"] != ".chaoxing.com":
@@ -143,7 +143,7 @@ async def _chaoxing_login(req):
 			}
 		)
 		await cx.__aenter__()
-		assert cx.logined, "Chaoxing login failed."
+		assert cx.__logined, "Chaoxing login failed."
 		nx = _Newesxidian(chaoxing = cx)
 		_create_task(nx.__aenter__())
 		ses = await _get_session(req)
@@ -296,7 +296,7 @@ async def _chaoxing_checkin_checkin_location(req):
 		return _Response(text = text, content_type = "application/json")
 
 @server_routes.post("/chaoxing/checkin_checkin_qrcode_img")
-async def chaoxing_checkin_checkin_qrcode_img(req):
+async def _chaoxing_checkin_checkin_qrcode_img(req):
 	try:
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -342,12 +342,8 @@ async def chaoxing_checkin_checkin_qrcode_img(req):
 		return _Response(text = text, content_type = "application/json")
 
 async def _vacuum_server_sessions_handler(ses):
-	for key in ("ids", "nx", "cx"):
-		if key in ses:
-			try:
-				await ses[key].__aexit__(None, None, None)
-			finally:
-				pass
+	for key in {"ids", "nx", "cx"} & set(ses.keys()):
+		await ses[key].__aexit__(None, None, None)
 
 async def _vacuum_server_sessions(app):
 	sessions = app["config"]["sessions"]

@@ -22,7 +22,7 @@ class IDSSession:
 		}
 	}
 	__async_ctxmgr = __session = __secrets = __service = None
-	logined = False
+	__logined = False
 
 	def __init__(self, service: str = ""):
 		"""Initialize an IDS Session.
@@ -45,6 +45,10 @@ class IDSSession:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__async_ctxmgr = False
+
+	@property
+	def logind(self):
+		return self.__logined
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -140,7 +144,8 @@ class IDSSession:
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
 	"""
-	__async_ctxmgr = __chaoxing = logined = None
+	__async_ctxmgr = __cx = None
+	__logined = False
 
 	def __init__(self, chaoxing: _Chaoxing = None):
 		"""Create a Newesxidian with ``Chaoxing`` instance.
@@ -150,21 +155,25 @@ class Newesxidian:
 		if not self.__async_ctxmgr is None or \
 		not chaoxing.fid == "16820":
 			return
-		self.logined, self.__chaoxing = \
-		True and chaoxing.logined, chaoxing
+		self.__logined, self.__cx = \
+		True and chaoxing.__logined, chaoxing
 
 	async def __aenter__(self):
 		if not self.__async_ctxmgr is None:
 			return self
 		self.__async_ctxmgr = True
-		await self.__chaoxing.__aenter__()
+		await self.__cx.__aenter__()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
 		if self.__async_ctxmgr != True:
 			return
-		await self.__chaoxing.__aexit__(*args, **kwargs)
+		await self.__cx.__aexit__(*args, **kwargs)
 		self.__async_ctxmgr = False
+
+	@property
+	def logind(self):
+		return self.__logined
 
 	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
@@ -175,7 +184,7 @@ class Newesxidian:
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
 		params = {"liveId": livestream["live_id"]}
-		res = await self.__chaoxing.get(
+		res = await self.__cx.get(
 			url = url, params = params, ttl = 86400
 		)
 		return {
@@ -203,7 +212,7 @@ class Newesxidian:
 		}
 		location = livestream.get("location") or ""
 		if not livestream.get("device"):
-			res1 = await self.__chaoxing.get(
+			res1 = await self.__cx.get(
 				url = url1, params = params1, ttl = 86400
 			)
 			for lesson in (await res1.json() or []):
@@ -211,7 +220,7 @@ class Newesxidian:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
-		res2 = await self.__chaoxing.get(
+		res2 = await self.__cx.get(
 			url = url2, params = params2, ttl = 86400
 		)
 		return {
@@ -241,17 +250,17 @@ class Newesxidian:
 				if l["device"] == livestream["device"]:
 					return
 			curriculum["lessons"][class_id]["livestreams"].append(livestream)
-		curriculum = await self.__chaoxing.curriculum_get_curriculum(
+		curriculum = await self.__cx.curriculum_get_curriculum(
 			week = week
 		)
 		url = "https://newesxidian.chaoxing.com/frontLive/listStudentCourseLivePage"
 		params = {
-			"fid": 16820, "userId": self.__chaoxing.uid,
+			"fid": 16820, "userId": self.__cx.uid,
 			"termYear": curriculum["details"]["year"],
 			"termId": curriculum["details"]["semester"],
 			"week": week or curriculum["details"]["week"]
 		}
-		res = await self.__chaoxing.get(
+		res = await self.__cx.get(
 			url = url, params = params, ttl = 86400
 		)
 		data = (await res.json() or []) if res else []

@@ -1,4 +1,9 @@
-from asyncio import create_task as _create_task
+from asyncio import create_task as _create_task, \
+get_event_loop as _get_event_loop
+from atexit import register as _register
+from signal import signal as _signal, SIGHUP as _SIGHUP, SIGINT as _SIGINT, \
+SIGTERM as _SIGTERM
+from sys import exit as _exit
 from aiocache import Cache as _Cache
 from aiocache.serializers import NullSerializer as _NullSerializer
 from aiohttp import ClientSession as _ClientSession
@@ -6,7 +11,8 @@ from aiohttp import ClientSession as _ClientSession
 class CachedSession:
 	"""Wrapper for ``aiohttp.ClientSession`` with cache.
 	"""
-	headers = cookies = verify = __session = __cache = None
+	__async_ctxmgr = headers = cookies = __session = __cache = None
+	__verify_ssl = False
 
 	def __init__(
 		self, headers: dict = None, cookies: dict = None,
@@ -18,6 +24,8 @@ class CachedSession:
 		:param verify: SSL verification.
 		:param cache_enabled: Whether to enable caching.
 		"""
+		if not self.__async_ctxmgr is None:
+			return
 		self.headers = headers or {}
 		self.cookies = cookies or {}
 		self.__verify_ssl = verify_ssl
@@ -26,22 +34,38 @@ class CachedSession:
 			self.__cache = _Cache(
 				_Cache.MEMORY, serializer = _NullSerializer()
 			)
+		def _release():
+			_get_event_loop().run_until_complete(
+				self.__aexit__(None, None, None)
+			)
+		def _sighandler(sig, frame):
+			_release()
+			_exit(0)
+		_register(_release)
+		_signal(_SIGHUP, _sighandler)
+		_signal(_SIGINT, _sighandler)
+		_signal(_SIGTERM, _sighandler)
 
 	async def __aenter__(self):
+		if not self.__async_ctxmgr is None:
+			return self
+		self.__async_ctxmgr = True
 		await self.__session.__aenter__()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
+		if self.__async_ctxmgr != True:
+			return
 		await self.__session.__aexit__(*args, **kwargs)
+		self.__async_ctxmgr = False
 
 	async def close(self):
-		await self.__aexit__()
+		await self.__aexit__(None, None, None)
 
 	async def __cache_handler(self, func, ttl: int, *args, **kwargs):
+		kwargs["verify_ssl"] = self.__verify_ssl
 		if not self.__cache or not ttl:
-			return await func(
-				verify_ssl = self.__verify_ssl, *args, **kwargs
-			)
+			return await func(*args, **kwargs)
 		key = f"{func.__name__}{args}{sorted(kwargs.items())}"
 		try:
 			res = await self.__cache.get(key)
@@ -50,14 +74,12 @@ class CachedSession:
 		if not res is None:
 			return res
 		try:
-			res = await func(
-				verify_ssl = self.__verify_ssl, *args, **kwargs
-			)
+			res = await func(*args, **kwargs)
 			assert res.status in (200, 500)
 		except Exception:
 			res = None
 		else:
-			_create_task(self.__cache.set(key, res, ttl = ttl))
+			_create_task(self.__cache.set(key, res, ttl))
 		return res
 
 	async def get(

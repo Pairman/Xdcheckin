@@ -41,7 +41,7 @@ _compile(r"id=(\d+).*?([0-9A-F]{32})")
 class Chaoxing:
 	"""Common Chaoxing APIs.
 	"""
-	config = {
+	__config = {
 		"requests_headers": {
 			"User-Agent":
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
@@ -56,10 +56,9 @@ class Chaoxing:
 		"chaoxing_checkin_location_randomness": True
 	}
 	__async_ctxmgr = __session = None
-	logined = False
-	fid = uid = 0
-	__account = {}
-	courses = {}
+	__account = courses = {}
+	__fid = __uid = 0
+	__logined = False
 
 	def __init__(
 		self, username: str = "", password: str = "", cookies = {},
@@ -79,10 +78,10 @@ class Chaoxing:
 			return
 		assert (username and password) or cookies
 		assert type(config) is dict
-		self.config.update(config)
+		self.__config.update(config)
 		self.__session = _CachedSession(
-			headers = self.config["requests_headers"],
-			cache_enabled = self.config["requests_cache_enabled"]
+			headers = self.__config["requests_headers"],
+			cache_enabled = self.__config["requests_cache_enabled"]
 		)
 		self.__account = {
 			"username": username, "password": password,
@@ -96,7 +95,7 @@ class Chaoxing:
 		await self.__session.__aenter__()
 		username, password, cookies = self.__account.values()
 		if cookies:
-			self.name, cookies, self.logined = \
+			self.name, cookies, self.__logined = \
 			(await self.login_cookies(account = self.__account)).values()
 		login_funcs = (
 			self.login_username_fanya, self.login_username_v3,
@@ -104,17 +103,17 @@ class Chaoxing:
 			self.login_username_v2, self.login_username_v11,
 			self.login_username_xxk, self.login_username_mylogin1
 		)
-		if not self.logined and username and password:
+		if not self.__logined and username and password:
 			for func in login_funcs:
-				self.name, cookies, self.logined = \
+				self.name, cookies, self.__logined = \
 				(await func(account = self.__account)).values()
-				if self.logined:
+				if self.__logined:
 					break
-		if self.logined:
+		if self.__logined:
 			if "fid" in cookies:
-				self.fid = cookies["fid"].value
+				self.__fid = cookies["fid"].value
 			self.__session.cookies = cookies
-			self.uid = cookies["UID"].value
+			self.__uid = cookies["UID"].value
 			self.courses = await self.course_get_courses()
 		return self
 
@@ -123,6 +122,18 @@ class Chaoxing:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__async_ctxmgr = False
+
+	@property
+	def logind(self):
+		return self.__logined
+
+	@property
+	def fid(self):
+		return self.__fid
+
+	@property
+	def uid(self):
+		return self.__uid
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -439,7 +450,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
 		params = {
-			"fid": self.fid, "courseId": "",
+			"fid": self.__fid, "courseId": "",
 			"classId": course["class_id"]
 		}
 		course_id = course.get("course_id") or \
@@ -493,7 +504,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"fid": self.fid, "courseId":
+			"fid": self.__fid, "courseId":
 			await self.course_get_course_id(course = course),
 			"classId": course["class_id"], "showNotStartedActive": 0
 		}
@@ -542,7 +553,7 @@ class Chaoxing:
 		data = (await res.json(content_type = None)).get("activeList") or []
 		all_details = {}
 		_sem = _Semaphore(
-			self.config["chaoxing_course_get_activities_workers"]
+			self.__config["chaoxing_course_get_activities_workers"]
 		)
 		async def _get_details(activity):
 			async with _sem:
@@ -582,10 +593,10 @@ class Chaoxing:
 		"""
 		courses = tuple(
 			self.courses.values()
-		)[: self.config["chaoxing_course_get_activities_courses_limit"]]
+		)[: self.__config["chaoxing_course_get_activities_courses_limit"]]
 		activities = {}
 		_sem = _Semaphore(
-			self.config["chaoxing_course_get_activities_workers"]
+			self.__config["chaoxing_course_get_activities_workers"]
 		)
 		async def _worker(func, course):
 			async with _sem:
@@ -712,12 +723,12 @@ class Chaoxing:
 		"""
 		new_location = {"ranged": 0, "range": 0, **new_location}
 		_rand = lambda x: round(x - 0.0005 + _uniform(0, 0.001), 6)
-		if self.config["chaoxing_checkin_location_randomness"]:
+		if self.__config["chaoxing_checkin_location_randomness"]:
 			new_location.update({
 				"latitude": _rand(new_location["latitude"]),
 				"longitude": _rand(new_location["longitude"])
 			})
-		if len(new_location["address"]) < self.config[
+		if len(new_location["address"]) < self.__config[
 			"chaoxing_checkin_location_address_override_maxlen"
 		]:
 			new_location["address"] = location["address"]
@@ -785,7 +796,7 @@ class Chaoxing:
 			"classId": course["class_id"],
 			"activePrimaryId": activity["active_id"],
 			"general": 1, "sys": 1, "ls": 1, "appType": 15,
-			"tid": "", "uid": self.uid, "ut": "s"
+			"tid": "", "uid": self.__uid, "ut": "s"
 		}
 		location = {
 			"latitude": -1, "longitude": -1, "address": "",
@@ -831,7 +842,7 @@ class Chaoxing:
 		else:
 			params = {
 				"name": "",
-				"uid": self.uid, "fid": self.fid,
+				"uid": self.__uid, "fid": self.__fid,
 				"activeId": activity["active_id"],
 				"enc": activity.get("enc", ""),
 				"enc2": "", "address": "", "latitude": -1,
