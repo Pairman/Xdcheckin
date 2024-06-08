@@ -157,7 +157,6 @@ async def _chaoxing_login(req, data = None):
 		await cx.__aenter__()
 		assert cx.logged_in, "Chaoxing login failed."
 		nx = _Newesxidian(chaoxing = cx)
-		await nx.__aenter__()
 		_create_task(nx.__aenter__())
 		ses = await _get_session(req)
 		ses.setdefault("uuid", str(_uuid4))
