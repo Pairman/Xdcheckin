@@ -44,6 +44,8 @@ class IDSSession:
 		if self.__async_ctxmgr != True:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
+		self.__secrets = None
+		self.__logged_in = False
 		self.__async_ctxmgr = False
 
 	@property
@@ -155,23 +157,24 @@ class Newesxidian:
 		:param chaoxing: The ``Chaoxing`` instance.
 		:return: None.
 		"""
-		if not self.__async_ctxmgr is None or \
-		not chaoxing.fid == "16820":
+		if not self.__async_ctxmgr is None:
 			return
-		self.__logged_in, self.__cx = \
-		True and chaoxing.__logged_in, chaoxing
+		self.__cx = chaoxing
 
 	async def __aenter__(self):
 		if not self.__async_ctxmgr is None:
 			return self
 		self.__async_ctxmgr = True
 		await self.__cx.__aenter__()
+		if self.__cx.logged_in and self.__cx.fid == "16820":
+			self.__logged_in = True
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
 		if self.__async_ctxmgr != True:
 			return
 		await self.__cx.__aexit__(*args, **kwargs)
+		self.__logged_in = False
 		self.__async_ctxmgr = False
 
 	@property
@@ -218,7 +221,9 @@ class Newesxidian:
 			res1 = await self.__cx.get(
 				url = url1, params = params1, ttl = 86400
 			)
-			for lesson in (await res1.json() or []):
+			for lesson in (await res1.json(
+				content_type = None
+			) or []):
 				if str(lesson["id"]) == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
@@ -245,14 +250,14 @@ class Newesxidian:
 				return
 			if not "livestreams" in curriculum["lessons"][class_id]:
 				curriculum["lessons"][class_id]["livestreams"] = []
-			livestream = self.livestream_get_live_url(livestream = {
+			ls = await self.livestream_get_live_url(livestream = {
 				"live_id": live_id,
 				"location": location
 			})
 			for l in curriculum["lessons"][class_id]["livestreams"]:
-				if l["device"] == livestream["device"]:
+				if l["device"] == ls["device"]:
 					return
-			curriculum["lessons"][class_id]["livestreams"].append(livestream)
+			curriculum["lessons"][class_id]["livestreams"].append(ls)
 		curriculum = await self.__cx.curriculum_get_curriculum(
 			week = week
 		)
@@ -266,7 +271,8 @@ class Newesxidian:
 		res = await self.__cx.get(
 			url = url, params = params, ttl = 86400
 		)
-		data = (await res.json() or []) if res else []
+		data = (await res.json(content_type = None) or []) \
+		if res else []
 		await _gather(*[
 			_create_task(_get_livestream(lesson)) for lesson in data
 		])

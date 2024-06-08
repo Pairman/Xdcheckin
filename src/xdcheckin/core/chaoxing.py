@@ -54,9 +54,9 @@ class Chaoxing:
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
 	}
-	__async_ctxmgr = __session = None
-	__account = courses = {}
-	__fid = __uid = 0
+	__async_ctxmgr = __session = __account = __cookies = None
+	__courses = {}
+	__fid = __uid = "0"
 	__logged_in = False
 
 	def __init__(
@@ -113,15 +113,19 @@ class Chaoxing:
 		if self.__logged_in:
 			if "fid" in cookies:
 				self.__fid = cookies["fid"].value
-			self.__session.cookies = cookies
+			self.__cookies = self.__session.cookies = cookies
 			self.__uid = cookies["UID"].value
-			self.courses = await self.course_get_courses()
+			self.__courses = await self.course_get_courses()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
 		if self.__async_ctxmgr != True:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
+		self.__account = None
+		self.__fid = self.__uid = "0"
+		self.__courses = {}
+		self.__logged_in = False
 		self.__async_ctxmgr = False
 
 	@property
@@ -135,6 +139,14 @@ class Chaoxing:
 	@property
 	def uid(self):
 		return self.__uid
+
+	@property
+	def courses(self):
+		return self.__courses
+
+	@property
+	def cookies(self):
+		return self.__cookies
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -346,7 +358,7 @@ class Chaoxing:
 			if data["result"]:
 				ret.update({
 					"name": data["msg"]["name"],
-					"cookies": account["cookies"],
+					"cookies": res.cookies,
 					"logged_in": True
 				})
 		return ret
@@ -472,7 +484,7 @@ class Chaoxing:
 			"classId": course["class_id"]
 		}
 		course_id = course.get("course_id") or \
-		self.courses.get(course["class_id"], {}).get("course_id")
+		self.__courses.get(course["class_id"], {}).get("course_id")
 		if not course_id:
 			res = await self.__session.get(
 				url = url, params = params, ttl = 86400
@@ -609,7 +621,7 @@ class Chaoxing:
 		:return: Dictionary of Class IDs to ongoing activities.
 		"""
 		courses = tuple(
-			self.courses.values()
+			self.__courses.values()
 		)[: self.__config["chaoxing_course_get_activities_courses_limit"]]
 		activities = {}
 		_sem = _Semaphore(

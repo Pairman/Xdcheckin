@@ -1,3 +1,5 @@
+__all__ = ("TimestampDict", )
+
 from time import time as _time
 
 class TimestampDict:

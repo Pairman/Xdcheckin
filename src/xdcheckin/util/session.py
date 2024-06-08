@@ -1,4 +1,6 @@
-from asyncio import create_task as _create_task, \
+__all__ = ("CachedSession", )
+
+from asyncio import create_task as _create_task, run as _run, \
 get_event_loop as _get_event_loop
 from atexit import register as _register
 from signal import signal as _signal, SIGINT as _SIGINT, SIGTERM as _SIGTERM
@@ -38,9 +40,15 @@ class CachedSession:
 				_Cache.MEMORY, serializer = _NullSerializer()
 			)
 		def _release():
-			_get_event_loop().run_until_complete(
-				self.__aexit__(None, None, None)
-			)
+			try:
+				_loop = _get_event_loop()
+			except Exception:
+				_loop = None
+			_coro = self.__aexit__(None, None, None)
+			if _loop and _loop.is_running():
+				_loop.create_task(_coro)
+			else:
+				_run(_coro)
 		def _sighandler(sig, frame):
 			_release()
 			_exit(0)
@@ -62,6 +70,10 @@ class CachedSession:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__async_ctxmgr = False
+
+	@property
+	def session_cookies(self):
+		return self.__session.cookie_jar
 
 	async def close(self):
 		await self.__aexit__(None, None, None)
@@ -86,11 +98,6 @@ class CachedSession:
 		else:
 			_create_task(self.__cache.set(key, res, ttl))
 		return res
-
-	@property
-	def session_cookies(self):
-		self.__session.cookie_jar.filter_cookies
-		return self.__session.cookie_jar
 
 	async def get(
 		self, url: str, params: dict = None, cookies: dict = None,

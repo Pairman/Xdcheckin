@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+__all__ = ("encrypt_aes", )
 
 from base64 import b64encode as _b64encode
 from Crypto.Cipher.AES import new as _new, block_size as _block_size, \
@@ -16,7 +16,5 @@ def encrypt_aes(
 	:param pad: Padder for the data. PKCS7 by default.
 	:return: Encrypted data in base64 string.
 	"""
-	enc = _new(key, _MODE_CBC, iv).encrypt(_pad(
-		pad(msg), _block_size
-	))
+	enc = _new(key, _MODE_CBC, iv).encrypt(_pad(pad(msg), _block_size))
 	return _b64encode(enc).decode("utf-8")

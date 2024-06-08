@@ -3,7 +3,6 @@
 __all__ = ("server_routes", "create_server", "start_server")
 
 from asyncio import create_task as _create_task
-from importlib.metadata import version as _version
 from importlib.resources import files as _files
 from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
@@ -20,6 +19,8 @@ from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import IDSSession as _IDSSession, \
 Newesxidian as _Newesxidian
+from xdcheckin.util.version import compare_versions as _compare_versions, \
+version as _version
 
 server_routes = _RouteTableDef()
 
@@ -44,19 +45,18 @@ async def _index_html(req):
 	return \
 	_Response(text = _index_html_str, content_type = "text/html")
 
-@server_routes.post("/xdcheckin/get/version")
+@server_routes.post("/xdcheckin/get_version")
 async def _xdcheckin_get_version(req):
-	return _Response(text = _version("Xdcheckin"))
+	return _Response(text = _version)
 
-_xdcheckin_get_latest_release_time = 0
-_xdcheckin_get_latest_release_data = ""
-@server_routes.post("/xdcheckin/get/releases/latest")
-async def _xdcheckin_get_latest_release(req):
-	global _xdcheckin_get_latest_release_time, \
-	_xdcheckin_get_latest_release_data
-	time = _time()
-	if time < _xdcheckin_get_latest_release_time + 3600:
-		_xdcheckin_get_latest_release_time = time
+_xdcheckin_get_update_time = 0
+_xdcheckin_get_update_data = ""
+@server_routes.post("/xdcheckin/get_update")
+async def _xdcheckin_get_update(req):
+	global _xdcheckin_get_update_time, _xdcheckin_get_update_data
+	update, time = False, _time()
+	if 1 or time < _xdcheckin_get_update_time + 3600:
+		_xdcheckin_get_update_time = time
 		try:
 			async with _request(
 				"GET",
@@ -64,26 +64,31 @@ async def _xdcheckin_get_latest_release(req):
 			) as res:
 				assert res.status == 200
 				data = await res.json()
-			_xdcheckin_get_latest_release_data = _dumps({
-				"tag_name": data["tag_name"],
-				"name": data["name"],
-				"author": data["author"]["login"],
-				"body": data["body"],
-				"published_at": data["published_at"],
-				"html_url": data["html_url"],
-				"assets": [{
-					"name": asset["name"],
-					"size": asset["size"],
-					"browser_download_url":
-					asset["browser_download_url"]
-				} for asset in data["assets"]]
-			})
+				ver_latest = data["tag_name"]
+			update = _compare_versions(
+				_version, data["tag_name"]
+			) == 1
 		except Exception:
-			pass
+			update = False
+		_xdcheckin_get_update_data = _dumps({
+			"tag_name": data["tag_name"],
+			"name": data["name"],
+			"author": data["author"]["login"],
+			"body": data["body"].replace("\r\n", "<br>"),
+			"published_at": data["published_at"],
+			"html_url": data["html_url"],
+			"assets": [{
+				"name": asset["name"],
+				"size": asset["size"],
+				"browser_download_url":
+				asset["browser_download_url"]
+			} for asset in data["assets"]],
+			"updatable": True
+		}) if update else _dumps({"updatable": False})
 	return _Response(
-		text = _xdcheckin_get_latest_release_data,
+		text = _xdcheckin_get_update_data,
 		content_type = "application/json",
-		status = 200 if _xdcheckin_get_latest_release_data else 500
+		status = 200 if _xdcheckin_get_update_data else 500
 	)
 
 @server_routes.post("/ids/login_prepare")
@@ -121,19 +126,21 @@ async def _ids_login_finish(req):
 		_create_task(ids.__aexit__(None, None, None))
 		assert ret["logged_in"], "IDS login failed."
 		cookies = ret["cookies"].filter_cookies("https://chaoxing.com")
-		text = _dumps(_chaoxing_login(req = {
+		return await _chaoxing_login(req = req, data = {
 			"username": "", "password": "", "cookies":
-			_dumps({k: v.value for k, v in cookies})}
-		))
+			_dumps({k: v.value for k, v in cookies.items()})
+		})
 	except Exception as e:
-		text = _dumps({"err": str(e)})
-	finally:
-		return _Response(text = text, content_type = "application/json")
+		return _Response(
+			text = _dumps({"err": str(e)}),
+			content_type = "application/json"
+		)
 
 @server_routes.post("/chaoxing/login")
-async def _chaoxing_login(req):
+async def _chaoxing_login(req, data = None):
 	try:
-		data = req if type(req) is dict else await req.json()
+		if not data:
+			data = await req.json()
 		username, password, cookies = \
 		data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies, \
@@ -148,8 +155,9 @@ async def _chaoxing_login(req):
 			config = config
 		)
 		await cx.__aenter__()
-		assert cx.__logged_in, "Chaoxing login failed."
+		assert cx.logged_in, "Chaoxing login failed."
 		nx = _Newesxidian(chaoxing = cx)
+		await nx.__aenter__()
 		_create_task(nx.__aenter__())
 		ses = await _get_session(req)
 		ses.setdefault("uuid", str(_uuid4))
@@ -158,7 +166,9 @@ async def _chaoxing_login(req):
 		).update({"cx": cx, "nx": nx})
 		ret = {
 			"fid": cx.fid, "courses": cx.courses,
-			"cookies": _dumps(dict(cx.cookies))
+			"cookies": _dumps({
+				k: v.value for k, v in cx.cookies.items()
+			})
 		}
 	except Exception as e:
 		ret = {"err": str(e)}
@@ -170,7 +180,7 @@ async def _chaoxing_login(req):
 @server_routes.post("/chaoxing/extract_url")
 async def _chaoxing_extract_url(req):
 	try:
-		data = await req.json(content_type = None)
+		data = await req.json()
 		ses = await _get_session(req)
 		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
 		assert nx.logged_in
@@ -186,11 +196,10 @@ async def _chaoxing_extract_url(req):
 @server_routes.post("/chaoxing/get_curriculum")
 async def _chaoxing_get_curriculum(req):
 	try:
-		data = await req.json(content_type = None)
-		assert data
+		with_live = await req.json()
 		ses = await _get_session(req)
 		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
-		if nx.logged_in:
+		if with_live and nx.logged_in:
 			curriculum = await nx.curriculum_get_curriculum()
 		else:
 			cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -224,7 +233,7 @@ async def _chaoxing_get_activities(req):
 @server_routes.post("/chaoxing/checkin_get_captcha")
 async def _chaoxing_captcha_get_captcha(req):
 	try:
-		data = await req.json(content_type = None)
+		data = await req.json()
 		assert data["captcha"]
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -243,7 +252,7 @@ async def _chaoxing_captcha_get_captcha(req):
 @server_routes.post("/chaoxing/checkin_submit_captcha")
 async def _chaoxing_captcha_submit_captcha(req):
 	try:
-		data = await req.json(content_type = None)
+		data = await req.json()
 		assert data["captcha"]
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -263,7 +272,7 @@ async def _chaoxing_captcha_submit_captcha(req):
 @server_routes.post("/chaoxing/checkin_do_sign")
 async def _chaoxing_checkin_do_sign(req):
 	try:
-		data = await req.json(content_type = None)
+		data = await req.json()
 		assert data["params"], "No parameters given"
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -281,7 +290,7 @@ async def _chaoxing_checkin_do_sign(req):
 @server_routes.post("/chaoxing/checkin_checkin_location")
 async def _chaoxing_checkin_checkin_location(req):
 	try:
-		data = await req.json(content_type = None)
+		data = await req.json()
 		assert data["activity"]["active_id"], "No activity ID given."
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
@@ -376,7 +385,7 @@ def create_server(config: dict = {}):
 	))
 	return app
 
-def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
+def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	"""Run a Xdcheckin server.
 	:param host: IP address.
 	:param port: Port.
@@ -387,10 +396,12 @@ def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
 	async def _startup(app):
 		app["config"]["_vacuum_task"] = \
 		_create_task(_vacuum_server_sessions(app = app))
+		print(f"Starting Xdcheckin server on {host}:{port}")
 	async def _cleanup(app):
-		_create_task(app["config"]["sessions"].vacuum(
+		print("Shutting down Xdcheckin server")
+		await app["config"]["sessions"].vacuum(
 			handler = _vacuum_server_sessions_handler
-		))
+		)
 		app["config"]["_vacuum_task"].cancel()
 		await app["config"]["_vacuum_task"]
 	app.on_startup.append(_startup)
@@ -398,29 +409,35 @@ def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
 	_run_app(app, host = host, port = port)
 
 def _main():
-	from sys import argv
-	help = "xdcheckin-server - Xdcheckin Server Commandline Tool"
-	f" {_version('Xdcheckin')}\n" \
-	f"Usage: {argv[0]} <ip> <port>\n" \
-	f"  or:  {argv[0]}"
-	if not len(argv) in (1, 3):
+	from os.path import basename
+	from sys import argv, exit, stderr
+	bn = basename(argv[0])
+	help = \
+	f"xdcheckin-server - Xdcheckin Server Commandline Tool " \
+	f"{_version}\n\n" \
+	f"Usage: \n" \
+	f"  {bn} [<host> <port>]\tStart server on the given host and port.\n" \
+	f"  {" " * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n" \
+	f"  {bn} -h\t\t\tShow help. Also '--help'."
+	if len(argv) == 2 and argv[1] in ("-h", "--help"):
 		print(help)
-		return 1
-	ip, port = "0.0.0.0", 5001
+		exit()
+	elif not len(argv) in (1, 3):
+		print(help, file = stderr)
+		exit(2)
+	host, port = "0.0.0.0", 5001
 	if len(argv) == 3:
 		from socket import inet_aton
 		try:
-			ip = argv[1]
-			inet_aton(ip)
+			host = argv[1]
+			inet_aton(host)
 		except Exception:
-			print(f"Invalid IP address {ip}")
-			return 1
+			print(f"Invalid IP address {host}", file = stderr)
+			exit(2)
 		try:
 			port = int(argv[2])
 			assert 0 < port < 65536
 		except Exception:
-			print(f"Invalid port number {port}")
-			return 1
-
-	print(f"Starting Xdcheckin server at {ip}:{port}")
-	start_server(host = ip, port = port)
+			print(f"Invalid port number {port}", file = stderr)
+			exit(2)
+	start_server(host = host, port = port)

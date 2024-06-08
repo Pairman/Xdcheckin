@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 __all__ = ("solve_captcha", )
 
 from base64 import b64decode as _b64decode
