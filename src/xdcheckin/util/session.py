@@ -1,8 +1,11 @@
 from asyncio import create_task as _create_task, \
 get_event_loop as _get_event_loop
 from atexit import register as _register
-from signal import signal as _signal, SIGHUP as _SIGHUP, SIGINT as _SIGINT, \
-SIGTERM as _SIGTERM
+from signal import signal as _signal, SIGINT as _SIGINT, SIGTERM as _SIGTERM
+try:
+	from signal import SIGHUP as _SIGHUP
+except Exception:
+	_SIGHUP = None
 from sys import exit as _exit
 from aiocache import Cache as _Cache
 from aiocache.serializers import NullSerializer as _NullSerializer
@@ -42,7 +45,8 @@ class CachedSession:
 			_release()
 			_exit(0)
 		_register(_release)
-		_signal(_SIGHUP, _sighandler)
+		if _SIGHUP:
+			_signal(_SIGHUP, _sighandler)
 		_signal(_SIGINT, _sighandler)
 		_signal(_SIGTERM, _sighandler)
 
@@ -64,6 +68,7 @@ class CachedSession:
 
 	async def __cache_handler(self, func, ttl: int, *args, **kwargs):
 		kwargs["verify_ssl"] = self.__verify_ssl
+		kwargs["proxy"] = "http://127.0.0.1:8888"
 		if not self.__cache or not ttl:
 			return await func(*args, **kwargs)
 		key = f"{func.__name__}{args}{sorted(kwargs.items())}"
@@ -81,6 +86,11 @@ class CachedSession:
 		else:
 			_create_task(self.__cache.set(key, res, ttl))
 		return res
+
+	@property
+	def session_cookies(self):
+		self.__session.cookie_jar.filter_cookies
+		return self.__session.cookie_jar
 
 	async def get(
 		self, url: str, params: dict = None, cookies: dict = None,

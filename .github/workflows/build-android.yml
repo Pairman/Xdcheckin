@@ -37,7 +37,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install briefcase
+        pip install briefcase toga
 
     - name: Build package
       run: |

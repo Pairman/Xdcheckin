@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt install -y libcairo2-dev libgirepository1.0-dev
-        pip install briefcase
+        pip install briefcase toga
 
     - name: Build package
       run: |

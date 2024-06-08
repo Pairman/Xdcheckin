@@ -22,7 +22,7 @@ class IDSSession:
 		}
 	}
 	__async_ctxmgr = __session = __secrets = __service = None
-	__logined = False
+	__logged_in = False
 
 	def __init__(self, service: str = ""):
 		"""Initialize an IDS Session.
@@ -47,8 +47,8 @@ class IDSSession:
 		self.__async_ctxmgr = False
 
 	@property
-	def logind(self):
-		return self.__logined
+	def logged_in(self):
+		return self.__logged_in
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -98,7 +98,7 @@ class IDSSession:
 		url1 = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data1 = {"canvasLength": 280, "moveLength": account["vcode"]}
 		res1 = await self.__session.post(url1, data = data1)
-		ret = {"cookies": None, "logined": False}
+		ret = {"cookies": None, "logged_in": False}
 		if not res1 or (not res1.status == 200 and \
 		(await res1.json())["errorCode"] == 1):
 			return ret
@@ -122,7 +122,10 @@ class IDSSession:
 		)
 		if not res2 or not res2.status == 200:
 			return ret
-		ret.update({"cookies": self.__session.cookies, "logined": True})
+		ret.update({
+			"cookies": self.__session.session_cookies,
+			"logged_in": True
+		})
 		return ret
 
 	async def login_cookies(self, account: dict = {"cookies": None}):
@@ -135,17 +138,17 @@ class IDSSession:
 			url = url, cookies = account["cookies"],
 			allow_redirects = False
 		)
-		ret = {"cookies": None, "logined": False}
+		ret = {"cookies": None, "logged_in": False}
 		if not res or res.status == 302:
 			return ret
-		ret.update({"cookies": account["cookies"], "logined": True})
+		ret.update({"cookies": account["cookies"], "logged_in": True})
 		return ret
 
 class Newesxidian:
 	"""XDU exclusive APIs for classroom livestreams.
 	"""
 	__async_ctxmgr = __cx = None
-	__logined = False
+	__logged_in = False
 
 	def __init__(self, chaoxing: _Chaoxing = None):
 		"""Create a Newesxidian with ``Chaoxing`` instance.
@@ -155,8 +158,8 @@ class Newesxidian:
 		if not self.__async_ctxmgr is None or \
 		not chaoxing.fid == "16820":
 			return
-		self.__logined, self.__cx = \
-		True and chaoxing.__logined, chaoxing
+		self.__logged_in, self.__cx = \
+		True and chaoxing.__logged_in, chaoxing
 
 	async def __aenter__(self):
 		if not self.__async_ctxmgr is None:
@@ -172,8 +175,8 @@ class Newesxidian:
 		self.__async_ctxmgr = False
 
 	@property
-	def logind(self):
-		return self.__logined
+	def logged_in(self):
+		return self.__logged_in
 
 	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.

@@ -2,7 +2,7 @@
 var g_location = {};
 
 var g_logining = false;
-var g_logined = false;
+var g_logged_in = false;
 var g_courses = {};
 
 var g_buildings = [];

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+__all__ = ("solve_captcha", )
+
 from base64 import b64decode as _b64decode
 from random import random as _random
 from zlib import decompress as _decompress

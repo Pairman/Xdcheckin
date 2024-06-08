@@ -1,4 +1,4 @@
-__all__ = tuple()
+__all__ = ()
 
 from xdcheckin.app.app import _Xdcheckin as _Xdcheckin
 

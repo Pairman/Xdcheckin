@@ -2,9 +2,9 @@
 
 __all__ = ("server_routes", "create_server", "start_server")
 
-from asyncio import create_task as _create_task, sleep as _sleep
+from asyncio import create_task as _create_task
 from importlib.metadata import version as _version
-from importlib.resources import path as _path
+from importlib.resources import files as _files
 from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
 from time import time as _time
@@ -20,20 +20,25 @@ from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import IDSSession as _IDSSession, \
 Newesxidian as _Newesxidian
+
 server_routes = _RouteTableDef()
 
-with _path("xdcheckin.server.static", "") as fpath:
-	server_routes.static("/static", fpath)
-
-_g_locations_js_str = f"var g_locations = {
-	_dumps(_locations).encode('ascii').decode('unicode-escape')
+_static_g_locations_js_str = f"var g_locations = {
+	_dumps(_locations).encode("ascii").decode("unicode-escape")
 };"
 @server_routes.get("/static/g_locations.js")
-async def _g_locations_js(req):
-	return _Response(text = _g_locations_js_str)
+async def _static_g_locations_js(req):
+	return _Response(
+		text = _static_g_locations_js_str,
+		content_type = "text/javascript", charset = "utf-8"
+	)
+server_routes.static("/static", _files("xdcheckin.server.static")._paths[0])
 
-with _path("xdcheckin.server.templates", "index.html") as fpath:
-	_index_html_str = fpath.read_text("utf-8")
+with open(
+	_files("xdcheckin.server.templates").joinpath("index.html"),
+	encoding = "ascii"
+) as fpath:
+	_index_html_str = fpath.read()
 @server_routes.get("/")
 async def _index_html(req):
 	return \
@@ -47,6 +52,8 @@ _xdcheckin_get_latest_release_time = 0
 _xdcheckin_get_latest_release_data = ""
 @server_routes.post("/xdcheckin/get/releases/latest")
 async def _xdcheckin_get_latest_release(req):
+	global _xdcheckin_get_latest_release_time, \
+	_xdcheckin_get_latest_release_data
 	time = _time()
 	if time < _xdcheckin_get_latest_release_time + 3600:
 		_xdcheckin_get_latest_release_time = time
@@ -112,15 +119,12 @@ async def _ids_login_finish(req):
 			"vcode": vcode
 		})
 		_create_task(ids.__aexit__(None, None, None))
-		assert ret["logined"], "IDS login failed."
-		for k in tuple(ret["cookies"]):
-			if ret["cookies"][k]["domain"] != ".chaoxing.com":
-				del ret["cookies"][k]
-		data = _chaoxing_login(req = {
+		assert ret["logged_in"], "IDS login failed."
+		cookies = ret["cookies"].filter_cookies("https://chaoxing.com")
+		text = _dumps(_chaoxing_login(req = {
 			"username": "", "password": "", "cookies":
-			_dumps({k: v.value for k, v in ret["cookies"].items()})
-		})
-		text = _dumps(data)
+			_dumps({k: v.value for k, v in cookies})}
+		))
 	except Exception as e:
 		text = _dumps({"err": str(e)})
 	finally:
@@ -134,16 +138,17 @@ async def _chaoxing_login(req):
 		data["username"], data["password"], data["cookies"]
 		assert (username and password) or cookies, \
 		"Missing username, password or cookies."
+		config = {
+			"chaoxing_course_get_activities_courses_limit": 36,
+			"chaoxing_checkin_location_address_override_maxlen": 13
+		}
 		cx = _Chaoxing(
 			username = username, password = password,
 			cookies = _loads(cookies) if cookies else None,
-			config = {
-				"chaoxing_course_get_activities_courses_limit": 36,
-				"chaoxing_checkin_location_address_override_maxlen": 13
-			}
+			config = config
 		)
 		await cx.__aenter__()
-		assert cx.__logined, "Chaoxing login failed."
+		assert cx.__logged_in, "Chaoxing login failed."
 		nx = _Newesxidian(chaoxing = cx)
 		_create_task(nx.__aenter__())
 		ses = await _get_session(req)
@@ -168,7 +173,7 @@ async def _chaoxing_extract_url(req):
 		data = await req.json(content_type = None)
 		ses = await _get_session(req)
 		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
-		assert nx.logined
+		assert nx.logged_in
 		livestream = await nx.livestream_get_live_url(
 			livestream = {"live_id": str(data)}
 		)
@@ -185,11 +190,11 @@ async def _chaoxing_get_curriculum(req):
 		assert data
 		ses = await _get_session(req)
 		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
-		if nx.logined:
+		if nx.logged_in:
 			curriculum = await nx.curriculum_get_curriculum()
 		else:
 			cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-			assert cx.logined
+			assert cx.logged_in
 			curriculum = await cx.curriculum_get_curriculum()
 		text, status = _dumps(curriculum), 200
 	except Exception:
@@ -205,7 +210,7 @@ async def _chaoxing_get_activities(req):
 	try:
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined
+		assert cx.logged_in
 		activities = await cx.course_get_activities()
 		text, status = _dumps(activities), 200
 	except Exception:
@@ -223,7 +228,7 @@ async def _chaoxing_captcha_get_captcha(req):
 		assert data["captcha"]
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined
+		assert cx.logged_in
 		captcha = \
 		await cx.captcha_get_captcha(captcha = data["captcha"])
 		text, status = _dumps(captcha), 200
@@ -242,7 +247,7 @@ async def _chaoxing_captcha_submit_captcha(req):
 		assert data["captcha"]
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined
+		assert cx.logged_in
 		result = \
 		await cx.captcha_submit_captcha(captcha = data["captcha"])
 		assert result[0]
@@ -262,7 +267,7 @@ async def _chaoxing_checkin_do_sign(req):
 		assert data["params"], "No parameters given"
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined, "Not logged in."
+		assert cx.logged_in, "Not logged in."
 		result = await cx.checkin_do_sign(old_params = data["params"])
 		text = _dumps(result[1])
 	except Exception as e:
@@ -280,7 +285,7 @@ async def _chaoxing_checkin_checkin_location(req):
 		assert data["activity"]["active_id"], "No activity ID given."
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined, "Not logged in."
+		assert cx.logged_in, "Not logged in."
 		data["activity"]["active_id"] = \
 		str(data["activity"]["active_id"])
 		result = await cx.checkin_checkin_location(
@@ -300,7 +305,7 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 	try:
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-		assert cx.logined, "Not logged in."
+		assert cx.logged_in, "Not logged in."
 		location = img_data = img = None
 		async for field in await req.multipart():
 			if field.name == "location":
@@ -346,12 +351,13 @@ async def _vacuum_server_sessions_handler(ses):
 		await ses[key].__aexit__(None, None, None)
 
 async def _vacuum_server_sessions(app):
+	from asyncio import sleep
 	sessions = app["config"]["sessions"]
 	secs = int(app["config"]["sessions_vacuum_days"] * 86400)
 	if not secs:
 		return
 	while True:
-		await _sleep(secs - 18000 - _time() % 86400)
+		await sleep(secs - 18000 - _time() % 86400)
 		_create_task(sessions.vacuum(
 			seconds = secs,
 			handler = _vacuum_server_sessions_handler
@@ -363,10 +369,11 @@ def create_server(config: dict = {}):
 	:return: Xdcheckin server.
 	"""
 	app = _Application()
-	app["xdcheckin_config"] = {
-		"sessions": {}, "sessions_vacuum_days": 1, **config
-	}
-	_setup(app, _SimpleCookieStorage("xdcheckin", max_age = 604800))
+	app.add_routes(server_routes)
+	app["config"] = {"sessions": {}, "sessions_vacuum_days": 1, **config}
+	_setup(app, _SimpleCookieStorage(
+		cookie_name = "xdcheckin", max_age = 604800
+	))
 	return app
 
 def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
@@ -375,9 +382,7 @@ def start_server(host: str = "127.0.0.1", port: int = 5001, config: dict = {}):
 	:param port: Port.
 	:param config: Configurations.
 	"""
-	from logging import getLogger, ERROR
 	from xdcheckin.util.types import TimestampDict
-	getLogger("aiohttp").setLevel(ERROR)
 	app = create_server(config = {"sessions": TimestampDict(), **config})
 	async def _startup(app):
 		app["config"]["_vacuum_task"] = \

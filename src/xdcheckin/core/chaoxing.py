@@ -5,7 +5,6 @@ __all__ = ("Chaoxing", )
 from ast import literal_eval as _literal_eval
 from asyncio import create_task as _create_task, gather as _gather, \
 Semaphore as _Semaphore
-from json import dumps as _dumps
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
@@ -58,7 +57,7 @@ class Chaoxing:
 	__async_ctxmgr = __session = None
 	__account = courses = {}
 	__fid = __uid = 0
-	__logined = False
+	__logged_in = False
 
 	def __init__(
 		self, username: str = "", password: str = "", cookies = {},
@@ -95,21 +94,23 @@ class Chaoxing:
 		await self.__session.__aenter__()
 		username, password, cookies = self.__account.values()
 		if cookies:
-			self.name, cookies, self.__logined = \
-			(await self.login_cookies(account = self.__account)).values()
-		login_funcs = (
+			self.name, cookies, self.__logged_in = \
+			(await self.login_cookies(
+				account = self.__account
+			)).values()
+		funcs = (
 			self.login_username_fanya, self.login_username_v3,
-			self.login_username_v5, self.login_username_v25,
-			self.login_username_v2, self.login_username_v11,
+			self.login_username_v25, self.login_username_v2,
 			self.login_username_xxk, self.login_username_mylogin1
 		)
-		if not self.__logined and username and password:
-			for func in login_funcs:
-				self.name, cookies, self.__logined = \
-				(await func(account = self.__account)).values()
-				if self.__logined:
+		if not self.__logged_in and username and password:
+			for f in funcs:
+				self.name, cookies, self.__logged_in = (await f(
+					account = self.__account
+				)).values()
+				if self.__logged_in:
 					break
-		if self.__logined:
+		if self.__logged_in:
 			if "fid" in cookies:
 				self.__fid = cookies["fid"].value
 			self.__session.cookies = cookies
@@ -124,8 +125,8 @@ class Chaoxing:
 		self.__async_ctxmgr = False
 
 	@property
-	def logind(self):
-		return self.__logined
+	def logged_in(self):
+		return self.__logged_in
 
 	@property
 	def fid(self):
@@ -141,6 +142,74 @@ class Chaoxing:
 	async def post(self, *args, **kwargs):
 		return await self.__session.post(*args, **kwargs)
 
+	async def captcha_get_captcha(self, captcha: dict = {"captcha_id": ""}):
+		"""Get CAPTCHA for checkin.
+		:param captcha: CAPTCHA ID and type.
+		:return: CAPTCHA images and token.
+		"""
+		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
+		params1 = {
+			"callback": "f", "captchaId": captcha["captcha_id"],
+			"_": int(_time() * 1000)
+		}
+		res1 = await self.__session.get(url = url1, params = params1)
+		captcha = {
+			**captcha, "type": "slide", "server_time":
+			_Chaoxing_captcha_get_captcha_regex.search(
+				await res1.text()
+			)
+		}
+		captcha_key, token = _generate_secrets(captcha = captcha)
+		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
+		params2 = {
+			"callback": "f",
+			"captchaId": captcha["captcha_id"],
+			"captchaKey": captcha_key,
+			"token": token,
+			"type": "slide", "version": "1.1.16",
+			"referer": "https://mobilelearn.chaoxing.com",
+			"_": int(_time() * 1000)
+		}
+		res2 = await self.__session.get(url = url2, params = params2)
+		data2 = _literal_eval((await res2.text())[2 : -1])
+		captcha.update({
+			"token": data2["token"],
+			"big_img_src":
+			data2["imageVerificationVo"]["shadeImage"],
+			"small_img_src":
+			data2["imageVerificationVo"]["cutoutImage"]
+		})
+		return captcha
+
+	async def captcha_submit_captcha(
+		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
+	):
+		"""Submit and verify CAPTCHA.
+		:param captcha: CAPTCHA ID, and verification code (e.g. slider \
+		offset) in dictionary.
+		:return: CAPTCHA with validation code on success.
+		"""
+		url = "https://captcha.chaoxing.com/captcha/check/verification/result"
+		params = {
+			"callback": "f",
+			"captchaId": captcha["captcha_id"],
+			"token": captcha["token"],
+			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
+			"type": "slide", "coordinate": "[]",
+			"version": "1.1.16", "runEnv": 10,
+			"_": int(_time() * 1000)
+		}
+		res = await self.__session.get(
+			url = url, params = params, headers = {
+				**self.__session.headers,
+				"Referer": "https://mobilelearn.chaoxing.com"
+			}
+		)
+		return "result\":true" in await res.text() if res else False, {
+			**captcha, "validate":
+			f"validate_{captcha['captcha_id']}_{captcha['token']}"
+		}
+
 	async def login_username_v2(
 		self, account: dict = {"username": "", "password": ""}
 	):
@@ -153,13 +222,13 @@ class Chaoxing:
 		params = {
 			"name": account["username"], "pwd": account["password"]
 		}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(url = url, params = params)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			data = await res.json(content_type = None)
 			ret.update({
 				"name": data["realname"],
-				"cookies": res.cookies, "logined": True
+				"cookies": res.cookies, "logged_in": True
 			})
 		return ret
 
@@ -176,61 +245,10 @@ class Chaoxing:
 			"userNumber": account["username"],
 			"passWord": account["password"]
 		}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.post(url = url, data = data)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
-		return ret
-
-	# tofix
-	async def login_username_v5(
-		self, account: dict = {"username": "", "password": ""}
-	):
-		"""Log into Chaoxing account with username and password \
-		via V5 API.
-		:param account: Same as ``login_username_v2()``.
-		:return: Same as ``login_username_v2()``.
-		"""
-		url = "https://v5.chaoxing.com/login/passportLogin"
-		data = {
-			"userNumber": account["username"],
-			"passWord": account["password"]
-		}
-		ret = {"name": "", "cookies": None, "logined": False}
-		res = await self.__session.post(
-			url = url, data = _dumps(data), headers = {
-				**self.__session.headers,
-				"Content-Type": "application/json;charset=utf-8"
-			}
-		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			data = await res.json()
-			ret.update({
-				"name": data["data"]["realname"],
-				"cookies": res.cookies, "logined": True
-			})
-		return res
-		return ret
-
-	#tofix
-	async def login_username_v11(
-		self, account: dict = {"username": "", "password": ""}
-	):
-		"""Log into Chaoxing account with username and password \
-		via V11 API.
-		:param account: Same as ``login_username_v2()``.
-		:return: Same as ``login_username_v3()``.
-		"""
-		url = "https://passport2.chaoxing.com/v11/loginregister"
-		params = {
-			"uname": account["username"],
-			"code": account["password"]
-		}
-		ret = {"name": "", "cookies": None, "logined": False}
-		res = await self.__session.get(url = url, params = params)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
-		return res
+			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
 	async def login_username_v25(
@@ -243,10 +261,10 @@ class Chaoxing:
 		"""
 		url = "https://v25.chaoxing.com/login"
 		data = {"name": account["username"], "pwd": account["password"]}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.post(url = url, data = data)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
+			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
 	async def login_username_mylogin1(
@@ -262,10 +280,10 @@ class Chaoxing:
 			"fid": "undefined", "msg": account["username"], 
 			"vercode": account["password"], "type": 1
 		}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.post(url = url, data = data)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
+			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
 	async def login_username_xxk(
@@ -281,10 +299,10 @@ class Chaoxing:
 			"username": account["username"],
 			"password": account["password"], "numcode": 0
 		}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(url = url, params = params)
 		if res and res.status == 500 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
+			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
 	async def login_username_fanya(
@@ -307,10 +325,10 @@ class Chaoxing:
 				iv = b"u2oh6Vu^HWe4_AES"
 			), "t": True
 		}
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.post(url = url, data = data)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logined": True})
+			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
 	async def login_cookies(self, account: dict = {"cookies": None}):
@@ -319,7 +337,7 @@ class Chaoxing:
 		:return: Same as ``login_username_v2()``.
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
-		ret = {"name": "", "cookies": None, "logined": False}
+		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
 			url = url, cookies = account["cookies"]
 		)
@@ -329,7 +347,7 @@ class Chaoxing:
 				ret.update({
 					"name": data["msg"]["name"],
 					"cookies": account["cookies"],
-					"logined": True
+					"logged_in": True
 				})
 		return ret
 
@@ -529,7 +547,6 @@ class Chaoxing:
 			activity.get("otherId") in ("2", "4")
 		]
 
-	#tofix
 	async def course_get_course_activities_ppt(
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
@@ -563,8 +580,8 @@ class Chaoxing:
 				)
 		await _gather(*[
 			_get_details({"active_id": str(activity["id"])})
-			for activity in data if not activity["status"] == 1 or
-			not activity["activeType"] == 2
+			for activity in data if activity["status"] == 1 and
+			activity["activeType"] == 2
 		])
 		activities = []
 		for activity in data:
@@ -609,75 +626,6 @@ class Chaoxing:
 		) for i, course in enumerate(courses) if course["status"]])
 		return activities
 
-	async def captcha_get_captcha(self, captcha: dict = {"captcha_id": ""}):
-		"""Get CAPTCHA for checkin.
-		:param captcha: CAPTCHA ID and type.
-		:return: CAPTCHA images and token.
-		"""
-		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
-		params1 = {
-			"callback": "f", "captchaId": captcha["captcha_id"],
-			"_": int(_time() * 1000)
-		}
-		res1 = await self.__session.get(url = url1, params = params1)
-		captcha = {
-			**captcha, "type": "slide", "server_time":
-			_Chaoxing_captcha_get_captcha_regex.search(
-				await res1.text()
-			)
-		}
-		captcha_key, token = _generate_secrets(captcha = captcha)
-		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
-		params2 = {
-			"callback": "f",
-			"captchaId": captcha["captcha_id"],
-			"captchaKey": captcha_key,
-			"token": token,
-			"type": "slide", "version": "1.1.16",
-			"referer": "https://mobilelearn.chaoxing.com",
-			"_": int(_time() * 1000)
-		}
-		res2 = await self.__session.get(url = url2, params = params2)
-		data2 = _literal_eval((await res2.text())[2 : -1])
-		captcha.update({
-			"token": data2["token"],
-			"big_img_src":
-			data2["imageVerificationVo"]["shadeImage"],
-			"small_img_src":
-			data2["imageVerificationVo"]["cutoutImage"]
-		})
-		return captcha
-
-	async def captcha_submit_captcha(
-		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
-	):
-		"""Submit and verify CAPTCHA.
-		:param captcha: CAPTCHA ID, and verification code (e.g. slider \
-		offset) in dictionary.
-		:return: CAPTCHA with validation code on success.
-		"""
-		url = "https://captcha.chaoxing.com/captcha/check/verification/result"
-		params = {
-			"callback": "f",
-			"captchaId": captcha["captcha_id"],
-			"token": captcha["token"],
-			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
-			"type": "slide", "coordinate": "[]",
-			"version": "1.1.16", "runEnv": 10,
-			"_": int(_time() * 1000)
-		}
-		res = await self.__session.get(
-			url = url, params = params, headers = {
-				**self.__session.headers,
-				"Referer": "https://mobilelearn.chaoxing.com"
-			}
-		)
-		return "result\":true" in await res.text() if res else False, {
-			**captcha, "validate":
-			f"validate_{captcha['captcha_id']}_{captcha['token']}"
-		}
-
-	#tofix
 	async def checkin_get_details(self, activity: dict = {"active_id": ""}):
 		"""Get checkin details.
 		:param activity: Activity ID.
@@ -689,9 +637,11 @@ class Chaoxing:
 			url = url, params = params, ttl = 300
 		)
 		try:
-			return await res.json(content_type = None) if res else {}
-		except Exception as e:
-			raise e
+			return await res.json(
+				content_type = None
+			) if res else {}
+		except Exception:
+			return {}
 
 	async def checkin_get_pptactiveinfo(
 		self, activity: dict = {"active_id": ""}

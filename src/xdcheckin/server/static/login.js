@@ -1,9 +1,9 @@
 async function afterLoginDuties(auto = false) {
-	if (g_logining || !g_logined)
+	if (g_logining || !g_logged_in)
 		return;
 	enablePlayers();
 	getCurriculum(with_live = false).then(() => {
-		if (g_logining || !g_logined)
+		if (g_logining || !g_logged_in)
 			return;
 		if (localStorage.getItem("fid") == "16820")
 			getCurriculum(with_live = true);
@@ -18,7 +18,7 @@ async function afterLoginDuties(auto = false) {
 }
 
 async function afterLogoutDuties() {
-	if (g_logining || g_logined)
+	if (g_logining || g_logged_in)
 		return;
 	hideOtherLists();
 	[
@@ -29,7 +29,7 @@ async function afterLogoutDuties() {
 }
 
 async function promptLogin(auto = false) {
-	if (g_logining || g_logined)
+	if (g_logining || g_logged_in)
 		return;
 	promptLogin.calling = true;
 	let username = localStorage.getItem("username");
@@ -60,20 +60,20 @@ async function promptLogin(auto = false) {
 }
 
 async function promptLogout() {
-	if (g_logining || !g_logined)
+	if (g_logining || !g_logged_in)
 		return;
 	if (confirm("Logout?")) {
-		g_logined = false;
+		g_logged_in = false;
 		afterLogoutDuties();
 	}
 }
 
 async function chaoxingLogin(username, password, force = false, auto = false) {
 	if (!force) {
-		if (g_logining || g_logined)
+		if (g_logining || g_logged_in)
 			return;
 		g_logining = true;
-		g_logined = false;
+		g_logged_in = false;
 	}
 	let ret = false;
 	let cookies;
@@ -104,7 +104,7 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 		ret = err.message;
 	}
 	if (!force) {
-		g_logined = (ret === true);
+		g_logged_in = (ret === true);
 		g_logining = false;
 		afterLoginDuties(auto);
 	}
@@ -112,10 +112,10 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 }
 
 async function idsLoginPrepare(username, password, auto = false) {
-	if (g_logining || g_logined)
+	if (g_logining || g_logged_in)
 		return;
 	g_logining = true;
-	let ret = g_logined = false;
+	let ret = g_logged_in = false;
 	let cookies = username != localStorage.getItem("username") ||
 		      password != localStorage.getItem("password") ?
 		      "" : localStorage.getItem("cookies");
@@ -127,7 +127,7 @@ async function idsLoginPrepare(username, password, auto = false) {
 				localStorage.setItem("username", username);
 				localStorage.setItem("password", password);
 				g_logining = false;
-				g_logined = true;
+				g_logged_in = true;
 				afterLoginDuties(auto);
 				return true;
 			}
@@ -174,7 +174,7 @@ async function idsLoginCaptcha(username, password, auto = false) {
 }
 
 async function idsLoginFinish(username, password, vcode) {
-	if (!g_logining || g_logined)
+	if (!g_logining || g_logged_in)
 		return;
 	let ret = false;
 	try {
@@ -197,7 +197,7 @@ async function idsLoginFinish(username, password, vcode) {
 	catch (err) {
 		ret = err.message;
 	}
-	g_logined = (ret === true);
+	g_logged_in = (ret === true);
 	g_logining = false;
 	return ret;
 }

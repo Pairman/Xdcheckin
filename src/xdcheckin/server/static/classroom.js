@@ -66,7 +66,7 @@ async function listClassrooms() {
 }
 
 async function extractClassroom() {
-	if (!g_logined)
+	if (!g_logged_in)
 		return alert("Login to use this feature.");
 	let input = prompt("Input liveId or URL to extract livestream URL:");
 	if (input === null)
