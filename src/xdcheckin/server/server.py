@@ -173,7 +173,7 @@ async def _chaoxing_login(req, data = None):
 	except Exception as e:
 		ret = {"err": str(e)}
 	finally:
-		return ret if type(req) is dict else _Response(
+		return _Response(
 			text = _dumps(ret), content_type = "application/json"
 		)
 
