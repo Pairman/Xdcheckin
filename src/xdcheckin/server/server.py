@@ -396,9 +396,9 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	async def _startup(app):
 		app["config"]["_vacuum_task"] = \
 		_create_task(_vacuum_server_sessions(app = app))
-		print(f"Starting Xdcheckin server on {host}:{port}")
+		print(f"Starting Xdcheckin server on {host}:{port}.")
 	async def _cleanup(app):
-		print("Shutting down Xdcheckin server")
+		print("Shutting down Xdcheckin server.")
 		await app["config"]["sessions"].vacuum(
 			handler = _vacuum_server_sessions_handler
 		)
@@ -406,7 +406,12 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 		await app["config"]["_vacuum_task"]
 	app.on_startup.append(_startup)
 	app.on_cleanup.append(_cleanup)
-	_run_app(app, host = host, port = port)
+	_run_app(
+		app, host = host, port = port,
+		print = lambda _: print(
+			"Server started. Press Ctrl+C to quit."
+		)
+	)
 
 def _main():
 	from os.path import basename
