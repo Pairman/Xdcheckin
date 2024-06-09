@@ -31,6 +31,8 @@ async function inputClassroom() {
 
 async function listClassrooms() {
 	let e = document.getElementById("classrooms-list-div");
+	if (!e)
+		return;
 	e.replaceChildren(newElement("button", {
 		onclick: extractClassroom,
 		innerText: "Extract"

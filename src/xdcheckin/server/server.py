@@ -64,7 +64,6 @@ async def _xdcheckin_get_update(req):
 			) as res:
 				assert res.status == 200
 				data = await res.json()
-				ver_latest = data["tag_name"]
 			update = _compare_versions(
 				_version, data["tag_name"]
 			) == 1
@@ -103,11 +102,14 @@ async def _ids_login_prepare(req):
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
-		text = _dumps(await ids.login_username_prepare())
+		data = await ids.login_username_prepare()
 	except Exception as e:
-		text = _dumps({"err": str(e)})
+		_create_task(ids.__aexit__(None, None, None))
+		data = {"err": str(e)}
 	finally:
-		return _Response(text = text, content_type = "application/json")
+		return _Response(
+			text = _dumps(data), content_type = "application/json"
+		)
 
 @server_routes.post("/ids/login_finish")
 async def _ids_login_finish(req):
@@ -156,24 +158,24 @@ async def _chaoxing_login(req, data = None):
 		)
 		await cx.__aenter__()
 		assert cx.logged_in, "Chaoxing login failed."
-		nx = _Newesxidian(chaoxing = cx)
-		_create_task(nx.__aenter__())
 		ses = await _get_session(req)
 		ses.setdefault("uuid", str(_uuid4))
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
-		).update({"cx": cx, "nx": nx})
-		ret = {
-			"fid": cx.fid, "courses": cx.courses,
-			"cookies": _dumps({
-				k: v.value for k, v in cx.cookies.items()
-			})
+		)["cx"] = cx
+		if cx.fid == "16820":
+			nx = _Newesxidian(chaoxing = cx)
+			req.app["config"]["sessions"][ses["uuid"]]["ids"] = nx
+			_create_task(nx.__aenter__())
+		data = {
+			"fid": cx.fid, "courses": cx.courses, "cookies":
+			_dumps({k: v.value for k, v in cx.cookies.items()})
 		}
 	except Exception as e:
-		ret = {"err": str(e)}
+		data = {"err": str(e)}
 	finally:
 		return _Response(
-			text = _dumps(ret), content_type = "application/json"
+			text = _dumps(data), content_type = "application/json"
 		)
 
 @server_routes.post("/chaoxing/extract_url")
@@ -186,30 +188,27 @@ async def _chaoxing_extract_url(req):
 		livestream = await nx.livestream_get_live_url(
 			livestream = {"live_id": str(data)}
 		)
-		text = livestream["url"]
+		return _Response(text = livestream["url"])
 	except Exception:
-		text = ""
-	finally:
-		return _Response(text = text)
+		return _Response(text = "")
 
 @server_routes.post("/chaoxing/get_curriculum")
 async def _chaoxing_get_curriculum(req):
 	try:
 		with_live = await req.json()
 		ses = await _get_session(req)
-		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
-		if with_live and nx.logged_in:
-			curriculum = await nx.curriculum_get_curriculum()
-		else:
-			cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
-			assert cx.logged_in
-			curriculum = await cx.curriculum_get_curriculum()
-		text, status = _dumps(curriculum), 200
+		xx = req.app["config"]["sessions"][ses["uuid"]][
+			"nx" if with_live else "cx"
+		]
+		assert xx.logged_in
+		data = await xx.curriculum_get_curriculum()
+		status = 200
 	except Exception:
-		text, status = "{}", 500
+		data = {}
+		status = 500
 	finally:
 		return _Response(
-			text = text, status = status,
+			text = _dumps(data), status = status,
 			content_type = "application/json"
 		)
 
@@ -219,13 +218,14 @@ async def _chaoxing_get_activities(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
-		activities = await cx.course_get_activities()
-		text, status = _dumps(activities), 200
+		data = await cx.course_get_activities()
+		status = 200
 	except Exception:
-		text, status = "{}", 500
+		data = {}
+		status = 500
 	finally:
 		return _Response(
-			text = text, status = status,
+			text = _dumps(data), status = status,
 			content_type = "application/json"
 		)
 
@@ -237,14 +237,16 @@ async def _chaoxing_captcha_get_captcha(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
-		captcha = \
-		await cx.captcha_get_captcha(captcha = data["captcha"])
-		text, status = _dumps(captcha), 200
-	except Exception:
-		text, status = "{}", 500
+		data = await cx.captcha_get_captcha(captcha = data["captcha"])
+		status = 200
+	except Exception as e:
+		from traceback import print_exception
+		print_exception(type(e), e, e.__traceback__)
+		data = {}
+		status = 500
 	finally:
 		return _Response(
-			text = text, status = status,
+			text = _dumps(data), status = status,
 			content_type = "application/json"
 		)
 
@@ -256,15 +258,17 @@ async def _chaoxing_captcha_submit_captcha(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
-		result = \
+		data = \
 		await cx.captcha_submit_captcha(captcha = data["captcha"])
-		assert result[0]
-		text, status = _dumps(result[1]), 200
+		assert data[0]
+		data = data[1]
+		status = 200
 	except Exception:
-		text, status = "{}", 500
+		data = {}
+		status = 500
 	finally:
 		return _Response(
-			text = text, status = status,
+			text = _dumps(data), status = status,
 			content_type = "application/json"
 		)
 
@@ -272,18 +276,18 @@ async def _chaoxing_captcha_submit_captcha(req):
 async def _chaoxing_checkin_do_sign(req):
 	try:
 		data = await req.json()
-		assert data["params"], "No parameters given"
+		assert data["params"], "No parameters given."
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		result = await cx.checkin_do_sign(old_params = data["params"])
-		text = _dumps(result[1])
+		data = result[1]
 	except Exception as e:
-		text = _dumps({
-			"msg": f"Checkin error. ({str(e)})", "params": {}
-		})
+		data = {"msg": f"Checkin error. ({str(e)})", "params": {}}
 	finally:
-		return _Response(text = text, content_type = "application/json")
+		return _Response(
+			text = _dumps(data), content_type = "application/json"
+		)
 					
 
 @server_routes.post("/chaoxing/checkin_checkin_location")
@@ -299,14 +303,16 @@ async def _chaoxing_checkin_checkin_location(req):
 		result = await cx.checkin_checkin_location(
 			activity = data["activity"], location = data["location"]
 		)
-		text = _dumps(result[1])
+		data = result[1]
 	except Exception as e:
-		text = _dumps({
+		data = {
 			"msg": f"Checkin error. ({str(e)})", "params": {},
 			"captcha": {}
-		})
+		}
 	finally:
-		return _Response(text = text, content_type = "application/json")
+		return _Response(
+			text = _dumps(data), content_type = "application/json"
+		)
 
 @server_routes.post("/chaoxing/checkin_checkin_qrcode_img")
 async def _chaoxing_checkin_checkin_qrcode_img(req):
@@ -341,27 +347,30 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 		result = await cx.checkin_checkin_qrcode_url(
 			url = urls[0], location = location
 		)
-		text = _dumps(result[1])
+		data = result[1]
 	except Exception as e:
-		text = _dumps({
+		data = {
 			"msg": f"Checkin error. ({str(e)})", "params": {},
 			"captcha": {}
-		})
+		}
 	finally:
 		if img_data:
 			img_data.close()
 		if img:
 			img.close()
-		return _Response(text = text, content_type = "application/json")
+		return _Response(
+			text = _dumps(data), content_type = "application/json"
+		)
 
 async def _vacuum_server_sessions_handler(ses):
-	for key in {"ids", "nx", "cx"} & set(ses.keys()):
-		await ses[key].__aexit__(None, None, None)
+	for key in {"ids", "nx", "cx"}:
+		if key in ses:
+			await ses[key].__aexit__(None, None, None)
 
 async def _vacuum_server_sessions(app):
 	from asyncio import sleep
 	sessions = app["config"]["sessions"]
-	secs = int(app["config"]["sessions_vacuum_days"] * 86400)
+	secs = app["config"]["sessions_vacuum_days"] * 86400
 	if not secs:
 		return
 	while True:

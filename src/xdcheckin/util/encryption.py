@@ -16,5 +16,6 @@ def encrypt_aes(
 	:param pad: Padder for the data. PKCS7 by default.
 	:return: Encrypted data in base64 string.
 	"""
-	enc = _new(key, _MODE_CBC, iv).encrypt(_pad(pad(msg), _block_size))
-	return _b64encode(enc).decode("utf-8")
+	return _b64encode(_new(key, _MODE_CBC, iv).encrypt(
+		_pad(pad(msg), _block_size)
+	)).decode("utf-8")

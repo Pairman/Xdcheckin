@@ -3,6 +3,7 @@
 __all__ = ("IDSSession", "Newesxidian")
 
 from asyncio import create_task as _create_task, gather as _gather
+from math import trunc as _trunc
 from re import compile as _compile
 from time import time as _time
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
@@ -41,7 +42,7 @@ class IDSSession:
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
-		if self.__async_ctxmgr != True:
+		if not self.__async_ctxmgr:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__secrets = None
@@ -73,7 +74,7 @@ class IDSSession:
 			await res1.text()
 		)
 		url2 = "https://ids.xidian.edu.cn/authserver/common/openSliderCaptcha.htl"
-		params2 = {"_": str(int(1000 * _time()))}
+		params2 = {"_": str(_trunc(1000 * _time()))}
 		res2 = await self.__session.get(url = url2, params = params2)
 		if not res2 or not res2.status == 200:
 			return ret
@@ -171,7 +172,7 @@ class Newesxidian:
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
-		if self.__async_ctxmgr != True:
+		if not self.__async_ctxmgr:
 			return
 		await self.__cx.__aexit__(*args, **kwargs)
 		self.__logged_in = False
@@ -273,7 +274,7 @@ class Newesxidian:
 		)
 		data = (await res.json(content_type = None) or []) \
 		if res else []
-		await _gather(*[
-			_create_task(_get_livestream(lesson)) for lesson in data
-		])
+		await _gather(*(_create_task(
+			_get_livestream(lesson)
+		) for lesson in data))
 		return curriculum

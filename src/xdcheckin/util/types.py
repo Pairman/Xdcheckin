@@ -5,7 +5,8 @@ from time import time as _time
 class TimestampDict:
 	"""Timestamped dictionary for easy vacuuming.
 	"""
-	_data, _ts = {}, {}
+	_data = {}
+	_ts = {}
 
 	def __getitem__(self, key):
 		"""Return ``self[key]``.

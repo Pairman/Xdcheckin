@@ -2,9 +2,10 @@
 
 __all__ = ("Chaoxing", )
 
-from ast import literal_eval as _literal_eval
 from asyncio import create_task as _create_task, gather as _gather, \
 Semaphore as _Semaphore
+from json import loads as _loads
+from math import trunc as _trunc
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
@@ -119,7 +120,7 @@ class Chaoxing:
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
-		if self.__async_ctxmgr != True:
+		if not self.__async_ctxmgr:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__account = None
@@ -162,14 +163,14 @@ class Chaoxing:
 		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
 		params1 = {
 			"callback": "f", "captchaId": captcha["captcha_id"],
-			"_": int(_time() * 1000)
+			"_": _trunc(_time() * 1000)
 		}
 		res1 = await self.__session.get(url = url1, params = params1)
 		captcha = {
 			**captcha, "type": "slide", "server_time":
 			_Chaoxing_captcha_get_captcha_regex.search(
 				await res1.text()
-			)
+			)[1]
 		}
 		captcha_key, token = _generate_secrets(captcha = captcha)
 		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
@@ -180,10 +181,10 @@ class Chaoxing:
 			"token": token,
 			"type": "slide", "version": "1.1.16",
 			"referer": "https://mobilelearn.chaoxing.com",
-			"_": int(_time() * 1000)
+			"_": _trunc(_time() * 1000)
 		}
 		res2 = await self.__session.get(url = url2, params = params2)
-		data2 = _literal_eval((await res2.text())[2 : -1])
+		data2 = _loads((await res2.text())[2 : -1])
 		captcha.update({
 			"token": data2["token"],
 			"big_img_src":
@@ -209,7 +210,7 @@ class Chaoxing:
 			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
 			"type": "slide", "coordinate": "[]",
 			"version": "1.1.16", "runEnv": 10,
-			"_": int(_time() * 1000)
+			"_": _trunc(_time() * 1000)
 		}
 		res = await self.__session.get(
 			url = url, params = params, headers = {
@@ -579,28 +580,30 @@ class Chaoxing:
 		)
 		if not res:
 			return []
-		data = (await res.json(content_type = None)).get("activeList") or []
+		data = (await res.json(
+			content_type = None
+		)).get("activeList") or []
 		all_details = {}
-		_sem = _Semaphore(
-			self.__config["chaoxing_course_get_activities_workers"]
-		)
-		async def _get_details(activity):
-			async with _sem:
-				all_details[activity["active_id"]] = \
-				await self.checkin_get_details(
-					activity = activity
-				)
-		await _gather(*[
-			_get_details({"active_id": str(activity["id"])})
-			for activity in data if activity["status"] == 1 and
-			activity["activeType"] == 2
+		_sem = _Semaphore(self.__config[
+			"chaoxing_course_get_activities_workers"
 		])
+		async def _get_details(active_id):
+			async with _sem:
+				all_details[active_id] = \
+				await self.checkin_get_details(activity = {
+					"active_id": str(active_id)
+				})
+		await _gather(*(
+			_get_details(activity["id"]) for activity in data
+			if activity["status"] == 1 and 
+			activity["activeType"] == 2
+		))
 		activities = []
 		for activity in data:
 			if not activity["status"] == 1 or \
 			not activity["activeType"] == 2:
 				continue
-			details = all_details[activity["active_id"]]
+			details = all_details[activity["id"]]
 			if not details["otherId"] in (2, 4):
 				continue
 			activities.append({
@@ -632,10 +635,10 @@ class Chaoxing:
 				course_activities = await func(course = course)
 			if course_activities:
 				activities[course["class_id"]] = course_activities
-		await _gather(*[_worker(
+		await _gather(*(_worker(
 			self.course_get_course_activities_v2 if i % 2
 			else self.course_get_course_activities_ppt, course
-		) for i, course in enumerate(courses) if course["status"]])
+		) for i, course in enumerate(courses) if course["status"]))
 		return activities
 
 	async def checkin_get_details(self, activity: dict = {"active_id": ""}):
@@ -734,7 +737,7 @@ class Chaoxing:
 		params2 = {
 			"code": _Chaoxing_checkin_do_analysis_regex.search(
 				await res1.text()
-			).group(1), "DB_STRATEGY": "RANDOM"
+			)[1], "DB_STRATEGY": "RANDOM"
 		}
 		res2 = await self.__session.get(
 			url = url2, params = params2, ttl = 1800
@@ -772,18 +775,17 @@ class Chaoxing:
 		match = \
 		_Chaoxing_checkin_do_presign_regex.search(await res.text())
 		if match:
-			if match.group(7):
+			if match[7]:
 				state = 2
-			if match.group(1) == "1":
+			if match[1] == "1":
 				location = {
-					"latitude": float(match.group(3) or -1),
-					"longitude":
-					float(match.group(4) or -1),
-					"address": match.group(2) or "",
-					"ranged": int(match.group(1)),
-					"range": int(match.group(5) or 0)
+					"latitude": float(match[3] or -1),
+					"longitude": float(match[4] or -1),
+					"address": match[2] or "",
+					"ranged": int(match[1]),
+					"range": int(match[5] or 0)
 				}
-			captcha["captcha_id"] = match.group(6)
+			captcha["captcha_id"] = match[6]
 		return state, location, captcha
 
 	async def checkin_do_sign(
@@ -836,7 +838,7 @@ class Chaoxing:
 		else:
 			match = _Chaoxing_checkin_do_sign_regex.search(text)
 			if match:
-				params["enc2"] = match.group(1)
+				params["enc2"] = match[1]
 			msg = f"Checkin failure. {text}"
 		return status, {"msg": msg, "params": params}
 
@@ -954,8 +956,7 @@ class Chaoxing:
 			match = \
 			_Chaoxing_checkin_checkin_qrcode_url_regex.search(url)
 			return await self.checkin_checkin_qrcode(activity = {
-				"active_id": match.group(1),
-				"enc": match.group(2)
+				"active_id": match[1], "enc": match[2]
 			}, location = location)
 		except Exception as e:
 			return False, {
