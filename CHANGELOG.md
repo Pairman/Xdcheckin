@@ -4,9 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.0.1] - 2024-06-10
+
 ### Added
 
 - (Module) Add shortcuts ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession``, ``xdcheckin.Newesxidian``, ``xdcheckin.locations``, ``xdcheckin.server_routes``, ``xdcheckin.create_server``, ``xdcheckin.start_server`` and ``xdcheckin.solve_captcha`` for easier importing.
+- (Module) ``xdcheckin.Chaoxing`` now provides ``uid`` and ``fid`` attributes for access.
 
 ### Fixed
 
@@ -24,9 +27,8 @@ Changelog for Xdcheckin.
 
 - Optimize speed for activities fetching and checking in.
 - Optimize messages for check-in failure for better reading and parsing.
-- (APP/Module/Server) ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession``, ``xdcheckin.Newesxidian`` and vast majority of ``xdcheckin`` are now made async with ``asyncio`` and ``aiohttp`` for security and performance. Refer to source code for detailed changes and usage.
+- (APP/Module/Server) ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession``, ``xdcheckin.Newesxidian`` and vast majority of ``xdcheckin`` are now made async with ``asyncio`` and ``aiohttp`` for security and performance. Refer to source code for details.
 - (Module) Some attributes and methods of the classes are now made private for security.
-- (Module) ``xdcheckin.Chaoxing`` now provides ``uid`` and ``fid`` attributes for access.
 - (Module) Rename the ``logined`` attribute to ``logged_in`` of ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession`` and ``xdcheckin.Newesxidian``.
 - (Module) Replace some dependencies.
 - (Server) Change commandline messages.
@@ -541,7 +543,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.0.1...main
+[3.0.1]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...3.0.1
 [2.1.1]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...2.1.1
 [2.0.12]: https://github.com/Pairman/Xdcheckin/compare/2.0.11...2.0.12
 [2.0.11]: https://github.com/Pairman/Xdcheckin/compare/2.0.10...2.0.11
