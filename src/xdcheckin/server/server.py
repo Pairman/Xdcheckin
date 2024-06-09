@@ -239,9 +239,7 @@ async def _chaoxing_captcha_get_captcha(req):
 		assert cx.logged_in
 		data = await cx.captcha_get_captcha(captcha = data["captcha"])
 		status = 200
-	except Exception as e:
-		from traceback import print_exception
-		print_exception(type(e), e, e.__traceback__)
+	except Exception:
 		data = {}
 		status = 500
 	finally:
