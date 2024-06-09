@@ -2,10 +2,13 @@
 
 __all__ = ("server_routes", "create_server", "start_server")
 
-from asyncio import create_task as _create_task
+from asyncio import create_task as _create_task, sleep as _sleep
 from importlib.resources import files as _files
 from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
+from os.path import basename as _basename
+from sys import argv as _argv, exit as _exit, stderr as _stderr
+from socket import inet_aton as _inet_aton
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
@@ -19,6 +22,7 @@ from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import IDSSession as _IDSSession, \
 Newesxidian as _Newesxidian
+from xdcheckin.util.types import TimestampDict as _TimestampDict
 from xdcheckin.util.version import compare_versions as _compare_versions, \
 version as _version
 
@@ -239,9 +243,7 @@ async def _chaoxing_captcha_get_captcha(req):
 		assert cx.logged_in
 		data = await cx.captcha_get_captcha(captcha = data["captcha"])
 		status = 200
-	except Exception as e:
-		from traceback import print_exception
-		print_exception(type(e), e, e.__traceback__)
+	except Exception:
 		data = {}
 		status = 500
 	finally:
@@ -368,13 +370,12 @@ async def _vacuum_server_sessions_handler(ses):
 			await ses[key].__aexit__(None, None, None)
 
 async def _vacuum_server_sessions(app):
-	from asyncio import sleep
 	sessions = app["config"]["sessions"]
 	secs = app["config"]["sessions_vacuum_days"] * 86400
 	if not secs:
 		return
 	while True:
-		await sleep(secs - 18000 - _time() % 86400)
+		await _sleep(secs - 18000 - _time() % 86400)
 		_create_task(sessions.vacuum(
 			seconds = secs,
 			handler = _vacuum_server_sessions_handler
@@ -399,8 +400,7 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	:param port: Port.
 	:param config: Configurations.
 	"""
-	from xdcheckin.util.types import TimestampDict
-	app = create_server(config = {"sessions": TimestampDict(), **config})
+	app = create_server(config = {"sessions": _TimestampDict(), **config})
 	async def _startup(app):
 		app["config"]["_vacuum_task"] = \
 		_create_task(_vacuum_server_sessions(app = app))
@@ -416,15 +416,11 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	app.on_cleanup.append(_cleanup)
 	_run_app(
 		app, host = host, port = port,
-		print = lambda _: print(
-			"Server started. Press Ctrl+C to quit."
-		)
+		print = lambda _: print("Server started. Press Ctrl+C to quit.")
 	)
 
 def _main():
-	from os.path import basename
-	from sys import argv, exit, stderr
-	bn = basename(argv[0])
+	bn = _basename(_argv[0])
 	help = \
 	f"xdcheckin-server - Xdcheckin Server Commandline Tool " \
 	f"{_version}\n\n" \
@@ -432,25 +428,24 @@ def _main():
 	f"  {bn} [<host> <port>]\tStart server on the given host and port.\n" \
 	f"  {" " * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n" \
 	f"  {bn} -h\t\t\tShow help. Also '--help'."
-	if len(argv) == 2 and argv[1] in ("-h", "--help"):
+	if len(_argv) == 2 and _argv[1] in ("-h", "--help"):
 		print(help)
-		exit()
-	elif not len(argv) in (1, 3):
-		print(help, file = stderr)
-		exit(2)
+		_exit()
+	elif not len(_argv) in (1, 3):
+		print(help, file = _stderr)
+		_exit(2)
 	host, port = "0.0.0.0", 5001
-	if len(argv) == 3:
-		from socket import inet_aton
+	if len(_argv) == 3:
 		try:
-			host = argv[1]
-			inet_aton(host)
+			host = _argv[1]
+			_inet_aton(host)
 		except Exception:
-			print(f"Invalid IP address {host}", file = stderr)
-			exit(2)
+			print(f"Invalid IP address {host}", file = _stderr)
+			_exit(2)
 		try:
-			port = int(argv[2])
+			port = int(_argv[2])
 			assert 0 < port < 65536
 		except Exception:
-			print(f"Invalid port number {port}", file = stderr)
-			exit(2)
+			print(f"Invalid port number {port}", file = _stderr)
+			_exit(2)
 	start_server(host = host, port = port)
