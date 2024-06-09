@@ -427,7 +427,7 @@ def _main():
 	f"{_version}\n\n" \
 	f"Usage: \n" \
 	f"  {bn} [<host> <port>]\tStart server on the given host and port.\n" \
-	f"  {" " * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n" \
+	f"  {' ' * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n" \
 	f"  {bn} -h\t\t\tShow help. Also '--help'."
 	if len(_argv) == 2 and _argv[1] in ("-h", "--help"):
 		print(help)
