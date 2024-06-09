@@ -885,8 +885,12 @@ class Chaoxing:
 			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
+			from traceback import format_exception
+			from sys import stderr
+			m = format_exception(type(e), e, e.__traceback__)
+			print(m, file = stderr)
 			return False, {
-				"msg": str(e), "params": {}, "captcha": {}
+				"msg": m, "params": {}, "captcha": {}
 			}
 
 	async def checkin_checkin_qrcode(
