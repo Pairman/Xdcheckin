@@ -80,7 +80,6 @@ class CachedSession:
 
 	async def __cache_handler(self, func, ttl: int, *args, **kwargs):
 		kwargs["verify_ssl"] = self.__verify_ssl
-		kwargs["proxy"] = "http://127.0.0.1:8888"
 		if not self.__cache or not ttl:
 			return await func(*args, **kwargs)
 		key = f"{func.__name__}{args}{sorted(kwargs.items())}"
