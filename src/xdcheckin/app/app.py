@@ -1,6 +1,6 @@
 __all__ = ()
 
-from threading import Thread as _Thread
+from asyncio import get_event_loop as _get_event_loop
 from toga import App as _App, Box as _Box, MainWindow as _MainWindow, \
 WebView as _WebView, Label as _Label
 from toga.platform import current_platform as _current_platform
@@ -12,7 +12,7 @@ _msg = f"This APP will launch\n your browser automatically.\n\
 If not, visit \"{_url}\"\n in you browser manually."
 
 class _Xdcheckin(_App):
-	def _gui_wrapper(self):
+	async def _gui_wrapper(self):
 		self.main_window = _MainWindow(title = self.formal_name)
 		if _current_platform == "android":
 			from android.content import Intent
@@ -38,5 +38,6 @@ class _Xdcheckin(_App):
 		self.main_window.show()
 
 	def startup(self):
-		_Thread(target = self._gui_wrapper, daemon = True).start()
+		loop = _get_event_loop()
+		loop.create_task(self._gui_wrapper())
 		_start_server()
