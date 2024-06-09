@@ -29,7 +29,7 @@ version as _version
 server_routes = _RouteTableDef()
 
 _static_g_locations_js_str = f"var g_locations = {
-	_dumps(_locations).encode("ascii").decode("unicode-escape")
+	_dumps(_locations).encode('ascii').decode('unicode-escape')
 };"
 @server_routes.get("/static/g_locations.js")
 async def _static_g_locations_js(req):
