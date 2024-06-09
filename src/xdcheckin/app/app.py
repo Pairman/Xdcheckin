@@ -1,6 +1,6 @@
 __all__ = ()
 
-from threading import Thread as _Thread
+from multiprocessing import Process as _Process
 from toga import App as _App, Box as _Box, MainWindow as _MainWindow, \
 WebView as _WebView, Label as _Label
 from toga.platform import current_platform as _current_platform
@@ -13,7 +13,7 @@ If not, visit \"{_url}\"\n in you browser manually."
 
 class _Xdcheckin(_App):
 	def startup(self):
-		_Thread(target = _start_server, daemon = True).start()
+		_Process(target = _start_server, daemon = True).start()
 		self.main_window = _MainWindow(title = self.formal_name)
 		if _current_platform == "android":
 			from android.content import Intent
