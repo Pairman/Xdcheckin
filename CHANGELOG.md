@@ -4,6 +4,35 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- (Module) Add shortcuts ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession``, ``xdcheckin.Newesxidian``, ``xdcheckin.locations``, ``xdcheckin.server_routes``, ``xdcheckin.create_server``, ``xdcheckin.start_server`` and ``xdcheckin.solve_captcha`` for easier importing.
+
+### Fixed
+
+- Fix classroom livestream not available on webpage for some XDU(-related) students.
+- (Module) Fix wrong and missing comment headers.
+- (Module) Resource and session cleanup on APP exit is now properly handled.
+- Other minor fixes.
+
+### Removed
+
+- (Module) Remove obsolete ``xdcheckin.Chaoxing().login_username_v5()`` and ``xdcheckin.Chaoxing().login_username_v11()`` login methods.
+- (Module) Remove unused dependencies.
+
+### Changed
+
+- Optimize speed for activities fetching and checking in.
+- Optimize messages for check-in failure for better reading and parsing.
+- (APP/Module/Server) ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession``, ``xdcheckin.Newesxidian`` and vast majority of ``xdcheckin`` are now made async with ``asyncio`` and ``aiohttp`` for security and performance. Refer to source code for detailed changes and usage.
+- (Module) Some attributes and methods of the classes are now made private for security.
+- (Module) ``xdcheckin.Chaoxing`` now provides ``uid`` and ``fid`` attributes for access.
+- (Module) Rename the ``logined`` attribute to ``logged_in`` of ``xdcheckin.Chaoxing``, ``xdcheckin.IDSSession`` and ``xdcheckin.Newesxidian``.
+- (Module) Replace some dependencies.
+- (Server) Change commandline messages.
+- Optimize secrets generation for Chaoxing CAPTCHAs.
+- Optimize webpage loading speed.
+
 ## [2.1.1] - 2024-05-14
 
 ### Fixed

@@ -4,4 +4,4 @@ from xdcheckin.core.locations import locations
 
 from xdcheckin.server.server import server_routes, create_server, start_server
 
-from xdcheckin.util.chaoxing_captcha import solve_captcha as solve_captcha
+from xdcheckin.util.chaoxing_captcha import solve_captcha

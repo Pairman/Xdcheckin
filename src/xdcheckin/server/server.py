@@ -102,7 +102,7 @@ async def _ids_login_prepare(req):
 		)
 		await ids.__aenter__()
 		ses = await _get_session(req)
-		ses.setdefault("uuid", str(_uuid4))
+		ses.setdefault("uuid", str(_uuid4()))
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
@@ -163,7 +163,7 @@ async def _chaoxing_login(req, data = None):
 		await cx.__aenter__()
 		assert cx.logged_in, "Chaoxing login failed."
 		ses = await _get_session(req)
-		ses.setdefault("uuid", str(_uuid4))
+		ses.setdefault("uuid", str(_uuid4()))
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["cx"] = cx
@@ -323,22 +323,24 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		location = img_data = img = None
-		async for field in await req.multipart():
-			if field.name == "location":
-				location = _loads(await field.text())
-			elif field.name == "img_src":
-				img_data = _BytesIO()
-				while True:
-					chk = await field.read_chunk()
-					if not chk:
-						break
-					img_data.write(chk)
-				if img_data.getbuffer().nbytes:
-					img_data.seek(0)
-					img = _open(img_data)
+		from aiohttp.web_request import BaseRequest
+		req = BaseRequest()
+		form = await req.multipart()
+		field = form.next()
+		assert field.name == "location"
+		location = _loads(await field.text())
 		assert location, "No location given."
-		assert img, "No image given."
-		assert img.height and img.width, "Empty image."
+		assert field.name == "img_src"
+		img_data = _BytesIO()
+		while True:
+			chk = await field.read_chunk()
+			if not chk:
+				break
+			img_data.write(chk)
+		assert img_data.getbuffer().nbytes, "No image given."
+		img_data.seek(0)
+		img = _open(img_data)
+		assert img.height > 64 and img.width > 64, "Empty image."
 		urls = _decode(img, (_ZBarSymbol.QRCODE, ))
 		assert urls, "No Qrcode detected."
 		urls = [
