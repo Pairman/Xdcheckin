@@ -118,7 +118,7 @@ async function chaoxingCheckinLocation(activity) {
 		return;
 	}
 	alert(unescapeUnicode(data.msg));
-	if (data.msg.includes("'validate')"))
+	if (data.msg.includes("validate"))
 		chaoxingCheckinCaptcha(data.params, data.captcha,
 				       "activities");
 }
@@ -143,7 +143,7 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 		return;
 	if (data.msg.includes("success"))
 		alert(unescapeUnicode(data.msg));
-	else if (data.msg.includes("'validate_"))
+	else if (data.msg.includes("validate"))
 		chaoxingCheckinCaptcha(data.params, data.captcha,
 				       result_div_id.split("-")[0]);
 };

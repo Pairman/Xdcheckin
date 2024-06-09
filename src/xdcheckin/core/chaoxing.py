@@ -839,7 +839,7 @@ class Chaoxing:
 			match = _Chaoxing_checkin_do_sign_regex.search(text)
 			if match:
 				params["enc2"] = match[1]
-			msg = f"Checkin failure. {text}"
+			msg = f"Checkin failure. ({text})"
 		return status, {"msg": msg, "params": params}
 
 	async def checkin_checkin_location(
@@ -902,15 +902,13 @@ class Chaoxing:
 			_analyze = _create_task(self.checkin_do_analysis(
 				activity = activity
 			))
-			info = self.checkin_get_details(activity = activity)
+			info = \
+			await self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], \
 			"Activity ended or deleted."
 			course = {"class_id": str(info["clazzId"])}
-			_locate = _create_task(self.checkin_format_location(
-				location = location,
-				new_location = await self.checkin_get_location(
-					activity = activity, course = course
-				)
+			_locate = _create_task(self.checkin_get_location(
+				activity = activity, course = course
 			))
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course

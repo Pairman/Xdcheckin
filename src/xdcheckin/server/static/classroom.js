@@ -82,7 +82,7 @@ async function extractClassroom() {
 	else if (input === "" || isNaN(input))
 		return alert("Invalid input.");
 	try {
-		let res = await post("/chaoxing/extract_url", live_id);
+		let res = await post("/newesxidian/extract_url", live_id);
 		let params = new URLSearchParams(
 				  decodeURIComponent(new URL(res.text).search));
 		let info = JSON.parse(params.get("info"));

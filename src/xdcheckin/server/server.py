@@ -169,7 +169,7 @@ async def _chaoxing_login(req, data = None):
 		)["cx"] = cx
 		if cx.fid == "16820":
 			nx = _Newesxidian(chaoxing = cx)
-			req.app["config"]["sessions"][ses["uuid"]]["ids"] = nx
+			req.app["config"]["sessions"][ses["uuid"]]["nx"] = nx
 			_create_task(nx.__aenter__())
 		data = {
 			"fid": cx.fid, "courses": cx.courses, "cookies":
@@ -182,8 +182,8 @@ async def _chaoxing_login(req, data = None):
 			text = _dumps(data), content_type = "application/json"
 		)
 
-@server_routes.post("/chaoxing/extract_url")
-async def _chaoxing_extract_url(req):
+@server_routes.post("/newesxidian/extract_url")
+async def _newesxidian_extract_url(req):
 	try:
 		data = await req.json()
 		ses = await _get_session(req)
@@ -193,7 +193,7 @@ async def _chaoxing_extract_url(req):
 			livestream = {"live_id": str(data)}
 		)
 		return _Response(text = livestream["url"])
-	except Exception:
+	except Exception as e:
 		return _Response(text = "")
 
 @server_routes.post("/chaoxing/get_curriculum")
@@ -233,7 +233,7 @@ async def _chaoxing_get_activities(req):
 			content_type = "application/json"
 		)
 
-@server_routes.post("/chaoxing/checkin_get_captcha")
+@server_routes.post("/chaoxing/captcha_get_captcha")
 async def _chaoxing_captcha_get_captcha(req):
 	try:
 		data = await req.json()
@@ -252,7 +252,7 @@ async def _chaoxing_captcha_get_captcha(req):
 			content_type = "application/json"
 		)
 
-@server_routes.post("/chaoxing/checkin_submit_captcha")
+@server_routes.post("/chaoxing/captcha_submit_captcha")
 async def _chaoxing_captcha_submit_captcha(req):
 	try:
 		data = await req.json()
