@@ -219,6 +219,7 @@ requires = [
 [tool.briefcase.app.xdcheckin.android]
 requires = [
 	"toga-android~=0.4.0",
+ 	"yarl>=1.6.0",
 ]
 
 build_gradle_dependencies = [
