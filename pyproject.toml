@@ -18,12 +18,13 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-	"aiocache",
-	"aiohttp",
-	"aiohttp-session",
-	"pillow >= 8.4.0",
-	"pycryptodome >= 3.9.4",
-	"pyzbar >= 0.1.8",
+	"aiocache>=0.12.0",
+	"aiohttp>=3.8.1",
+	"aiohttp-session>=2.6.0",
+	"pillow>=8.4.0",
+	"pycryptodome>=3.9.4",
+	"pyzbar>=0.1.8",
+ 	"yarl>=1.6.0",
 ]
 
 [project.urls]
@@ -63,12 +64,13 @@ sources = [
 ]
 # test_sources = []
 requires = [
-	"aiocache",
-	"aiohttp",
-	"aiohttp-session",
-	"pillow >= 8.4.0",
-	"pycryptodome >= 3.9.4",
-	"pyzbar >= 0.1.8",
+	"aiocache>=0.12.0",
+	"aiohttp>=3.8.1",
+	"aiohttp-session>=2.6.0",
+	"pillow>=8.4.0",
+	"pycryptodome>=3.9.4",
+	"pyzbar>=0.1.8",
+ 	"yarl>=1.6.0",
 ]
 # test_requires = []
 
@@ -219,7 +221,6 @@ requires = [
 [tool.briefcase.app.xdcheckin.android]
 requires = [
 	"toga-android~=0.4.0",
- 	"yarl>=1.6.0",
 ]
 
 build_gradle_dependencies = [
