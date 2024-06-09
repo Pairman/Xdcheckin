@@ -40,4 +40,5 @@ class _Xdcheckin(_App):
 	def startup(self):
 		loop = _get_event_loop()
 		loop.create_task(self._gui_wrapper())
+		loop.run_forever()
 		_start_server()
