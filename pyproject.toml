@@ -226,14 +226,11 @@ requires = [
 
 build_gradle_dependencies = [
 	"androidx.appcompat:appcompat:1.6.1",
-	"com.google.android.material:material:1.11.0",
 ]
 
 build_gradle_extra_content = """
 android.defaultConfig.ndk.abiFilters = ['arm64-v8a']
 """
-
-base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
 
 # Web deployments
 [tool.briefcase.app.xdcheckin.web]
