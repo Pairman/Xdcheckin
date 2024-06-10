@@ -101,7 +101,8 @@ system_runtime_requires = [
 	# Dependencies that GTK looks for at runtime
 	"libcanberra-gtk3-module",
 	# Needed to provide WebKit2 at runtime
-	# "gir1.2-webkit2-4.0",
+	# Note: Debian 11 and Ubuntu 20.04 require gir1.2-webkit2-4.0 instead
+	# "gir1.2-webkit2-4.1",
 	# Needed for pyzbar at runtime
 	"libzbar0",
 ]
@@ -139,11 +140,11 @@ system_runtime_requires = [
 	# Needed to provide GTK
 	"gtk3",
 	# Needed to support Python bindings to GTK
-	"gobject-introspection", "typelib(Gtk)=3.0",
+	"gobject-introspection", "typelib(Gtk) = 3.0",
 	# Dependencies that GTK looks for at runtime
-	"libcanberra-gtk3-0",
+	"libcanberra-gtk3-module",
 	# Needed to provide WebKit2 at runtime
-	# "libwebkit2gtk3",
+	# "libwebkit2gtk3", "typelib(WebKit2)",
 	# "typelib(WebKit2)",
 	# Needed for pyzbar at runtime
 	"libzbar0",
@@ -224,13 +225,15 @@ requires = [
 ]
 
 build_gradle_dependencies = [
-	"androidx.appcompat:appcompat:1.0.2",
-	"androidx.constraintlayout:constraintlayout:1.1.3",
+	"androidx.appcompat:appcompat:1.6.1",
+	"com.google.android.material:material:1.11.0",
 ]
 
 build_gradle_extra_content = """
 android.defaultConfig.ndk.abiFilters = ['arm64-v8a']
 """
+
+base_theme = "Theme.MaterialComponents.Light.DarkActionBar"
 
 # Web deployments
 [tool.briefcase.app.xdcheckin.web]
