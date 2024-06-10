@@ -3,17 +3,18 @@
 __all__ = ("server_routes", "create_server", "start_server")
 
 from asyncio import create_task as _create_task, sleep as _sleep
-from importlib.resources import files as _files
 from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
+from pathlib import Path as _Path
 from sys import argv as _argv, exit as _exit, stderr as _stderr
 from socket import inet_aton as _inet_aton
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
-from aiohttp.web import Application as _Application, Response as _Response, \
-RouteTableDef as _RouteTableDef, run_app as _run_app
+from aiohttp.web import Application as _Application, \
+Response as _Response, RouteTableDef as _RouteTableDef, \
+GracefulExit as _GracefulExit, run_app as _run_app
 from aiohttp_session import get_session as _get_session, setup as _setup
 from aiohttp_session import SimpleCookieStorage as _SimpleCookieStorage
 from PIL.Image import open as _open
@@ -27,7 +28,6 @@ from xdcheckin.util.version import compare_versions as _compare_versions, \
 version as _version
 
 server_routes = _RouteTableDef()
-
 _locations_str = _dumps(_locations).encode("ascii").decode("unicode-escape")
 _static_g_locations_js_str = f"var g_locations = {_locations_str};"
 @server_routes.get("/static/g_locations.js")
@@ -36,13 +36,11 @@ async def _static_g_locations_js(req):
 		text = _static_g_locations_js_str,
 		content_type = "text/javascript", charset = "utf-8"
 	)
-server_routes.static("/static", _files("xdcheckin.server.static")._paths[0])
 
-with open(
-	_files("xdcheckin.server.templates").joinpath("index.html"),
-	encoding = "ascii"
-) as fpath:
-	_index_html_str = fpath.read()
+with _Path(__file__).parent.resolve() as path:
+	server_routes.static("/static", path.joinpath("static"))
+	_index_html_str = \
+	path.joinpath("templates", "index.html").read_text(encoding = "utf-8")
 @server_routes.get("/")
 async def _index_html(req):
 	return \
@@ -322,12 +320,11 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		location = img_data = img = None
-		from aiohttp.web_request import BaseRequest
-		req = BaseRequest()
 		form = await req.multipart()
-		field = form.next()
+		field = await form.next()
 		assert field.name == "location"
 		location = _loads(await field.text())
+		field = await form.next()
 		assert location, "No location given."
 		assert field.name == "img_src"
 		img_data = _BytesIO()
@@ -372,13 +369,14 @@ async def _vacuum_server_sessions_handler(ses):
 
 async def _vacuum_server_sessions(app):
 	sessions = app["config"]["sessions"]
-	secs = app["config"]["sessions_vacuum_days"] * 86400
-	if not secs:
+	t = app["config"]["sessions_vacuum_days"] * 86400 \
+	- 18000 - _time() % 86400
+	if t <= 0:
 		return
 	while True:
-		await _sleep(secs - 18000 - _time() % 86400)
+		await _sleep(t)
 		_create_task(sessions.vacuum(
-			seconds = secs,
+			seconds = t,
 			handler = _vacuum_server_sessions_handler
 		))
 
@@ -411,8 +409,7 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 		await app["config"]["sessions"].vacuum(
 			handler = _vacuum_server_sessions_handler
 		)
-		app["config"]["_vacuum_task"].cancel()
-		await app["config"]["_vacuum_task"]
+		_GracefulExit()
 	app.on_startup.append(_startup)
 	app.on_cleanup.append(_cleanup)
 	_run_app(

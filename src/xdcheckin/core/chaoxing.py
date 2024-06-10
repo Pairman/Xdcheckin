@@ -102,7 +102,7 @@ class Chaoxing:
 		funcs = (
 			self.login_username_fanya, self.login_username_v3,
 			self.login_username_v25, self.login_username_v2,
-			self.login_username_xxk, self.login_username_mylogin1
+			self.login_username_mylogin1
 		)
 		if not self.__logged_in and username and password:
 			for f in funcs:
@@ -236,7 +236,9 @@ class Chaoxing:
 			"name": account["username"], "pwd": account["password"]
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.get(url = url, params = params)
+		res = await self.__session.get(
+			url = url, params = params, allow_redirects = False
+		)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			data = await res.json(content_type = None)
 			ret.update({
@@ -259,7 +261,9 @@ class Chaoxing:
 			"passWord": account["password"]
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.post(url = url, data = data)
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
@@ -275,7 +279,9 @@ class Chaoxing:
 		url = "https://v25.chaoxing.com/login"
 		data = {"name": account["username"], "pwd": account["password"]}
 		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.post(url = url, data = data)
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
@@ -294,27 +300,10 @@ class Chaoxing:
 			"vercode": account["password"], "type": 1
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.post(url = url, data = data)
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logged_in": True})
-		return ret
-
-	async def login_username_xxk(
-		self, account: dict = {"username": "", "password": ""}
-	):
-		"""Log into Chaoxing account with username and password \
-		via XXK API.
-		:param account: Same as ``login_username_v2()``.
-		:return: Same as ``login_username_v3()``.
-		"""
-		url = "http://xxk.chaoxing.com/api/front/user/login"
-		params = {
-			"username": account["username"],
-			"password": account["password"], "numcode": 0
-		}
-		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.get(url = url, params = params)
-		if res and res.status == 500 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
@@ -339,7 +328,9 @@ class Chaoxing:
 			), "t": True
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.post(url = url, data = data)
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
 		if res and res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
@@ -352,7 +343,8 @@ class Chaoxing:
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
-			url = url, cookies = account["cookies"]
+			url = url, cookies = account["cookies"],
+			allow_redirects = False
 		)
 		if res and res.status == 200:
 			data = await res.json(content_type = None)
@@ -885,12 +877,8 @@ class Chaoxing:
 			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
-			from traceback import format_exception
-			from sys import stderr
-			m = format_exception(type(e), e, e.__traceback__)
-			print(m, file = stderr)
 			return False, {
-				"msg": m, "params": {}, "captcha": {}
+				"msg": str(e), "params": {}, "captcha": {}
 			}
 
 	async def checkin_checkin_qrcode(

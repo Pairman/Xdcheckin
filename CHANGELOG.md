@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix some login errors.
+- (APP) Fix missing APP icon on Android.
+- (Module) Fix compability with Python 3.9.
+
+### Removed
+
+- (Module) Remove obsolete ``xdcheckin.Chaoxing.login_username_xxk()``.
+
 ## [3.0.1] - 2024-06-10
 
 ### Added
