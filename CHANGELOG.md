@@ -4,8 +4,11 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.1.2] - 2024-06-10
+
 ### Fixed
 
+- (Server) Fix incomplete server shutdown.
 - Fix some login errors.
 - (APP) Fix missing APP icon on Android.
 - (Module) Fix compability with Python 3.9.
@@ -553,7 +556,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.0.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.0.2...main
+[3.0.2]: https://github.com/Pairman/Xdcheckin/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...3.0.1
 [2.1.1]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...2.1.1
 [2.0.12]: https://github.com/Pairman/Xdcheckin/compare/2.0.11...2.0.12
