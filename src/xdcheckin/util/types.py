@@ -44,11 +44,13 @@ class TimestampDict:
 		self[key] = default
 		return default
 
-	async def vacuum(self, seconds = 0, handler = lambda _: None):
-		"""Remove key and value pairs older than the specified seconds.
+	async def vacuum(self, seconds = 0, handler = None):
+		"""Remove key and value pairs older than the specified seconds. \
+  		Calls ``handler`` on each of the values if given.
 		"""
 		now = _time()
 		for k, t in tuple(self._ts.items()):
 			if now > t + seconds:
-				await handler(self[k])
+				if handler:
+					await handler(self[k])
 				del self[k]
