@@ -13,35 +13,54 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	8 by default for Chaoxing's.
 	:return: Slider offset.
 	"""
-	with small_img.getchannel("A") as alpha:
-		with alpha.point(lambda p: p == 255) as point:
-			x_l, y_t, x_r, y_b = point.getbbox()
+	big_img.load()
+	small_img.load()
+	x_l, y_t, x_r, y_b = small_img.im.getband(3).point((
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1
+	), None).getbbox()
 	x_l += border
 	y_t += border
 	x_r -= border
 	y_b -= border
-	with small_img.crop((x_l, y_t, x_r, y_b)) as crop:
-		with crop.convert("L") as grayscale:
-			template = grayscale.getdata()
-	mean_tmp = sum(template) / len(template)
-	template = [v - mean_tmp for v in template]
-	ncc_max = 0
-	x_max = 0
-	with big_img.crop(
-		(x_l + 1, y_t, big_img.width - small_img.width + x_r, y_b)
-	) as img:
-		with img.convert("L") as grayscale:
-			for x in range(0, grayscale.width - x_r + x_l, 2):
-				with grayscale.crop(
-					(x, 0, x + x_r - x_l, grayscale.height)
-				) as crop:
-					window = crop.getdata()
-				mean_wd = sum(window) / len(window)
-				window = [w - mean_wd for w in window]
-				ncc = sum(
-					w * t for w, t in zip(window, template)
-				) / sum(w * w for w in window)
-				if ncc > ncc_max:
-					ncc_max = ncc
-					x_max = x
+	template = small_img.im.crop((
+		x_l, y_t, x_r, y_b
+	)).convert("L", 0)
+	mean_t = sum(template) / len(template)
+	template = [v - mean_t for v in template]
+	ncc_max = x_max = 0
+	width_w = x_r - x_l
+	height_w = y_b - y_t
+	len_w = width_w * height_w
+	width_g = big_img.width - small_img.width + width_w - 1
+	grayscale = big_img.im.crop((
+		x_l + 1, y_t, x_l + width_g, y_b
+	)).convert("L", 0)
+	for x in range(0, width_g - width_w, 2):
+		window = grayscale.crop((x, 0, x + width_w, height_w))
+		mean_w = sum(window) / len_w
+		sum_wt = 0
+		sum_ww = 0
+		for w, t in zip(window, template):
+			w -= mean_w
+			sum_wt += w * t
+			sum_ww += w * w
+		ncc = sum_wt / sum_ww
+		if ncc > ncc_max:
+			ncc_max = ncc
+			x_max = x
 	return x_max

@@ -4,6 +4,10 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Changed
+
+- (Module) Optimize performance and precision of ``xdcheckin.solve_captcha()``
+
 ## [3.0.2] - 2024-06-10
 
 ### Fixed
