@@ -39,7 +39,7 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	y_b -= border
 	template = small_img.im.crop((
 		x_l, y_t, x_r, y_b
-	)).convert("L", 0)
+	)).convert("L", 3)
 	mean_t = sum(template) / len(template)
 	template = [v - mean_t for v in template]
 	ncc_max = x_max = 0
@@ -49,7 +49,7 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	width_g = big_img.width - small_img.width + width_w - 1
 	grayscale = big_img.im.crop((
 		x_l + 1, y_t, x_l + width_g, y_b
-	)).convert("L", 0)
+	)).convert("L", 3)
 	for x in range(0, width_g - width_w, 2):
 		window = grayscale.crop((x, 0, x + width_w, height_w))
 		mean_w = sum(window) / len_w
