@@ -4,7 +4,7 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
-## [3.1.2] - 2024-06-10
+## [3.0.2] - 2024-06-10
 
 ### Fixed
 
