@@ -215,7 +215,7 @@ class Newesxidian:
 		params1 = {"liveId": livestream.get("live_id") or ""}
 		url2 = "http://newesxidian.chaoxing.com/live/getViewUrlNoCourseLive"
 		params2 = {
-			"deviceCode": livestream.get("device") or "","status": 1
+			"deviceCode": livestream.get("device") or "", "status": 1
 		}
 		location = livestream.get("location") or ""
 		if not livestream.get("device"):
