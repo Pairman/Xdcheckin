@@ -252,8 +252,7 @@ class Newesxidian:
 			if not "livestreams" in curriculum["lessons"][class_id]:
 				curriculum["lessons"][class_id]["livestreams"] = []
 			ls = await self.livestream_get_live_url(livestream = {
-				"live_id": live_id,
-				"location": location
+				"live_id": live_id, "location": location
 			})
 			for l in curriculum["lessons"][class_id]["livestreams"]:
 				if l["device"] == ls["device"]:
