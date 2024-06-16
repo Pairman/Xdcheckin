@@ -82,20 +82,15 @@ class CachedSession:
 		kwargs["verify_ssl"] = self.__verify_ssl
 		if not self.__cache or not ttl:
 			return await func(*args, **kwargs)
-		key = f"{func.__name__}{args}{sorted(kwargs.items())}"
+		key = f"{func.__name__}{args}{kwargs.items()}"
 		try:
 			res = await self.__cache.get(key)
 		except Exception:
 			res = None
-		if not res is None:
-			return res
-		try:
+		if not res:
 			res = await func(*args, **kwargs)
-			assert res.status in (200, 500)
-		except Exception:
-			res = None
-		else:
-			_create_task(self.__cache.set(key, res, ttl))
+			if res.status == 200 or res.status == 500:
+				_create_task(self.__cache.set(key, res, ttl))
 		return res
 
 	async def get(
