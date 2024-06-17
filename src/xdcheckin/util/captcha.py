@@ -1,9 +1,11 @@
-__all__ = ("solve_captcha", )
+__all__ = ("chaoxing_captcha_get_checksum", "solve_captcha")
 
 from hashlib import md5 as _md5
 from uuid import uuid4 as _uuid4
 
-def chaoxing_captcha_get_checksum(captcha: dict = {"captcha_id": "", "server_time": "", "type": ""}):
+def chaoxing_captcha_get_checksum(
+	captcha: dict = {"captcha_id": "", "server_time": "", "type": ""}
+):
 	"""Generate key and token for CAPTCHA images.
  	:param: CAPTCHA ID, server timestamp and CAPTCHA type.
   	:return: CAPTCHA key and token.
