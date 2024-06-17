@@ -9,8 +9,8 @@ from math import trunc as _trunc
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
-from xdcheckin.util.chaoxing_captcha import \
-generate_secrets as _generate_secrets
+from xdcheckin.util.captcha import \
+chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 from xdcheckin.util.session import CachedSession as _CachedSession
 from xdcheckin.util.time import strftime as _strftime
@@ -172,7 +172,7 @@ class Chaoxing:
 				await res1.text()
 			)[1]
 		}
-		captcha_key, token = _generate_secrets(captcha = captcha)
+		captcha_key, token = _chaoxing_captcha_get_checksum(captcha = captcha)
 		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
 		params2 = {
 			"callback": "f",
