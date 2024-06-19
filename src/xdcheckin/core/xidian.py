@@ -74,7 +74,7 @@ class IDSSession:
 			await res1.text()
 		)
 		url2 = "https://ids.xidian.edu.cn/authserver/common/openSliderCaptcha.htl"
-		params2 = {"_": str(_trunc(1000 * _time()))}
+		params2 = {"_": f"{_trunc(1000 * _time())}"}
 		res2 = await self.__session.get(url = url2, params = params2)
 		if not res2 or not res2.status == 200:
 			return ret
@@ -225,7 +225,7 @@ class Newesxidian:
 			for lesson in (await res1.json(
 				content_type = None
 			) or []):
-				if str(lesson["id"]) == livestream["live_id"]:
+				if f"{lesson['id']}" == livestream["live_id"]:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
@@ -244,9 +244,9 @@ class Newesxidian:
 		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
 		async def _get_livestream(lesson):
-			class_id = str(lesson["teachClazzId"])
-			live_id = str(lesson["id"])
-			location = str(lesson["place"])
+			class_id = f"{lesson['teachClazzId']}"
+			live_id = f"{lesson['id']}"
+			location = f"{lesson['place']}"
 			if not class_id in curriculum["lessons"]:
 				return
 			if not "livestreams" in curriculum["lessons"][class_id]:
