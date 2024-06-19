@@ -545,7 +545,7 @@ class Chaoxing:
 				"time_start":
 				_strftime(activity["startTime"] // 1000),
 				"time_end":
-				_(ftime(activity["endTime"] // 1000)
+				_strftime(activity["endTime"] // 1000)
 				if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and \
