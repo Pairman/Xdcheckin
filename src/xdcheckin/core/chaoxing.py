@@ -364,22 +364,22 @@ class Chaoxing:
 		and time.
 		"""
 		def _add_lesson(lesson):
-			class_id = str(lesson["classId"])
+			class_id = f"{lesson['classId']}"
 			lesson = {
 				"class_id": class_id,
-				"course_id": str(lesson["courseId"]),
+				"course_id": f"{lesson['courseId']}",
 				"name": lesson["name"],
 				"locations": [lesson["location"]],
 				"invite_code": lesson["meetCode"],
 				"teachers": [lesson["teacherName"]],
 				"times": [{
-					"day": str(lesson["dayOfWeek"]),
+					"day": f"{lesson['dayOfWeek']}",
 					"period_begin":
-					str(lesson["beginNumber"]),
-					"period_end": str(
-						lesson["beginNumber"] +
-						lesson["length"] - 1
-					)
+					f"{lesson['beginNumber']}",
+					"period_end": f"""{
+						lesson['beginNumber'] +
+						lesson['length'] - 1
+					}"""
 				}]
 			}
 			if not class_id in curriculum["lessons"]:
@@ -407,13 +407,13 @@ class Chaoxing:
 		details = data["curriculum"]
 		curriculum = {
 			"details": {
-				"year": str(details["schoolYear"]),
-				"semester": str(details["semester"]),
-				"week": str(details["currentWeek"]),
-				"week_real": str(details["realCurrentWeek"]),
-				"week_max": str(details["maxWeek"]),
+				"year": f"{details['schoolYear']}",
+				"semester": f"{details['semester']}",
+				"week": f"{details['currentWeek']}",
+				"week_real": f"{details['realCurrentWeek']}",
+				"week_max": f"{details['maxWeek']}",
 				"time": {
-					"period_max": str(details["maxLength"]),
+					"period_max": f"{details['maxLength']}",
 					"timetable":
 					details["lessonTimeConfigArray"][1 : -1]
 				}
@@ -485,7 +485,7 @@ class Chaoxing:
 			if res:
 				data = (await res.json()).get("data")
 				if data:
-					course_id = str(data.get("courseid"))
+					course_id = f"{data.get('courseid')}"
 		return course_id or "0"
 
 	async def course_get_location_log(
@@ -539,13 +539,13 @@ class Chaoxing:
 		).get("activeList") or []) if res else []
 		return [
 			{
-				"active_id": str(activity["id"]),
+				"active_id": f"{activity['id']}",
 				"type": activity["otherId"],
 				"name": activity["nameOne"],
 				"time_start":
 				_strftime(activity["startTime"] // 1000),
 				"time_end":
-				_strftime(activity["endTime"] // 1000)
+				_(ftime(activity["endTime"] // 1000)
 				if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
 			} for activity in data if activity["status"] == 1 and \
@@ -583,7 +583,7 @@ class Chaoxing:
 			async with _sem:
 				all_details[active_id] = \
 				await self.checkin_get_details(activity = {
-					"active_id": str(active_id)
+					"active_id": f"{active_id}"
 				})
 		await _gather(*(
 			_get_details(activity["id"]) for activity in data
@@ -599,12 +599,12 @@ class Chaoxing:
 			if not details["otherId"] in (2, 4):
 				continue
 			activities.append({
-				"active_id": str(activity["id"]),
+				"active_id": f"{activity['id']}",
 				"name": activity["nameOne"],
 				"time_start":
 				_strftime(activity["startTime"] // 1000),
 				"time_left": activity["nameFour"],
-				"type": str(details["otherId"]),
+				"type": f"{details['otherId']}",
 				"time_end": _strftime(
 					details["endTime"]["time"] // 1000
 				) if details["endTime"] else ""
@@ -814,7 +814,7 @@ class Chaoxing:
 				})
 			elif activity["type"] == "2":
 				params.update({
-					"location": str(location),
+					"location": f"{location}",
 					"ifTiJiao": location["ranged"]
 				} if location["ranged"] else {
 					"address": location["address"],
@@ -854,7 +854,7 @@ class Chaoxing:
 			)
 			assert info["status"] == 1 and not info["isDelete"], \
 			"Activity ended or deleted."
-			course = {"class_id": str(info["clazzId"])}
+			course = {"class_id": f"{info['clazzId']}"}
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course
 			)
@@ -878,7 +878,7 @@ class Chaoxing:
 			return result
 		except Exception as e:
 			return False, {
-				"msg": str(e), "params": {}, "captcha": {}
+				"msg": f"{e}", "params": {}, "captcha": {}
 			}
 
 	async def checkin_checkin_qrcode(
@@ -898,7 +898,7 @@ class Chaoxing:
 			await self.checkin_get_details(activity = activity)
 			assert info["status"] == 1 and not info["isDelete"], \
 			"Activity ended or deleted."
-			course = {"class_id": str(info["clazzId"])}
+			course = {"class_id": f"{info['clazzId']}"}
 			_locate = _create_task(self.checkin_get_location(
 				activity = activity, course = course
 			))
@@ -928,7 +928,7 @@ class Chaoxing:
 			return result
 		except Exception as e:
 			return False, {
-				"msg": str(e), "params": {}, "captcha": {}
+				"msg": f"{e}", "params": {}, "captcha": {}
 			}
 
 	async def checkin_checkin_qrcode_url(
@@ -950,5 +950,5 @@ class Chaoxing:
 			}, location = location)
 		except Exception as e:
 			return False, {
-				"msg": str(e), "params": {}, "captcha": {}
+				"msg": f"{e}", "params": {}, "captcha": {}
 			}
