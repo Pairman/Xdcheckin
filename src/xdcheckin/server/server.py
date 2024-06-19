@@ -100,14 +100,14 @@ async def _ids_login_prepare(req):
 		)
 		await ids.__aenter__()
 		ses = await _get_session(req)
-		ses.setdefault("uuid", str(_uuid4()))
+		ses.setdefault("uuid", f"{_uuid4()}")
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
 		data = await ids.login_username_prepare()
 	except Exception as e:
 		_create_task(ids.__aexit__(None, None, None))
-		data = {"err": str(e)}
+		data = {"err": f"{e}"}
 	finally:
 		return _Response(
 			text = _dumps(data), content_type = "application/json"
@@ -136,7 +136,7 @@ async def _ids_login_finish(req):
 		})
 	except Exception as e:
 		return _Response(
-			text = _dumps({"err": str(e)}),
+			text = _dumps({"err": f"{e}"}),
 			content_type = "application/json"
 		)
 
@@ -161,7 +161,7 @@ async def _chaoxing_login(req, data = None):
 		await cx.__aenter__()
 		assert cx.logged_in, "Chaoxing login failed."
 		ses = await _get_session(req)
-		ses.setdefault("uuid", str(_uuid4()))
+		ses.setdefault("uuid", f"{_uuid4()}")
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["cx"] = cx
@@ -174,7 +174,7 @@ async def _chaoxing_login(req, data = None):
 			_dumps({k: v.value for k, v in cx.cookies.items()})
 		}
 	except Exception as e:
-		data = {"err": str(e)}
+		data = {"err": f"{e}"}
 	finally:
 		return _Response(
 			text = _dumps(data), content_type = "application/json"
@@ -188,7 +188,7 @@ async def _newesxidian_extract_url(req):
 		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
 		assert nx.logged_in
 		livestream = await nx.livestream_get_live_url(
-			livestream = {"live_id": str(data)}
+			livestream = {"live_id": f"{data}"}
 		)
 		return _Response(text = livestream["url"])
 	except Exception as e:
@@ -283,7 +283,7 @@ async def _chaoxing_checkin_do_sign(req):
 		result = await cx.checkin_do_sign(old_params = data["params"])
 		data = result[1]
 	except Exception as e:
-		data = {"msg": f"Checkin error. ({str(e)})", "params": {}}
+		data = {"msg": f"Checkin error. ({e})", "params": {}}
 	finally:
 		return _Response(
 			text = _dumps(data), content_type = "application/json"
@@ -299,14 +299,14 @@ async def _chaoxing_checkin_checkin_location(req):
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		data["activity"]["active_id"] = \
-		str(data["activity"]["active_id"])
+		f"{data['activity']['active_id']}"
 		result = await cx.checkin_checkin_location(
 			activity = data["activity"], location = data["location"]
 		)
 		data = result[1]
 	except Exception as e:
 		data = {
-			"msg": f"Checkin error. ({str(e)})", "params": {},
+			"msg": f"Checkin error. ({e})", "params": {},
 			"captcha": {}
 		}
 	finally:
@@ -351,7 +351,7 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 		data = result[1]
 	except Exception as e:
 		data = {
-			"msg": f"Checkin error. ({str(e)})", "params": {},
+			"msg": f"Checkin error. ({e})", "params": {},
 			"captcha": {}
 		}
 	finally:
