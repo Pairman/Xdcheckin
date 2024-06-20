@@ -123,10 +123,10 @@ async def _ids_login_finish(req):
 		"Missing username, password or verification code."
 		ses = await _get_session(req)
 		ids = req.app["config"]["sessions"][ses["uuid"]].pop("ids")
-		ret = await ids.login_username_finish(account = {
-			"username": username, "password": password,
-			"vcode": vcode
-		})
+		ret = await ids.login_username_finish(
+			account = {"username": username, "password": password},
+			captcha = {"vcode": vcode}
+		)
 		_create_task(ids.__aexit__(None, None, None))
 		assert ret["logged_in"], "IDS login failed."
 		cookies = ret["cookies"].filter_cookies("https://chaoxing.com")

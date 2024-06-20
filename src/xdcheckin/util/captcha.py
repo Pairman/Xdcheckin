@@ -13,7 +13,7 @@ def chaoxing_captcha_get_checksum(
 	id = captcha["captcha_id"]
 	time = captcha["server_time"]
 	type = captcha["type"]
-	key = _md5(f"{time}{uuid4()}".encode("utf-8")).hexdigest()
+	key = _md5(f"{time}{_uuid4()}".encode("utf-8")).hexdigest()
 	token = f"""{_md5(
 		f"{time}{id}{type}{key}".encode("utf-8")
 	).hexdigest()}:{int(time) + 300000}"""
@@ -25,7 +25,7 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	:param small_img: Slider image vertically aligned \
 	with transparent padding.
 	:param border: Border width of the slider piece. \
-	8 by default for Chaoxing's.
+	8 by default for Chaoxing's and 24 recommended for IDS's.
 	:return: Slider offset.
 	"""
 	big_img.load()

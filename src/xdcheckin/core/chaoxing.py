@@ -198,8 +198,8 @@ class Chaoxing:
 		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
 	):
 		"""Submit and verify CAPTCHA.
-		:param captcha: CAPTCHA ID, and verification code (e.g. slider \
-		offset) in dictionary.
+		:param captcha: CAPTCHA ID, and verification code \
+		(i.e. slider offset).
 		:return: CAPTCHA with validation code on success.
 		"""
 		url = "https://captcha.chaoxing.com/captcha/check/verification/result"

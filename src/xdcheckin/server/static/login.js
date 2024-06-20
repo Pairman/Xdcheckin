@@ -168,8 +168,8 @@ async function idsLoginCaptcha(username, password, auto = false) {
 	let img = document.getElementById("ids-login-captcha-img");
 	img.onload = () => displayTag("ids-login-captcha-div");
 	s_img.style.left = `${s.value = 0}px`;
-	s_img.src = `data:image/png;base64,${data.small_img_src}`;
-	img.src = `data:image/png;base64,${data.big_img_src}`;
+	s_img.src = `data:image/png;base64,${data.captcha.small_img_src}`;
+	img.src = `data:image/png;base64,${data.captcha.big_img_src}`;
 	b.disabled = true;
 }
 
