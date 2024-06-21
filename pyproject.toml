@@ -18,6 +18,7 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
+	"waitress",
 	"aiocache>=0.12.0",
 	"aiohttp>=3.8.1",
 	"aiohttp-session>=2.6.0",
@@ -56,14 +57,14 @@ bundle = "org.eu.pnxlr.git"
 
 [tool.briefcase.app.xdcheckin]
 formal_name = "Xdcheckin"
-long_description = """Chaoxing Checkin Tool for XDU.
-"""
+long_description = "Chaoxing Checkin Tool for XDU."
 icon = "src/xdcheckin/app/resources/xdcheckin"
 sources = [
 	"src/xdcheckin",
 ]
 # test_sources = []
 requires = [
+	"waitress",
 	"aiocache>=0.12.0",
 	"aiohttp>=3.8.1",
 	"aiohttp-session>=2.6.0",

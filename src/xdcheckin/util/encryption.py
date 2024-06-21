@@ -1,8 +1,9 @@
 __all__ = ("encrypt_aes", )
 
 from base64 import b64encode as _b64encode
-from Crypto.Cipher.AES import new as _new, block_size as _block_size, \
-MODE_CBC as _MODE_CBC
+from Crypto.Cipher.AES import (
+	new as _new, block_size as _block_size, MODE_CBC as _MODE_CBC
+)
 from Crypto.Util.Padding import pad as _pad
 
 def encrypt_aes(

@@ -1,7 +1,9 @@
 __all__ = ("CachedSession", )
 
-from asyncio import create_task as _create_task, run as _run, \
-get_event_loop as _get_event_loop
+from asyncio import (
+	create_task as _create_task, run as _run,
+	get_event_loop as _get_event_loop
+)
 from atexit import register as _register
 from signal import signal as _signal, SIGINT as _SIGINT, SIGTERM as _SIGTERM
 try:

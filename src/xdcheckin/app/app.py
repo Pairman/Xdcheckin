@@ -1,15 +1,19 @@
 __all__ = ()
 
 from multiprocessing import Process as _Process
-from toga import App as _App, Box as _Box, MainWindow as _MainWindow, \
-WebView as _WebView, Label as _Label
+from toga import (
+	App as _App, Box as _Box, MainWindow as _MainWindow,
+	WebView as _WebView, Label as _Label
+)
 from toga.platform import current_platform as _current_platform
 from toga.style import Pack as _Pack
 from xdcheckin.server.server import start_server as _start_server
 
 _url = "http://127.0.0.1:5001"
-_msg = f"This APP will launch\n your browser automatically.\n\
-If not, visit \"{_url}\"\n in you browser manually."
+_msg = (
+	f"This APP will launch\n your browser automatically.\n"
+	f"If not, visit \"{_url}\"\n in you browser manually."
+)
 
 class _Xdcheckin(_App):
 	def startup(self):

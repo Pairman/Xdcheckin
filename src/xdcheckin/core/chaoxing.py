@@ -2,8 +2,9 @@
 
 __all__ = ("Chaoxing", )
 
-from asyncio import create_task as _create_task, gather as _gather, \
-Semaphore as _Semaphore
+from asyncio import (
+	create_task as _create_task, gather as _gather, Semaphore as _Semaphore
+)
 from json import loads as _loads
 from math import trunc as _trunc
 from random import uniform as _uniform

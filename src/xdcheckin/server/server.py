@@ -12,20 +12,24 @@ from socket import inet_aton as _inet_aton
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
-from aiohttp.web import Application as _Application, \
-Response as _Response, RouteTableDef as _RouteTableDef, \
-GracefulExit as _GracefulExit, run_app as _run_app
+from aiohttp.web import (
+	Application as _Application, Response as _Response,
+	RouteTableDef as _RouteTableDef, GracefulExit as _GracefulExit,
+	run_app as _run_app
+)
 from aiohttp_session import get_session as _get_session, setup as _setup
 from aiohttp_session import SimpleCookieStorage as _SimpleCookieStorage
 from PIL.Image import open as _open
 from pyzbar.pyzbar import decode as _decode, ZBarSymbol as _ZBarSymbol
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
-from xdcheckin.core.xidian import IDSSession as _IDSSession, \
-Newesxidian as _Newesxidian
+from xdcheckin.core.xidian import (
+	IDSSession as _IDSSession, Newesxidian as _Newesxidian
+)
 from xdcheckin.util.types import TimestampDict as _TimestampDict
-from xdcheckin.util.version import compare_versions as _compare_versions, \
-version as _version
+from xdcheckin.util.version import (
+	compare_versions as _compare_versions, version as _version
+)
 
 server_routes = _RouteTableDef()
 
@@ -414,19 +418,21 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	app.on_startup.append(_startup)
 	app.on_cleanup.append(_cleanup)
 	_run_app(
-		app, host = host, port = port,
+		app, host = host, port = port, handler_cancellation = True,
 		print = lambda _: print("Server started. Press Ctrl+C to quit.")
 	)
 
 def _main():
 	bn = _basename(_argv[0])
-	help = \
-	f"xdcheckin-server - Xdcheckin Server Commandline Tool " \
-	f"{_version}\n\n" \
-	f"Usage: \n" \
-	f"  {bn} [<host> <port>]\tStart server on the given host and port.\n" \
-	f"  {' ' * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n" \
-	f"  {bn} -h\t\t\tShow help. Also '--help'."
+	help = (
+		f"{bn} - Xdcheckin Server Commandline Tool "
+		f"{_version}\n\n"
+		f"Usage: \n"
+		f"  {bn} [<host> <port>]\t"
+		"Start server on the given host and port.\n"
+		f"  {' ' * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n"
+		f"  {bn} -h\t\t\tShow help. Also '--help'."
+	)
 	if len(_argv) == 2 and _argv[1] in ("-h", "--help"):
 		print(help)
 		_exit()
