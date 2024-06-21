@@ -23,16 +23,17 @@ class IDSSession:
 		}
 	}
 	__async_ctxmgr = __session = __secrets = __service = None
-	__logged_in = False
 
-	def __init__(self, service: str = ""):
+	def __init__(self, service: str = "", type = "userNameLogin"):
 		"""Initialize an IDS Session.
 		:param service: The SSO service for redirection.
+		:param type: Login type. ``"userNameLogin"`` by default for \
+		username and ``"dynamicLogin"`` for phone number.
 		"""
 		if not self.__async_ctxmgr is None:
 			return
 		self.__session = _CachedSession()
-		self.__secrets, self.__service = {}, service
+		self.__secrets, self.__service = {"login_type": type}, service
 
 	async def __aenter__(self):
 		if not self.__async_ctxmgr is None:
@@ -46,12 +47,7 @@ class IDSSession:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
 		self.__secrets = None
-		self.__logged_in = False
 		self.__async_ctxmgr = False
-
-	@property
-	def logged_in(self):
-		return self.__logged_in
 
 	async def get(self, *args, **kwargs):
 		return await self.__session.get(*args, **kwargs)
@@ -84,14 +80,15 @@ class IDSSession:
 			await res.json()
 		)["errorMsg"] == "success")
 
-	async def login_prepare(self, type = "userNameLogin"):
+	async def login_prepare(self):
 		"""Prepare to log into IDS with username and password.
-		:param type: Login type. ``"userNameLogin"`` by default for \
-		username and ``"dynamicLogin"`` for phone number.
 		:return: True on success.
 		"""
 		url = "https://ids.xidian.edu.cn/authserver/login"
-		params = {"service": self.__service, "type": type}
+		params = {
+			"service": self.__service,
+			"type": self.__secrets["login_type"]
+		}
 		res = await self.__session.get(url = url, params = params)
 		if not res or res.status != 200:
 			return False
@@ -99,8 +96,8 @@ class IDSSession:
 			await res.text()
 		)
 		self.__secrets.update({
-			"login_type": type, "login_salt": s[1],
-			"login_execution": s[2]
+			"login_type": self.__secrets["login_type"],
+			"login_salt": s[1], "login_execution": s[2]
 		})
 		return True
 
@@ -149,8 +146,8 @@ class IDSSession:
 		data = {"mobile": account["username"], "captcha": ""}
 		res = await self.__session.post(url, data = data)
 		return bool(res and res.status == 200 and (
-			await res.json()
-		)["code"] == "success")
+			await res.json(content_type = None)
+		)["code"] in ("success", "timeExpire"))
 
 	async def login_dynamic_finish(
 		self, account: dict = {"username": "", "password": ""}
