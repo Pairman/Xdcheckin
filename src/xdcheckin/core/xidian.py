@@ -75,52 +75,46 @@ class IDSSession:
 	async def captcha_submit_captcha(self, captcha = {"vcode": ""}):
 		"""Submit and verify CAPTCHA.
 		:param captcha: Verification code (i.e. slider offset).
-		:return: CAPTCHA with validation code on success.
+		:return: True on success.
 		"""
 		url = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data = {"canvasLength": 280, "moveLength": captcha["vcode"]}
 		res = await self.__session.post(url, data = data)
-		return bool(
-			res and res.status == 200 and \
-			(await res.json())["errorMsg"] == "success"
-		)
+		return bool(res and res.status == 200 and (
+			await res.json()
+		)["errorMsg"] == "success")
 
-	async def login_username_prepare(self):
+	async def login_prepare(self, type = "userNameLogin"):
 		"""Prepare to log into IDS with username and password.
-		:return: CAPTCHA.
+		:param type: Login type. ``"userNameLogin"`` by default for \
+		username and ``"dynamicLogin"`` for phone number.
+		:return: True on success.
 		"""
 		url = "https://ids.xidian.edu.cn/authserver/login"
-		params = {"service": self.__service}
+		params = {"service": self.__service, "type": type}
 		res = await self.__session.get(url = url, params = params)
-		ret = {}
-		if res and res.status == 200:
-			s = _IDSSession_login_username_prepare_regex.search(
-				await res.text()
-			)
-			ret["captcha"] = await self.captcha_get_captcha()
-			self.__secrets.update({
-				"login_prepare_salt": s[1],
-				"login_prepare_execution": s[2]
-			})
-		return ret
+		if not res or res.status != 200:
+			return False
+		s = _IDSSession_login_username_prepare_regex.search(
+			await res.text()
+		)
+		self.__secrets.update({
+			"login_type": type, "login_salt": s[1],
+			"login_execution": s[2]
+		})
+		return True
 
 	async def login_username_finish(
 		self,
-		account: dict = {"username": "", "password": ""},
-		captcha: dict = {"vcode": ""}
+		account: dict = {"username": "", "password": ""}
 	):
 		"""Finish logging into IDS with username and password.
-		:param account: Username, password and verification \
-		code (e.g. slider offset).
-		:param captcha: Verification code in dictionary.
+		:param account: Username and password.
 		:return: Cookies and login state.
 		"""
-		ret = {"cookies": None, "logged_in": False}
-		if not await self.captcha_submit_captcha(captcha = captcha):
-			return ret
 		password = _encrypt_aes(
 			msg = account["password"],
-			key = self.__secrets["login_prepare_salt"].encode("utf-8"),
+			key = self.__secrets["login_salt"].encode("utf-8"),
 			iv = 16 * b" ",
 			pad = lambda msg: 64 * b" " + msg.encode("utf-8")
 		)
@@ -128,9 +122,53 @@ class IDSSession:
 		data = {
 			"username": account["username"], "password": password,
 			"captcha": "", "_eventId": "submit",
-			"cllt": "userNameLogin", "dllt": "generalLogin",
-			"execution": self.__secrets["login_prepare_execution"],
-			"lt": "", "rememberMe": True
+			"cllt": self.__secrets["login_type"],
+			"dllt": "generalLogin", "lt": "", "rememberMe": True,
+			"execution": self.__secrets["login_execution"]
+		}
+		params = {"service": self.__service}
+		res = await self.__session.post(
+			url, data = data, params = params
+		)
+		ret = {"cookies": None, "logged_in": False}
+		if res and res.status == 200:
+			ret.update({
+				"cookies": self.__session.session_cookies,
+				"logged_in": True
+			})
+		return ret
+
+	async def login_dynamic_send_code(
+		self, account: dict = {"username": ""}
+	):
+		"""Send dynamic code for logging into IDS.
+		:param account: Username (i.e. phone number).
+		:return: True on success.
+		"""
+		url = "https://ids.xidian.edu.cn/authserver/dynamicCode/getDynamicCode.htl"
+		data = {"mobile": account["username"], "captcha": ""}
+		res = await self.__session.post(url, data = data)
+		return bool(res and res.status == 200 and (
+			await res.json()
+		)["code"] == "success")
+
+	async def login_dynamic_finish(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Prepare to log into IDS via dynamic code.
+		:param account: Username (i.e. phone number) and \
+		password (i.e. dynamic code).
+		:return: Cookies and login state.
+		"""
+		ret = {"cookies": None, "logged_in": False}
+		url = "https://ids.xidian.edu.cn/authserver/login"
+		data = {
+			"username": account["username"],
+			"dynamicCode": account["password"], "captcha": "",
+			"captcha": "", "_eventId": "submit",
+			"cllt": self.__secrets["login_type"],
+			"dllt": "generalLogin", "lt": "", "rememberMe": True,
+			"execution": self.__secrets["login_execution"]
 		}
 		params = {"service": self.__service}
 		res = await self.__session.post(
@@ -142,20 +180,6 @@ class IDSSession:
 				"logged_in": True
 			})
 		return ret
-
-	async def login_dynamic_prepare(self, account: dict = {"username": ""}):
-		"""Prepare to log into IDS via dynamic code.
-		:param account: Username (i.e. phone number).
-		:return: None.
-		"""
-		raise NotImplementedError(f"{__name__} Is Not Implemented Yet.")
-
-	async def login_dynamic_finish(self, captcha: dict = {"vcode": ""}):
-		"""Prepare to log into IDS via dynamic code.
-		:param captcha: Verification code.
-		:return: None.
-		"""
-		raise NotImplementedError(f"{__name__} Is Not Implemented Yet.")
 
 	async def login_cookies(self, account: dict = {"cookies": None}):
 		"""Login with cookies.

@@ -108,7 +108,8 @@ async def _ids_login_prepare(req):
 		req.app["config"]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
-		data = await ids.login_username_prepare()
+		assert await ids.login_prepare()
+		data = {"captcha": await ids.captcha_get_captcha()}
 	except Exception as e:
 		_create_task(ids.__aexit__(None, None, None))
 		data = {"err": f"{e}"}
@@ -124,13 +125,15 @@ async def _ids_login_finish(req):
 		username, password, vcode = \
 		data["username"], data["password"], data["vcode"]
 		assert username and password and vcode, \
-		"Missing username, password or verification code."
+		"Missing username, password or CAPTCHA verification code."
 		ses = await _get_session(req)
 		ids = req.app["config"]["sessions"][ses["uuid"]].pop("ids")
-		ret = await ids.login_username_finish(
-			account = {"username": username, "password": password},
+		assert await ids.captcha_submit_captcha(
 			captcha = {"vcode": vcode}
-		)
+		), "CAPTCHA verification failed."
+		ret = await ids.login_username_finish(account = {
+			"username": username, "password": password
+		})
 		_create_task(ids.__aexit__(None, None, None))
 		assert ret["logged_in"], "IDS login failed."
 		cookies = ret["cookies"].filter_cookies("https://chaoxing.com")
