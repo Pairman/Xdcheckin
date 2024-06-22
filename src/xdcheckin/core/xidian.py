@@ -183,7 +183,7 @@ class IDSSession:
 		:param account: Cookies.
 		:return: Cookies and login state.
 		"""
-		url = "http://ids.xidian.edu.cn/authserver/index.do"
+		url = "https://ids.xidian.edu.cn/personalInfo/personCenter/index.html"
 		res = await self.__session.get(
 			url = url, cookies = account["cookies"],
 			allow_redirects = False
