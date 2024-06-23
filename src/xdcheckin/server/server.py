@@ -2,7 +2,7 @@
 
 __all__ = ("server_routes", "create_server", "start_server")
 
-from asyncio import create_task as _create_task, sleep as _sleep
+from asyncio import create_task as _create_task, sleep as _sleep, run as _run
 from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
@@ -14,8 +14,7 @@ from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
 from aiohttp.web import (
 	Application as _Application, Response as _Response,
-	RouteTableDef as _RouteTableDef, GracefulExit as _GracefulExit,
-	run_app as _run_app
+	RouteTableDef as _RouteTableDef, run_app as _run_app
 )
 from aiohttp_session import get_session as _get_session, setup as _setup
 from aiohttp_session import SimpleCookieStorage as _SimpleCookieStorage
@@ -412,18 +411,23 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 		app["config"]["_vacuum_task"] = \
 		_create_task(_vacuum_server_sessions(app = app))
 		print(f"Starting Xdcheckin server on {host}:{port}.")
-	async def _cleanup(app):
-		print("Shutting down Xdcheckin server.")
+	async def _shutdown(app):
 		await app["config"]["sessions"].vacuum(
 			handler = _vacuum_server_sessions_handler
 		)
-		_GracefulExit()
 	app.on_startup.append(_startup)
-	app.on_cleanup.append(_cleanup)
-	_run_app(
-		app, host = host, port = port, handler_cancellation = True,
-		print = lambda _: print("Server started. Press Ctrl+C to quit.")
-	)
+	app.on_shutdown.append(_shutdown)
+	try:
+		_run_app(
+			app, host = host, port = port, handler_cancellation = True,
+			print = lambda _: print("Server started. Press Ctrl+C to quit.")
+		)
+	except KeyboardInterrupt:
+		pass
+	finally:
+		_run(app.shutdown())
+		_run(app.cleanup())
+		print("Server shut down.")
 
 def _main():
 	bn = _basename(_argv[0])
