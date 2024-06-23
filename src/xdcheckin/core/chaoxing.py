@@ -865,7 +865,7 @@ class Chaoxing:
 				return True, {
 					"msg":
 					"Checkin success. (Already checked in.)",
-					"params": "", "captcha": ""
+					"params": {}, "captcha": {}
 				}
 			location = self.checkin_format_location(
 				location = location, new_location = presign[1]
@@ -911,7 +911,7 @@ class Chaoxing:
 				return True, {
 					"msg":
 					"Checkin success. (Already checked in.)",
-					"params": "", "captcha": ""
+					"params": {}, "captcha": {}
 				}
 			if presign[1]["ranged"]:
 				location = self.checkin_format_location(
