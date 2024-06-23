@@ -13,29 +13,39 @@ except Exception:
 from sys import exit as _exit
 from aiocache import Cache as _Cache
 from aiocache.serializers import NullSerializer as _NullSerializer
-from aiohttp import ClientSession as _ClientSession
+from aiohttp.client import (
+	ClientSession as _ClientSession, ClientResponse as _ClientResponse
+)
+class _MockResponse:
+	cookies, status = {}, 404
 
+	async def json(self, *args, **kwargs):
+		return {}
+
+	async def read(self, *args, **kwargs):
+		return b""
+
+	async def text(self,  *args, **kwargs):
+		return ""
+	
 class CachedSession:
 	"""Wrapper for ``aiohttp.ClientSession`` with cache.
 	"""
 	__async_ctxmgr = headers = cookies = __session = __cache = None
-	__verify_ssl = False
 
 	def __init__(
 		self, headers: dict = None, cookies: dict = None,
-		verify_ssl: bool = False, cache_enabled: bool = True
+		cache_enabled: bool = True
 	):
 		"""Create a ``CachedSession`` instance.
 		:param headers: Default headers.
 		:param cookies: Default cookies.
-		:param verify: SSL verification.
 		:param cache_enabled: Whether to enable caching.
 		"""
 		if not self.__async_ctxmgr is None:
 			return
 		self.headers = headers or {}
 		self.cookies = cookies or {}
-		self.__verify_ssl = verify_ssl
 		self.__session = _ClientSession()
 		if cache_enabled:
 			self.__cache = _Cache(
@@ -80,15 +90,16 @@ class CachedSession:
 	async def close(self):
 		await self.__aexit__(None, None, None)
 
-	async def __cache_handler(self, func, ttl: int, *args, **kwargs):
-		kwargs["verify_ssl"] = self.__verify_ssl
+	async def __cache_handler(
+		self, func, ttl: int, *args, **kwargs
+	) -> _ClientResponse:
 		if not self.__cache or not ttl:
 			return await func(*args, **kwargs)
 		key = f"{func.__name__}{args}{kwargs.items()}"
 		try:
 			res = await self.__cache.get(key)
 		except Exception:
-			res = None
+			res = _MockResponse()
 		if not res:
 			res = await func(*args, **kwargs)
 			if res.status == 200 or res.status == 500:
@@ -98,7 +109,7 @@ class CachedSession:
 	async def get(
 		self, url: str, params: dict = None, cookies: dict = None,
 		headers: dict = None, ttl: int = 0, **kwargs
-	):
+	) -> _ClientResponse:
 		"""Get request.
 		:param url: URL.
 		:param params: params.
@@ -120,7 +131,7 @@ class CachedSession:
 	async def post(
 		self, url: str, data: dict = None, cookies: dict = None,
 		headers: dict = None, ttl: int = 0, **kwargs
-	):
+	) -> _ClientResponse:
 		"""Post request.
 		:param url: URL.
 		:param data: data.

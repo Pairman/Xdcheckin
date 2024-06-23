@@ -4,6 +4,14 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- (Module) Rework IDSSession to support logging in with phone number and dynamic code. See the code for details.
+
+### Fixed
+
+- (Module) Fix ``xdcheckin.IDSSession.login_cookies()`` failures.
+
 ### Changed
 
 - (Module) Optimize performance and precision of ``xdcheckin.solve_captcha()``

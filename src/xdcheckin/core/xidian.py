@@ -76,7 +76,7 @@ class IDSSession:
 		url = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data = {"canvasLength": 280, "moveLength": captcha["vcode"]}
 		res = await self.__session.post(url, data = data)
-		return bool(res and res.status == 200 and (
+		return bool(res.status == 200 and (
 			await res.json()
 		)["errorMsg"] == "success")
 
@@ -90,7 +90,7 @@ class IDSSession:
 			"type": self.__secrets["login_type"]
 		}
 		res = await self.__session.get(url = url, params = params)
-		if not res or res.status != 200:
+		if res.status != 200:
 			return False
 		s = _IDSSession_login_username_prepare_regex.search(
 			await res.text()
@@ -128,7 +128,7 @@ class IDSSession:
 			url, data = data, params = params
 		)
 		ret = {"cookies": None, "logged_in": False}
-		if res and res.status == 200:
+		if res.status == 200:
 			ret.update({
 				"cookies": self.__session.session_cookies,
 				"logged_in": True
@@ -145,7 +145,7 @@ class IDSSession:
 		url = "https://ids.xidian.edu.cn/authserver/dynamicCode/getDynamicCode.htl"
 		data = {"mobile": account["username"], "captcha": ""}
 		res = await self.__session.post(url, data = data)
-		return bool(res and res.status == 200 and (
+		return bool(res.status == 200 and (
 			await res.json(content_type = None)
 		)["code"] in ("success", "timeExpire"))
 
@@ -171,7 +171,7 @@ class IDSSession:
 		res = await self.__session.post(
 			url, data = data, params = params
 		)
-		if res and res.status == 200:
+		if res.status == 200:
 			ret.update({
 				"cookies": self.__session.session_cookies,
 				"logged_in": True
@@ -189,7 +189,7 @@ class IDSSession:
 			allow_redirects = False
 		)
 		ret = {"cookies": None, "logged_in": False}
-		if res and res.status == 302:
+		if res.status == 302:
 			ret.update({
 				"cookies": account["cookies"],
 				"logged_in": True
@@ -320,8 +320,7 @@ class Newesxidian:
 		res = await self.__cx.get(
 			url = url, params = params, ttl = 86400
 		)
-		data = (await res.json(content_type = None) or []) \
-		if res else []
+		data = await res.json(content_type = None) or []
 		await _gather(*(_create_task(
 			_get_livestream(lesson)
 		) for lesson in data))

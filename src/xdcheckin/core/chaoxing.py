@@ -219,7 +219,7 @@ class Chaoxing:
 				"Referer": "https://mobilelearn.chaoxing.com"
 			}
 		)
-		return "result\":true" in await res.text() if res else False, {
+		return "result\":true" in await res.text(), {
 			**captcha, "validate":
 			f"validate_{captcha['captcha_id']}_{captcha['token']}"
 		}
@@ -240,7 +240,7 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, allow_redirects = False
 		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
+		if res.status == 200 and "p_auth_token" in res.cookies:
 			data = await res.json(content_type = None)
 			ret.update({
 				"name": data["realname"],
@@ -265,7 +265,7 @@ class Chaoxing:
 		res = await self.__session.post(
 			url = url, data = data, allow_redirects = False
 		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
+		if res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
@@ -283,7 +283,7 @@ class Chaoxing:
 		res = await self.__session.post(
 			url = url, data = data, allow_redirects = False
 		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
+		if res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
@@ -304,7 +304,7 @@ class Chaoxing:
 		res = await self.__session.post(
 			url = url, data = data, allow_redirects = False
 		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
+		if res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
@@ -332,7 +332,7 @@ class Chaoxing:
 		res = await self.__session.post(
 			url = url, data = data, allow_redirects = False
 		)
-		if res and res.status == 200 and "p_auth_token" in res.cookies:
+		if res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
@@ -347,7 +347,7 @@ class Chaoxing:
 			url = url, cookies = account["cookies"],
 			allow_redirects = False
 		)
-		if res and res.status == 200:
+		if res.status == 200:
 			data = await res.json(content_type = None)
 			if data["result"]:
 				ret.update({
@@ -483,10 +483,8 @@ class Chaoxing:
 			res = await self.__session.get(
 				url = url, params = params, ttl = 86400
 			)
-			if res:
-				data = (await res.json()).get("data")
-				if data:
-					course_id = f"{data.get('courseid')}"
+			data = (await res.json()).get('data', {})
+			course_id = f"{data.get('courseid', 0)}"
 		return course_id or "0"
 
 	async def course_get_location_log(
@@ -507,7 +505,7 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 1800
 		)
-		data = ((await res.json()).get("data") or []) if res else []
+		data = (await res.json()).get("data") or []
 		return {
 			location["activeid"]: {
 				"latitude": location["latitude"],
@@ -516,7 +514,7 @@ class Chaoxing:
 				"ranged": 1,
 				"range": int(location["locationrange"])
 			} for location in data
-		} if res else {}
+		}
 
 	async def course_get_course_activities_v2(
 		self, course: dict = {"course_id": "", "class_id": ""}
@@ -535,9 +533,9 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 60
 		)
-		data = ((
-			(await res.json()).get("data") or {}
-		).get("activeList") or []) if res else []
+		data = ((await res.json()).get("data") or {}).get(
+			"activeList"
+		) or []
 		return [
 			{
 				"active_id": f"{activity['id']}",
@@ -571,11 +569,11 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 60
 		)
-		if not res:
-			return []
 		data = (await res.json(
 			content_type = None
 		)).get("activeList") or []
+		if not data:
+			return
 		all_details = {}
 		_sem = _Semaphore(self.__config[
 			"chaoxing_course_get_activities_workers"
@@ -644,12 +642,7 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 300
 		)
-		try:
-			return await res.json(
-				content_type = None
-			) if res else {}
-		except Exception:
-			return {}
+		return await res.json(content_type = None)
 
 	async def checkin_get_pptactiveinfo(
 		self, activity: dict = {"active_id": ""}
@@ -664,7 +657,7 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 60
 		)
-		return (await res.json())["data"] if res else {}
+		return (await res.json()).get("data") or {}
 
 	def checkin_format_location(
 		self,
@@ -724,7 +717,7 @@ class Chaoxing:
 		res1 = await self.__session.get(
 			url = url1, params = params1, ttl = 1800
 		)
-		if not res1:
+		if res1.status != 200:
 			return False
 		url2 = "https://mobilelearn.chaoxing.com/pptSign/analysis2"
 		params2 = {
@@ -735,7 +728,7 @@ class Chaoxing:
 		res2 = await self.__session.get(
 			url = url2, params = params2, ttl = 1800
 		)
-		return await res2.text() == "success" if res2 else False
+		return await res2.text() == "success"
 
 	async def checkin_do_presign(
 		self, activity: dict = {"active_id": ""},
@@ -762,7 +755,7 @@ class Chaoxing:
 		}
 		captcha = {"captcha_id": ""}
 		res = await self.__session.get(url = url, params = params)
-		if not res or res.status != 200:
+		if res.status != 200:
 			return 0, location, captcha
 		state = 1
 		match = \
