@@ -4,6 +4,8 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.1.1] - 2024-06-24
+
 ### Added
 
 - (Module) Rework IDSSession to support logging in with phone number and dynamic code. See the code for details.
@@ -11,6 +13,7 @@ Changelog for Xdcheckin.
 ### Fixed
 
 - (Module) Fix ``xdcheckin.IDSSession.login_cookies()`` failures.
+- (APP) Fix adaptive icon on Android.
 
 ### Changed
 
@@ -568,7 +571,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.0.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.1.1...main
+[3.1.1]: https://github.com/Pairman/Xdcheckin/compare/3.0.2...3.1.1
 [3.0.2]: https://github.com/Pairman/Xdcheckin/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...3.0.1
 [2.1.1]: https://github.com/Pairman/Xdcheckin/compare/2.0.12...2.1.1
