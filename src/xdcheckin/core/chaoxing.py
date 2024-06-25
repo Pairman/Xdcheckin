@@ -110,6 +110,7 @@ class Chaoxing:
 		funcs = (
 			self.login_username_fanya, self.login_username_v3,
 			self.login_username_v25, self.login_username_v2,
+			self.login_username_v11, self.login_username_xxk,
 			self.login_username_mylogin1, self.login_username_yz
 		)
 		if not self.__logged_in and username and password:
@@ -276,6 +277,27 @@ class Chaoxing:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
+	async def login_username_v11(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password \
+		via V11 API.
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
+		"""
+		url = "https://passport2.chaoxing.com/v11/loginregister"
+		data = {
+			"uname": account["username"],
+			"code": account["password"]
+		}
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
+		if res.status == 200 and "p_auth_token" in res.cookies:
+			ret.update({"cookies": res.cookies, "logged_in": True})
+		return ret
+
 	async def login_username_v25(
 		self, account: dict = {"username": "", "password": ""}
 	):
@@ -291,6 +313,27 @@ class Chaoxing:
 			url = url, data = data, allow_redirects = False
 		)
 		if res.status == 200 and "p_auth_token" in res.cookies:
+			ret.update({"cookies": res.cookies, "logged_in": True})
+		return ret
+
+	async def login_username_xxk(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password \
+		via XXK API.
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
+		"""
+		url = "http://xxk.chaoxing.com/api/front/user/login"
+		data = {
+			"username": account["username"], 
+			"password": account["password"], "numcode": 0
+		}
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		res = await self.__session.post(
+			url = url, data = data, allow_redirects = False
+		)
+		if "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
