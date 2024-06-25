@@ -43,12 +43,14 @@ async def _static_g_locations_js(req):
 
 with _Path(__file__).parent.resolve() as path:
 	server_routes.static("/static", path.joinpath("static"))
-	_index_html_str = \
-	path.joinpath("templates", "index.html").read_text(encoding = "utf-8")
+	_index_html_str = path.joinpath(
+		"templates", "index.html"
+	).read_text(encoding = "utf-8")
 @server_routes.get("/")
 async def _index_html(req):
-	return \
-	_Response(text = _index_html_str, content_type = "text/html")
+	return _Response(
+		text = _index_html_str, content_type = "text/html"
+	)
 
 @server_routes.post("/xdcheckin/get_version")
 async def _xdcheckin_get_version(req):
@@ -121,10 +123,12 @@ async def _ids_login_prepare(req):
 async def _ids_login_finish(req):
 	try:
 		data = await req.json()
-		username, password, vcode = \
-		data["username"], data["password"], data["vcode"]
-		assert username and password and vcode, \
-		"Missing username, password or CAPTCHA verification code."
+		username, password, vcode = (
+			data["username"], data["password"], data["vcode"]
+		)
+		assert (
+			username and password and vcode
+		), "Missing username, password or CAPTCHA verification code."
 		ses = await _get_session(req)
 		ids = req.app["config"]["sessions"][ses["uuid"]].pop("ids")
 		assert await ids.captcha_submit_captcha(
@@ -151,10 +155,12 @@ async def _chaoxing_login(req, data = None):
 	try:
 		if not data:
 			data = await req.json()
-		username, password, cookies = \
-		data["username"], data["password"], data["cookies"]
-		assert (username and password) or cookies, \
-		"Missing username, password or cookies."
+		username, password, cookies = (
+			data["username"], data["password"], data["cookies"]
+		)
+		assert (
+			(username and password) or cookies
+		), "Missing username, password or cookies."
 		config = {
 			"chaoxing_course_get_activities_courses_limit": 36,
 			"chaoxing_checkin_location_address_override_maxlen": 13
@@ -264,8 +270,9 @@ async def _chaoxing_captcha_submit_captcha(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
-		data = \
-		await cx.captcha_submit_captcha(captcha = data["captcha"])
+		data = await cx.captcha_submit_captcha(
+			captcha = data["captcha"]
+		)
 		assert data[0]
 		data = data[1]
 		status = 200
@@ -304,8 +311,9 @@ async def _chaoxing_checkin_checkin_location(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
-		data["activity"]["active_id"] = \
-		f"{data['activity']['active_id']}"
+		data["activity"]["active_id"] = f"""{
+			data['activity']['active_id']
+		}"""
 		result = await cx.checkin_checkin_location(
 			activity = data["activity"], location = data["location"]
 		)
@@ -376,8 +384,10 @@ async def _vacuum_server_sessions_handler(ses):
 
 async def _vacuum_server_sessions(app):
 	sessions = app["config"]["sessions"]
-	t = app["config"]["sessions_vacuum_days"] * 86400 \
-	- 18000 - _time() % 86400
+	t = (
+		app["config"]["sessions_vacuum_days"] * 86400
+		- 18000 - _time() % 86400
+	)
 	if t <= 0:
 		return
 	while True:
@@ -408,8 +418,9 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	"""
 	app = create_server(config = {"sessions": _TimestampDict(), **config})
 	async def _startup(app):
-		app["config"]["_vacuum_task"] = \
-		_create_task(_vacuum_server_sessions(app = app))
+		app["config"]["_vacuum_task"] = _create_task(
+			_vacuum_server_sessions(app = app)
+		)
 		print(f"Starting Xdcheckin server on {host}:{port}.")
 	async def _shutdown(app):
 		await app["config"]["sessions"].vacuum(

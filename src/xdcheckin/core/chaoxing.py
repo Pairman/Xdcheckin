@@ -10,11 +10,16 @@ from math import trunc as _trunc
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
-from xdcheckin.util.captcha import \
-chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
+from xdcheckin.util.captcha import (
+	chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
+)
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 from xdcheckin.util.session import CachedSession as _CachedSession
 from xdcheckin.util.time import strftime as _strftime
+
+_Chaoxing_login_username_yz_regex = _compile(
+	r"enc.*?([0-9a-f]{32})", _DOTALL
+)
 
 _Chaoxing_course_get_courses_regex1 = _compile(
 	r"Client\('(\d+)','(.*?)','(\d+).*?color3\" title=\"(.*?)\".*?\n"
@@ -36,8 +41,9 @@ _Chaoxing_checkin_do_presign_regex = _compile(
 
 _Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
 
-_Chaoxing_checkin_checkin_qrcode_url_regex = \
-_compile(r"id=(\d+).*?([0-9A-F]{32})")
+_Chaoxing_checkin_checkin_qrcode_url_regex = _compile(
+	r"id=(\d+).*?([0-9A-F]{32})"
+)
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
@@ -96,14 +102,15 @@ class Chaoxing:
 		await self.__session.__aenter__()
 		username, password, cookies = self.__account.values()
 		if cookies:
-			self.name, cookies, self.__logged_in = \
-			(await self.login_cookies(
-				account = self.__account
-			)).values()
+			self.name, cookies, self.__logged_in = (
+				await self.login_cookies(
+					account = self.__account
+				)
+			).values()
 		funcs = (
 			self.login_username_fanya, self.login_username_v3,
 			self.login_username_v25, self.login_username_v2,
-			self.login_username_mylogin1
+			self.login_username_mylogin1, self.login_username_yz
 		)
 		if not self.__logged_in and username and password:
 			for f in funcs:
@@ -336,6 +343,37 @@ class Chaoxing:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
+	async def login_username_yz(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password \
+		via Yunzhou API.
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
+		"""
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		url1 = "https://yz.chaoxing.com"
+		res1 = await self.__session.get(url1, allow_redirects = False)
+		if res1.status != 200:
+			return ret
+		match = _Chaoxing_login_username_yz_regex.search(
+			await res1.text()
+		)
+		if not match:
+			return ret
+		url2 = "https://yz.chaoxing.com/login6"
+		data2 = {
+			"enc": match[1], "uname": account["username"],
+			"password": account["password"]
+		}
+		res = await self.__session.post(
+			url2, data2, allow_redirects = False
+		)
+		if "p_auth_token" in res.cookies:
+			ret.update({"cookies": res.cookies, "logged_in": True})
+		return ret
+
+
 	async def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
 		:param account: Cookies in dictionary.
@@ -477,8 +515,9 @@ class Chaoxing:
 			"fid": self.__fid, "courseId": "",
 			"classId": course["class_id"]
 		}
-		course_id = course.get("course_id") or \
-		self.__courses.get(course["class_id"], {}).get("course_id")
+		course_id = course.get("course_id") or self.__courses.get(
+			course["class_id"], {}
+		).get("course_id")
 		if not course_id:
 			res = await self.__session.get(
 				url = url, params = params, ttl = 86400
@@ -547,8 +586,10 @@ class Chaoxing:
 				_strftime(activity["endTime"] // 1000)
 				if activity["endTime"] else "",
 				"time_left": activity["nameFour"]
-			} for activity in data if activity["status"] == 1 and \
-			activity.get("otherId") in ("2", "4")
+			} for activity in data if (
+				activity["status"] == 1 and
+				activity.get("otherId") in ("2", "4")
+			)
 		]
 
 	async def course_get_course_activities_ppt(
@@ -579,20 +620,21 @@ class Chaoxing:
 			"chaoxing_course_get_activities_workers"
 		])
 		async def _get_details(active_id):
+			a = {"active_id": f"{active_id}"}
 			async with _sem:
 				all_details[active_id] = \
-				await self.checkin_get_details(activity = {
-					"active_id": f"{active_id}"
-				})
+				await self.checkin_get_details(activity = a)
 		await _gather(*(
 			_get_details(activity["id"]) for activity in data
-			if activity["status"] == 1 and 
+			if activity["status"] == 1 and
 			activity["activeType"] == 2
 		))
 		activities = []
 		for activity in data:
-			if not activity["status"] == 1 or \
-			not activity["activeType"] == 2:
+			if (
+				activity["status"] != 1 or
+				activity["activeType"] != 2
+			):
 				continue
 			details = all_details[activity["id"]]
 			if not details["otherId"] in (2, 4):
@@ -758,8 +800,9 @@ class Chaoxing:
 		if res.status != 200:
 			return 0, location, captcha
 		state = 1
-		match = \
-		_Chaoxing_checkin_do_presign_regex.search(await res.text())
+		match = _Chaoxing_checkin_do_presign_regex.search(
+			await res.text()
+		)
 		if match:
 			if match[7]:
 				state = 2
@@ -846,14 +889,16 @@ class Chaoxing:
 			info = await self.checkin_get_details(
 				activity = activity
 			)
-			assert info["status"] == 1 and not info["isDelete"], \
-			"Activity ended or deleted."
+			assert (
+				info["status"] == 1 and not info["isDelete"]
+			), "Activity ended or deleted."
 			course = {"class_id": f"{info['clazzId']}"}
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course
 			)
-			assert presign[0], \
-			f"Presign failure. {activity, presign}"
+			assert (
+				presign[0]
+			), f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
 					"msg":
@@ -888,10 +933,12 @@ class Chaoxing:
 			_analyze = _create_task(self.checkin_do_analysis(
 				activity = activity
 			))
-			info = \
-			await self.checkin_get_details(activity = activity)
-			assert info["status"] == 1 and not info["isDelete"], \
-			"Activity ended or deleted."
+			info = await self.checkin_get_details(
+				activity = activity
+			)
+			assert (
+				info["status"] == 1 and not info["isDelete"]
+			), "Activity ended or deleted."
 			course = {"class_id": f"{info['clazzId']}"}
 			_locate = _create_task(self.checkin_get_location(
 				activity = activity, course = course
@@ -899,7 +946,9 @@ class Chaoxing:
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course
 			)
-			assert presign[0], f"Presign failure. {activity, presign}"
+			assert (
+				presign[0]
+			), f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
 					"msg":
@@ -935,8 +984,9 @@ class Chaoxing:
 		:return: Same as ``checkin_checkin_location()``.
 		"""
 		try:
-			assert "mobilelearn.chaoxing.com/widget/sign/e" \
-			in url, f"Checkin failure. {'Invalid URL.', url}"
+			assert (
+				"mobilelearn.chaoxing.com/widget/sign/e" in url
+			), f"Checkin failure. {'Invalid URL.', url}"
 			match = \
 			_Chaoxing_checkin_checkin_qrcode_url_regex.search(url)
 			return await self.checkin_checkin_qrcode(activity = {

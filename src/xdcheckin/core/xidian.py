@@ -10,8 +10,9 @@ from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
 from xdcheckin.util.session import CachedSession as _CachedSession
 
-_IDSSession_login_username_prepare_regex = \
-_compile(r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\"")
+_IDSSession_login_username_prepare_regex = _compile(
+	r"\"pwdEncryptSalt\" value=\"(.*?)\".*?\"execution\" value=\"(.*?)\""
+)
 
 class IDSSession:
 	config = {
@@ -234,7 +235,7 @@ class Newesxidian:
 	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
 		:param livesteam: Live ID in dictionary.
-		:return: Livestream URL, live ID, device ID and 
+		:return: Livestream URL, live ID, device ID and \
 		classroom location (``""``).
 		URL will fallback to replay URL for non-ongoing live IDs.
 		"""

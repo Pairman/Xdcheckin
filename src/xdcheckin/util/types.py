@@ -45,7 +45,7 @@ class TimestampDict:
 		return default
 
 	async def vacuum(self, seconds = 0, handler = None):
-		"""Remove key and value pairs older than the specified seconds. \
+		"""Remove key and value pairs older than the given seconds. \
   		Calls ``handler`` on each of the values if given.
 		"""
 		now = _time()

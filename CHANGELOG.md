@@ -4,6 +4,10 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+### Added
+
+- (Module) Add new login method ``xdcheckin.Chaoxing.login_username_yz()``.
+
 ## [3.1.1] - 2024-06-24
 
 ### Added
@@ -17,7 +21,7 @@ Changelog for Xdcheckin.
 
 ### Changed
 
-- (Module) Optimize performance and precision of ``xdcheckin.solve_captcha()``
+- (Module) Optimize performance and precision of ``xdcheckin.solve_captcha()``.
 
 ## [3.0.2] - 2024-06-10
 
