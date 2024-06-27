@@ -463,12 +463,10 @@ def _main():
 			host = _argv[1]
 			_inet_aton(host)
 		except Exception:
-			print(f"Invalid IP address {host}", file = _stderr)
+			print(f"Invalid IP address {_argv[1]}", file = _stderr)
 			_exit(2)
-		try:
-			port = int(_argv[2])
-			assert 0 < port < 65536
-		except Exception:
-			print(f"Invalid port number {port}", file = _stderr)
+		port = int(_argv[2]) if _argv[2].isdigit() else 0
+		if not 0 < port < 65536:
+			print(f"Invalid port number {_argv[2]}", file = _stderr)
 			_exit(2)
 	start_server(host = host, port = port)
