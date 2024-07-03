@@ -21,7 +21,6 @@ dependencies = [
 	"aiocache>=0.12.0",
 	"aiohttp>=3.8.1",
 	"aiohttp-session>=2.6.0",
-	"pillow>=8.4.0",
 	"pycryptodome>=3.9.4",
  	"yarl>=1.6.0",
 ]
@@ -65,7 +64,6 @@ requires = [
 	"aiocache>=0.12.0",
 	"aiohttp>=3.8.1",
 	"aiohttp-session>=2.6.0",
-	"pillow>=8.4.0",
 	"pycryptodome>=3.9.4",
  	"yarl>=1.6.0",
 ]
