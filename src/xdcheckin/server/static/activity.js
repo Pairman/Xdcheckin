@@ -130,7 +130,7 @@ async function chaoxingCheckinLocationWrapper(activity, b_id) {
 async function chaoxingCheckinQrcode(url, result_div_id) {
 	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
 				`captcha-div`).style.display = "none";
-	let res = await post("/chaoxing/checkin_checkin_qrcode_img", {
+	let res = await post("/chaoxing/checkin_checkin_qrcode_url", {
 		"location": g_location, "url": url
 	});
 	let data = res.json();
@@ -158,14 +158,12 @@ async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
 					 "Checkin error. (No Qrcode detected.)";
 		return;
 	}
-	urls = urls.filter(v =>
-			  v.includes("mobilelearn.chaoxing.com/widget/sign/e"));
+	urls = urls.filter(v => v.includes(
+				     "mobilelearn.chaoxing.com/widget/sign/e"));
 	if (!urls.length) {
 		document.getElementById(result_div_id).innerText =
 				       "Checkin error. (No checkin URL found.)";
 		return;
 	}
-	if (!syms.length)
-		return null;
 	chaoxingCheckinQrcode(urls[0], result_div_id);
 }
