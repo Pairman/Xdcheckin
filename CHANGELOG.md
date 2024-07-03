@@ -4,14 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.2.1] - 2024-07-04
+
 ### Added
 
 - (Module) Add new login method ``xdcheckin.Chaoxing.login_username_yz()``.
 
 ### Changed
 
-- Optimize network data usage and qrcode checkin speed.
-- (Module) Replace ``pyzbar`` and ``zlar-libs`` with ``zbar-wasm``.
+- Use ``zbar-wasm`` to handle qrcode decoding for better performance and data usage.
+- (Module) Remove unused dependencies.
 
 ## [3.1.1] - 2024-06-24
 
@@ -580,7 +582,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.1.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.2.1...main
+[3.2.1]: https://github.com/Pairman/Xdcheckin/compare/3.1.1...3.2.1
 [3.1.1]: https://github.com/Pairman/Xdcheckin/compare/3.0.2...3.1.1
 [3.0.2]: https://github.com/Pairman/Xdcheckin/compare/3.0.1...3.0.2
 [3.0.1]: https://github.com/Pairman/Xdcheckin/compare/2.1.1...3.0.1
