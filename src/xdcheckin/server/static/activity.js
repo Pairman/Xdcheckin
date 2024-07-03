@@ -109,8 +109,7 @@ async function chaoxingCheckinLocation(activity) {
 	document.getElementById(`activities-checkin-captcha-div`).style.display
 								       = "none";
 	let res = await post("/chaoxing/checkin_checkin_location", {
-		"location": g_location,
-		"activity": activity
+		"location": g_location, "activity": activity
 	});
 	let data = res.json();
 	if (res.status_code != 200) {
@@ -128,13 +127,12 @@ async function chaoxingCheckinLocationWrapper(activity, b_id) {
 	onclickCooldown(b_id);
 }
 
-async function chaoxingCheckinQrcode(img_src, result_div_id) {
+async function chaoxingCheckinQrcode(url, result_div_id) {
 	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
 				`captcha-div`).style.display = "none";
-	var form = new FormData();
-	form.append("location", localStorage.getItem("location_"));
-	form.append("img_src", img_src);
-	let res = await post("/chaoxing/checkin_checkin_qrcode_img", form);
+	let res = await post("/chaoxing/checkin_checkin_qrcode_img", {
+		"location": g_location, "url": url
+	});
 	let data = res.json();
 	document.getElementById(result_div_id).innerText =
 						    unescapeUnicode(data.msg) ||
@@ -148,11 +146,26 @@ async function chaoxingCheckinQrcode(img_src, result_div_id) {
 				       result_div_id.split("-")[0]);
 };
 
-async function chaoxingCheckinQrcodeWrapper(video, quality, result_div_id) {
-	if (video.paused)
+async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
+	if (video.paused) {
 		document.getElementById(result_div_id).innerText =
 					     "Checkin error. (No image given.)";
-	else
-		chaoxingCheckinQrcode(await screenshot(video, quality),
-				      result_div_id);
+		return;
+	}
+	urls = await screenshot_scan(video);
+	if (!urls.length) {
+		document.getElementById(result_div_id).innerText =
+					 "Checkin error. (No Qrcode detected.)";
+		return;
+	}
+	urls = urls.filter(v =>
+			  v.includes("mobilelearn.chaoxing.com/widget/sign/e"));
+	if (!urls.length) {
+		document.getElementById(result_div_id).innerText =
+				       "Checkin error. (No checkin URL found.)";
+		return;
+	}
+	if (!syms.length)
+		return null;
+	chaoxingCheckinQrcode(urls[0], result_div_id);
 }

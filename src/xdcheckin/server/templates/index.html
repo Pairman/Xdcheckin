@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="static/style.css">
 	<link rel="stylesheet" href="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/skins/default/aliplayer-min.css">
 	<script src="https://g.alicdn.com/apsara-media-box/imp-web-player/2.20.2/aliplayer-h5-min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.11.0/dist/index.js"></script>
 	<script src="static/g_classroom_urls.js"></script>
 	<script src="static/g_locations.js"></script>
 	<script src="static/global.js"></script>
@@ -82,7 +83,7 @@
 			<button onclick="muteOtherPlayers(g_players[0])">Unmute</button>
 			<button onclick="g_players[0].mute()">Mute</button>
 			<button id="player0-scan-button" onclick="
-				chaoxingCheckinQrcodeWrapper(g_players[0].tag, 1, 'player0-scanresult-div');
+				chaoxingCheckinQrcodeWrapper(g_players[0].tag, 'player0-scanresult-div');
 				onclickCooldown(this.id);
 			" style="display: none">Scan</button>
 		</div>
@@ -136,7 +137,7 @@
 			<button onclick="cameraOn()">On</button>
 			<button onclick="cameraOff()">Off</button>
 			<button id="camera-scan-button" onclick="
-				chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 0.65, 'camera-scanresult-div');
+				chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 'camera-scanresult-div');
 				onclickCooldown(this.id);
 			" style="display: none">Scan</button>
 		</div>
@@ -163,6 +164,7 @@
 
 		<script>
 			checkEula();
+			qrcode_scanner_init();
 			xdcheckinCheckUpdates();
 			if (localStorage.getItem("username"))
 				promptLogin(auto = true);

@@ -15,11 +15,9 @@ function isValidUrl(url) {
 async function post(url = "", data = {}) {
 	let status_code = 404, text = "";
 	try {
-		let body = data instanceof FormData ? data :
-						      JSON.stringify(data);
 		let res = await fetch(url, {
 			method: "POST",
-			body: body
+			body: JSON.stringify(data)
 		});
 		status_code = res.status;
 		text = await res.text();
@@ -38,7 +36,10 @@ async function post(url = "", data = {}) {
 }
 
 function newElement(tag, properties = {}) {
-	return Object.assign(document.createElement(tag), properties);
+	let e;
+	if (typeof(tag) != "object")
+		e = document.createElement(tag);
+	return Object.assign(e, properties);
 }
 
 async function displayTag(e_id) {
@@ -71,15 +72,22 @@ function unescapeUnicode(s) {
 						parseInt(match.substr(2), 16)));
 }
 
-async function screenshot(video, quality) {
-	let canvas = newElement("canvas", {
-		height: video.videoHeight,
-		width: video.videoWidth
-	});
-	let ctx = canvas.getContext("2d");
-	ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-	let img_src = await new Promise(resolve => canvas.toBlob(
-				 blob => resolve(blob), "image/jpeg", quality));
-	canvas.remove();
-	return img_src;
+async function qrcode_scanner_init() {
+	scanner = await zbarWasm.getDefaultScanner();
+	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_NONE,
+			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 0);
+	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_QRCODE,
+			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 1);
+}
+
+async function screenshot_scan(video) {
+	const canvas = newElement("canvas");
+	canvas.height = video.videoHeight;
+	canvas.width = video.videoWidth;
+	const ctx = canvas.getContext("2d");
+	ctx.drawImage(video, 0, 0);
+	let img_data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	let syms = await zbarWasm.scanImageData(img_data);
+	syms.forEach(s => s.rawData = s.decode());
+	return syms.map(s => s.rawData);
 }

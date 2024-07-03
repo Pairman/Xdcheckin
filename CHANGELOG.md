@@ -8,6 +8,11 @@ Changelog for Xdcheckin.
 
 - (Module) Add new login method ``xdcheckin.Chaoxing.login_username_yz()``.
 
+### Changed
+
+- Optimize network data usage and qrcode checkin speed.
+- (Module) Replace ``pyzbar`` and ``zlar-libs`` with ``zbar-wasm``.
+
 ## [3.1.1] - 2024-06-24
 
 ### Added

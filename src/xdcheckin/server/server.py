@@ -3,7 +3,6 @@
 __all__ = ("server_routes", "create_server", "start_server")
 
 from asyncio import create_task as _create_task, sleep as _sleep, run as _run
-from io import BytesIO as _BytesIO
 from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
 from pathlib import Path as _Path
@@ -18,8 +17,6 @@ from aiohttp.web import (
 )
 from aiohttp_session import get_session as _get_session, setup as _setup
 from aiohttp_session import SimpleCookieStorage as _SimpleCookieStorage
-from PIL.Image import open as _open
-from pyzbar.pyzbar import decode as _decode, ZBarSymbol as _ZBarSymbol
 from xdcheckin.core.chaoxing import Chaoxing as _Chaoxing
 from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import (
@@ -331,36 +328,12 @@ async def _chaoxing_checkin_checkin_location(req):
 @server_routes.post("/chaoxing/checkin_checkin_qrcode_img")
 async def _chaoxing_checkin_checkin_qrcode_img(req):
 	try:
+		data = await req.json()
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
-		location = img_data = img = None
-		form = await req.multipart()
-		field = await form.next()
-		assert field.name == "location"
-		location = _loads(await field.text())
-		field = await form.next()
-		assert location, "No location given."
-		assert field.name == "img_src"
-		img_data = _BytesIO()
-		while True:
-			chk = await field.read_chunk()
-			if not chk:
-				break
-			img_data.write(chk)
-		assert img_data.getbuffer().nbytes, "No image given."
-		img_data.seek(0)
-		img = _open(img_data)
-		assert img.height > 64 and img.width > 64, "Empty image."
-		urls = _decode(img, (_ZBarSymbol.QRCODE, ))
-		assert urls, "No Qrcode detected."
-		urls = [
-			s.data.decode("utf-8") for s in urls
-			if b"mobilelearn.chaoxing.com/widget/sign/e" in s.data
-		]
-		assert urls, "No checkin URL found."
 		result = await cx.checkin_checkin_qrcode_url(
-			url = urls[0], location = location
+			url = data["url"], location = data["location"]
 		)
 		data = result[1]
 	except Exception as e:
@@ -369,10 +342,6 @@ async def _chaoxing_checkin_checkin_qrcode_img(req):
 			"captcha": {}
 		}
 	finally:
-		if img_data:
-			img_data.close()
-		if img:
-			img.close()
 		return _Response(
 			text = _dumps(data), content_type = "application/json"
 		)
