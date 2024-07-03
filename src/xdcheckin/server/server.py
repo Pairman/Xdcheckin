@@ -325,8 +325,8 @@ async def _chaoxing_checkin_checkin_location(req):
 			text = _dumps(data), content_type = "application/json"
 		)
 
-@server_routes.post("/chaoxing/checkin_checkin_qrcode_img")
-async def _chaoxing_checkin_checkin_qrcode_img(req):
+@server_routes.post("/chaoxing/checkin_checkin_qrcode_url")
+async def _chaoxing_checkin_checkin_qrcode_url(req):
 	try:
 		data = await req.json()
 		ses = await _get_session(req)
