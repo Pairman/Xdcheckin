@@ -36,9 +36,8 @@ async function getActivities() {
 			let b = newElement("button", {
 				id: `chaoxing-activity-${a.active_id}-button`,
 				disabled: a.type == "2",
-				onclick: () => chaoxingCheckinLocationWrapper(a,
-									  b.id),
-				innerText: `${a.name} (${type}, ${ts} ~ ${te})`
+				innerText: `${a.name} (${type}, ${ts} ~ ${te})`,
+				onclick: () => chaoxingCheckinLocationWrapper(a)
 			});
 			e.appendChild(b);
 		});
@@ -122,9 +121,8 @@ async function chaoxingCheckinLocation(activity) {
 				       "activities");
 }
 
-async function chaoxingCheckinLocationWrapper(activity, b_id) {
+async function chaoxingCheckinLocationWrapper(activity) {
 	chaoxingCheckinLocation(activity);
-	onclickCooldown(b_id, 50);
 }
 
 async function chaoxingCheckinQrcode(url, result_div_id) {
