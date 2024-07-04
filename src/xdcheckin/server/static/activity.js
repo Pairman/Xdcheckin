@@ -124,7 +124,7 @@ async function chaoxingCheckinLocation(activity) {
 
 async function chaoxingCheckinLocationWrapper(activity, b_id) {
 	chaoxingCheckinLocation(activity);
-	onclickCooldown(b_id);
+	onclickCooldown(b_id, 50);
 }
 
 async function chaoxingCheckinQrcode(url, result_div_id) {
