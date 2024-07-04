@@ -61,12 +61,6 @@ async function hideOtherLists(e_id) {
 		displayTag(e_id);
 }
 
-async function onclickCooldown(e_id, ms = 1000) {
-	let e = document.getElementById(e_id);
-	e.style.pointerEvents = "none";
-	setTimeout(() => e.style.pointerEvents = "auto", ms);
-}
-
 function unescapeUnicode(s) {
 	return s.replace(/\\u[\dA-Fa-f]{4}/g, match => String.fromCharCode(
 						parseInt(match.substr(2), 16)));
