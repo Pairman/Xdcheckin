@@ -84,7 +84,6 @@
 			<button onclick="g_players[0].mute()">Mute</button>
 			<button id="player0-scan-button" onclick="
 				chaoxingCheckinQrcodeWrapper(g_players[0].tag, 'player0-scanresult-div');
-				onclickCooldown(this.id);
 			" style="display: none">Scan</button>
 		</div>
 		<div id="player0-div"></div>
@@ -120,7 +119,6 @@
 			<button onclick="g_players[2].mute()">Mute</button>
 			<button id="player2-scan-button" onclick="
 				chaoxingCheckinQrcodeWrapper(g_players[2].tag, 'player2-scanresult-div');
-				onclickCooldown(this.id);
 			" style="display: none">Scan</button>
 		</div>
 		<div id="player2-div"></div>
@@ -154,7 +152,6 @@
 			<button onclick="cameraOff()">Off</button>
 			<button id="camera-scan-button" onclick="
 				chaoxingCheckinQrcodeWrapper(document.getElementById('camera-video'), 'camera-scanresult-div');
-				onclickCooldown(this.id);
 			" style="display: none">Scan</button>
 		</div>
 		<div id="camera-div" style="display: none">
