@@ -150,7 +150,7 @@ async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
 					     "Checkin error. (No image given.)";
 		return;
 	}
-	urls = await screenshot_scan(video);
+	let urls = await screenshot_scan(video);
 	if (!urls.length) {
 		document.getElementById(result_div_id).innerText =
 					 "Checkin error. (No Qrcode detected.)";
