@@ -118,8 +118,24 @@
 			<button onclick="g_players[2].stop()">Stop</button>
 			<button onclick="muteOtherPlayers(g_players[2])">Unmute</button>
 			<button onclick="g_players[2].mute()">Mute</button>
+			<button id="player2-scan-button" onclick="
+				chaoxingCheckinQrcodeWrapper(g_players[2].tag, 'player2-scanresult-div');
+				onclickCooldown(this.id);
+			" style="display: none">Scan</button>
 		</div>
 		<div id="player2-div"></div>
+		<div id="player2-checkin-captcha-div" style="display: none">
+			<div id="player2-checkin-captcha-container-div" class="captcha-container-div">
+				<img id="player2-checkin-captcha-img" class="captcha-img" alt="player2-checkin-captcha-img" src="#">
+				<img id="player2-checkin-captcha-small-img" class="captcha-small-img" alt="player2-checkin-captcha-small-img" src="#">
+			</div>
+			<div class="div-center">
+				<input id="player2-checkin-captcha-input" class="captcha-input" type="range" min="0" max="320" step="1" value="0">
+				&emsp;
+				<button id="player2-checkin-captcha-button">Verify</button>
+			</div>
+		</div>
+		<div id="player2-scanresult-div" class="scanresult-div"></div>
 
 		<div id="player3-buttons-div" class="div-center" style="display: none">
 			<B style="font-size:40px; font-family: sans-serif">StudentFull</B>
