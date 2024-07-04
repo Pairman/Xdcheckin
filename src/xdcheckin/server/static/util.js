@@ -73,7 +73,7 @@ function unescapeUnicode(s) {
 }
 
 async function qrcode_scanner_init() {
-	const scanner = await zbarWasm.getDefaultScanner();
+	let scanner = await zbarWasm.getDefaultScanner();
 	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_NONE,
 			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 0);
 	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_QRCODE,
@@ -83,10 +83,10 @@ async function qrcode_scanner_init() {
 async function screenshot_scan(video) {
 	if (video.readyState < video.HAVE_ENOUGH_DATA)
 		return [];
-	const canvas = newElement("canvas");
+	let canvas = newElement("canvas");
 	canvas.height = video.videoHeight;
 	canvas.width = video.videoWidth;
-	const ctx = canvas.getContext("2d");
+	let ctx = canvas.getContext("2d");
 	ctx.drawImage(video, 0, 0);
 	let data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	return (await zbarWasm.scanImageData(data)).map(s => s.decode());
