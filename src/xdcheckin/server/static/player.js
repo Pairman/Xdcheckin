@@ -41,6 +41,8 @@ async function resizePlayers() {
 	document.getElementById("camera-scanresult-div").style.width = `${w}px`;
 	document.getElementById("player0-scanresult-div").style.width =
 						      g_player_width = `${w}px`;
+	document.getElementById("player2-scanresult-div").style.width =
+						      g_player_width = `${w}px`;
 	let e = document.getElementById("camera-video");
 	Object.assign(e, {
 		height: `${parseInt(w * e.videoHeight / e.videoWidth)}`,
