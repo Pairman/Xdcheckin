@@ -18,7 +18,7 @@ async function cameraOn() {
 		},
 		audio: false
 	}).then(stream => {
-		let e = document.getElementById("camera-video");
+		const e = document.getElementById("camera-video");
 		e.srcObject = stream;
 		e.addEventListener("playing", () => {
 			if (!e.height)
@@ -29,7 +29,7 @@ async function cameraOn() {
 }
 
 async function cameraOff() {
-	let e = document.getElementById("camera-video");
+	const e = document.getElementById("camera-video");
 	if (!e.srcObject)
 		return;
 	e.srcObject.getTracks().forEach(track => track.stop());
@@ -38,12 +38,13 @@ async function cameraOff() {
 
 async function resizePlayers() {
 	let w = window.innerWidth;
-	document.getElementById("camera-scanresult-div").style.width = `${w}px`;
-	document.getElementById("player0-scanresult-div").style.width =
-						      g_player_width = `${w}px`;
-	document.getElementById("player2-scanresult-div").style.width =
-						      g_player_width = `${w}px`;
-	let e = document.getElementById("camera-video");
+	g_player_width = `${w}px`;
+	[
+		"camera-scanresult-div", "player0-scanresult-div",
+		"player2-scanresult-div"
+	].forEach(id =>
+		      document.getElementById(id).style.width = g_player_width);
+	const e = document.getElementById("camera-video");
 	Object.assign(e, {
 		height: `${parseInt(w * e.videoHeight / e.videoWidth)}`,
 		width: `${w}`
