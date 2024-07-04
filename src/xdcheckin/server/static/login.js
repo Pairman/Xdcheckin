@@ -10,7 +10,8 @@ async function afterLoginDuties(auto = false) {
 	});
 	[
 		"login-button", "logout-button",
-		"player0-scan-button", "camera-scan-button",
+		"player0-scan-button", "player2-scan-button",
+		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
 	].forEach(displayTag);
 	if (!auto)
@@ -23,7 +24,8 @@ async function afterLogoutDuties() {
 	hideOtherLists();
 	[
 		"login-button", "logout-button",
-		"player0-scan-button", "camera-scan-button",
+		"player0-scan-button", "player2-scan-button",
+		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
 	].forEach(displayTag);
 }
