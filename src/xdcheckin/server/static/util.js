@@ -81,6 +81,8 @@ async function qrcode_scanner_init() {
 }
 
 async function screenshot_scan(video) {
+	if (video.readyState < video.HAVE_ENOUGH_DATA)
+		return [];
 	const canvas = newElement("canvas");
 	canvas.height = video.videoHeight;
 	canvas.width = video.videoWidth;
