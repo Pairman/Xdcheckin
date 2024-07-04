@@ -1027,9 +1027,6 @@ class Chaoxing:
 		:return: Same as ``checkin_checkin_location()``.
 		"""
 		try:
-			assert (
-				"mobilelearn.chaoxing.com/widget/sign/e" in url
-			), f"Checkin failure. {'Invalid URL.', url}"
 			match = \
 			_Chaoxing_checkin_checkin_qrcode_url_regex.search(url)
 			return await self.checkin_checkin_qrcode(activity = {
