@@ -23,7 +23,7 @@ _Chaoxing_login_username_yz_regex = _compile(
 
 _Chaoxing_course_get_courses_regex1 = _compile(
 	r"Client\('(\d+)','(.*?)','(\d+).*?color3\" title=\"(.*?)\".*?\n"
-	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?", _DOTALL
+	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?|(isState)", _DOTALL
 )
 
 _Chaoxing_course_get_courses_regex2 = _compile(r", |,|，|、")
@@ -518,32 +518,27 @@ class Chaoxing:
 		res = await self.__session.get(
 			url = url, params = params, ttl = 86400
 		)
-		text = (await res.text())
-		pos = text.index("isState")
-		active = _Chaoxing_course_get_courses_regex1.findall(
-			text, endpos = pos
-		)
-		ended = _Chaoxing_course_get_courses_regex1.findall(
-			text, pos = pos
+		matches = _Chaoxing_course_get_courses_regex1.findall(
+			await res.text()
 		)
 		courses = {}
-		def _fill_courses(matches, status):
-			for match in matches:
-				teachers = \
+		status = 1
+		for match in matches:
+			if match[6]:
+				status = 0
+				continue
+			courses[match[2]] = {
+				"class_id": match[2],
+				"course_id": match[0],
+				"name": match[1],
+				"teachers": 
 				_Chaoxing_course_get_courses_regex2.split(
 					match[3]
-				)
-				courses[match[2]] = {
-					"class_id": match[2],
-					"course_id": match[0],
-					"name": match[1],
-					"teachers": teachers,
-					"status": status,
-					"time_start": match[4],
-					"time_end": match[5]
-				}
-		_fill_courses(active, 1)
-		_fill_courses(ended, 0)
+				),
+				"status": status,
+				"time_start": match[4],
+				"time_end": match[5]
+			}
 		return courses
 
 	async def course_get_course_id(

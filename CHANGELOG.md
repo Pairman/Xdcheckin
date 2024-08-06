@@ -4,6 +4,13 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.3.2] - 2024-08-06
+
+### Changed
+
+- Optimize courses fetching.
+- Update a classfier in project metadata.
+
 ## [3.3.1] - 2024-07-04
 
 ### Added
@@ -588,7 +595,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.3.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.3.2...main
+[3.3.2]: https://github.com/Pairman/Xdcheckin/compare/3.3.1...3.3.2
 [3.3.1]: https://github.com/Pairman/Xdcheckin/compare/3.2.1...3.3.1
 [3.2.1]: https://github.com/Pairman/Xdcheckin/compare/3.1.1...3.2.1
 [3.1.1]: https://github.com/Pairman/Xdcheckin/compare/3.0.2...3.1.1
