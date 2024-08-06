@@ -11,7 +11,7 @@ description = "Chaoxing Checkin Tool for XDU."
 license = {text = "GNU General Public License v3 (GPLv3)"}
 keywords = ["xdu", "xidian", "chaoxing", "livestream"]
 classifiers = [
-	"Framework :: Flask",
+	"Framework :: aiohttp",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: JavaScript",
 	"License :: OSI Approved :: GNU General Public License (GPL)",
