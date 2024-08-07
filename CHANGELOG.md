@@ -9,7 +9,7 @@ Changelog for Xdcheckin.
 ### Changed
 
 - Optimize courses fetching.
-- Update a classfier in project metadata.
+- Update a classifier in project metadata.
 
 ## [3.3.1] - 2024-07-04
 
