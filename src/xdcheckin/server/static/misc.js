@@ -1,5 +1,5 @@
 async function checkEula() {
-	let msg = "This APP provides utilities for Chaoxing check-ins and " +
+	const msg = "This APP provides utilities for Chaoxing check-ins and " +
 		  "classroom livestreams exclusively for XDUers.\n\n" +
 		  "By confirming you agree to the following terms:\n" +
 		  "    1. This APP is for study use only.\n" +
