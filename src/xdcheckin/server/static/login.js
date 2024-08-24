@@ -50,10 +50,11 @@ async function promptLogin(auto = false) {
 			return;
 	}
 	try {
-		let force = false, success = await (method ?
-				     idsLoginPrepare(username, password, auto):
-				     chaoxingLogin(username, password, force,
-						   auto));
+		const success = await (method ?
+				       idsLoginPrepare(username, password,
+						       auto) :
+				       chaoxingLogin(username, password, false,
+						     auto));
 		assert(success === true, success);
 	}
 	catch (err) {
@@ -78,21 +79,18 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 		g_logged_in = false;
 	}
 	let ret = false;
-	let cookies;
-	if (force)
-		cookies = localStorage.getItem("cookies");
-	else
-		cookies = username != localStorage.getItem("username") ||
-			  password != localStorage.getItem("password") ?
-			  "" : localStorage.getItem("cookies");
+	const cookies = force ? localStorage.getItem("cookies") :
+				(username != localStorage.getItem("username") ||
+				 password != localStorage.getItem("password") ?
+				 "" : localStorage.getItem("cookies"));
 	try {
-		let res = await post("/chaoxing/login", {
+		const res = await post("/chaoxing/login", {
 			"username": username,
 			"password": password,
 			"cookies": cookies
 		});
 		assert(res.status_code == 200, "Backend error.");
-		let data = res.json();
+		const data = res.json();
 		assert(!data.err, data.err);
 		localStorage.setItem("login_method", "chaoxing");
 		localStorage.setItem("username", username);
@@ -118,7 +116,7 @@ async function idsLoginPrepare(username, password, auto = false) {
 		return;
 	g_logining = true;
 	let ret = g_logged_in = false;
-	let cookies = username != localStorage.getItem("username") ||
+	const cookies = username != localStorage.getItem("username") ||
 		      password != localStorage.getItem("password") ?
 		      "" : localStorage.getItem("cookies");
 	try {
@@ -144,14 +142,14 @@ async function idsLoginPrepare(username, password, auto = false) {
 }
 
 async function idsLoginCaptcha(username, password, auto = false) {
-	let res = await post("/ids/login_prepare");
+	const res = await post("/ids/login_prepare");
 	assert(res.status_code == 200, "Backend error.");
-	let data = res.json();
+	const data = res.json();
 	assert(!data.err, data.err);
-	let b = document.getElementById("login-button");
-	let s = document.getElementById("ids-login-captcha-input");
-	let c = document.getElementById("ids-login-captcha-container-div");
-	let s_img = document.getElementById("ids-login-captcha-small-img");
+	const b = document.getElementById("login-button");
+	const s = document.getElementById("ids-login-captcha-input");
+	const c = document.getElementById("ids-login-captcha-container-div");
+	const s_img = document.getElementById("ids-login-captcha-small-img");
 	s.oninput = () => s_img.style.left =
 		     `${(c.offsetWidth - s_img.offsetWidth) * s.value / 280}px`;
 	document.getElementById("ids-login-captcha-button").onclick = () => {
@@ -167,7 +165,7 @@ async function idsLoginCaptcha(username, password, auto = false) {
 		});
 		displayTag("ids-login-captcha-div");
 	};
-	let img = document.getElementById("ids-login-captcha-img");
+	const img = document.getElementById("ids-login-captcha-img");
 	img.onload = () => displayTag("ids-login-captcha-div");
 	s_img.style.left = `${s.value = 0}px`;
 	s_img.src = `data:image/png;base64,${data.captcha.small_img_src}`;
@@ -180,13 +178,13 @@ async function idsLoginFinish(username, password, vcode) {
 		return;
 	let ret = false;
 	try {
-		let res = await post("/ids/login_finish", {
+		const res = await post("/ids/login_finish", {
 			"username": username,
 			"password": password,
 			"vcode": vcode
 		});
 		assert(res.status_code == 200, "Backend error.");
-		let data = res.json();
+		const data = res.json();
 		assert(!data.err, data.err);
 		localStorage.setItem("login_method", "ids");
 		localStorage.setItem("username", username);
