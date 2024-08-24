@@ -15,7 +15,7 @@ function isValidUrl(url) {
 async function post(url = "", data = {}) {
 	let status_code = 404, text = "";
 	try {
-		let res = await fetch(url, {
+		const res = await fetch(url, {
 			method: "POST",
 			body: JSON.stringify(data)
 		});
@@ -36,14 +36,12 @@ async function post(url = "", data = {}) {
 }
 
 function newElement(tag, properties = {}) {
-	let e;
-	if (typeof(tag) != "object")
-		e = document.createElement(tag);
+	const e = (typeof(tag) != "object") ? document.createElement(tag) : tag;
 	return Object.assign(e, properties);
 }
 
 async function displayTag(e_id) {
-	let e = document.getElementById(e_id);
+	const e = document.getElementById(e_id);
 	e.style.display = e.style.display == "none" ? "" : "none";
 }
 
@@ -67,7 +65,7 @@ function unescapeUnicode(s) {
 }
 
 async function qrcode_scanner_init() {
-	let scanner = await zbarWasm.getDefaultScanner();
+	const scanner = await zbarWasm.getDefaultScanner();
 	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_NONE,
 			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 0);
 	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_QRCODE,
@@ -77,11 +75,11 @@ async function qrcode_scanner_init() {
 async function screenshot_scan(video) {
 	if (video.readyState < video.HAVE_ENOUGH_DATA)
 		return [];
-	let canvas = newElement("canvas");
+	const canvas = newElement("canvas");
 	canvas.height = video.videoHeight;
 	canvas.width = video.videoWidth;
-	let ctx = canvas.getContext("2d");
+	const ctx = canvas.getContext("2d");
 	ctx.drawImage(video, 0, 0);
-	let data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
 	return (await zbarWasm.scanImageData(data)).map(s => s.decode());
 }
