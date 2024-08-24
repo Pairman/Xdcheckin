@@ -1,7 +1,7 @@
 async function enableCamera() {
 	if (!navigator.mediaDevices)
 		return;
-	let devices = await navigator.mediaDevices.enumerateDevices();
+	const devices = await navigator.mediaDevices.enumerateDevices();
 	if (!devices.filter(v => v.kind == "videoinput").length)
 		return;
 	[
@@ -37,7 +37,7 @@ async function cameraOff() {
 }
 
 async function resizePlayers() {
-	let w = window.innerWidth;
+	const w = window.innerWidth;
 	g_player_width = `${w}px`;
 	[
 		"camera-scanresult-div", "player0-scanresult-div",
