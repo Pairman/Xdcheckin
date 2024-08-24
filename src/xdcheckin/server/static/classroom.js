@@ -3,9 +3,9 @@ async function setClassroom(url, name = "Unknown") {
 							   `Xdcheckin: ${name}`;
 	localStorage.setItem("classroom_name", name);
 	localStorage.setItem("classroom", url);
-	let params = new URLSearchParams(
+	const params = new URLSearchParams(
 				       decodeURIComponent(new URL(url).search));
-	let videos = JSON.parse(params.get("info")).videoPath;
+	const videos = JSON.parse(params.get("info")).videoPath;
 	g_player_sources[0] = videos.pptVideo || "";
 	g_player_sources[1] = videos.teacherTrack || "";
 	g_player_sources[2] = videos.teacherFull || "";
@@ -14,13 +14,13 @@ async function setClassroom(url, name = "Unknown") {
 }
 
 async function randClassroom() {
-	let b = Math.floor(Math.random() * g_buildings.length);
-	let c = Math.floor(Math.random() * g_buildings[b].length);
+	const b = Math.floor(Math.random() * g_buildings.length);
+	const c = Math.floor(Math.random() * g_buildings[b].length);
 	setClassroom(g_buildings[b][c], g_building_names[b][c]);
 }
 
 async function inputClassroom() {
-	let input = prompt("Input livestream URL to play:");
+	const input = prompt("Input livestream URL to play:");
 	if (input === null)
 		return;
 	if (isValidUrl(input))
@@ -30,7 +30,7 @@ async function inputClassroom() {
 }
 
 async function listClassrooms() {
-	let e = document.getElementById("classrooms-list-div");
+	const e = document.getElementById("classrooms-list-div");
 	if (!e)
 		return;
 	e.replaceChildren(newElement("button", {
@@ -51,8 +51,8 @@ async function listClassrooms() {
 		e.appendChild(newElement("div", {
 			innerText: `${building_name}:`
 		}));
-		let classrooms = [], classroom_names = [];
-		let building = g_classroom_urls[building_name];
+		const classrooms = [], classroom_names = [];
+		const building = g_classroom_urls[building_name];
 		for (let c_name in building) {
 			e.appendChild(newElement("button", {
 				onclick: () => setClassroom(building[c_name],
@@ -70,22 +70,22 @@ async function listClassrooms() {
 async function extractClassroom() {
 	if (!g_logged_in)
 		return alert("Login to use this feature.");
-	let input = prompt("Input liveId or URL to extract livestream URL:");
+	const input = prompt("Input liveId or URL to extract livestream URL:");
 	if (input === null)
 		return;
 	let live_id = input;
 	if (isValidUrl(input)) {
-		let params = new URLSearchParams(
+		const params = new URLSearchParams(
 				     decodeURIComponent(new URL(input).search));
 		live_id = JSON.parse(params.get("liveId"));
 	}
 	else if (input === "" || isNaN(input))
 		return alert("Invalid input.");
 	try {
-		let res = await post("/newesxidian/extract_url", live_id);
-		let params = new URLSearchParams(
+		const res = await post("/newesxidian/extract_url", live_id);
+		const params = new URLSearchParams(
 				  decodeURIComponent(new URL(res.text).search));
-		let info = JSON.parse(params.get("info"));
+		const info = JSON.parse(params.get("info"));
 		assert(info.type == "1" && Object.keys(info.videoPath).length);
 		prompt("Extracted URL:", res.text);
 	}
