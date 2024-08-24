@@ -26,7 +26,7 @@ async function inputLocation() {
 }
 
 async function listLocations() {
-	let e = document.getElementById("locations-list-div");
+	const e = document.getElementById("locations-list-div");
 	e.appendChild(newElement("button", {
 		innerText: "Input",
 		onclick: inputLocation
@@ -38,7 +38,7 @@ async function listLocations() {
 						   buildingName),
 		}));
 	}
-	let loc = localStorage.getItem('location_');
+	const loc = localStorage.getItem('location_');
 	if (!loc) {
 		setLocation(g_locations["B楼"], "B楼");
 	}
