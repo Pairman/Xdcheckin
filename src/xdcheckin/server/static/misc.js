@@ -1,6 +1,6 @@
 async function checkEula() {
-	const msg = "This APP provides utilities for Chaoxing check-ins and " +
-		  "classroom livestreams exclusively for XDUers.\n\n" +
+	const msg = "This APP provides utilities for Chaoxing check-ins " +
+		  "and classroom livestreams exclusively for XDUers.\n\n" +
 		  "By confirming you agree to the following terms:\n" +
 		  "    1. This APP is for study use only.\n" +
 		  "    2. This work comes with absolutely no warranty.\n\n" +
@@ -10,9 +10,9 @@ async function checkEula() {
 }
 
 async function xdcheckinCheckUpdates() {
-	let ver = (await post("/xdcheckin/get_version")).text;
+	const ver = (await post("/xdcheckin/get_version")).text;
 	document.getElementById("footer-link-a").innerText += ` ${ver}`;
-	let update = (await post("/xdcheckin/get_update")).json();
+	const update = (await post("/xdcheckin/get_update")).json();
 	if (update && update.updatable)
 		document.getElementById("xdcheckin-update-div").innerHTML =
 			`<a href='${update.html_url}'>` +
