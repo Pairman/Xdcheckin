@@ -8,7 +8,7 @@ globalThis.g_courses = {};
 globalThis.g_buildings = [];
 globalThis.g_building_names = [];
 
-/* globalThis.g_classroom_urls = {} */
+/* globalThis.g_classroom_urls = {}; */
 globalThis.g_players = [undefined, undefined, undefined, undefined];
 globalThis.g_player_sources = ["", "", "", ""];
 globalThis.g_player_width = "";
