@@ -67,15 +67,11 @@ async function initPlayers() {
 				isLive: true,
 				width: globalThis.g_player_width,
 				height: globalThis.g_player_height,
+				source: globalThis.g_player_sources[i],
 				playsinline: true,
-				source: globalThis.g_player_sources[i]
-			}, () => {
-				player.mute();
-				if (i)
-					player.stop();
-				else
-					player.play();
-			});
+				autoplay: i == 0,
+				mute: true
+			}, () => {});
 	});
 }
 
