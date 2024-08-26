@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Xdcheckin"
-version = "3.3.2"
+version = "3.3.3"
 authors = [{name = "Pairman", email = "pairmanxlr@gmail.com"}]
 readme = "README.md"
 description = "Chaoxing Checkin Tool for XDU."
@@ -209,8 +209,7 @@ requires = [
 ]
 
 build_gradle_dependencies = [
-	"com.google.android.material:material:1.11.0",
-	# "androidx.appcompat:appcompat:1.0.2",
+	"androidx.appcompat:appcompat:1.0.2",
 ]
 
 build_gradle_extra_content = """
