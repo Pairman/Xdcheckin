@@ -6,17 +6,18 @@ async function setClassroom(url, name = "Unknown") {
 	const params = new URLSearchParams(
 				       decodeURIComponent(new URL(url).search));
 	const videos = JSON.parse(params.get("info")).videoPath;
-	g_player_sources[0] = videos.pptVideo || "";
-	g_player_sources[1] = videos.teacherTrack || "";
-	g_player_sources[2] = videos.teacherFull || "";
-	g_player_sources[3] = videos.studentFull || "";
+	globalThis.g_player_sources[0] = videos.pptVideo || "";
+	globalThis.g_player_sources[1] = videos.teacherTrack || "";
+	globalThis.g_player_sources[2] = videos.teacherFull || "";
+	globalThis.g_player_sources[3] = videos.studentFull || "";
 	initPlayers();
 }
 
 async function randClassroom() {
-	const b = Math.floor(Math.random() * g_buildings.length);
-	const c = Math.floor(Math.random() * g_buildings[b].length);
-	setClassroom(g_buildings[b][c], g_building_names[b][c]);
+	const b = Math.floor(Math.random() * globalThis.g_buildings.length);
+	const c = Math.floor(Math.random() * globalThis.g_buildings[b].length);
+	setClassroom(globalThis.g_buildings[b][c],
+		     globalThis.g_building_names[b][c]);
 }
 
 async function inputClassroom() {
@@ -45,14 +46,14 @@ async function listClassrooms() {
 		onclick: randClassroom,
 		innerText: "Random"
 	}));
-	g_buildings = [];
-	g_building_names = [];
-	for (let building_name in g_classroom_urls) {
+	globalThis.g_buildings = [];
+	globalThis.g_building_names = [];
+	for (let building_name in globalThis.g_classroom_urls) {
 		e.appendChild(newElement("div", {
 			innerText: `${building_name}:`
 		}));
 		const classrooms = [], classroom_names = [];
-		const building = g_classroom_urls[building_name];
+		const building = globalThis.g_classroom_urls[building_name];
 		for (let c_name in building) {
 			e.appendChild(newElement("button", {
 				onclick: () => setClassroom(building[c_name],
@@ -62,13 +63,13 @@ async function listClassrooms() {
 			classrooms.push(building[c_name]);
 			classroom_names.push(c_name);
 		}
-		g_buildings.push(classrooms);
-		g_building_names.push(classroom_names);
+		globalThis.g_buildings.push(classrooms);
+		globalThis.g_building_names.push(classroom_names);
 	}
 }
 
 async function extractClassroom() {
-	if (!g_logged_in)
+	if (!globalThis.g_logged_in)
 		return alert("Login to use this feature.");
 	const input = prompt("Input liveId or URL to extract livestream URL:");
 	if (input === null)

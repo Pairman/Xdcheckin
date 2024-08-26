@@ -10,7 +10,7 @@ async function getActivities() {
 	for (let class_id in activities) {
 		const course_activities = activities[class_id];
 		e.appendChild(newElement("div", {
-			innerText: `${g_courses[class_id].name}: `
+			innerText: `${globalThis.g_courses[class_id].name}: `
 		}));
 		course_activities.forEach(a => {
 			const type = a.type == "2" ? `Qrcode` : `Location`;
@@ -108,7 +108,7 @@ async function chaoxingCheckinLocation(activity) {
 	document.getElementById(`activities-checkin-captcha-div`).style.display
 								       = "none";
 	const res = await post("/chaoxing/checkin_checkin_location", {
-		"location": g_location, "activity": activity
+		"location": globalThis.g_location, "activity": activity
 	});
 	const data = res.json();
 	if (res.status_code != 200) {
@@ -129,7 +129,7 @@ async function chaoxingCheckinQrcode(url, result_div_id) {
 	document.getElementById(`${result_div_id.split('-')[0]}-checkin-` +
 				`captcha-div`).style.display = "none";
 	const res = await post("/chaoxing/checkin_checkin_qrcode_url", {
-		"location": g_location, "url": url
+		"location": globalThis.g_location, "url": url
 	});
 	const data = res.json();
 	document.getElementById(result_div_id).innerText =

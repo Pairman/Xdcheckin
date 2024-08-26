@@ -38,36 +38,37 @@ async function cameraOff() {
 
 async function resizePlayers() {
 	const w = window.innerWidth;
-	g_player_width = `${w}px`;
+	globalThis.g_player_width = `${w}px`;
 	[
 		"camera-scanresult-div", "player0-scanresult-div",
 		"player2-scanresult-div"
-	].forEach(id =>
-		      document.getElementById(id).style.width = g_player_width);
+	].forEach(id => document.getElementById(id).style.width =
+						     globalThis.g_player_width);
 	const e = document.getElementById("camera-video");
 	Object.assign(e, {
 		height: `${parseInt(w * e.videoHeight / e.videoWidth)}`,
 		width: `${w}`
 	});
-	g_player_height = `${parseInt(w / 16 * 9)}px`;
-	g_players.forEach(player => {
+	globalThis.g_player_height = `${parseInt(w / 16 * 9)}px`;
+	globalThis.g_players.forEach(player => {
 		if (player)
-			player.setPlayerSize(g_player_width, g_player_height);
+			player.setPlayerSize(globalThis.g_player_width,
+					     globalThis.g_player_height);
 	});
 }
 
 async function initPlayers() {
-	g_players.forEach((player, i) => {
+	globalThis.g_players.forEach((player, i) => {
 		if (player)
 			player.dispose();
-		if (isValidUrl(g_player_sources[i]))
-			player = g_players[i] = new Aliplayer({
+		if (isValidUrl(globalThis.g_player_sources[i]))
+			player = globalThis.g_players[i] = new Aliplayer({
 				id: `player${i}-div`,
 				isLive: true,
-				width: g_player_width,
-				height: g_player_height,
+				width: globalThis.g_player_width,
+				height: globalThis.g_player_height,
 				playsinline: true,
-				source: g_player_sources[i]
+				source: globalThis.g_player_sources[i]
 			}, () => {
 				player.mute();
 				if (i)
@@ -97,7 +98,7 @@ async function enablePlayers() {
 }
 
 async function muteOtherPlayers(player) {
-	g_players.forEach(v => {
+	globalThis.g_players.forEach(v => {
 		if (v != player)
 			v.mute();
 	});

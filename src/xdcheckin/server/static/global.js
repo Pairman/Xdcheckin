@@ -1,15 +1,15 @@
-/* var g_locations = {}; */
-var g_location = {};
+/* globalThis.g_locations = {}; */
+globalThis.g_location = {};
 
-var g_logining = false;
-var g_logged_in = false;
-var g_courses = {};
+globalThis.g_logging_in = false;
+globalThis.g_logged_in = false;
+globalThis.g_courses = {};
 
-var g_buildings = [];
-var g_building_names = [];
+globalThis.g_buildings = [];
+globalThis.g_building_names = [];
 
-/* var g_classroom_urls = {} */
-var g_players = [undefined, undefined, undefined, undefined];
-var g_player_sources = ["", "", "", ""];
-var g_player_width = "";
-var g_player_height = "";
+/* globalThis.g_classroom_urls = {} */
+globalThis.g_players = [undefined, undefined, undefined, undefined];
+globalThis.g_player_sources = ["", "", "", ""];
+globalThis.g_player_width = "";
+globalThis.g_player_height = "";

@@ -1,10 +1,11 @@
 async function setLocation(loc, name) {
-	g_location = {
+	globalThis.g_location = {
 		"latitude": loc.latitude,
 		"longitude": loc.longitude,
 		"address": loc.address
 	};
-	localStorage.setItem("location_", JSON.stringify(g_location));
+	localStorage.setItem("location_",
+			     JSON.stringify(globalThis.g_location));
 	localStorage.setItem("location_name", name);
 	document.getElementById("location-current-div").innerText =
 						     `Current location ${name}`;
@@ -31,16 +32,17 @@ async function listLocations() {
 		innerText: "Input",
 		onclick: inputLocation
 	}));
-	for (let buildingName in g_locations) {
+	for (let buildingName in globalThis.g_locations) {
 		e.appendChild(newElement("button", {
 			innerText: buildingName,
-			onclick: () => setLocation(g_locations[buildingName],
-						   buildingName),
+			onclick: () => setLocation(
+					   globalThis.g_locations[buildingName],
+					   buildingName),
 		}));
 	}
 	const loc = localStorage.getItem('location_');
 	if (!loc) {
-		setLocation(g_locations["B楼"], "B楼");
+		setLocation(globalThis.g_locations["B楼"], "B楼");
 	}
 	else
 		setLocation(JSON.parse(loc),
