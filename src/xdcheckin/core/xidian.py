@@ -15,25 +15,35 @@ _IDSSession_login_username_prepare_regex = _compile(
 )
 
 class IDSSession:
-	config = {
+	__config = {
 		"requests_headers": {
 			"User-Agent":
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
 				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
 				"obile Safari/537.36"
-		}
+		},
+		"requests_cache_enabled": True
 	}
 	__async_ctxmgr = __session = __secrets = __service = None
 
-	def __init__(self, service: str = "", type = "userNameLogin"):
+	def __init__(
+			self, service: str = "", type = "userNameLogin",
+			config: dict = {}
+		):
 		"""Initialize an IDS Session.
 		:param service: The SSO service for redirection.
 		:param type: Login type. ``"userNameLogin"`` by default for \
 		username and ``"dynamicLogin"`` for phone number.
+		:param config: Configurations.
+		:return: None
 		"""
 		if not self.__async_ctxmgr is None:
 			return
-		self.__session = _CachedSession()
+		self.__config.update(config)
+		self.__session = _CachedSession(
+			headers = self.__config["requests_headers"],
+			cache_enabled = self.__config["requests_cache_enabled"]
+		)
 		self.__secrets, self.__service = {"login_type": type}, service
 
 	async def __aenter__(self):
@@ -132,7 +142,10 @@ class IDSSession:
 		if res.status == 200:
 			ret.update({
 				"cookies": self.__session.session_cookies,
-				"logged_in": True
+				"logged_in": "CASTGC" in
+				self.__session.session_cookies.filter_cookies(
+					"https://ids.xidian.edu.cn/authserver"
+				)
 			})
 		return ret
 
@@ -175,25 +188,10 @@ class IDSSession:
 		if res.status == 200:
 			ret.update({
 				"cookies": self.__session.session_cookies,
-				"logged_in": True
-			})
-		return ret
-
-	async def login_cookies(self, account: dict = {"cookies": None}):
-		"""Login with cookies.
-		:param account: Cookies.
-		:return: Cookies and login state.
-		"""
-		url = "https://ids.xidian.edu.cn/personalInfo/personCenter/index.html"
-		res = await self.__session.get(
-			url = url, cookies = account["cookies"],
-			allow_redirects = False
-		)
-		ret = {"cookies": None, "logged_in": False}
-		if res.status == 302:
-			ret.update({
-				"cookies": account["cookies"],
-				"logged_in": True
+				"logged_in": "CASTGC" in
+				self.__session.session_cookies.filter_cookies(
+					"https://ids.xidian.edu.cn/authserver"
+				)
 			})
 		return ret
 
