@@ -92,7 +92,7 @@ async function chaoxingLogin(username, password, force = false, auto = false) {
 		assert(res.status_code == 200, "Backend error.");
 		const data = res.json();
 		assert(!data.err, data.err);
-		assert(!data.cookies, "Backend login failed.");
+		assert(data.cookies, "Backend login failed.");
 		localStorage.setItem("login_method", "chaoxing");
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
@@ -187,7 +187,7 @@ async function idsLoginFinish(username, password, vcode) {
 		assert(res.status_code == 200, "Backend error.");
 		const data = res.json();
 		assert(!data.err, data.err);
-		assert(!data.cookies, "Backend login failed.");
+		assert(data.cookies, "Backend login failed.");
 		localStorage.setItem("login_method", "ids");
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
