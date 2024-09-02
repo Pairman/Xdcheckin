@@ -91,8 +91,12 @@ async function checkEula() {
 		  "    1. This APP is for study use only.\n" +
 		  "    2. This work comes with absolutely no warranty.\n\n" +
 		  "You have been warned.";
-	if (!localStorage.getItem("xdcheckin_eula") && confirm(msg))
-		localStorage.setItem("xdcheckin_eula", "1");
+	if (!localStorage.getItem("xdcheckin_eula"))
+		if (confirm(msg))
+			localStorage.setItem("xdcheckin_eula", "1");
+		else
+			document.getElementById("main-body").style.display =
+									 "none";
 }
 
 async function xdcheckinCheckUpdates() {

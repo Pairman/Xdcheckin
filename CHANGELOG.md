@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.4.3] - 2024-09-02
+
+### Fixed
+
+- Fix EULA dialog ineffective.
+
 ## [3.4.2] - 2024-09-01
 
 ### Fixed
@@ -617,7 +623,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...main
+[3.4.3]: https://github.com/Pairman/Xdcheckin/compare/3.4.2...3.4.3
 [3.4.2]: https://github.com/Pairman/Xdcheckin/compare/3.4.1...3.4.2
 [3.4.1]: https://github.com/Pairman/Xdcheckin/compare/3.3.3...3.4.1
 [3.3.3]: https://github.com/Pairman/Xdcheckin/compare/3.3.2...3.3.3
