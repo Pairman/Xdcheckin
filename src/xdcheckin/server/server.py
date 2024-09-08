@@ -97,10 +97,9 @@ async def _xdcheckin_get_update(req):
 @server_routes.post("/ids/login_prepare")
 async def _ids_login_prepare(req):
 	try:
-		ids = _IDSSession(
+		ids = await _IDSSession(
 			service = "https://learning.xidian.edu.cn/cassso/xidian"
-		)
-		await ids.__aenter__()
+		).__aenter__()
 		ses = await _get_session(req)
 		ses.setdefault("uuid", f"{_uuid4()}")
 		req.app["config"]["sessions"].setdefault(
@@ -162,12 +161,11 @@ async def _chaoxing_login(req, data = None):
 			"chaoxing_course_get_activities_courses_limit": 36,
 			"chaoxing_checkin_location_address_override_maxlen": 13
 		}
-		cx = _Chaoxing(
+		cx = await _Chaoxing(
 			username = username, password = password,
 			cookies = _loads(cookies) if cookies else None,
 			config = config
-		)
-		await cx.__aenter__()
+		).__aenter__()
 		assert cx.logged_in, "Chaoxing login failed."
 		ses = await _get_session(req)
 		ses.setdefault("uuid", f"{_uuid4()}")
