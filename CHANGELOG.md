@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.4.6] - 2024-09-12
+
+### Removed
+
+- (Module) Remove unused debug messages.
+
 ## [3.4.5] - 2024-09-12
 
 ### Added
@@ -637,7 +643,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.6...main
+[3.4.6]: https://github.com/Pairman/Xdcheckin/compare/3.4.5...3.4.6
 [3.4.5]: https://github.com/Pairman/Xdcheckin/compare/3.4.4...3.4.5
 [3.4.4]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...3.4.4
 [3.4.3]: https://github.com/Pairman/Xdcheckin/compare/3.4.2...3.4.3
