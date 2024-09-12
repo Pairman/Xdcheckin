@@ -497,7 +497,7 @@ class Chaoxing:
 				"time": {
 					"period_max": f"{details['maxLength']}",
 					"timetable":
-					details["lessonTimeConfigArray"][1 : -1]
+					details["lessonTimeConfigArray"][ : -1]
 				}
 			}, "lessons": {}
 		}
