@@ -10,6 +10,7 @@ from math import trunc as _trunc
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
+from uuid import uuid4 as _uuid4
 from xdcheckin.util.captcha import (
 	chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
 )
@@ -54,7 +55,8 @@ class Chaoxing:
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
 				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
 				"obile Safari/537.36 com.chaoxing.mobile/ChaoXi"
-				"ngStudy_3_6.1.0_android_phone_906_100"
+				"ngStudy_3_6.1.0_android_phone_906_100 "
+				f'(@Kalimdor)_{_uuid4().hex}'
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_course_get_activities_courses_limit": 32,
