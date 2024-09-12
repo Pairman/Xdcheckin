@@ -4,6 +4,13 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.4.4] - 2024-09-12
+
+### Fixed
+
+- (Module) Fix curriculum timetable being truncated.
+- (Webpage) Fix curriculum table not shown.
+
 ## [3.4.3] - 2024-09-02
 
 ### Fixed
@@ -623,7 +630,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.4...main
+[3.4.4]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...3.4.4
 [3.4.3]: https://github.com/Pairman/Xdcheckin/compare/3.4.2...3.4.3
 [3.4.2]: https://github.com/Pairman/Xdcheckin/compare/3.4.1...3.4.2
 [3.4.1]: https://github.com/Pairman/Xdcheckin/compare/3.3.3...3.4.1
