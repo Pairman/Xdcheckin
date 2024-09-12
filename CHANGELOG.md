@@ -4,6 +4,13 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.4.5] - 2024-09-12
+
+### Added
+
+- Added mechanisms against anti-mock-location detection.
+- (Module) Add ```xdcheckin.Chaoxing.name``` property for student name.
+
 ## [3.4.4] - 2024-09-12
 
 ### Fixed
@@ -630,7 +637,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.4...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.5...main
+[3.4.5]: https://github.com/Pairman/Xdcheckin/compare/3.4.4...3.4.5
 [3.4.4]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...3.4.4
 [3.4.3]: https://github.com/Pairman/Xdcheckin/compare/3.4.2...3.4.3
 [3.4.2]: https://github.com/Pairman/Xdcheckin/compare/3.4.1...3.4.2
