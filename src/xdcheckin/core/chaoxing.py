@@ -10,38 +10,32 @@ from math import trunc as _trunc
 from random import uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
-from uuid import uuid4 as _uuid4
 from xdcheckin.util.captcha import (
 	chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
 )
-from xdcheckin.util.encryption import encrypt_aes as _encrypt_aes
+from xdcheckin.util.encryption import (
+	encrypt_aes as _encrypt_aes,
+	chaoxing_get_identifier as _chaoxing_get_identifier,
+	chaoxing_get_devicecode as _chaoxing_get_devicecode
+)
 from xdcheckin.util.session import CachedSession as _CachedSession
 from xdcheckin.util.time import strftime as _strftime
 
-_Chaoxing_login_username_yz_regex = _compile(
-	r"enc.*?([0-9a-f]{32})", _DOTALL
-)
-
+_Chaoxing_login_username_yz_regex = _compile(r"enc.*?([0-9a-f]{32})", _DOTALL)
 _Chaoxing_course_get_courses_regex1 = _compile(
 	r"Client\('(\d+)','(.*?)','(\d+).*?color3\" title=\"(.*?)\".*?\n"
 	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?|(isState)", _DOTALL
 )
-
 _Chaoxing_course_get_courses_regex2 = _compile(r", |,|，|、")
-
 _Chaoxing_captcha_get_captcha_regex = _compile(r"t\":(\d+)")
-
 _Chaoxing_checkin_do_analysis_regex = _compile(r"([0-9a-f]{32})")
-
 _Chaoxing_checkin_do_presign_regex = _compile(
 	r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\""
 	r".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" "
 	r"value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?.*?"
 	r"captchaId: '([0-9A-Za-z]{32})|(zsign_success)", _DOTALL
 )
-
 _Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
-
 _Chaoxing_checkin_checkin_qrcode_url_regex = _compile(
 	r"id=(\d+).*?([0-9A-F]{32})"
 )
@@ -55,8 +49,7 @@ class Chaoxing:
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
 				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
 				"obile Safari/537.36 com.chaoxing.mobile/ChaoXi"
-				"ngStudy_3_6.1.0_android_phone_906_100 "
-				f'(@Kalimdor)_{_uuid4().hex}'
+				"ngStudy_3_6.1.0_android_phone_906_100"
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_course_get_activities_courses_limit": 32,
@@ -64,9 +57,10 @@ class Chaoxing:
 		"chaoxing_checkin_location_address_override_maxlen": 0,
 		"chaoxing_checkin_location_randomness": True
 	}
-	__async_ctxmgr = __session = __account = __cookies = None
+	__async_ctxmgr = __session = __secrets = __cookies = None
 	__courses = {}
 	__fid = __uid = "0"
+	__name = ""
 	__logged_in = False
 
 	def __init__(
@@ -92,7 +86,7 @@ class Chaoxing:
 			headers = self.__config["requests_headers"],
 			cache_enabled = self.__config["requests_cache_enabled"]
 		)
-		self.__account = {
+		self.__secrets = {
 			"username": username, "password": password,
 			"cookies": cookies
 		}
@@ -102,11 +96,11 @@ class Chaoxing:
 			return self
 		self.__async_ctxmgr = True
 		await self.__session.__aenter__()
-		username, password, cookies = self.__account.values()
+		username, password, cookies = self.__secrets.values()
 		if cookies:
-			self.name, cookies, self.__logged_in = (
+			self.__name, cookies, self.__logged_in = (
 				await self.login_cookies(
-					account = self.__account
+					account = self.__secrets
 				)
 			).values()
 		funcs = (
@@ -117,24 +111,30 @@ class Chaoxing:
 		)
 		if not self.__logged_in and username and password:
 			for f in funcs:
-				self.name, cookies, self.__logged_in = (await f(
-					account = self.__account
+				self.__name, cookies, self.__logged_in = (await f(
+					account = self.__secrets
 				)).values()
 				if self.__logged_in:
 					break
-		if self.__logged_in:
-			if "fid" in cookies:
-				self.__fid = cookies["fid"].value
-			self.__cookies = self.__session.cookies = cookies
-			self.__uid = cookies["UID"].value
-			self.__courses = await self.course_get_courses()
+		if not self.logged_in:
+			return self
+		if "fid" in cookies:
+			self.__fid = cookies["fid"].value
+		self.__cookies = self.__session.cookies = cookies
+		self.__uid = cookies["UID"].value
+		ident = _chaoxing_get_identifier(self.__uid)
+		self.__session.headers["User-Agent"] += f" (@Kalimdor)_{ident}"
+		self.__secrets["device_code"] = _chaoxing_get_devicecode(ident)
+		print(self.__session.headers)
+		print(self.__secrets)
+		self.__courses = await self.course_get_courses()
 		return self
 
 	async def __aexit__(self, *args, **kwargs):
 		if not self.__async_ctxmgr:
 			return
 		await self.__session.__aexit__(*args, **kwargs)
-		self.__account = None
+		self.__secrets = None
 		self.__fid = self.__uid = "0"
 		self.__courses = {}
 		self.__logged_in = False
@@ -151,6 +151,10 @@ class Chaoxing:
 	@property
 	def uid(self):
 		return self.__uid
+
+	@property
+	def name(self):
+		return self.__name
 
 	@property
 	def courses(self):
@@ -874,14 +878,14 @@ class Chaoxing:
 			params = old_params
 		else:
 			params = {
-				"name": "",
-				"uid": self.__uid, "fid": self.__fid,
+				"name": "", "uid": self.__uid, "fid": self.__fid,
 				"activeId": activity["active_id"],
 				"enc": activity.get("enc", ""),
 				"enc2": "", "address": "", "latitude": -1,
 				"longitude": -1, "location": "", "ifTiJiao": 0,
 				"appType": 15, "clientip": "", "validate": "",
-				"deviceCode": "", "vpProbability": -1, "vpStrategy": ""
+				"deviceCode": self.__secrets["device_code"],
+				"vpProbability": -1, "vpStrategy": ""
 			}
 			if activity["type"] == "4":
 				params.update({
