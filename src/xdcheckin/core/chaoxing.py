@@ -192,7 +192,7 @@ class Chaoxing:
 			"captchaId": captcha["captcha_id"],
 			"captchaKey": captcha_key,
 			"token": token,
-			"type": "slide", "version": "1.1.16",
+			"type": "slide", "version": "1.1.20",
 			"referer": "https://mobilelearn.chaoxing.com",
 			"_": _trunc(_time() * 1000)
 		}
@@ -222,7 +222,7 @@ class Chaoxing:
 			"token": captcha["token"],
 			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
 			"type": "slide", "coordinate": "[]",
-			"version": "1.1.16", "runEnv": 10,
+			"version": "1.1.20", "runEnv": 10,
 			"_": _trunc(_time() * 1000)
 		}
 		res = await self.__session.get(
