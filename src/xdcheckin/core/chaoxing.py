@@ -125,8 +125,6 @@ class Chaoxing:
 		ident = _chaoxing_get_identifier(self.__uid)
 		self.__session.headers["User-Agent"] += f" (@Kalimdor)_{ident}"
 		self.__secrets["device_code"] = _chaoxing_get_devicecode(ident)
-		print(self.__session.headers)
-		print(self.__secrets)
 		self.__courses = await self.course_get_courses()
 		return self
 
