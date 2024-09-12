@@ -878,7 +878,8 @@ class Chaoxing:
 				"enc": activity.get("enc", ""),
 				"enc2": "", "address": "", "latitude": -1,
 				"longitude": -1, "location": "", "ifTiJiao": 0,
-				"appType": 15, "clientip": "", "validate": ""
+				"appType": 15, "clientip": "", "validate": "",
+				"deviceCode": "", "vpProbability": -1, "vpStrategy": ""
 			}
 			if activity["type"] == "4":
 				params.update({
