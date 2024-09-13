@@ -682,11 +682,11 @@ class Chaoxing:
 				continue
 			activities.append({
 				"active_id": f"{activity['id']}",
+				"type": f"{details['otherId']}",
 				"name": activity["nameOne"],
 				"time_start": details["starttimeStr"],
-				"time_left": activity["nameFour"],
-				"type": f"{details['otherId']}",
-				"time_end": details["endtimeStr"] or ""
+				"time_end": details["endtimeStr"] or "",
+				"time_left": activity["nameFour"]
 			})
 		return activities
 
@@ -694,22 +694,42 @@ class Chaoxing:
 		"""Get activities of all courses.
 		:return: Dictionary of Class IDs to ongoing activities.
 		"""
-		courses = tuple(
-			self.__courses.values()
-		)[: self.__config["chaoxing_course_get_activities_courses_limit"]]
+		url = "https://ketang-zhizhen.chaoxing.com/education/student/activelist"
+		params = {
+			"startTimeSet": "", "statusSet": 1, "devices": 0,
+			"includeWork": 0, "includeExam": 0, "includeRead": 0
+		}
 		activities = {}
-		_sem = _Semaphore(
-			self.__config["chaoxing_course_get_activities_workers"]
-		)
-		async def _worker(func, course):
-			async with _sem:
-				course_activities = await func(course = course)
-			if course_activities:
-				activities[course["class_id"]] = course_activities
-		await _gather(*(_worker(
-			self.course_get_course_activities_v2 if i % 2
-			else self.course_get_course_activities_ppt, course
-		) for i, course in enumerate(courses) if course["status"]))
+		while True:
+			res = await self.__session.get(
+				url, params = params, ttl = 60
+			)
+			data = ((await res.json(
+				content_type = None
+			)).get("data") or {}).get("array") or []
+			for activity in data:
+				class_id = f"{activity['classId']}"
+				if (
+					activity["activeType"] != 2 or
+					not activity["otherId"] in ("2", "4") or
+					not class_id in self.__courses
+				):
+					continue
+				activities.setdefault(class_id, []).append({
+					"active_id": f"{activity['id']}",
+					"type": activity["otherId"],
+					"name": activity["nameOne"],
+					"time_start": _strftime(
+						activity["startTime"] // 1000
+					),
+					"time_end": _strftime(
+						activity["endTime"] // 1000
+					) if activity["endTime"] else "",
+					"time_left": activity["nameFour"]
+				})
+			if len(data) < 20:
+				break
+			params["startTimeSet"] = data[-1]["startTime"]
 		return activities
 
 	async def checkin_get_info_newsign(
@@ -722,7 +742,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {"activePrimaryId": activity["active_id"], "type": 1}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 300
+			url = url, params = params, ttl = 60
 		)
 		return (await res.json(content_type = None)) or {}
 
@@ -736,7 +756,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {"activeId": activity["active_id"]}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 300
+			url = url, params = params, ttl = 60
 		)
 		return (await res.json()).get("data") or {}
 
@@ -750,7 +770,7 @@ class Chaoxing:
 		url = "https://mobilelearn.chaoxing.com/widget/active/getActiveInfo"
 		params = {"id": activity["active_id"]}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 300
+			url = url, params = params, ttl = 60
 		)
 		return (
 			(await res.json()).get("data") or {}
