@@ -607,9 +607,9 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"fid": self.__fid, "courseId":
+			"classId": course["class_id"], "courseId":
 			await self.course_get_course_id(course = course),
-			"classId": course["class_id"], "showNotStartedActive": 0
+			"showNotStartedActive": 0, "fid": self.__fid
 		}
 		res = await self.__session.get(
 			url = url, params = params, ttl = 60
@@ -644,9 +644,8 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/ppt/activeAPI/taskactivelist"
 		params = {
-			"courseId":
+			"classId": course["class_id"], "courseId":
 			await self.course_get_course_id(course = course),
-			"classId": course["class_id"],
 			"showNotStartedActive": 0
 		}
 		res = await self.__session.get(
@@ -665,7 +664,7 @@ class Chaoxing:
 			a = {"active_id": f"{active_id}"}
 			async with _sem:
 				all_details[active_id] = \
-				await self.checkin_get_details(activity = a)
+				await self.checkin_get_info_widget(activity = a)
 		await _gather(*(
 			_get_details(activity["id"]) for activity in data
 			if activity["status"] == 1 and
@@ -684,13 +683,10 @@ class Chaoxing:
 			activities.append({
 				"active_id": f"{activity['id']}",
 				"name": activity["nameOne"],
-				"time_start":
-				_strftime(activity["startTime"] // 1000),
+				"time_start": details["starttimeStr"],
 				"time_left": activity["nameFour"],
 				"type": f"{details['otherId']}",
-				"time_end": _strftime(
-					details["endTime"]["time"] // 1000
-				) if details["endTime"] else ""
+				"time_end": details["endtimeStr"] or ""
 			})
 		return activities
 
@@ -716,32 +712,49 @@ class Chaoxing:
 		) for i, course in enumerate(courses) if course["status"]))
 		return activities
 
-	async def checkin_get_details(self, activity: dict = {"active_id": ""}):
-		"""Get checkin details.
+	async def checkin_get_info_newsign(
+		self, activity: dict = {"active_id": ""}
+	):
+		"""Get checkin details via Newsign API.
 		:param activity: Activity ID.
-		:return: Checkin details including class ID on success.
+		:return: Checkin details on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {"activePrimaryId": activity["active_id"], "type": 1}
 		res = await self.__session.get(
 			url = url, params = params, ttl = 300
 		)
-		return await res.json(content_type = None)
+		return (await res.json(content_type = None)) or {}
 
-	async def checkin_get_pptactiveinfo(
+	async def checkin_get_info_ppt(
 		self, activity: dict = {"active_id": ""}
 	):
-		"""Get checkin PPT activity information.
+		"""Get checkin details via PPT API.
 		:param activity: Activity ID.
-		:return: Checkin PPT activity details including class ID \
-		and ranged flag on success.
+		:return: Checkin details on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {"activeId": activity["active_id"]}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 60
+			url = url, params = params, ttl = 300
 		)
 		return (await res.json()).get("data") or {}
+
+	async def checkin_get_info_widget(
+		self, activity: dict = {"active_id": ""}
+	):
+		"""Get checkin details via Widget API.
+		:param activity: Activity ID.
+		:return: Checkin details on success.
+		"""
+		url = "https://mobilelearn.chaoxing.com/widget/active/getActiveInfo"
+		params = {"id": activity["active_id"]}
+		res = await self.__session.get(
+			url = url, params = params, ttl = 300
+		)
+		return (
+			(await res.json()).get("data") or {}
+		).get("detail") or {}
 
 	def checkin_format_location(
 		self,
@@ -929,13 +942,13 @@ class Chaoxing:
 			_analyze = _create_task(self.checkin_do_analysis(
 				activity = activity
 			))
-			info = await self.checkin_get_details(
+			info = await self.checkin_get_info_widget(
 				activity = activity
 			)
 			assert (
-				info["status"] == 1 and not info["isDelete"]
+				info["status"] == 1 and not info["isdelete"]
 			), "Activity ended or deleted."
-			course = {"class_id": f"{info['clazzId']}"}
+			course = {"class_id": f"{info['clazzid']}"}
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course
 			)
@@ -944,13 +957,21 @@ class Chaoxing:
 			), f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
-					"msg":
-					"Checkin success. (Already checked in.)",
-					"params": {}, "captcha": {}
+					"params": {}, "captcha": {}, "msg":
+					"Checkin success. (Already checked in.)"
 				}
+			content = _loads(info["content"])
 			location = self.checkin_format_location(
-				location = location, new_location = presign[1]
-			) if presign[1]["ranged"] else {**location, "ranged": 0}
+				location = location, new_location = {
+					"ranged": 1, "latitude":
+					float(content["locationLatitude"]),
+					"longitude":
+					float(content["locationLongitude"]),
+					"address": content["locationText"]
+				}
+			) if content["ifopenAddress"] else {
+				**location, "ranged": 0
+			}
 			await _analyze
 			result = await self.checkin_do_sign(
 				activity = {**activity, "type": "4"},
@@ -976,16 +997,13 @@ class Chaoxing:
 			_analyze = _create_task(self.checkin_do_analysis(
 				activity = activity
 			))
-			info = await self.checkin_get_details(
+			info = await self.checkin_get_info_widget(
 				activity = activity
 			)
 			assert (
-				info["status"] == 1 and not info["isDelete"]
+				info["status"] == 1 and not info["isdelete"]
 			), "Activity ended or deleted."
-			course = {"class_id": f"{info['clazzId']}"}
-			_locate = _create_task(self.checkin_get_location(
-				activity = activity, course = course
-			))
+			course = {"class_id": f"{info['clazzid']}"}
 			presign = await self.checkin_do_presign(
 				activity = activity, course = course
 			)
@@ -994,17 +1012,21 @@ class Chaoxing:
 			), f"Presign failure. {activity, presign}"
 			if presign[0] == 2:
 				return True, {
-					"msg":
-					"Checkin success. (Already checked in.)",
-					"params": {}, "captcha": {}
+					"params": {}, "captcha": {}, "msg":
+					"Checkin success. (Already checked in.)"
 				}
-			if presign[1]["ranged"]:
-				location = self.checkin_format_location(
-					location = location,
-					new_location = await _locate
-				)
-			else:
-				location["ranged"] = 0
+			content = _loads(info["content"])
+			location = self.checkin_format_location(
+				location = location, new_location = {
+					"ranged": 1, "latitude":
+					float(content["locationLatitude"]),
+					"longitude":
+					float(content["locationLongitude"]),
+					"address": content["locationText"]
+				}
+			) if content["ifopenAddress"] else {
+				**location, "ranged": 0
+			}
 			await _analyze
 			result = await self.checkin_do_sign(
 				activity = {**activity, "type": "2"},
