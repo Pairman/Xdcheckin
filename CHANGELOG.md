@@ -12,7 +12,7 @@ Changelog for Xdcheckin.
 
 ### Changed
 
-- (Module) Rename ```xdcheckin.Chaoxing.checkin_get_details()``` to ```xdcheckin.Chaoxing.checkin_get_info_newsign()```, ```xdcheckin.Chaoxing.checkin_get_pptactiveinfo()``` to ```xdcheckin.Chaoxing.checkin_get_info_ppt()```
+- (Module) Rename ```xdcheckin.Chaoxing.checkin_get_details()``` to ```xdcheckin.Chaoxing.checkin_get_info_newsign()```, ```xdcheckin.Chaoxing.checkin_get_pptactiveinfo()``` to ```xdcheckin.Chaoxing.checkin_get_info_ppt()```.
 
 ## [3.4.6] - 2024-09-12
 
