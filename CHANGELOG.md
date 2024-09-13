@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.5.2] - 2024-09-14
+
+# Changed
+
+- Activities will now be fetched much faster with a new API.
+
 ## [3.5.1] - 2024-09-13
 
 ### Added
