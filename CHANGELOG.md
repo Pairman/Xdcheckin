@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.5.1] - 2024-09-13
+
+### Added
+
+- (Module) Added ```xdcheckin.Chaoxing.checkin_get_info_widget()``` API.
+
+### Changed
+
+- (Module) Rename ```xdcheckin.Chaoxing.checkin_get_details()``` to ```xdcheckin.Chaoxing.checkin_get_info_newsign()```, ```xdcheckin.Chaoxing.checkin_get_pptactiveinfo()``` to ```xdcheckin.Chaoxing.checkin_get_info_ppt()```
+
 ## [3.4.6] - 2024-09-12
 
 ### Removed
@@ -643,7 +653,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.4.6...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.1...main
+[3.5.1]: https://github.com/Pairman/Xdcheckin/compare/3.4.6...3.5.1
 [3.4.6]: https://github.com/Pairman/Xdcheckin/compare/3.4.5...3.4.6
 [3.4.5]: https://github.com/Pairman/Xdcheckin/compare/3.4.4...3.4.5
 [3.4.4]: https://github.com/Pairman/Xdcheckin/compare/3.4.3...3.4.4
