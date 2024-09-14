@@ -19,7 +19,9 @@ def chaoxing_captcha_get_checksum(
 	token = f"""{_md5(
 		f"{time}{id}{type}{key}".encode("utf-8")
 	).hexdigest()}:{int(time) + 300000}"""
-	iv = _md5(f"{id}{type}{_trunc(_time() * 1000)}{_uuid4()}").hexdigest()
+	iv = _md5(
+		f"{id}{type}{_trunc(_time() * 1000)}{_uuid4()}".encode("utf-8")
+	).hexdigest()
 	return key, token, iv
 
 def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8):
