@@ -699,6 +699,9 @@ class Chaoxing:
 			"startTimeSet": "", "statusSet": 1, "devices": 0,
 			"includeWork": 0, "includeExam": 0, "includeRead": 0
 		}
+		courses = tuple(self.__courses.keys())[ : self.__config[
+			"chaoxing_course_get_activities_courses_limit"
+		]]
 		activities = {}
 		while True:
 			res = await self.__session.get(
@@ -712,7 +715,7 @@ class Chaoxing:
 				if (
 					activity["activeType"] != 2 or
 					not activity["otherId"] in ("2", "4") or
-					not class_id in self.__courses
+					not class_id in courses
 				):
 					continue
 				activities.setdefault(class_id, []).append({
