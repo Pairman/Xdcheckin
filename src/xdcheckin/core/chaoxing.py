@@ -123,7 +123,6 @@ class Chaoxing:
 		self.__cookies = self.__session.cookies = cookies
 		self.__uid = cookies["UID"].value
 		ident = _chaoxing_get_identifier(self.__uid)
-		self.__session.headers["User-Agent"] += f" (@Kalimdor)_{ident}"
 		self.__secrets["device_code"] = _chaoxing_get_devicecode(ident)
 		self.__courses = await self.course_get_courses()
 		return self
