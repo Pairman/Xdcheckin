@@ -222,7 +222,6 @@ class Newesxidian:
 	async def __aexit__(self, *args, **kwargs):
 		if not self.__async_ctxmgr:
 			return
-		await self.__cx.__aexit__(*args, **kwargs)
 		self.__logged_in = False
 		self.__async_ctxmgr = False
 
