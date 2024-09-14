@@ -198,7 +198,7 @@ class Chaoxing:
 			"_": _trunc(_time() * 1000), "iv": iv
 		}
 		res2 = await self.__session.get(url = url2, params = params2)
-		data2 = _loads((await res2.text())[2 : -1])
+		data2 = _loads((await res2.text())[20 : -1])
 		captcha.update({
 			"token": data2["token"],
 			"big_img_src":
