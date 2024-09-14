@@ -1,6 +1,8 @@
 __all__ = ("chaoxing_captcha_get_checksum", "solve_captcha")
 
 from hashlib import md5 as _md5
+from math import trunc as _trunc
+from time import time as _time
 from uuid import uuid4 as _uuid4
 
 def chaoxing_captcha_get_checksum(
@@ -17,7 +19,8 @@ def chaoxing_captcha_get_checksum(
 	token = f"""{_md5(
 		f"{time}{id}{type}{key}".encode("utf-8")
 	).hexdigest()}:{int(time) + 300000}"""
-	return key, token
+	iv = _md5(f"{id}{type}{_trunc(_time() * 1000)}{_uuid4()}").hexdigest()
+	return key, token, iv
 
 def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8):
 	"""Slider CAPTCHA solver based on normalized cross-correlation.
