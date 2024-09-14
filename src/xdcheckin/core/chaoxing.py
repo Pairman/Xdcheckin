@@ -175,7 +175,8 @@ class Chaoxing:
 		"""
 		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
 		params1 = {
-			"callback": "f", "captchaId": captcha["captcha_id"],
+			"callback": "cx_captcha_function",
+			"captchaId": captcha["captcha_id"],
 			"_": _trunc(_time() * 1000)
 		}
 		res1 = await self.__session.get(url = url1, params = params1)
@@ -185,16 +186,17 @@ class Chaoxing:
 				await res1.text()
 			)[1]
 		}
-		captcha_key, token = _chaoxing_captcha_get_checksum(captcha = captcha)
+		captcha_key, token, iv = _chaoxing_captcha_get_checksum(
+			captcha = captcha
+		)
 		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
 		params2 = {
-			"callback": "f",
+			"callback": "cx_captcha_function",
 			"captchaId": captcha["captcha_id"],
 			"captchaKey": captcha_key,
-			"token": token,
-			"type": "slide", "version": "1.1.20",
+			"token": token, "type": "slide", "version": "1.1.20",
 			"referer": "https://mobilelearn.chaoxing.com",
-			"_": _trunc(_time() * 1000)
+			"_": _trunc(_time() * 1000), "iv": iv
 		}
 		res2 = await self.__session.get(url = url2, params = params2)
 		data2 = _loads((await res2.text())[2 : -1])
