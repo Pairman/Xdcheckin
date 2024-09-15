@@ -105,8 +105,9 @@ class Chaoxing:
 			).values()
 		funcs = (
 			self.login_username_fanya, self.login_username_v3,
-			self.login_username_v25, self.login_username_v2,
-			self.login_username_v11, self.login_username_xxk,
+			self.login_username_v25, self.login_username_xxk,
+			self.login_username_xxt, self.login_username_v2,
+			self.login_username_v11, self.login_username_2,
 			self.login_username_mylogin1, self.login_username_yz
 		)
 		if not self.__logged_in and username and password:
@@ -237,6 +238,30 @@ class Chaoxing:
 			f"validate_{captcha['captcha_id']}_{captcha['token']}"
 		}
 
+	async def login_username_2(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password \
+		via Login API.
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v2()``.
+		"""
+		url = "https://passport2.chaoxing.com/api/login"
+		params = {
+			"name": account["username"], "pwd": account["password"]
+		}
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		res = await self.__session.get(
+			url = url, params = params, allow_redirects = False
+		)
+		if res.status == 200 and "p_auth_token" in res.cookies:
+			data = await res.json(content_type = None)
+			ret.update({
+				"name": data["realname"],
+				"cookies": res.cookies, "logged_in": True
+			})
+		return ret
+
 	async def login_username_v2(
 		self, account: dict = {"username": "", "password": ""}
 	):
@@ -342,6 +367,30 @@ class Chaoxing:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
 
+	async def login_username_xxt(
+		self, account: dict = {"username": "", "password": ""}
+	):
+		"""Log into Chaoxing account with username and password \
+		via XXT API.
+		:param account: Same as ``login_username_v2()``.
+		:return: Same as ``login_username_v3()``.
+		"""
+		url = "https://passport2.chaoxing.com/xxt/loginregisternew"
+		params = {
+			"uname": account["username"],
+			"code": account["password"]
+		}
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		res = await self.__session.get(
+			url = url, params = params, allow_redirects = False
+		)
+		if res.status == 200 and "p_auth_token" in res.cookies:
+			ret.update({
+				"name": "", "cookies": res.cookies,
+				"logged_in": True
+			})
+		return ret
+
 	async def login_username_mylogin1(
 		self, account: dict = {"username": "", "password": ""}
 	):
@@ -420,7 +469,6 @@ class Chaoxing:
 		if "p_auth_token" in res.cookies:
 			ret.update({"cookies": res.cookies, "logged_in": True})
 		return ret
-
 
 	async def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
