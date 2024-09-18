@@ -51,7 +51,7 @@ class Chaoxing:
 				"obile Safari/537.36 com.chaoxing.mobile/ChaoXi"
 				"ngStudy_3_6.1.0_android_phone_906_100",
 			"X-Forwarded-For":
-				f"113.200.{_trunc(_random() * 4) + 200}."
+				f"113.200.{_trunc(_random() * 228) + 16}."
 				f"{_trunc(_random() * 256)}"
 				
 		},
