@@ -49,7 +49,11 @@ class Chaoxing:
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
 				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
 				"obile Safari/537.36 com.chaoxing.mobile/ChaoXi"
-				"ngStudy_3_6.1.0_android_phone_906_100"
+				"ngStudy_3_6.1.0_android_phone_906_100",
+			"X-Forwarded-For":
+				f"113.200.{_trunc(_random() * 4) + 200}."
+				f"{_trunc(_random() * 256)}"
+				
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_course_get_activities_courses_limit": 32,
