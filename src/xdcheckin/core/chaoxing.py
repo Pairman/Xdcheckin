@@ -223,7 +223,7 @@ class Chaoxing:
 		"""
 		url = "https://captcha.chaoxing.com/captcha/check/verification/result"
 		params = {
-			"callback": "f",
+			"callback": "cx_captcha_function",
 			"captchaId": captcha["captcha_id"],
 			"token": captcha["token"],
 			"textClickArr": f"[{{\"x\": {captcha['vcode']}}}]",
