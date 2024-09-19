@@ -7,7 +7,7 @@ from asyncio import (
 )
 from json import loads as _loads
 from math import trunc as _trunc
-from random import uniform as _uniform
+from random import random as _random, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
 from xdcheckin.util.captcha import (
