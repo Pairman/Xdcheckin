@@ -4,6 +4,14 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.5.4] - 2024-09-19
+
+# Added
+
+- Display error message for qrcode scanning.
+- (Module) Add ```xdcheckin.Chaoxing.login_username_xxt``` and ```xdcheckin.Chaoxing.login_username_2```.
+- Mock IP address.
+
 ## [3.5.3] - 2024-09-14
 
 # Fixed
