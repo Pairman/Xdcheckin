@@ -53,16 +53,17 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 		alert(`Checkin error. (Backend error, ${res.status_code})`);
 		return;
 	}
-	captcha = res.json()
-	const s = document.getElementById(`${e_id_prefix}-checkin-captcha-input`);
-	const c = document.getElementById(`${e_id_prefix}-checkin-captcha-` +
-					`container-div`);
-	const s_img = document.getElementById(`${e_id_prefix}-checkin-captcha-` +
-					    `small-img`);
+	captcha = res.json();
+	const s = document.getElementById(
+					`${e_id_prefix}-checkin-captcha-input`);
+	const c = document.getElementById(
+				`${e_id_prefix}-checkin-captcha-container-div`);
+	const s_img = document.getElementById(
+				    `${e_id_prefix}-checkin-captcha-small-img`);
 	s.oninput = () => s_img.style.left =
 		     `${(c.offsetWidth - s_img.offsetWidth) * s.value / 320}px`;
 	document.getElementById(`${e_id_prefix}-checkin-captcha-button`)
-							.onclick = () => {
+		.onclick = () => {
 		captcha["vcode"] = parseInt(s_img.style.left.split("px")[0] *
 					    320 / c.offsetWidth);
 		post("/chaoxing/captcha_submit_captcha", data = {
@@ -97,7 +98,8 @@ async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
 		});
 		displayTag(`${e_id_prefix}-checkin-captcha-div`);
 	};
-	const img = document.getElementById(`${e_id_prefix}-checkin-captcha-img`);
+	const img = document.getElementById(
+					  `${e_id_prefix}-checkin-captcha-img`);
 	img.onload = () => displayTag(`${e_id_prefix}-checkin-captcha-div`);
 	s_img.style.left = `${s.value = 0}px`;
 	s_img.src = captcha.small_img_src;
@@ -117,8 +119,7 @@ async function chaoxingCheckinLocation(activity) {
 	}
 	alert(unescapeUnicode(data.msg));
 	if (data.msg.includes("validate"))
-		chaoxingCheckinCaptcha(data.params, data.captcha,
-				       "activities");
+		chaoxingCheckinCaptcha(data.params, data.captcha, "activities");
 }
 
 async function chaoxingCheckinLocationWrapper(activity) {
@@ -150,18 +151,24 @@ async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
 					     "Checkin error. (No image given.)";
 		return;
 	}
-	let urls = await screenshot_scan(video);
-	if (!urls.length) {
-		document.getElementById(result_div_id).innerText =
+	try {
+		const urls = await screenshot_scan(video);
+		if (!urls.length) {
+			document.getElementById(result_div_id).innerText =
 					 "Checkin error. (No Qrcode detected.)";
-		return;
-	}
-	urls = urls.filter(v => v.includes(
+			return;
+		}
+		const curls = urls.filter(v => v.includes(
 				     "mobilelearn.chaoxing.com/widget/sign/e"));
-	if (!urls.length) {
-		document.getElementById(result_div_id).innerText =
+		if (!curls.length) {
+			document.getElementById(result_div_id).innerText =
 				       "Checkin error. (No checkin URL found.)";
-		return;
+			return;
+		}
+		chaoxingCheckinQrcode(curls[0], result_div_id);
 	}
-	chaoxingCheckinQrcode(urls[0], result_div_id);
+	catch (e) {
+		document.getElementById(result_div_id).innerText =
+						`Checkin error. (${e.message})`;
+	}
 }
