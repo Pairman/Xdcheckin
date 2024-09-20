@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.5.5] - 2024-09-20
+
+# Added
+
+- Redo display error message for qrcode scanning.
+
 ## [3.5.4] - 2024-09-19
 
 # Added
@@ -673,7 +679,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.4...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.5...main
+[3.5.5]: https://github.com/Pairman/Xdcheckin/compare/3.5.4...3.5.5
 [3.5.4]: https://github.com/Pairman/Xdcheckin/compare/3.5.3...3.5.4
 [3.5.3]: https://github.com/Pairman/Xdcheckin/compare/3.5.2...3.5.3
 [3.5.2]: https://github.com/Pairman/Xdcheckin/compare/3.5.1...3.5.2
