@@ -72,6 +72,7 @@ class Chaoxing:
 		config: dict = {}
 	):
 		"""Create a Chaoxing instance and login.
+
 		:param username: Chaoxing username. \
 		Unused if ``cookies`` is given.
 		:param password: Chaoxing password. \
@@ -79,7 +80,6 @@ class Chaoxing:
 		:param cookies: Cookies from previous login. Overrides \
 		``username`` and ``password`` if given.
 		:param config: Configurations.
-		:return: None.
 		"""
 		if not self.__async_ctxmgr is None:
 			return
@@ -116,9 +116,9 @@ class Chaoxing:
 		)
 		if not self.__logged_in and username and password:
 			for f in funcs:
-				self.__name, cookies, self.__logged_in = (await f(
-					account = self.__secrets
-				)).values()
+				self.__name, cookies, self.__logged_in = (
+					await f(account = self.__secrets)
+				).values()
 				if self.__logged_in:
 					break
 		if not self.logged_in:
@@ -174,6 +174,7 @@ class Chaoxing:
 
 	async def captcha_get_captcha(self, captcha: dict = {"captcha_id": ""}):
 		"""Get CAPTCHA for checkin.
+
 		:param captcha: CAPTCHA ID and type.
 		:return: CAPTCHA images and token.
 		"""
@@ -183,7 +184,7 @@ class Chaoxing:
 			"captchaId": captcha["captcha_id"],
 			"_": _trunc(_time() * 1000)
 		}
-		res1 = await self.__session.get(url = url1, params = params1)
+		res1 = await self.__session.get(url1, params = params1)
 		captcha = {
 			**captcha, "type": "slide", "server_time":
 			_Chaoxing_captcha_get_captcha_regex.search(
@@ -202,7 +203,7 @@ class Chaoxing:
 			"referer": "https://mobilelearn.chaoxing.com",
 			"_": _trunc(_time() * 1000), "iv": iv
 		}
-		res2 = await self.__session.get(url = url2, params = params2)
+		res2 = await self.__session.get(url2, params = params2)
 		data2 = _loads((await res2.text())[20 : -1])
 		captcha.update({
 			"token": data2["token"],
@@ -217,6 +218,7 @@ class Chaoxing:
 		self, captcha = {"captcha_id": "", "token": "", "vcode": ""}
 	):
 		"""Submit and verify CAPTCHA.
+
 		:param captcha: CAPTCHA ID, and verification code \
 		(i.e. slider offset).
 		:return: CAPTCHA with validation code on success.
@@ -231,12 +233,10 @@ class Chaoxing:
 			"version": "1.1.20", "runEnv": 10,
 			"_": _trunc(_time() * 1000)
 		}
-		res = await self.__session.get(
-			url = url, params = params, headers = {
-				**self.__session.headers,
-				"Referer": "https://mobilelearn.chaoxing.com"
-			}
-		)
+		res = await self.__session.get(url, params = params, headers = {
+			**self.__session.headers,
+			"Referer": "https://mobilelearn.chaoxing.com"
+		})
 		return "result\":true" in await res.text(), {
 			**captcha, "validate":
 			f"validate_{captcha['captcha_id']}_{captcha['token']}"
@@ -247,6 +247,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via Login API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v2()``.
 		"""
@@ -256,7 +257,7 @@ class Chaoxing:
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
-			url = url, params = params, allow_redirects = False
+			url, params = params, allow_redirects = False
 		)
 		if res.status == 200 and "p_auth_token" in res.cookies:
 			data = await res.json(content_type = None)
@@ -271,6 +272,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via V2 API.
+
 		:param account: Username and password in dictionary.
 		:return: Name, cookies and login state.
 		"""
@@ -280,7 +282,7 @@ class Chaoxing:
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
-			url = url, params = params, allow_redirects = False
+			url, params = params, allow_redirects = False
 		)
 		if res.status == 200 and "p_auth_token" in res.cookies:
 			data = await res.json(content_type = None)
@@ -295,6 +297,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via V3 API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Name (``""``), cookies and login state.
 		"""
@@ -316,6 +319,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via V11 API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -337,6 +341,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via V25 API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -355,6 +360,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via XXK API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -376,6 +382,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via XXT API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -386,7 +393,7 @@ class Chaoxing:
 		}
 		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
-			url = url, params = params, allow_redirects = False
+			url, params = params, allow_redirects = False
 		)
 		if res.status == 200 and "p_auth_token" in res.cookies:
 			ret.update({
@@ -400,6 +407,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via Mylogin1 API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -421,6 +429,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via Fanya API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -449,6 +458,7 @@ class Chaoxing:
 	):
 		"""Log into Chaoxing account with username and password \
 		via Yunzhou API.
+
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
@@ -476,13 +486,14 @@ class Chaoxing:
 
 	async def login_cookies(self, account: dict = {"cookies": None}):
 		"""Log into Chaoxing account with cookies.
+
 		:param account: Cookies in dictionary.
 		:return: Same as ``login_username_v2()``.
 		"""
 		url = "https://sso.chaoxing.com/apis/login/userLogin4Uname.do"
 		ret = {"name": "", "cookies": None, "logged_in": False}
 		res = await self.__session.get(
-			url = url, cookies = account["cookies"],
+			url, cookies = account["cookies"],
 			allow_redirects = False
 		)
 		if res.status == 200:
@@ -497,6 +508,7 @@ class Chaoxing:
 
 	async def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum.
+
 		:param week: Week number. Defaulted to the current week.
 		:return: Dictionary of curriculum details and lessons \
 		containing course IDs, names, classroom locations, teachers \
@@ -540,7 +552,7 @@ class Chaoxing:
 			"week": week
 		}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 86400
+			url, params = params, ttl = 86400
 		)
 		data = (await res.json()).get("data")
 		details = data["curriculum"]
@@ -567,13 +579,14 @@ class Chaoxing:
 
 	async def course_get_courses(self):
 		"""Get all courses in the root folder.
+
 		:return: Dictionary of class IDs to course containing \
 		course IDs, names, teachers, status, start and end time.
 		"""
 		url = "https://mooc2-ans.chaoxing.com/visit/courselistdata"
 		params = {"courseType": 1}
 		res = await self.__session.get(
-			url = url, params = params, ttl = 86400
+			url, params = params, ttl = 86400
 		)
 		matches = _Chaoxing_course_get_courses_regex1.findall(
 			await res.text()
@@ -602,6 +615,7 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get course ID of a course.
+
 		:param course: Course ID (optional) and clsss ID.
 		:return: Course ID corresponding to the class ID.
 		"""
@@ -615,7 +629,7 @@ class Chaoxing:
 		).get("course_id")
 		if not course_id:
 			res = await self.__session.get(
-				url = url, params = params, ttl = 86400
+				url, params = params, ttl = 86400
 			)
 			data = (await res.json()).get('data', {})
 			course_id = f"{data.get('courseid', 0)}"
@@ -625,6 +639,7 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get checkin location history of a course.
+
 		:param course: Course ID (optional) and class ID.
 		:return: Dictionary of activity IDs to checkin locations \
 		used by the course.
@@ -636,9 +651,7 @@ class Chaoxing:
 			await self.course_get_course_id(course = course),
 			"classId": course["class_id"]
 		}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 1800
-		)
+		res = await self.__session.get(url, params = params, ttl = 1800)
 		data = (await res.json()).get("data") or []
 		return {
 			location["activeid"]: {
@@ -654,6 +667,7 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via V2 API.
+
 		:param course: Course ID (optional) and class ID.
 		:return: List of ongoing activities with type, name, \
 		activity ID, start, end and remaining time.
@@ -664,9 +678,7 @@ class Chaoxing:
 			await self.course_get_course_id(course = course),
 			"showNotStartedActive": 0, "fid": self.__fid
 		}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 60
-		)
+		res = await self.__session.get(url, params = params, ttl = 60)
 		data = ((await res.json()).get("data") or {}).get(
 			"activeList"
 		) or []
@@ -691,6 +703,7 @@ class Chaoxing:
 		self, course: dict = {"course_id": "", "class_id": ""}
 	):
 		"""Get activities of a course via PPT API.
+
 		:param course: Course ID (optional) and class ID.
 		:return: List of ongoing activities with type, name, \
 		activity ID, start, end and remaining time.
@@ -701,9 +714,7 @@ class Chaoxing:
 			await self.course_get_course_id(course = course),
 			"showNotStartedActive": 0
 		}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 60
-		)
+		res = await self.__session.get(url, params = params, ttl = 60)
 		data = (await res.json(
 			content_type = None
 		)).get("activeList") or []
@@ -745,6 +756,7 @@ class Chaoxing:
 
 	async def course_get_activities(self):
 		"""Get activities of all courses.
+
 		:return: Dictionary of Class IDs to ongoing activities.
 		"""
 		url = "https://ketang-zhizhen.chaoxing.com/education/student/activelist"
@@ -792,14 +804,13 @@ class Chaoxing:
 		self, activity: dict = {"active_id": ""}
 	):
 		"""Get checkin details via Newsign API.
+
 		:param activity: Activity ID.
 		:return: Checkin details on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/signDetail"
 		params = {"activePrimaryId": activity["active_id"], "type": 1}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 60
-		)
+		res = await self.__session.get(url, params = params, ttl = 60)
 		return (await res.json(content_type = None)) or {}
 
 	async def checkin_get_info_ppt(
@@ -811,23 +822,20 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/getPPTActiveInfo"
 		params = {"activeId": activity["active_id"]}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 60
-		)
+		res = await self.__session.get(url, params = params, ttl = 60)
 		return (await res.json()).get("data") or {}
 
 	async def checkin_get_info_widget(
 		self, activity: dict = {"active_id": ""}
 	):
 		"""Get checkin details via Widget API.
+
 		:param activity: Activity ID.
 		:return: Checkin details on success.
 		"""
 		url = "https://mobilelearn.chaoxing.com/widget/active/getActiveInfo"
 		params = {"id": activity["active_id"]}
-		res = await self.__session.get(
-			url = url, params = params, ttl = 60
-		)
+		res = await self.__session.get(url, params = params, ttl = 60)
 		return (
 			(await res.json()).get("data") or {}
 		).get("detail") or {}
@@ -838,6 +846,7 @@ class Chaoxing:
 		new_location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Format checkin location.
+
 		:param location: Address, latitude and longitude. \
 		Used for address override for checkin location.
 		:param location_new: Address, latitude and longitude. \
@@ -878,7 +887,8 @@ class Chaoxing:
 		}
 
 	async def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
-		"""Do checkin analysis.
+		"""Send analytics for checkin.
+
 		:param activity: Activity ID in dictionary.
 		:return: True on success, otherwise False.
 		"""
@@ -888,7 +898,7 @@ class Chaoxing:
 			"aid": activity["active_id"]
 		}
 		res1 = await self.__session.get(
-			url = url1, params = params1, ttl = 1800
+			url1, params = params1, ttl = 1800
 		)
 		if res1.status != 200:
 			return False
@@ -899,7 +909,7 @@ class Chaoxing:
 			)[1], "DB_STRATEGY": "RANDOM"
 		}
 		res2 = await self.__session.get(
-			url = url2, params = params2, ttl = 1800
+			url2, params = params2, ttl = 1800
 		)
 		return await res2.text() == "success"
 
@@ -908,6 +918,7 @@ class Chaoxing:
 		course: dict ={"course_id": "", "class_id": ""}
 	):
 		"""Do checkin pre-sign.
+
 		:param activity: Activity ID in dictionary.
 		:param course: Course ID (optional) and class ID.
 		:return: Presign state (2 if checked-in or 1 on success), \
@@ -928,7 +939,7 @@ class Chaoxing:
 			"ranged": 0, "range": 0
 		}
 		captcha = {"captcha_id": ""}
-		res = await self.__session.get(url = url, params = params)
+		res = await self.__session.get(url, params = params)
 		if res.status != 200:
 			return 0, location, captcha
 		state = 1
@@ -955,6 +966,7 @@ class Chaoxing:
 		old_params: dict = {"name": "", "uid": "", "fid": "", "...": "..."}
 	):
 		"""Do checkin sign.
+
 		:param activity: Activity ID and type in dictionary.
 		:param location: Address, latitude, longitude and ranged flag.
 		:param old_params: Reuse previous parameters. \
@@ -992,7 +1004,7 @@ class Chaoxing:
 					"longitude": location["longitude"]
 				})
 		status = False
-		res = await self.__session.get(url = url, params = params)
+		res = await self.__session.get(url, params = params)
 		text = await res.text()
 		if text in ("success", "您已签到过了"):
 			status = True
@@ -1009,6 +1021,7 @@ class Chaoxing:
 		location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Location checkin.
+
 		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude. \
 		Overriden by server-side location if any.
@@ -1066,6 +1079,7 @@ class Chaoxing:
 		location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Qrcode checkin.
+
 		:param activity: Activity ID and ENC in dictionary.
 		:param location: Same as ``checkin_checkin_location()``.
 		:return: Same as ``checkin_checkin_location()``.
@@ -1121,6 +1135,7 @@ class Chaoxing:
 		location: dict = {"latitude": -1, "longitude": -1, "address": ""}
 	):
 		"""Qrcode checkin.
+
 		:param url: URL from Qrcode.
 		:param location: Same as ``checkin_checkin_location()``.
 		:return: Same as ``checkin_checkin_location()``.
