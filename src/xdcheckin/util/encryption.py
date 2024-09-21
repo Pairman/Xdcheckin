@@ -14,6 +14,7 @@ def encrypt_aes(
 	mode: int = _MODE_CBC, pad = lambda msg: msg.encode("utf-8")
 ):
 	"""AES encryption.
+
 	:param msg: Data in string.
 	:param key: Key in bytes.
 	:param iv: Initialization vector in bytes.
@@ -26,6 +27,7 @@ def encrypt_aes(
 
 def chaoxing_get_identifier(seed: str = ""):
 	"""Get the 'Kalimdor' device identifier in Chaoxing's UA.
+
 	:param seed: Seed.
 	:return: Device identifier.
 	"""
@@ -33,6 +35,7 @@ def chaoxing_get_identifier(seed: str = ""):
 
 def chaoxing_get_devicecode(ident: str = ""):
 	"""Get device code for Chaoxing's checking-in.
+
 	:param ident: Device identifier.
 	:return: Device code.
 	"""
