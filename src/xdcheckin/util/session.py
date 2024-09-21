@@ -38,6 +38,7 @@ class CachedSession:
 		cache_enabled: bool = True
 	):
 		"""Create a ``CachedSession`` instance.
+
 		:param headers: Default headers.
 		:param cookies: Default cookies.
 		:param cache_enabled: Whether to enable caching.
@@ -111,6 +112,7 @@ class CachedSession:
 		headers: dict = None, ttl: int = 0, **kwargs
 	) -> _ClientResponse:
 		"""Get request.
+
 		:param url: URL.
 		:param params: params.
 		:param cookies: Cookies. Overrides existing cookies.
@@ -133,6 +135,7 @@ class CachedSession:
 		headers: dict = None, ttl: int = 0, **kwargs
 	) -> _ClientResponse:
 		"""Post request.
+
 		:param url: URL.
 		:param data: data.
 		:param cookies: Cookies. Overrides existing cookies.
