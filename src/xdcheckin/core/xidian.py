@@ -31,6 +31,7 @@ class IDSSession:
 			config: dict = {}
 		):
 		"""Initialize an IDS Session.
+
 		:param service: The SSO service for redirection.
 		:param type: Login type. ``"userNameLogin"`` by default for \
 		username and ``"dynamicLogin"`` for phone number.
@@ -68,11 +69,12 @@ class IDSSession:
 
 	async def captcha_get_captcha(self):
 		"""Get CAPTCHA for checkin.
+
 		:return: CAPTCHA images and token.
 		"""
 		url = "https://ids.xidian.edu.cn/authserver/common/openSliderCaptcha.htl"
 		params = {"_": f"{_trunc(1000 * _time())}"}
-		res = await self.__session.get(url = url, params = params)
+		res = await self.__session.get(url, params = params)
 		data = await res.json()
 		return {
 			"big_img_src": data["bigImage"],
@@ -81,6 +83,7 @@ class IDSSession:
 
 	async def captcha_submit_captcha(self, captcha = {"vcode": ""}):
 		"""Submit and verify CAPTCHA.
+
 		:param captcha: Verification code (i.e. slider offset).
 		:return: True on success.
 		"""
@@ -93,6 +96,7 @@ class IDSSession:
 
 	async def login_prepare(self):
 		"""Prepare to log into IDS with username and password.
+
 		:return: True on success.
 		"""
 		url = "https://ids.xidian.edu.cn/authserver/login"
@@ -100,7 +104,7 @@ class IDSSession:
 			"service": self.__service,
 			"type": self.__secrets["login_type"]
 		}
-		res = await self.__session.get(url = url, params = params)
+		res = await self.__session.get(url, params = params)
 		if res.status != 200:
 			return False
 		s = _IDSSession_login_username_prepare_regex.search(
@@ -117,6 +121,7 @@ class IDSSession:
 		account: dict = {"username": "", "password": ""}
 	):
 		"""Finish logging into IDS with username and password.
+
 		:param account: Username and password.
 		:return: Cookies and login state.
 		"""
@@ -153,6 +158,7 @@ class IDSSession:
 		self, account: dict = {"username": ""}
 	):
 		"""Send dynamic code for logging into IDS.
+
 		:param account: Username (i.e. phone number).
 		:return: True on success.
 		"""
@@ -167,6 +173,7 @@ class IDSSession:
 		self, account: dict = {"username": "", "password": ""}
 	):
 		"""Prepare to log into IDS via dynamic code.
+
 		:param account: Username (i.e. phone number) and \
 		password (i.e. dynamic code).
 		:return: Cookies and login state.
@@ -203,8 +210,8 @@ class Newesxidian:
 
 	def __init__(self, chaoxing: _Chaoxing = None):
 		"""Create a Newesxidian with ``Chaoxing`` instance.
+
 		:param chaoxing: The ``Chaoxing`` instance.
-		:return: None.
 		"""
 		if not self.__async_ctxmgr is None:
 			return
@@ -231,6 +238,7 @@ class Newesxidian:
 
 	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
 		"""Get livestream URL.
+
 		:param livesteam: Live ID in dictionary.
 		:return: Livestream URL, live ID, device ID and \
 		classroom location (``""``).
@@ -238,9 +246,7 @@ class Newesxidian:
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
 		params = {"liveId": livestream["live_id"]}
-		res = await self.__cx.get(
-			url = url, params = params, ttl = 86400
-		)
+		res = await self.__cx.get(url, params = params, ttl = 86400)
 		return {
 			"url": await res.text(),
 			"live_id": livestream["live_id"],
@@ -252,6 +258,7 @@ class Newesxidian:
 		livestream: dict = {"live_id": "", "device": "", "location": ""}
 	):
 		"""Get livestream URL.
+
 		:param livestream: Live ID (unused if device ID is present), \
 		device ID and location (in case device ID is not present) \
 		in dictionary.
@@ -267,7 +274,7 @@ class Newesxidian:
 		location = livestream.get("location") or ""
 		if not livestream.get("device"):
 			res1 = await self.__cx.get(
-				url = url1, params = params1, ttl = 86400
+				url1, params = params1, ttl = 86400
 			)
 			for lesson in (await res1.json(
 				content_type = None
@@ -276,9 +283,7 @@ class Newesxidian:
 					params2["deviceCode"] = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
-		res2 = await self.__cx.get(
-			url = url2, params = params2, ttl = 86400
-		)
+		res2 = await self.__cx.get(url2, params = params2, ttl = 86400)
 		return {
 			"url": await res2.text(), "live_id": params1["liveId"],
 			"device": params2["deviceCode"],
@@ -287,6 +292,7 @@ class Newesxidian:
 
 	async def curriculum_get_curriculum(self, week: str = ""):
 		"""Get curriculum with livestreams.
+
 		:param week: Week number. Defaulted to the current week.
 		:return: Chaoxing curriculum with livestreams for lessons.
 		"""
@@ -315,9 +321,7 @@ class Newesxidian:
 			"termId": curriculum["details"]["semester"],
 			"week": week or curriculum["details"]["week"]
 		}
-		res = await self.__cx.get(
-			url = url, params = params, ttl = 86400
-		)
+		res = await self.__cx.get(url, params = params, ttl = 86400)
 		data = await res.json(content_type = None) or []
 		await _gather(*(_create_task(
 			_get_livestream(lesson)
