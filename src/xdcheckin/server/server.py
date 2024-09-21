@@ -366,6 +366,7 @@ async def _vacuum_server_sessions(app):
 
 def create_server(config: dict = {}):
 	"""Create a Xdcheckin server.
+
 	:param config: Configurations.
 	:return: Xdcheckin server.
 	"""
@@ -379,6 +380,7 @@ def create_server(config: dict = {}):
 
 def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	"""Run a Xdcheckin server.
+
 	:param host: IP address.
 	:param port: Port.
 	:param config: Configurations.
