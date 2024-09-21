@@ -9,6 +9,7 @@ def chaoxing_captcha_get_checksum(
 	captcha: dict = {"captcha_id": "", "server_time": "", "type": ""}
 ):
 	"""Generate key and token for CAPTCHA images.
+
  	:param: CAPTCHA ID, server timestamp and CAPTCHA type.
   	:return: CAPTCHA key and token.
  	"""
@@ -26,6 +27,7 @@ def chaoxing_captcha_get_checksum(
 
 def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8):
 	"""Slider CAPTCHA solver based on normalized cross-correlation.
+
 	:param big_img: Background image with slider piece embedded.
 	:param small_img: Slider image vertically aligned \
 	with transparent padding.
