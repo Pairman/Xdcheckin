@@ -16,7 +16,7 @@ async function post(url = "", data = {}) {
 	let status_code = 404, text = "";
 	try {
 		const res = await fetch(url, {
-			method: "POST",
+			method: "POST", credentials: "include",
 			body: JSON.stringify(data)
 		});
 		status_code = res.status;
@@ -36,7 +36,7 @@ async function post(url = "", data = {}) {
 }
 
 function newElement(tag, properties = {}) {
-	const e = (typeof(tag) != "object") ? document.createElement(tag) : tag;
+	const e = (typeof tag != "object") ? document.createElement(tag) : tag;
 	return Object.assign(e, properties);
 }
 

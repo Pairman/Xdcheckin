@@ -35,16 +35,13 @@ async function listClassrooms() {
 	if (!e)
 		return;
 	e.replaceChildren(newElement("button", {
-		onclick: extractClassroom,
-		innerText: "Extract"
+		onclick: extractClassroom, innerText: "Extract"
 	}));
 	e.appendChild(newElement("button", {
-		onclick: inputClassroom,
-		innerText: "Load"
+		onclick: inputClassroom, innerText: "Load"
 	}));
 	e.appendChild(newElement("button", {
-		onclick: randClassroom,
-		innerText: "Random"
+		onclick: randClassroom, innerText: "Random"
 	}));
 	globalThis.g_buildings = [];
 	globalThis.g_building_names = [];
@@ -56,9 +53,8 @@ async function listClassrooms() {
 		const building = globalThis.g_classroom_urls[building_name];
 		for (let c_name in building) {
 			e.appendChild(newElement("button", {
-				onclick: () => setClassroom(building[c_name],
-							    c_name),
-				innerText: c_name
+				innerText: c_name, onclick:
+				() => setClassroom(building[c_name], c_name),
 			}));
 			classrooms.push(building[c_name]);
 			classroom_names.push(c_name);

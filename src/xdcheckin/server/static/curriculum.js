@@ -3,7 +3,7 @@ async function getCurriculum(with_live = false) {
 		return;
 	getCurriculum.calling = true;
 	const curriculum = (await post("/chaoxing/get_curriculum",
-				    with_live)).json();
+				       with_live)).json();
 	const d = newElement("div", {
 		innerText: `Current year ${curriculum.details.year}, ` +
 			   `semester ${curriculum.details.semester}, ` +
@@ -14,9 +14,7 @@ async function getCurriculum(with_live = false) {
 		d.innerText += " No curriculum.";
 		return getCurriculum.calling = false;
 	}
-	const table = newElement("table", {
-		style: "border = 1"
-	});
+	const table = newElement("table", {"style": "border = 1"});
 	const tb = table.appendChild(newElement("tbody"));
 	const timetable = curriculum.details.time.timetable;
 	for (let class_id in curriculum.lessons) {

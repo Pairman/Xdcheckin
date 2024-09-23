@@ -1,7 +1,6 @@
 async function setLocation(loc, name) {
 	globalThis.g_location = {
-		"latitude": loc.latitude,
-		"longitude": loc.longitude,
+		"latitude": loc.latitude, "longitude": loc.longitude,
 		"address": loc.address
 	};
 	localStorage.setItem("location_",
@@ -20,30 +19,25 @@ async function inputLocation() {
 	if (!(address = prompt("Input address:")) || /[()\[\]{}]/.test(address))
 		return address === null ? undefined : alert("Invalid input.");
 	setLocation({
-		"latitude": latitude,
-		"longitude": longitude,
-		"address": address
+		"latitude": latitude, "longitude": longitude, "address": address
 	}, `Input(${latitude}, ${longitude}, ${address})`);
 }
 
 async function listLocations() {
 	const e = document.getElementById("locations-list-div");
 	e.appendChild(newElement("button", {
-		innerText: "Input",
-		onclick: inputLocation
+		innerText: "Input", onclick: inputLocation
 	}));
 	for (let buildingName in globalThis.g_locations) {
 		e.appendChild(newElement("button", {
-			innerText: buildingName,
-			onclick: () => setLocation(
-					   globalThis.g_locations[buildingName],
-					   buildingName),
+			innerText: buildingName, onclick: () =>
+			setLocation(globalThis.g_locations[buildingName],
+				    buildingName),
 		}));
 	}
 	const loc = localStorage.getItem('location_');
-	if (!loc) {
+	if (!loc)
 		setLocation(globalThis.g_locations["B楼"], "B楼");
-	}
 	else
 		setLocation(JSON.parse(loc),
 			    localStorage.getItem('location_name'));
