@@ -38,11 +38,6 @@ if (typeof globalThis === "undefined")
 
 if (!Element.prototype.replaceChildren)
 	Element.prototype.replaceChildren = function (...nodes) {
-	if (!(this instanceof Element)) {
-		console.error('this is not a DOM element');
-		console.error(nodes);
-		return;
-	}
 		while (this.firstChild)
 			this.firstChild.remove();
 		this.append(...nodes);
