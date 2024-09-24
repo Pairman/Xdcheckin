@@ -23,17 +23,17 @@ if (typeof globalThis === "undefined")
 						t[k] = s[k];
 		return t;
 	};
-	try {
-		if (typeof Object.assign !== "function")
-			Object.assign = assign;
-		else {
-			const o = document.createElement("div");
+	if (typeof Object.assign !== "function")
+		Object.assign = assign;
+	else {
+		const o = document.createElement("div");
+		try {
 			Object.assign(o, {"style": "display = block"});
 		}
-	}
-	catch (e) {
-		if (e instanceof TypeError)
-			Object.assign = assign;
+		catch (e) {
+			if (e instanceof TypeError)
+				Object.assign = assign;
+		}
 	}
 })();
 
