@@ -8,7 +8,7 @@ Changelog for Xdcheckin.
 
 # Added
 
-- (Webpage) Nuked AliPlayer telemetrics.
+- (Webpage) Nuke AliPlayer telemetrics.
 
 ## [3.5.6] - 2024-09-23
 
