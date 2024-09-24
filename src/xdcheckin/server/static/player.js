@@ -4,9 +4,8 @@ async function enableCamera() {
 	const devices = await navigator.mediaDevices.enumerateDevices();
 	if (!devices.filter(v => v.kind == "videoinput").length)
 		return;
-	[
-		"camera-buttons-div", "camera-div", "camera-scanresult-div"
-	].forEach(displayTag);
+	["camera-buttons-div", "camera-div", "camera-scanresult-div"].forEach(
+								    displayTag);
 }
 
 async function cameraOn() {
@@ -61,7 +60,7 @@ async function initPlayers() {
 	globalThis.g_players.forEach((player, i) => {
 		if (player)
 			player.dispose();
-		if (isValidUrl(globalThis.g_player_sources[i]))
+		if (isValidUrl(globalThis.g_player_sources[i])) {
 			player = globalThis.g_players[i] = new Aliplayer({
 				id: `player${i}-div`,
 				isLive: true,
@@ -71,19 +70,20 @@ async function initPlayers() {
 				playsinline: true,
 				autoplay: i == 0,
 				mute: true
-			}, () => {});
+			});
+			player._player._monitor._logService._report = () => {};
+		}
 	});
 }
 
 async function enablePlayers() {
 	if (enablePlayers.success || enablePlayers.calling ||
-	    !["16820", "146332", "147335", "2403"]
-	    .includes(localStorage.getItem("fid")))
+	    !["16820", "146332", "147335", "2403"].includes(
+						   localStorage.getItem("fid")))
 		return;
 	enablePlayers.calling = true;
-	[
-		"s", "0", "1", "2", "3"
-	].forEach(v => displayTag(`player${v}-buttons-div`));
+	["s", "0", "1", "2", "3"].forEach(v =>
+					  displayTag(`player${v}-buttons-div`));
 	if (localStorage.getItem("classroom_name"))
 		setClassroom(localStorage.getItem("classroom"),
 			     localStorage.getItem("classroom_name"));
