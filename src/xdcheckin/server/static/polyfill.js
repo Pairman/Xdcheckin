@@ -24,11 +24,12 @@ if (typeof globalThis === "undefined")
 		return t;
 	};
 	try {
-		const o = document.createElement("div");
 		if (typeof Object.assign !== "function")
 			Object.assign = assign;
-		else
+		else {
+			const o = document.createElement("div");
 			Object.assign(o, {"style": "display = block"});
+		}
 	}
 	catch (e) {
 		if (e instanceof TypeError)
