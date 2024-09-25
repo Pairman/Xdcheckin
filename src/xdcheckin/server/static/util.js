@@ -64,12 +64,10 @@ function unescapeUnicode(s) {
 						parseInt(match.substr(2), 16)));
 }
 
-async function qrcode_scanner_init() {
-	const scanner = await zbarWasm.getDefaultScanner();
-	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_NONE,
-			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 0);
-	scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_QRCODE,
-			  zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 1);
+function isPlatformIOS() {
+	return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+	      (/Macintosh/.test(navigator.userAgent) &&
+	       navigator.maxTouchPoints > 1);
 }
 
 async function screenshot_scan(video) {
