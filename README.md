@@ -32,6 +32,9 @@ pip install Xdcheckin
 The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) and ```xdcheckin.server``` (server implementation) for importing. It also provides the ```xdcheckin-server``` commandline tool to start a server at the given IP and port.
 
 ## Notes
+### For Server-side:
+Due to cross origin problems on Safari, qrcode scanning on iOS devices are not supported on older versions. You must use version 3.6.1 (or newer) and run ```pip install xdcheckin[image]``` to make qrcode decoding work on iOS.
+
 ### For Android
 The APP doesn't use WebView on Android until upstream support, therefore it will open ```http://127.0.0.1:5001``` in your browser automatically.
 
