@@ -14,23 +14,26 @@ except ImportError:
 	).returncode else "ffmpeg"
 
 if _ffmpeg:
-	async def video_get_img(url: str, ses = None):
+	async def video_get_img(url: str, ses = None, len_limit: int = 384):
 		"""Extract an frame from an M3U8 stream. \
 		Needs ``xdcheckin[image]`` to be installed.
 
 		:param url: URL of the stream.
 		:param ses: An ``aiohttp.ClientSession`` instance. Optional.
+  		:param len_limit: \
+		Limit of length of the M3U8 data. Default is ``384``.
 		:return: Frame in ``PIL.Image.Image`` on success.
 		"""
 		try:
 			if ses:
-				res = await ses.get(url)
+				res = await ses.get(url, headers = {})
 				assert res.status == 200
 				text = await res.text()
 			else:
 				async with _request("GET", url) as res:
 					assert res.status == 200
 					text = await res.text()
+			assert text.content_length < len_limit
 			ts = text.split()[-1]
 			assert ts.endswith(".ts")
 			proc = _Popen((
@@ -45,7 +48,7 @@ if _ffmpeg:
 		finally:
 			return ret
 else:
-	async def video_get_img(url: str, ses = None):
+	async def video_get_img(url: str, ses = None, len_limit: int = 384):
 		"""Dummy fallback for ``video_get_img``. \
 		Please install ``xdcheckin[image]``.
 
