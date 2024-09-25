@@ -4,6 +4,14 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.6.1] - 2024-09-25
+
+# Added
+
+- (Server/Webpage) Add support for qrcode scanning on iOS devices. Needs ``xdcheckin[image]`` to be installed on the server.
+- (Module) Add ``xdcheckin.video_get_img()``, ``xdcheckin.img_scan()``, ``xdcheckin.classroom_urls`` and ``xdcheckin.classroom_url_get_single()``. Refer to source code for details.
+- Add two locations for the north campus. (@wtflmao )
+
 ## [3.5.8] - 2024-09-25
 
 # Fixed
@@ -697,7 +705,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.8...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.1...main
+[3.6.1]: https://github.com/Pairman/Xdcheckin/compare/3.5.8...3.6.1
 [3.5.8]: https://github.com/Pairman/Xdcheckin/compare/3.5.7...3.5.8
 [3.5.7]: https://github.com/Pairman/Xdcheckin/compare/3.5.6...3.5.7
 [3.5.6]: https://github.com/Pairman/Xdcheckin/compare/3.5.5...3.5.6
