@@ -31,7 +31,7 @@ if _ffmpeg:
 				async with _request("GET", url) as res:
 					assert res.status == 200
 					text = await res.text()
-			ts = text.split("\r\n")[-2]
+			ts = text.split()[-1]
 			assert ts.endswith(".ts")
 			proc = _Popen((
 				_ffmpeg, "-v", "quiet",
