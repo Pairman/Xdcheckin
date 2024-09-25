@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Xdcheckin"
-version = "3.5.8"
+version = "3.6.1"
 authors = [{name = "Pairman", email = "pairmanxlr@gmail.com"}]
 readme = "README.md"
 description = "Chaoxing Checkin Tool for XDU."
@@ -23,6 +23,12 @@ dependencies = [
 	"aiohttp-session>=2.6.0",
 	"pycryptodome>=3.9.4",
  	"yarl>=1.6.0",
+]
+
+[project.optional-dependencies]
+image = [
+	"imageio-ffmpeg>=0.4.4",
+	"pyzbar>=0.1.8",
 ]
 
 [project.urls]
