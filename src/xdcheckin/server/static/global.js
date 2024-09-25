@@ -13,3 +13,5 @@ globalThis.g_players = [undefined, undefined, undefined, undefined];
 globalThis.g_player_sources = ["", "", "", ""];
 globalThis.g_player_width = "";
 globalThis.g_player_height = "";
+
+/* globalThis.g_is_ios = false; */
