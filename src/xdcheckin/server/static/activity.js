@@ -162,7 +162,7 @@ async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
 				     "mobilelearn.chaoxing.com/widget/sign/e"));
 		if (!curls.length) {
 			document.getElementById(result_div_id).innerText =
-				       "Checkin error. (No checkin URL found.)";
+				`Checkin error. (No checkin URL in [${urls}].)`;
 			return;
 		}
 		chaoxingCheckinQrcode(curls[0], result_div_id);
