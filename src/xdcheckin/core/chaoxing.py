@@ -932,8 +932,10 @@ class Chaoxing:
 			"classId": course["class_id"],
 			"activePrimaryId": activity["active_id"],
 			"general": 1, "sys": 1, "ls": 1, "appType": 15,
-			"tid": self.__cookies["_tid"].value,
-			"uid": self.__uid, "ut": "s"
+			"tid": (
+				self.__cookies["_tid"].value
+				if "_tid" in self.__cookies else 0
+			), "uid": self.__uid, "ut": "s"
 		}
 		location = {
 			"latitude": -1, "longitude": -1, "address": "",
