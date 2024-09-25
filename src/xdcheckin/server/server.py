@@ -22,6 +22,9 @@ from xdcheckin.core.locations import locations as _locations
 from xdcheckin.core.xidian import (
 	IDSSession as _IDSSession, Newesxidian as _Newesxidian
 )
+from xdcheckin.util.image import (
+	video_get_img as _video_get_img, img_scan as _img_scan
+)
 from xdcheckin.util.types import TimestampDict as _TimestampDict
 from xdcheckin.util.version import (
 	compare_versions as _compare_versions, version as _version
@@ -330,6 +333,19 @@ async def _chaoxing_checkin_checkin_qrcode_url(req):
 		ses = await _get_session(req)
 		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
+		vsrc = data.get("video")
+		if vsrc:
+			with await _video_get_img(
+				url = vsrc, ses = cx
+			) as img:
+				assert (
+					img.height and img.width
+				), "No image decoded."
+				urls = _img_scan(img)
+			assert urls, "No Qrcode detected."
+			qr_urls = [s for s in urls if "widget/sign/e" in s]
+			assert qr_urls, f"No checkin URL in {qr_urls}."
+			data["url"] = next(iter(qr_urls))
 		result = await cx.checkin_checkin_qrcode_url(
 			url = data["url"], location = data["location"]
 		)
