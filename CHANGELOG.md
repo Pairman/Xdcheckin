@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.5.8] - 2024-09-25
+
+# Fixed
+
+- Fix "Please use Xuezaixidian APP to sign in" failure.
+
 ## [3.5.7] - 2024-09-24
 
 # Added
@@ -691,7 +697,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.7...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.5.8...main
+[3.5.8]: https://github.com/Pairman/Xdcheckin/compare/3.5.7...3.5.8
 [3.5.7]: https://github.com/Pairman/Xdcheckin/compare/3.5.6...3.5.7
 [3.5.6]: https://github.com/Pairman/Xdcheckin/compare/3.5.5...3.5.6
 [3.5.5]: https://github.com/Pairman/Xdcheckin/compare/3.5.4...3.5.5
