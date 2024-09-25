@@ -14,7 +14,7 @@ except ImportError:
 	).returncode else "ffmpeg"
 
 if _ffmpeg:
-	async def video_get_img(url: str, ses = None, len_limit: int = 384):
+	async def video_get_img(url: str, ses = None, len_limit: int = 256):
 		"""Extract an frame from an M3U8 stream. \
 		Needs ``xdcheckin[image]`` to be installed.
 
