@@ -58,11 +58,6 @@ if (typeof WebAssembly === "object") {
 	document.head.appendChild(script);
 }
 else {
-	globalThis.zbarWasm = {};
-	zbarWasm.getDefaultScanner = function() {
-		return {"setConfig": function() {}}
-	};
-	zbarWasm.ZBarSymbolType = zbarWasm.ZBarConfigType = {};
 	const script = document.createElement("script");
 	globalThis.module = {};
 	script.src = "https://cdn.jsdelivr.net/npm/llqrcode@1.0.0/index.min.js";
@@ -100,6 +95,7 @@ else {
 		}
 	}
 	script.onload = function() {
+		globalThis.zbarWasm = {};
 		zbarWasm.scanImageData = scanImageData;
 	}
 	document.head.appendChild(script);
