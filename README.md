@@ -33,12 +33,12 @@ The module provides ```xdcheckin```, ```xdcheckin.core``` (core APIs) and ```xdc
 
 ## Notes
 ### For Android
-The APP doesn't use WebView on Android until upstream support, therefore it will open ```http://127.0.0.1:5001``` in your browser automatically.
+The APP doesn't use WebView on Android until upstream support, therefore it will open ```http://localhost:5001``` in your browser automatically.
 
 Due to signature change, if you upgrade from version 1.3.2 (or older) to 1.3.3 (or newer), please uninstall before upgrading.
 
 ### For Linux
-The APP doesn't use WebView on Linux, therefore it will open ```http://127.0.0.1:5001``` in your browser automatically.
+The APP doesn't use WebView on Linux, therefore it will open ```http://localhost:5001``` in your browser automatically.
 
 ### For Windows
 The APP needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784) to work on Windows. Please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
