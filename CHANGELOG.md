@@ -4,34 +4,40 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.6.6] - 2024-09-26
+
+### Fixed
+
+- (Server) Fix the wrong default binding address.
+
 ## [3.6.5] - 2024-09-26
 
-# Added
+### Added
 
 - (Server) Add support to bind IPv6, hostnames and domain names.
 - (Server) Changed dafault host to "localhost".
 
 ## [3.6.4] - 2024-09-26
 
-# Fixed
+### Fixed
 
 - (APP) Fix another startup crash.
 
 ## [3.6.3] - 2024-09-26
 
-# Fixed
+### Fixed
 
 - (APP) Fix startup crash.
 
 ## [3.6.2] - 2024-09-26
 
-# Fixed
+### Fixed
 
 - (Webpage) Possible fix for "zbarWasm is not defined" error.
 
 ## [3.6.1] - 2024-09-25
 
-# Added
+### Added
 
 - (Server/Webpage) Add support for qrcode scanning on iOS devices. Needs ``xdcheckin[image]`` to be installed on the server.
 - (Module) Add ``xdcheckin.video_get_img()``, ``xdcheckin.img_scan()``, ``xdcheckin.classroom_urls`` and ``xdcheckin.classroom_url_get_single()``. Refer to source code for details.
@@ -39,31 +45,31 @@ Changelog for Xdcheckin.
 
 ## [3.5.8] - 2024-09-25
 
-# Fixed
+### Fixed
 
 - Fix "Please use Xuezaixidian APP to sign in" failure.
 
 ## [3.5.7] - 2024-09-24
 
-# Added
+### Added
 
 - (Webpage) Nuke AliPlayer telemetrics.
 
 ## [3.5.6] - 2024-09-23
 
-# Added
+### Added
 
 - (Webpage) Add support for Safari 10.1.
 
 ## [3.5.5] - 2024-09-20
 
-# Added
+### Added
 
 - Redo display error message for qrcode scanning.
 
 ## [3.5.4] - 2024-09-19
 
-# Added
+### Added
 
 - Display error message for qrcode scanning.
 - (Module) Add ```xdcheckin.Chaoxing.login_username_xxt``` and ```xdcheckin.Chaoxing.login_username_2```.
@@ -71,13 +77,13 @@ Changelog for Xdcheckin.
 
 ## [3.5.3] - 2024-09-14
 
-# Fixed
+### Fixed
 
 - Checkin failure caused by device identifier.
 
 ## [3.5.2] - 2024-09-14
 
-# Changed
+### Changed
 
 - Activities will now be fetched much faster with a new API.
 
@@ -730,7 +736,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.6...main
+[3.6.6]: https://github.com/Pairman/Xdcheckin/compare/3.6.5...3.6.6
 [3.6.5]: https://github.com/Pairman/Xdcheckin/compare/3.6.4...3.6.5
 [3.6.4]: https://github.com/Pairman/Xdcheckin/compare/3.6.3...3.6.4
 [3.6.3]: https://github.com/Pairman/Xdcheckin/compare/3.6.2...3.6.3
