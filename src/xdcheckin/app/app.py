@@ -1,6 +1,7 @@
 __all__ = ()
 
-from multiprocessing import Process as _Process
+from asyncio import new_event_loop as _new_event_loop
+from threading import Thread as _Thread
 from toga import (
 	App as _App, Box as _Box, MainWindow as _MainWindow,
 	WebView as _WebView, Label as _Label
@@ -21,7 +22,9 @@ _msg = (
 
 class _Xdcheckin(_App):
 	def startup(self):
-		_Process(target = _start_server, daemon = True).start()
+		_Thread(target = _start_server, kwargs = {
+			"host": _host, "port": _port, "loop": _new_event_loop()
+		}, daemon = True).start()
 		if _current_platform == "android":
 			from android.content import Intent
 			from android.net import Uri
