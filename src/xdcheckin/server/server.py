@@ -344,7 +344,7 @@ async def _chaoxing_checkin_checkin_qrcode_url(req):
 				urls = _img_scan(img)
 			assert urls, "No Qrcode detected."
 			qr_urls = [s for s in urls if "widget/sign/e" in s]
-			assert qr_urls, f"No checkin URL in {qr_urls}."
+			assert qr_urls, f"No checkin URL in {urls}."
 			data["url"] = next(iter(qr_urls))
 		result = await cx.checkin_checkin_qrcode_url(
 			url = data["url"], location = data["location"]
