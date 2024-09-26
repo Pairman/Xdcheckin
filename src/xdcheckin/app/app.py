@@ -9,7 +9,7 @@ from toga.platform import current_platform as _current_platform
 from toga.style import Pack as _Pack
 from xdcheckin.server.server import start_server as _start_server
 
-_url = "http://127.0.0.1:5001"
+_url = "http://localhost:5001"
 _msg = (
 	f"This APP will launch\n your browser automatically.\n"
 	f"If not, visit \"{_url}\"\n in you browser manually."
