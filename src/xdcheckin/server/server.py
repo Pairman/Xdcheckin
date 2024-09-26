@@ -4,11 +4,16 @@ __all__ = (
 	"server_routes", "server_config_key", "create_server", "start_server"
 )
 
-from asyncio import create_task as _create_task, sleep as _sleep, run as _run
+from asyncio import (
+	create_task as _create_task, sleep as _sleep, run as _run,
+	set_event_loop as _set_event_loop,
+	AbstractEventLoop as _AbstractEventLoop
+)
 from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
 from pathlib import Path as _Path
 from sys import argv as _argv, exit as _exit, stderr as _stderr
+from threading import current_thread as _current_thread, main_thread as _main_thread
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
@@ -188,6 +193,8 @@ async def _chaoxing_login(req, data = None):
 			_dumps({k: v.value for k, v in cx.cookies.items()})
 		}
 	except Exception as e:
+		from traceback import print_exc
+		print_exc()
 		data = {"err": f"{e}"}
 	finally:
 		return _Response(
@@ -398,13 +405,19 @@ def create_server(config: dict = {}):
 	))
 	return app
 
-def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
+def start_server(
+	host: str = "0.0.0.0", port: int = 5001, config: dict = {},
+	loop: _AbstractEventLoop = None
+):
 	"""Run a Xdcheckin server.
 
 	:param host: IP address.
 	:param port: Port.
 	:param config: Configurations.
+	:param loop: Event loop. Only necessary in non-main thread.
 	"""
+	if isinstance(loop, _AbstractEventLoop):
+		_set_event_loop(loop)
 	app = create_server(config = {"sessions": _TimestampDict(), **config})
 	async def _startup(app):
 		app[server_config_key]["_vacuum_task"] = _create_task(
@@ -418,10 +431,12 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 		)
 	app.on_startup.append(_startup)
 	app.on_shutdown.append(_shutdown)
+	is_main = _current_thread() == _main_thread()
+	printer = lambda _: print("Server started. Press Ctrl+C to quit.")
 	try:
 		_run_app(
-			app, host = host, port = port, handler_cancellation = True,
-			print = lambda _: print("Server started. Press Ctrl+C to quit.")
+			app, host = host, port = port, print = printer,
+			handle_signals = is_main, handler_cancellation = True
 		)
 	except KeyboardInterrupt:
 		pass
