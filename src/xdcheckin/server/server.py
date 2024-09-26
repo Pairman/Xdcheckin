@@ -398,7 +398,7 @@ def create_server(config: dict = {}):
 	))
 	return app
 
-def start_server(host: str = "localhost", port: int = 5001, config: dict = {}):
+def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 	"""Run a Xdcheckin server.
 
 	:param host: IP address.
@@ -431,7 +431,7 @@ def start_server(host: str = "localhost", port: int = 5001, config: dict = {}):
 		print("Server shut down.")
 
 def _main():
-	host, port = "localhost", 5001
+	host, port = "0.0.0.0", 5001
 	bn = _basename(_argv[0])
 	help = (
 		f"{bn} - Xdcheckin Server Commandline Tool "
