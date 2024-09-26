@@ -1,21 +1,19 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ("server_routes", "create_server", "start_server")
+__all__ = (
+	"server_routes", "server_config_key", "create_server", "start_server"
+)
 
 from asyncio import create_task as _create_task, sleep as _sleep, run as _run
 from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
 from pathlib import Path as _Path
 from sys import argv as _argv, exit as _exit, stderr as _stderr
-from socket import (
-	getaddrinfo as _getaddrinfo, AF_INET as _AF_INET, AF_INET6 as _AF_INET6,
-	gaierror as _gaierror
-)
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
 from aiohttp.web import (
-	Application as _Application, Response as _Response,
+	AppKey as _AppKey, Application as _Application, Response as _Response,
 	RouteTableDef as _RouteTableDef, run_app as _run_app
 )
 from aiohttp_session import get_session as _get_session, setup as _setup
@@ -28,12 +26,14 @@ from xdcheckin.core.xidian import (
 from xdcheckin.util.image import (
 	video_get_img as _video_get_img, img_scan as _img_scan
 )
+from xdcheckin.util.network import is_valid_host as _is_valid_host
 from xdcheckin.util.types import TimestampDict as _TimestampDict
 from xdcheckin.util.version import (
 	compare_versions as _compare_versions, version as _version
 )
 
 server_routes = _RouteTableDef()
+server_config_key = _AppKey("config", dict)
 
 _locations_str = _dumps(_locations).encode("ascii").decode("unicode-escape")
 _static_g_locations_js_str = f"var g_locations = {_locations_str};"
@@ -44,11 +44,12 @@ async def _static_g_locations_js(req):
 		content_type = "text/javascript", charset = "utf-8"
 	)
 
-with _Path(__file__).parent.resolve() as path:
-	server_routes.static("/static", path.joinpath("static"))
-	_index_html_str = path.joinpath(
-		"templates", "index.html"
-	).read_text(encoding = "utf-8")
+_static_dir_path = _Path(__file__).parent.resolve()
+server_routes.static("/static", _static_dir_path.joinpath("static"))
+
+_index_html_str = _static_dir_path.joinpath(
+	"templates", "index.html"
+).read_text(encoding = "utf-8")
 @server_routes.get("/")
 async def _index_html(req):
 	return _Response(
@@ -108,7 +109,7 @@ async def _ids_login_prepare(req):
 		).__aenter__()
 		ses = await _get_session(req)
 		ses.setdefault("uuid", f"{_uuid4()}")
-		req.app["config"]["sessions"].setdefault(
+		req.app[server_config_key]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["ids"] = ids
 		assert await ids.login_prepare()
@@ -132,7 +133,7 @@ async def _ids_login_finish(req):
 			username and password and vcode
 		), "Missing username, password or CAPTCHA verification code."
 		ses = await _get_session(req)
-		ids = req.app["config"]["sessions"][ses["uuid"]].pop("ids")
+		ids = req.app[server_config_key]["sessions"][ses["uuid"]].pop("ids")
 		assert await ids.captcha_submit_captcha(
 			captcha = {"vcode": vcode}
 		), "CAPTCHA verification failed."
@@ -175,12 +176,12 @@ async def _chaoxing_login(req, data = None):
 		assert cx.logged_in, "Chaoxing login failed."
 		ses = await _get_session(req)
 		ses.setdefault("uuid", f"{_uuid4()}")
-		req.app["config"]["sessions"].setdefault(
+		req.app[server_config_key]["sessions"].setdefault(
 			ses["uuid"], {}
 		)["cx"] = cx
 		if cx.fid == "16820":
 			nx = _Newesxidian(chaoxing = cx)
-			req.app["config"]["sessions"][ses["uuid"]]["nx"] = nx
+			req.app[server_config_key]["sessions"][ses["uuid"]]["nx"] = nx
 			_create_task(nx.__aenter__())
 		data = {
 			"fid": cx.fid, "courses": cx.courses, "cookies":
@@ -198,7 +199,7 @@ async def _newesxidian_extract_url(req):
 	try:
 		data = await req.json()
 		ses = await _get_session(req)
-		nx = req.app["config"]["sessions"][ses["uuid"]]["nx"]
+		nx = req.app[server_config_key]["sessions"][ses["uuid"]]["nx"]
 		assert nx.logged_in
 		livestream = await nx.livestream_get_live_url(
 			livestream = {"live_id": f"{data}"}
@@ -212,7 +213,7 @@ async def _chaoxing_get_curriculum(req):
 	try:
 		with_live = await req.json()
 		ses = await _get_session(req)
-		xx = req.app["config"]["sessions"][ses["uuid"]][
+		xx = req.app[server_config_key]["sessions"][ses["uuid"]][
 			"nx" if with_live else "cx"
 		]
 		assert xx.logged_in
@@ -231,7 +232,7 @@ async def _chaoxing_get_curriculum(req):
 async def _chaoxing_get_activities(req):
 	try:
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
 		data = await cx.course_get_activities()
 		status = 200
@@ -250,7 +251,7 @@ async def _chaoxing_captcha_get_captcha(req):
 		data = await req.json()
 		assert data["captcha"]
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
 		data = await cx.captcha_get_captcha(captcha = data["captcha"])
 		status = 200
@@ -269,7 +270,7 @@ async def _chaoxing_captcha_submit_captcha(req):
 		data = await req.json()
 		assert data["captcha"]
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
 		data = await cx.captcha_submit_captcha(
 			captcha = data["captcha"]
@@ -292,7 +293,7 @@ async def _chaoxing_checkin_do_sign(req):
 		data = await req.json()
 		assert data["params"], "No parameters given."
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		result = await cx.checkin_do_sign(old_params = data["params"])
 		data = result[1]
@@ -310,7 +311,7 @@ async def _chaoxing_checkin_checkin_location(req):
 		data = await req.json()
 		assert data["activity"]["active_id"], "No activity ID given."
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		data["activity"]["active_id"] = f"""{
 			data['activity']['active_id']
@@ -334,7 +335,7 @@ async def _chaoxing_checkin_checkin_qrcode_url(req):
 	try:
 		data = await req.json()
 		ses = await _get_session(req)
-		cx = req.app["config"]["sessions"][ses["uuid"]]["cx"]
+		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in, "Not logged in."
 		vsrc = data.get("video")
 		if vsrc:
@@ -369,9 +370,9 @@ async def _vacuum_server_sessions_handler(ses):
 			await ses[key].__aexit__(None, None, None)
 
 async def _vacuum_server_sessions(app):
-	sessions = app["config"]["sessions"]
+	sessions = app[server_config_key]["sessions"]
 	t = (
-		app["config"]["sessions_vacuum_days"] * 86400
+		app[server_config_key]["sessions_vacuum_days"] * 86400
 		- 18000 - _time() % 86400
 	)
 	if t <= 0:
@@ -391,7 +392,7 @@ def create_server(config: dict = {}):
 	"""
 	app = _Application()
 	app.add_routes(server_routes)
-	app["config"] = {"sessions": {}, "sessions_vacuum_days": 1, **config}
+	app[server_config_key] = {"sessions": {}, "sessions_vacuum_days": 1, **config}
 	_setup(app, _SimpleCookieStorage(
 		cookie_name = "xdcheckin", max_age = 604800
 	))
@@ -406,12 +407,13 @@ def start_server(host: str = "localhost", port: int = 5001, config: dict = {}):
 	"""
 	app = create_server(config = {"sessions": _TimestampDict(), **config})
 	async def _startup(app):
-		app["config"]["_vacuum_task"] = _create_task(
+		app[server_config_key]["_vacuum_task"] = _create_task(
 			_vacuum_server_sessions(app = app)
 		)
-		print(f"Starting Xdcheckin server on {host}:{port}.")
+		h = f"{f'[{host}]' if _is_valid_host(host) == 6 else host}"
+		print(f"Starting Xdcheckin server on {h}:{port}.")
 	async def _shutdown(app):
-		await app["config"]["sessions"].vacuum(
+		await app[server_config_key]["sessions"].vacuum(
 			handler = _vacuum_server_sessions_handler
 		)
 	app.on_startup.append(_startup)
@@ -428,20 +430,8 @@ def start_server(host: str = "localhost", port: int = 5001, config: dict = {}):
 		_run(app.cleanup())
 		print("Server shut down.")
 
-def _is_valid_host(host: str):
-	try:
-		_getaddrinfo(host, None, _AF_INET)
-		return True
-	except _gaierror:
-		pass
-	try:
-		_getaddrinfo(host, None, _AF_INET6)
-		return True
-	except _gaierror:
-		pass
-	return False
-
 def _main():
+	host, port = "localhost", 5001
 	bn = _basename(_argv[0])
 	help = (
 		f"{bn} - Xdcheckin Server Commandline Tool "
@@ -449,7 +439,7 @@ def _main():
 		f"Usage: \n"
 		f"  {bn} [<host> <port>]\t"
 		"Start server on the given host and port.\n"
-		f"  {' ' * len(bn)}\t\t\tDefault is 'localhost:5001'.\n"
+		f"  {' ' * len(bn)}\t\t\tDefault is '{host}:{port}'.\n"
 		f"  {bn} -h|--help\t\tShow help."
 	)
 	if len(_argv) == 2 and _argv[1] in ("-h", "--help"):
@@ -458,7 +448,6 @@ def _main():
 	elif not len(_argv) in (1, 3):
 		print(help, file = _stderr)
 		_exit(2)
-	host, port = "localhost", 5001
 	if len(_argv) == 3:
 		if _is_valid_host(_argv[1]):
 			host = _argv[1]

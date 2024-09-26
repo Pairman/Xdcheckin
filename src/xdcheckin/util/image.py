@@ -61,13 +61,9 @@ if _ffmpeg:
 				"-vf", "select='eq(n\\,23)'", "-vframes", "1",
 				"-f", "image2", "-"
 			), stdout = _PIPE)
-			ret = _open(_BytesIO(proc.communicate()[0]))
+			return _open(_BytesIO(proc.communicate()[0]))
 		except Exception:
-			import traceback
-			traceback.print_exc()
-			ret = _Image()
-		finally:
-			return ret
+			return _Image()
 else:
 	async def video_get_img(url: str, ses = None, len_limit: int = 384):
 		"""Dummy fallback for ``video_get_img()``. \
