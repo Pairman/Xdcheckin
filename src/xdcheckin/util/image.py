@@ -1,7 +1,8 @@
 __all__ = ("video_get_img", "img_scan")
 
 from io import BytesIO as _BytesIO
-from subprocess import run as _run, Popen as _Popen, PIPE as _PIPE
+from shutil import which as _which
+from subprocess import Popen as _Popen, PIPE as _PIPE
 from aiohttp import request as _request
 
 try:
@@ -21,12 +22,10 @@ except ImportError:
 		return _Image()
 
 try:
-	from imageio_ffmpeg import get_ffmpeg_exe
-	_ffmpeg = get_ffmpeg_exe()
+	from imageio_ffmpeg import get_ffmpeg_exe as _get_ffmpeg_exe
+	_ffmpeg = _get_ffmpeg_exe()
 except ImportError:
-	_ffmpeg = None if _run(
-		("ffmpeg", "-version"), stdout = _PIPE, stderr = _PIPE
-	).returncode else "ffmpeg"
+	_ffmpeg = "ffmpeg" if _which("ffmpeg") else None
 
 if _ffmpeg:
 	async def video_get_img(url: str, ses = None, len_limit: int = 256):
