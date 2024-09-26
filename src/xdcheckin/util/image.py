@@ -41,13 +41,18 @@ if _ffmpeg:
 		try:
 			if ses:
 				res = await ses.get(url, headers = {})
-				assert res.status == 200
+				assert (
+					res.status == 200 and
+					res.content_length < len_limit
+				)
 				text = await res.text()
 			else:
 				async with _request("GET", url) as res:
-					assert res.status == 200
+					assert (
+						res.status == 200 and
+						res.content_length < len_limit
+					)
 					text = await res.text()
-			assert text.content_length < len_limit
 			ts = text.split()[-1]
 			assert ts.endswith(".ts")
 			proc = _Popen((
@@ -58,6 +63,8 @@ if _ffmpeg:
 			), stdout = _PIPE)
 			ret = _open(_BytesIO(proc.communicate()[0]))
 		except Exception:
+			import traceback
+			traceback.print_exc()
 			ret = _Image()
 		finally:
 			return ret
