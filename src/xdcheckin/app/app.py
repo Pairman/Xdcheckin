@@ -22,7 +22,6 @@ _msg = (
 class _Xdcheckin(_App):
 	def startup(self):
 		_Process(target = _start_server, daemon = True).start()
-		self.main_window = _MainWindow(title = self.formal_name)
 		if _current_platform == "android":
 			from android.content import Intent
 			from android.net import Uri
@@ -42,5 +41,6 @@ class _Xdcheckin(_App):
 			children = (_WebView(url = _url, style = _Pack(
 				flex = 1
 			)), )
+		self.main_window = _MainWindow(title = self.formal_name)
 		self.main_window.content = _Box(children = children)
 		self.main_window.show()
