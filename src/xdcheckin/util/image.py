@@ -3,7 +3,22 @@ __all__ = ("video_get_img", "img_scan")
 from io import BytesIO as _BytesIO
 from subprocess import run as _run, Popen as _Popen, PIPE as _PIPE
 from aiohttp import request as _request
-from PIL.Image import open as _open, Image as _Image
+
+try:
+	from PIL.Image import open as _open, Image as _Image
+except ImportError:
+	class _Image:
+		"""Dummy fallback for ``PIL.Image.Image``.
+		"""
+		height = width = 0
+		def __enter__(self):
+			return self
+		def __exit__(self, *args):
+			pass
+	def _open(fp, mode = None, formats = None):
+		"""Dummy fallback for ``PIL.Image.open()``.
+		"""
+		return _Image()
 
 try:
 	from imageio_ffmpeg import get_ffmpeg_exe
@@ -49,7 +64,7 @@ if _ffmpeg:
 			return ret
 else:
 	async def video_get_img(url: str, ses = None, len_limit: int = 384):
-		"""Dummy fallback for ``video_get_img``. \
+		"""Dummy fallback for ``video_get_img()``. \
 		Please install ``xdcheckin[image]``.
 
 		:param url: URL of the stream.
@@ -73,7 +88,7 @@ try:
 		)]
 except ImportError:
 	def img_scan(img):
-		"""Dummy fallback for ``img_scan``. \
+		"""Dummy fallback for ``img_scan()``. \
 		Please install ``xdcheckin[image]``.
 
 		:param img: ``PIL.Image.Image`` Image.
