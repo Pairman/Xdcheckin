@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.6.2] - 2024-09-26
+
+# Fixed
+
+- (Webpage) Possible fix for "zbarWasm is not defined" error.
+
 ## [3.6.1] - 2024-09-25
 
 # Added
@@ -705,7 +711,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.2...main
+[3.6.2]: https://github.com/Pairman/Xdcheckin/compare/3.6.1...3.6.2
 [3.6.1]: https://github.com/Pairman/Xdcheckin/compare/3.5.8...3.6.1
 [3.5.8]: https://github.com/Pairman/Xdcheckin/compare/3.5.7...3.5.8
 [3.5.7]: https://github.com/Pairman/Xdcheckin/compare/3.5.6...3.5.7

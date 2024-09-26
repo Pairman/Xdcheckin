@@ -71,6 +71,7 @@ function isPlatformIOS() {
 }
 
 async function screenshot_scan(video) {
+	await zbarWasmReady;
 	if (video.readyState < video.HAVE_ENOUGH_DATA)
 		return [];
 	const canvas = newElement("canvas");

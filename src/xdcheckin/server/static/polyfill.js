@@ -44,59 +44,65 @@ if (!Element.prototype.replaceChildren)
 		this.append(...nodes);
 	}
 
-if (typeof WebAssembly === "object") {
-	const script = document.createElement("script");
-	script.src =
-	 "https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.11.0/dist/index.js";
-	script.onload = async function() {
-		const scanner = await zbarWasm.getDefaultScanner();
-		scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_NONE,
-				zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 0);
-		scanner.setConfig(zbarWasm.ZBarSymbolType.ZBAR_QRCODE,
-				zbarWasm.ZBarConfigType.ZBAR_CFG_ENABLE, 1);
-	}
-	document.head.appendChild(script);
-}
-else {
-	const script = document.createElement("script");
-	globalThis.module = {};
-	script.src = "https://cdn.jsdelivr.net/npm/llqrcode@1.0.0/index.min.js";
-	async function scanImageData (data) {
-		const canvas = document.createElement("canvas");
-		canvas.height = data.height;
-		canvas.width = data.width;
-		const ctx = canvas.getContext("2d");
-		ctx.putImageData(data, 0, 0);
-		let nh = data.height, nw = data.width;
-		if(data.height * data.width > qrcode.maxImgSize) {
-			const r = data.width / data.height;
-			nh = Math.sqrt(qrcode.maxImgSize / r);
-			nw = r * nh;
+globalThis.zbarWasmReady = new Promise(function (resolve, reject) {
+	if (typeof WebAssembly === "object") {
+		const script = document.createElement("script");
+		script.src =
+		"https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.11.0/dist/index.js";
+		script.onload = function () {
+			zbarWasm.getDefaultScanner().then(function (s) {
+				s.setConfig(0, 0, 0);
+				s.setConfig(64, 0, 1);
+				resolve();
+			});
 		}
-		const ncanvas = document.createElement("canvas");
-		qrcode.height = ncanvas.height = nh;
-		qrcode.width = ncanvas.width = nw;
-		const nctx = ncanvas.getContext("2d");
-		nctx.drawImage(canvas, 0, 0, data.width, data.height, 0, 0, nw,
-			       nh);
-		qrcode.imagedata = nctx.getImageData(0, 0, nw, nh);
-		try {
-			qrcode.result = qrcode.process(nctx);
-			return [{
-				"decode": function() {return qrcode.result;}
-			}];
-		}
-		catch (e) {
-			if (typeof e === "string" &&
-			    e.startsWith("Couldn't find enough"))
-				return [];
-			else
-				throw e;
-		}
+		script.onerror = reject;
+		document.head.appendChild(script);
 	}
-	script.onload = function() {
-		globalThis.zbarWasm = {};
-		zbarWasm.scanImageData = scanImageData;
+	else {
+		const script = document.createElement("script");
+		globalThis.module = {};
+		script.src =
+		"https://cdn.jsdelivr.net/npm/llqrcode@1.0.0/index.min.js";
+		async function scanImageData (data) {
+			const canvas = document.createElement("canvas");
+			canvas.height = data.height;
+			canvas.width = data.width;
+			const ctx = canvas.getContext("2d");
+			ctx.putImageData(data, 0, 0);
+			let nh = data.height, nw = data.width;
+			if (data.height * data.width > qrcode.maxImgSize) {
+				const r = data.width / data.height;
+				nh = Math.sqrt(qrcode.maxImgSize / r);
+				nw = r * nh;
+			}
+			const ncanvas = document.createElement("canvas");
+			qrcode.height = ncanvas.height = nh;
+			qrcode.width = ncanvas.width = nw;
+			const nctx = ncanvas.getContext("2d");
+			nctx.drawImage(canvas, 0, 0, data.width, data.height,
+				       0, 0, nw, nh);
+			qrcode.imagedata = nctx.getImageData(0, 0, nw, nh);
+			try {
+				qrcode.result = qrcode.process(nctx);
+				return [{"decode": function() {
+					return qrcode.result;
+				}}];
+			}
+			catch (e) {
+				if (typeof e === "string" &&
+				    e.startsWith("Couldn't find enough"))
+					return [];
+				else
+					throw e;
+			}
+		}
+		script.onload = function() {
+			globalThis.zbarWasm = {};
+			zbarWasm.scanImageData = scanImageData;
+			resolve();
+		}
+		script.onerror = reject;
+		document.head.appendChild(script);
 	}
-	document.head.appendChild(script);
-}
+});
