@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.7.1] - 2024-09-26
+
+### Fixed
+
+- (APP) Fix webpage loading error on Windows.
+
 ## [3.6.6] - 2024-09-26
 
 ### Fixed
@@ -736,7 +742,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.6...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.7.1...main
+[3.7.1]: https://github.com/Pairman/Xdcheckin/compare/3.6.6...3.7.1
 [3.6.6]: https://github.com/Pairman/Xdcheckin/compare/3.6.5...3.6.6
 [3.6.5]: https://github.com/Pairman/Xdcheckin/compare/3.6.4...3.6.5
 [3.6.4]: https://github.com/Pairman/Xdcheckin/compare/3.6.3...3.6.4
