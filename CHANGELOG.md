@@ -8,7 +8,8 @@ Changelog for Xdcheckin.
 
 # Added
 
-- Add support for IPv6.
+- (Server) Add support to bind IPv6, hostnames and domain names.
+- (Server) Changed dafault host to "localhost".
 
 ## [3.6.4] - 2024-09-26
 
