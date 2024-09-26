@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.6.4] - 2024-09-26
+
+# Fixed
+
+- (APP) Fix another startup crash.
+
 ## [3.6.3] - 2024-09-26
 
 # Fixed
@@ -717,7 +723,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.3...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.6.4...main
+[3.6.4]: https://github.com/Pairman/Xdcheckin/compare/3.6.3...3.6.4
 [3.6.3]: https://github.com/Pairman/Xdcheckin/compare/3.6.2...3.6.3
 [3.6.2]: https://github.com/Pairman/Xdcheckin/compare/3.6.1...3.6.2
 [3.6.1]: https://github.com/Pairman/Xdcheckin/compare/3.5.8...3.6.1
