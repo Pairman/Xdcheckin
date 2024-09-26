@@ -7,7 +7,10 @@ from json import dumps as _dumps, loads as _loads
 from os.path import basename as _basename
 from pathlib import Path as _Path
 from sys import argv as _argv, exit as _exit, stderr as _stderr
-from socket import inet_aton as _inet_aton
+from socket import (
+	getaddrinfo as _getaddrinfo, AF_INET as _AF_INET, AF_INET6 as _AF_INET6,
+	gaierror as _gaierror
+)
 from time import time as _time
 from uuid import uuid4 as _uuid4
 from aiohttp import request as _request
@@ -394,7 +397,7 @@ def create_server(config: dict = {}):
 	))
 	return app
 
-def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
+def start_server(host: str = "localhost", port: int = 5001, config: dict = {}):
 	"""Run a Xdcheckin server.
 
 	:param host: IP address.
@@ -425,6 +428,19 @@ def start_server(host: str = "0.0.0.0", port: int = 5001, config: dict = {}):
 		_run(app.cleanup())
 		print("Server shut down.")
 
+def _is_valid_host(host: str):
+	try:
+		_getaddrinfo(host, None, _AF_INET)
+		return True
+	except _gaierror:
+		pass
+	try:
+		_getaddrinfo(host, None, _AF_INET6)
+		return True
+	except _gaierror:
+		pass
+	return False
+
 def _main():
 	bn = _basename(_argv[0])
 	help = (
@@ -433,8 +449,8 @@ def _main():
 		f"Usage: \n"
 		f"  {bn} [<host> <port>]\t"
 		"Start server on the given host and port.\n"
-		f"  {' ' * len(bn)}\t\t\t'0.0.0.0:5001' by default.\n"
-		f"  {bn} -h\t\t\tShow help. Also '--help'."
+		f"  {' ' * len(bn)}\t\t\tDefault is 'localhost:5001'.\n"
+		f"  {bn} -h|--help\t\tShow help."
 	)
 	if len(_argv) == 2 and _argv[1] in ("-h", "--help"):
 		print(help)
@@ -442,13 +458,12 @@ def _main():
 	elif not len(_argv) in (1, 3):
 		print(help, file = _stderr)
 		_exit(2)
-	host, port = "0.0.0.0", 5001
+	host, port = "localhost", 5001
 	if len(_argv) == 3:
-		try:
+		if _is_valid_host(_argv[1]):
 			host = _argv[1]
-			_inet_aton(host)
-		except Exception:
-			print(f"Invalid IP address {_argv[1]}", file = _stderr)
+		else:
+			print(f"Invalid host {_argv[1]}", file = _stderr)
 			_exit(2)
 		port = int(_argv[2]) if _argv[2].isdigit() else 0
 		if not 0 < port < 65536:
