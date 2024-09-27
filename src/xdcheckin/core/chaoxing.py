@@ -49,8 +49,8 @@ class Chaoxing:
 				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
 				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
 				"obile Safari/537.36 com.chaoxing.mobile.xuezai"
-				"xidian/ChaoXingStudy_1000149_5.3.1_android_pho"
-				"ne_5000_83",
+				"xidian/ChaoXingStudy_1000149_6.2_android_phone"
+				"_6001_234",
 			"X-Forwarded-For":
 				f"113.200.{_trunc(_random() * 228) + 16}."
 				f"{_trunc(_random() * 256)}"
