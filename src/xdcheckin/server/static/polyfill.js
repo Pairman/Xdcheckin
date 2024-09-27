@@ -11,7 +11,7 @@ if (typeof globalThis === "undefined")
 	})();
 
 (function() {
-	function assign (target, ...sources) {
+	function assign(target, ...sources) {
 		if (target == null)
 			throw new TypeError(
 				  "Cannot convert undefined or null to object");
@@ -49,7 +49,7 @@ globalThis.zbarWasmReady = new Promise(function (resolve, reject) {
 		const script = document.createElement("script");
 		script.src =
 		"https://cdn.jsdelivr.net/npm/@undecaf/zbar-wasm@0.11.0/dist/index.js";
-		script.onload = function () {
+		script.onload = function() {
 			zbarWasm.getDefaultScanner().then(function (s) {
 				s.setConfig(0, 0, 0);
 				s.setConfig(64, 0, 1);
@@ -64,7 +64,7 @@ globalThis.zbarWasmReady = new Promise(function (resolve, reject) {
 		globalThis.module = {};
 		script.src =
 		"https://cdn.jsdelivr.net/npm/llqrcode@1.0.0/index.min.js";
-		async function scanImageData (data) {
+		async function scanImageData(data) {
 			const canvas = document.createElement("canvas");
 			canvas.height = data.height;
 			canvas.width = data.width;
