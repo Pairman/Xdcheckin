@@ -4,6 +4,17 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.8.1] - 2024-09-28
+
+### Fixed
+
+- Fix checkin failure caused by missing CAPTCHA ID.
+
+### Changed
+
+- Removed the ```captcha``` param for ```xdcheckin.Chaoxing.captcha_get_captcha()```.
+- ```xdcheckin.Chaoxing.checkin_do_presign()```, ```xdcheckin.Chaoxing.checkin_checkin_location()```, ```xdcheckin.Chaoxing.checkin_checkin_qrcode()``` and ```xdcheckin.Chaoxing.checkin_checkin_qrcode_url()``` no longer returns ```captcha``` .
+
 ## [3.7.1] - 2024-09-26
 
 ### Fixed
