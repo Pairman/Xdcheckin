@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.8.2] - 2024-09-28
+
+### Changed
+
+- (Module) Updated ```xdcheckin.Newesxidian.curriculum_get_curriculum()``` to parse its own data in case the one from Chaoxing is empty.
+
 ## [3.8.1] - 2024-09-28
 
 ### Fixed
@@ -753,7 +759,9 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.7.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.8.2...main
+[3.8.2]: https://github.com/Pairman/Xdcheckin/compare/3.8.1...3.8.2
+[3.8.1]: https://github.com/Pairman/Xdcheckin/compare/3.7.1...3.8.1
 [3.7.1]: https://github.com/Pairman/Xdcheckin/compare/3.6.6...3.7.1
 [3.6.6]: https://github.com/Pairman/Xdcheckin/compare/3.6.5...3.6.6
 [3.6.5]: https://github.com/Pairman/Xdcheckin/compare/3.6.4...3.6.5
