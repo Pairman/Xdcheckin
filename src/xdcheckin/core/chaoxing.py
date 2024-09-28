@@ -21,19 +21,22 @@ from xdcheckin.util.encryption import (
 from xdcheckin.util.session import CachedSession as _CachedSession
 from xdcheckin.util.time import strftime as _strftime
 
+_Chaoxing_captcha_get_captcha_regex1 = _compile(
+	r"captchaId: '([0-9A-Za-z]{32})'"
+)
+_Chaoxing_captcha_get_captcha_regex2 = _compile(r"t\":(\d+)")
 _Chaoxing_login_username_yz_regex = _compile(r"enc.*?([0-9a-f]{32})", _DOTALL)
 _Chaoxing_course_get_courses_regex1 = _compile(
 	r"Client\('(\d+)','(.*?)','(\d+).*?color3\" title=\"(.*?)\".*?\n"
 	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?|(isState)", _DOTALL
 )
 _Chaoxing_course_get_courses_regex2 = _compile(r", |,|，|、")
-_Chaoxing_captcha_get_captcha_regex = _compile(r"t\":(\d+)")
 _Chaoxing_checkin_do_analysis_regex = _compile(r"([0-9a-f]{32})")
 _Chaoxing_checkin_do_presign_regex = _compile(
 	r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\""
 	r".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" "
-	r"value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?.*?"
-	r"captchaId: '([0-9A-Za-z]{32})|(zsign_success)", _DOTALL
+	r"value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?"
+	r"|(zsign_success)", _DOTALL
 )
 _Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
 _Chaoxing_checkin_checkin_qrcode_url_regex = _compile(
@@ -173,45 +176,52 @@ class Chaoxing:
 	async def post(self, *args, **kwargs):
 		return await self.__session.post(*args, **kwargs)
 
-	async def captcha_get_captcha(self, captcha: dict = {"captcha_id": ""}):
-		"""Get CAPTCHA for checkin.
+	async def captcha_get_captcha(self):
+		"""Get CAPTCHA.
 
-		:param captcha: CAPTCHA ID and type.
-		:return: CAPTCHA images and token.
+		:return: CAPTCHA ID, images and token.
 		"""
-		url1 = "https://captcha.chaoxing.com/captcha/get/conf"
-		params1 = {
-			"callback": "cx_captcha_function",
-			"captchaId": captcha["captcha_id"],
-			"_": _trunc(_time() * 1000)
-		}
-		res1 = await self.__session.get(url1, params = params1)
-		captcha = {
-			**captcha, "type": "slide", "server_time":
-			_Chaoxing_captcha_get_captcha_regex.search(
+		if not "captcha_id" in self.__secrets:
+			url1 = "https://mobilelearn.chaoxing.com/front/mobile/sign/js/mySignCaptchaUtils.js"
+			res1 = await self.__session.get(url1, ttl = 86400)
+			match = _Chaoxing_captcha_get_captcha_regex1.search(
 				await res1.text()
+			)
+			self.__secrets["captcha_id"] = match[1] if match else ""
+		captcha_id = self.__secrets["captcha_id"]
+		url2 = "https://captcha.chaoxing.com/captcha/get/conf"
+		params2 = {
+			"callback": "cx_captcha_function",
+			"captchaId": captcha_id, "_": _trunc(_time() * 1000)
+		}
+		res2 = await self.__session.get(url2, params = params2)
+		captcha = {
+			"captcha_id": captcha_id,
+			"type": "slide", "server_time":
+			_Chaoxing_captcha_get_captcha_regex2.search(
+				await res2.text()
 			)[1]
 		}
 		captcha_key, token, iv = _chaoxing_captcha_get_checksum(
 			captcha = captcha
 		)
-		url2 = "https://captcha.chaoxing.com/captcha/get/verification/image"
-		params2 = {
+		url3 = "https://captcha.chaoxing.com/captcha/get/verification/image"
+		params3 = {
 			"callback": "cx_captcha_function",
-			"captchaId": captcha["captcha_id"],
+			"captchaId": captcha_id,
 			"captchaKey": captcha_key,
 			"token": token, "type": "slide", "version": "1.1.20",
 			"referer": "https://mobilelearn.chaoxing.com",
 			"_": _trunc(_time() * 1000), "iv": iv
 		}
-		res2 = await self.__session.get(url2, params = params2)
-		data2 = _loads((await res2.text())[20 : -1])
+		res3 = await self.__session.get(url3, params = params3)
+		data3 = _loads((await res3.text())[20 : -1])
 		captcha.update({
-			"token": data2["token"],
+			"token": data3["token"],
 			"big_img_src":
-			data2["imageVerificationVo"]["shadeImage"],
+			data3["imageVerificationVo"]["shadeImage"],
 			"small_img_src":
-			data2["imageVerificationVo"]["cutoutImage"]
+			data3["imageVerificationVo"]["cutoutImage"]
 		})
 		return captcha
 
@@ -891,7 +901,7 @@ class Chaoxing:
 		"""Send analytics for checkin.
 
 		:param activity: Activity ID in dictionary.
-		:return: True on success, otherwise False.
+		:return: ``True`` on success.
 		"""
 		url1 = "https://mobilelearn.chaoxing.com/pptSign/analysis"
 		params1 = {
@@ -922,8 +932,8 @@ class Chaoxing:
 
 		:param activity: Activity ID in dictionary.
 		:param course: Course ID (optional) and class ID.
-		:return: Presign state (2 if checked-in or 1 on success), \
-		checkin location and CAPTCHA.
+		:return: Presign state (``2`` if checked-in or \
+		``1`` on success) and checkin location.
 		"""
 		url = "https://mobilelearn.chaoxing.com/newsign/preSign"
 		params = {
@@ -941,16 +951,15 @@ class Chaoxing:
 			"latitude": -1, "longitude": -1, "address": "",
 			"ranged": 0, "range": 0
 		}
-		captcha = {"captcha_id": ""}
 		res = await self.__session.get(url, params = params)
 		if res.status != 200:
-			return 0, location, captcha
+			return 0, location
 		state = 1
 		match = _Chaoxing_checkin_do_presign_regex.search(
 			await res.text()
 		)
 		if match:
-			if match[7]:
+			if match[6]:
 				state = 2
 			if match[1] == "1":
 				location = {
@@ -960,8 +969,7 @@ class Chaoxing:
 					"ranged": int(match[1]),
 					"range": int(match[5] or 0)
 				}
-			captcha["captcha_id"] = match[6]
-		return state, location, captcha
+		return state, location
 
 	async def checkin_do_sign(
 		self, activity: dict = {"active_id": "", "type": ""},
@@ -974,7 +982,8 @@ class Chaoxing:
 		:param location: Address, latitude, longitude and ranged flag.
 		:param old_params: Reuse previous parameters. \
 		Overrides activity and location if given.
-		:return: Sign state (True on success), message and parameters.
+		:return: Sign state (``True`` on success), message \
+		and parameters.
 		"""
 		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		if old_params.get("activeId"):
@@ -1028,8 +1037,8 @@ class Chaoxing:
 		:param activity: Activity ID in dictionary.
 		:param location: Address, latitude and longitude. \
 		Overriden by server-side location if any.
-		:return: Checkin state (True on success), message, \
-		parameters and captcha (``{}`` if checked-in or failed).
+		:return: Checkin state (``True`` on success), message \
+		and parameters.
 		"""
 		try:
 			_analyze = _create_task(self.checkin_do_analysis(
@@ -1070,12 +1079,11 @@ class Chaoxing:
 				activity = {**activity, "type": "4"},
 				location = location
 			)
-			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
-			return False, {
-				"msg": f"{e}", "params": {}, "captcha": {}
-			}
+			from traceback import print_exc
+			print_exc()
+			return False, {"msg": f"{e}", "params": {}}
 
 	async def checkin_checkin_qrcode(
 		self, activity: dict = {"active_id": "", "enc": ""},
@@ -1126,12 +1134,9 @@ class Chaoxing:
 				activity = {**activity, "type": "2"},
 				location = location
 			)
-			result[1]["captcha"] = presign[2]
 			return result
 		except Exception as e:
-			return False, {
-				"msg": f"{e}", "params": {}, "captcha": {}
-			}
+			return False, {"msg": f"{e}", "params": {}}
 
 	async def checkin_checkin_qrcode_url(
 		self, url: str = "",
@@ -1150,6 +1155,4 @@ class Chaoxing:
 				"active_id": match[1], "enc": match[2]
 			}, location = location)
 		except Exception as e:
-			return False, {
-				"msg": f"{e}", "params": {}, "captcha": {}
-			}
+			return False, {"msg": f"{e}", "params": {}}

@@ -255,12 +255,10 @@ async def _chaoxing_get_activities(req):
 @server_routes.post("/chaoxing/captcha_get_captcha")
 async def _chaoxing_captcha_get_captcha(req):
 	try:
-		data = await req.json()
-		assert data["captcha"]
 		ses = await _get_session(req)
 		cx = req.app[server_config_key]["sessions"][ses["uuid"]]["cx"]
 		assert cx.logged_in
-		data = await cx.captcha_get_captcha(captcha = data["captcha"])
+		data = await cx.captcha_get_captcha()
 		status = 200
 	except Exception:
 		data = {}
@@ -328,10 +326,7 @@ async def _chaoxing_checkin_checkin_location(req):
 		)
 		data = result[1]
 	except Exception as e:
-		data = {
-			"msg": f"Checkin error. ({e})", "params": {},
-			"captcha": {}
-		}
+		data = {"msg": f"Checkin error. ({e})", "params": {}}
 	finally:
 		return _Response(
 			text = _dumps(data), content_type = "application/json"
@@ -362,10 +357,7 @@ async def _chaoxing_checkin_checkin_qrcode_url(req):
 		)
 		data = result[1]
 	except Exception as e:
-		data = {
-			"msg": f"Checkin error. ({e})", "params": {},
-			"captcha": {}
-		}
+		data = {"msg": f"Checkin error. ({e})", "params": {}}
 	finally:
 		return _Response(
 			text = _dumps(data), content_type = "application/json"

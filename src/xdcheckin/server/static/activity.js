@@ -45,10 +45,8 @@ async function getActivities() {
 	getActivities.calling = false;
 }
 
-async function chaoxingCheckinCaptcha(params, captcha, e_id_prefix) {
-	const res = await post("/chaoxing/captcha_get_captcha", data = {
-		"captcha": captcha
-	})
+async function chaoxingCheckinCaptcha(params, e_id_prefix) {
+	const res = await post("/chaoxing/captcha_get_captcha")
 	if (res.status_code != 200 && e_id_prefix == "activities") {
 		alert(`Checkin error. (Backend error, ${res.status_code})`);
 		return;
@@ -119,7 +117,7 @@ async function chaoxingCheckinLocation(activity) {
 	}
 	alert(unescapeUnicode(data.msg));
 	if (data.msg.includes("validate"))
-		chaoxingCheckinCaptcha(data.params, data.captcha, "activities");
+		chaoxingCheckinCaptcha(data.params, "activities");
 }
 
 async function chaoxingCheckinLocationWrapper(activity) {
@@ -148,8 +146,7 @@ async function chaoxingCheckinQrcode(url, result_div_id) {
 	if (d.msg.includes("success"))
 		alert(unescapeUnicode(d.msg));
 	else if (d.msg.includes("validate"))
-		chaoxingCheckinCaptcha(d.params, d.captcha,
-				       result_div_id.split("-")[0]);
+		chaoxingCheckinCaptcha(d.params, result_div_id.split("-")[0]);
 };
 
 async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
