@@ -12,8 +12,8 @@ Changelog for Xdcheckin.
 
 ### Changed
 
-- Removed the ```captcha``` param for ```xdcheckin.Chaoxing.captcha_get_captcha()```.
-- ```xdcheckin.Chaoxing.checkin_do_presign()```, ```xdcheckin.Chaoxing.checkin_checkin_location()```, ```xdcheckin.Chaoxing.checkin_checkin_qrcode()``` and ```xdcheckin.Chaoxing.checkin_checkin_qrcode_url()``` no longer returns ```captcha``` .
+- (Module) Removed the ```captcha``` param for ```xdcheckin.Chaoxing.captcha_get_captcha()```.
+- (Module) ```xdcheckin.Chaoxing.checkin_do_presign()```, ```xdcheckin.Chaoxing.checkin_checkin_location()```, ```xdcheckin.Chaoxing.checkin_checkin_qrcode()``` and ```xdcheckin.Chaoxing.checkin_checkin_qrcode_url()``` no longer returns ```captcha``` .
 
 ## [3.7.1] - 2024-09-26
 
