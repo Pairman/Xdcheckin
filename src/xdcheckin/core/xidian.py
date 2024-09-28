@@ -245,11 +245,11 @@ class Newesxidian:
 		URL will fallback to replay URL for non-ongoing live IDs.
 		"""
 		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
-		params = {"liveId": livestream["live_id"]}
+		live_id = livestream["live_id"]
+		params = {"liveId": live_id}
 		res = await self.__cx.get(url, params = params, ttl = 86400)
 		return {
-			"url": await res.text(),
-			"live_id": livestream["live_id"],
+			"url": await res.text(), "live_id": live_id,
 			"device": "", "location": ""
 		}
 
@@ -265,14 +265,11 @@ class Newesxidian:
 		:return: Livestream URL, live ID (``""`` if not given), device \
 		ID and classroom location (``""`` if device ID not given).
 		"""
-		url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
-		params1 = {"liveId": livestream.get("live_id") or ""}
-		url2 = "http://newesxidian.chaoxing.com/live/getViewUrlNoCourseLive"
-		params2 = {
-			"deviceCode": livestream.get("device") or "", "status": 1
-		}
 		location = livestream.get("location") or ""
+		device_code = livestream.get("device") or ""
 		if not livestream.get("device"):
+			url1 = "http://newesxidian.chaoxing.com/live/listSignleCourse"
+			params1 = {"liveId": livestream.get("live_id") or ""}
 			res1 = await self.__cx.get(
 				url1, params = params1, ttl = 86400
 			)
@@ -280,14 +277,15 @@ class Newesxidian:
 				content_type = None
 			) or []):
 				if f"{lesson['id']}" == livestream["live_id"]:
-					params2["deviceCode"] = lesson["deviceCode"]
+					device_code = lesson["deviceCode"]
 					location = lesson["schoolRoomName"].rstrip()
 					break
+		url2 = "http://newesxidian.chaoxing.com/live/getViewUrlNoCourseLive"
+		params2 = {"deviceCode": device_code, "status": 1}
 		res2 = await self.__cx.get(url2, params = params2, ttl = 86400)
 		return {
 			"url": await res2.text(), "live_id": params1["liveId"],
-			"device": params2["deviceCode"],
-			"location": location
+			"device": device_code, "location": location
 		}
 
 	async def curriculum_get_curriculum(self, week: str = ""):
@@ -298,19 +296,47 @@ class Newesxidian:
 		"""
 		async def _get_livestream(lesson):
 			class_id = f"{lesson['teachClazzId']}"
+			location = lesson["place"]
 			live_id = f"{lesson['id']}"
-			location = f"{lesson['place']}"
+			lesson = {
+				"class_id": class_id,
+				"course_id": f"{lesson['courseId']}",
+				"name": lesson["courseName"],
+				"locations": [location],
+				"invite_code": "",
+				"teachers": self.__cx.courses.get(
+					class_id, {}
+				).get("teachers", []),
+				"times": [{
+					"day": f"{lesson['weekDay']}",
+					"period_begin": f"{lesson['jie']}",
+					"period_end": f"{lesson['jie']}"
+				}]
+			}
 			if not class_id in curriculum["lessons"]:
-				return
-			if not "livestreams" in curriculum["lessons"][class_id]:
-				curriculum["lessons"][class_id]["livestreams"] = []
+				curriculum["lessons"][class_id] = lesson
+			else:
+				_ts = curriculum["lessons"][class_id]["times"]
+				t = lesson["times"][0]
+				for _t in _ts:
+					b = int(t["period_begin"])
+					e = int(t["period_end"])
+					_b = int(_t["period_begin"])
+					_e = int(_t["period_end"])
+					if _b <= b and e <= _e:
+						break
+				else:
+					_ts.append(t)
 			ls = await self.livestream_get_live_url(livestream = {
 				"live_id": live_id, "location": location
 			})
-			for l in curriculum["lessons"][class_id]["livestreams"]:
+			_ls = curriculum["lessons"][class_id].setdefault(
+				"livestreams", []
+			)
+			for l in _ls:
 				if l["device"] == ls["device"]:
 					return
-			curriculum["lessons"][class_id]["livestreams"].append(ls)
+			_ls.append(ls)
 		curriculum = await self.__cx.curriculum_get_curriculum(
 			week = week
 		)
