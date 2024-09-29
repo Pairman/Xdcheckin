@@ -937,9 +937,9 @@ class Chaoxing:
 		)
 		if match:			
 			location = {
-				"latitude": float(match[3] or -1),
-				"longitude": float(match[4] or -1),
-				"address": match[2] or "",
+				"latitude": float(match[3] or location["latitude"]),
+				"longitude": float(match[4] or location["longitude"]),
+				"address": match[2] or location["address"],
 				"ranged": int(match[1]),
 				"range": int(match[5] or 0)
 			}
