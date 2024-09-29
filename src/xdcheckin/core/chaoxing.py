@@ -1060,6 +1060,10 @@ class Chaoxing:
 				})
 		if old_params.get("activeId"):
 			params = old_params
+			activity = {"active_id": old_params["activeId"]}
+			activity["type"] = (await self.checkin_get_info_widget(
+				activity = activity
+			))["otherId"]
 		else:
 			params = {
 				"name": "", "uid": self.__uid, "fid":
