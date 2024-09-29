@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.2] - 2024-09-30
+
+### Fixed
+
+- Fix location not uploaded for non-ranged checkins.
+
 ## [3.9.1] - 2024-09-30
 
 ### Added
@@ -769,7 +775,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.2...main
+[3.9.2]: https://github.com/Pairman/Xdcheckin/compare/3.9.1...3.9.2
 [3.9.1]: https://github.com/Pairman/Xdcheckin/compare/3.8.2...3.9.1
 [3.8.2]: https://github.com/Pairman/Xdcheckin/compare/3.8.1...3.8.2
 [3.8.1]: https://github.com/Pairman/Xdcheckin/compare/3.7.1...3.8.1
