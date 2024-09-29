@@ -5,7 +5,7 @@ __all__ = ("Chaoxing", )
 from asyncio import (
 	create_task as _create_task, gather as _gather, Semaphore as _Semaphore
 )
-from json import loads as _loads
+from json import loads as _loads, dumps as _dumps
 from math import trunc as _trunc
 from random import random as _random, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
@@ -31,6 +31,11 @@ _Chaoxing_course_get_courses_regex1 = _compile(
 	r"(?:[^\n]*?(\d+-\d+-\d+)～(\d+-\d+-\d+))?|(isState)", _DOTALL
 )
 _Chaoxing_course_get_courses_regex2 = _compile(r", |,|，|、")
+_Chaoxing_checkin_get_location_error_regex = _compile(
+	r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\""
+	r".*?locationLatitude\" value=\"(\d+\.\d+)\".*?locationLongitude\" "
+	r"value=\"(\d+\.\d+)\".*?locationRange\" value=\"(\d+))?", _DOTALL
+)
 _Chaoxing_checkin_do_analysis_regex = _compile(r"([0-9a-f]{32})")
 _Chaoxing_checkin_do_presign_regex = _compile(
 	r"ifopenAddress\" value=\"(\d)\"(?:.*?locationText\" value=\"(.*?)\""
@@ -897,6 +902,49 @@ class Chaoxing:
 			"ranged": 0, "range": 0
 		}
 
+	async def checkin_get_location_error(
+		self, activity: dict = {"active_id": ""},
+		location: dict = {"latitude": -1, "longitude": -1, "address": ""},
+		error = "errorLocation1"
+	):
+		"""Get checkin location on error checking-in with \
+		the previous location.
+		:param activity: Activity ID in dictionary.
+		:param course: Course ID (optional) and class ID.
+		:param location: Address, latitude and longitude.
+		:param error: Error message returned.
+		:return: The new checkin location containing address, \
+		latitude, longitude, range and ranged flag. Falls back to \
+		the given one on failure.
+		"""
+		url = "https://mobilelearn.chaoxing.com/pptSign/errorLocation"
+		params = {
+			"DB_STRATEGY": "PRIMARY_KEY",
+			"STRATEGY_PARA": "activeId", "uid": self.__uid,
+			"activeId": activity["active_id"], "errortype": error,
+			"location": _dumps({
+				"mockData": {"probability": 0},
+				"result": 1, "address": location["address"],
+				"latitude": location["latitude"],
+				"longitude": location["longitude"]
+			})
+		}
+		res = await self.__session.get(url, params = params, ttl = 60)
+		if not res.status == 200:
+			return location
+		match = _Chaoxing_checkin_get_location_error_regex.search(
+			await res.text()
+		)
+		if match:			
+			location = {
+				"latitude": float(match[3] or -1),
+				"longitude": float(match[4] or -1),
+				"address": match[2] or "",
+				"ranged": int(match[1]),
+				"range": int(match[5] or 0)
+			}
+		return location
+
 	async def checkin_do_analysis(self, activity: dict = {"active_id": ""}):
 		"""Send analytics for checkin.
 
@@ -985,46 +1033,72 @@ class Chaoxing:
 		:return: Sign state (``True`` on success), message \
 		and parameters.
 		"""
-		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
-		if old_params.get("activeId"):
-			params = old_params
-		else:
-			params = {
-				"name": "", "uid": self.__uid, "fid": self.__fid,
-				"activeId": activity["active_id"],
-				"enc": activity.get("enc", ""),
-				"enc2": "", "address": "", "latitude": -1,
-				"longitude": -1, "location": "", "ifTiJiao": 0,
-				"appType": 15, "clientip": "", "validate": "",
-				"deviceCode": self.__secrets["device_code"],
-				"vpProbability": -1, "vpStrategy": ""
-			}
+		def _update_params(params, activity, location):
 			if activity["type"] == "4":
 				params.update({
 					"address": location["address"],
 					"latitude": location["latitude"],
 					"longitude": location["longitude"],
-					"ifTiJiao": location["ranged"]
+					"ifTiJiao": location["ranged"],
+					"vpProbability": -1
 				})
 			elif activity["type"] == "2":
 				params.update({
-					"location": f"{location}",
+					"location": _dumps({
+						"mockData": {"probability": 0},
+						"result": 1, "address":
+						location["address"], "latitude":
+						location["latitude"],
+						"longitude":
+						location["longitude"]
+					}),
 					"ifTiJiao": location["ranged"]
 				} if location["ranged"] else {
 					"address": location["address"],
 					"latitude": location["latitude"],
 					"longitude": location["longitude"]
 				})
-		status = False
+		if old_params.get("activeId"):
+			params = old_params
+		else:
+			params = {
+				"name": "", "uid": self.__uid, "fid":
+				self.__fid, "activeId": activity["active_id"],
+				"enc": activity.get("enc", ""), "enc2": "",
+				"address": "", "latitude": -1, "longitude": -1,
+				"location": "", "ifTiJiao": 0, "appType": 15,
+				"clientip": "", "validate": "",
+				"deviceCode": self.__secrets["device_code"],
+				"vpProbability": "", "vpStrategy": ""
+			}
+			_update_params(
+				params = params, activity = activity,
+				location = location
+			)
+		url = "https://mobilelearn.chaoxing.com/pptSign/stuSignajax"
 		res = await self.__session.get(url, params = params)
 		text = await res.text()
+		if "errorLocation" in text:
+			_update_params(
+				params = params, activity = activity, location =
+				await self.checkin_get_location_error(
+					activity = activity,
+					location = location, error = text
+				)
+			)
+			res = await self.__session.get(url, params = params)
+			text = await res.text()
+		status = False
 		if text in ("success", "您已签到过了"):
 			status = True
 			msg = f"Checkin success. ({text})"
 		else:
-			match = _Chaoxing_checkin_do_sign_regex.search(text)
-			if match:
-				params["enc2"] = match[1]
+			if "validate_" in text:
+				match = _Chaoxing_checkin_do_sign_regex.search(
+					text
+				)
+				if match:
+					params["enc2"] = match[1]
 			msg = f"Checkin failure. ({text})"
 		return status, {"msg": msg, "params": params}
 
@@ -1081,8 +1155,6 @@ class Chaoxing:
 			)
 			return result
 		except Exception as e:
-			from traceback import print_exc
-			print_exc()
 			return False, {"msg": f"{e}", "params": {}}
 
 	async def checkin_checkin_qrcode(
