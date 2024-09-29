@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.1] - 2024-09-30
+
+### Added
+
+- (Module) Add ```xdcheckin.Chaoxing.checkin_get_location_error()``` to get location if the previous one was determined an error.
+
+### Fixed
+
+- Possible fix for "errorLocation*" checkin failures.
+
 ## [3.8.2] - 2024-09-28
 
 ### Changed
@@ -759,7 +769,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.8.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.1...main
+[3.9.1]: https://github.com/Pairman/Xdcheckin/compare/3.8.2...3.9.1
 [3.8.2]: https://github.com/Pairman/Xdcheckin/compare/3.8.1...3.8.2
 [3.8.1]: https://github.com/Pairman/Xdcheckin/compare/3.7.1...3.8.1
 [3.7.1]: https://github.com/Pairman/Xdcheckin/compare/3.6.6...3.7.1
