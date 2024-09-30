@@ -59,30 +59,37 @@ def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8)
 	y_t += border
 	x_r -= border
 	y_b -= border
-	template = small_img.im.crop((
-		x_l, y_t, x_r, y_b
-	)).convert("L", 3)
+	template = small_img.im.crop((x_l, y_t, x_r, y_b)).convert("L", 3)
 	mean_t = sum(template) / len(template)
 	template = [v - mean_t for v in template]
-	ncc_max = x_max = 0
 	width_w = x_r - x_l
-	height_w = y_b - y_t
-	len_w = width_w * height_w
+	len_w = width_w * (y_b - y_t)
 	width_g = big_img.width - small_img.width + width_w - 1
-	grayscale = big_img.im.crop((
-		x_l + 1, y_t, x_l + width_g, y_b
-	)).convert("L", 3)
-	for x in range(0, width_g - width_w, 2):
-		window = grayscale.crop((x, 0, x + width_w, height_w))
-		mean_w = sum(window) / len_w
+	grayscale = big_img.im.convert("L", 3)
+	cols_w = [
+		sum(grayscale[y * big_img.width + x] for y in range(y_t, y_b))
+		for x in range(x_l + 1, width_g + 1)
+	]
+	cols_w_l = iter(cols_w)
+	cols_w_r = iter(cols_w)
+	sum_w = sum(next(cols_w_r) for _ in range(width_w))
+	ncc_max = x_max = 0
+	for x in range(x_l + 1, width_g - width_w, 2):
+		sum_w = (
+			sum_w - next(cols_w_l) - next(cols_w_l) +
+			next(cols_w_r) + next(cols_w_r)
+		)
+		mean_w = sum_w / len_w
 		sum_wt = 0
 		sum_ww = 0
-		for w, t in zip(window, template):
+		for w, t in zip(grayscale.crop((
+			x, y_t, x + width_w, y_b
+		)), template):
 			w -= mean_w
 			sum_wt += w * t
 			sum_ww += w * w
-		ncc = sum_wt / sum_ww
+		ncc = sum_wt / (sum_ww + 0.000001)
 		if ncc > ncc_max:
 			ncc_max = ncc
 			x_max = x
-	return x_max
+	return x_max - x_l - 1
