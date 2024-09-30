@@ -18,9 +18,8 @@ async function inputLocation() {
 		return longitude === null ? undefined : alert("Invalid input.");
 	if (!(address = prompt("Input address:")) || /[()\[\]{}]/.test(address))
 		return address === null ? undefined : alert("Invalid input.");
-	setLocation({
-		"latitude": latitude, "longitude": longitude, "address": address
-	}, `Input(${latitude}, ${longitude}, ${address})`);
+	setLocation({latitude, longitude, address},
+		    `Input(${latitude}, ${longitude}, ${address})`);
 }
 
 async function listLocations() {

@@ -1,9 +1,9 @@
-async function getCurriculum(with_live = false) {
+async function getCurriculum(live = false) {
 	if (getCurriculum.calling)
 		return;
 	getCurriculum.calling = true;
 	const curriculum = (await post("/chaoxing/get_curriculum",
-				       with_live)).json();
+				       live)).json();
 	const d = newElement("div", {
 		innerText: `Current year ${curriculum.details.year}, ` +
 			   `semester ${curriculum.details.semester}, ` +

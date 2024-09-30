@@ -13,19 +13,18 @@ function isValidUrl(url) {
 }
 
 async function post(url = "", data = {}) {
-	let status_code = 404, text = "";
+	let status = 404, text = "";
 	try {
 		const res = await fetch(url, {
 			method: "POST", credentials: "include",
 			body: JSON.stringify(data)
 		});
-		status_code = res.status;
+		status = res.status;
 		text = await res.text();
-	} catch (err) {}
+	}
+	catch (err) {}
 	return {
-		status_code,
-		text,
-		json: () => {
+		status, text, json: () => {
 			try {
 				return JSON.parse(text);
 			} catch (err) {

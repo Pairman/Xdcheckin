@@ -45,79 +45,84 @@ async function getActivities() {
 	getActivities.calling = false;
 }
 
-async function chaoxingCheckinCaptcha(params, e_id_prefix) {
-	const res = await post("/chaoxing/captcha_get_captcha")
-	if (res.status_code != 200 && e_id_prefix == "activities") {
-		alert(`Checkin error. (Backend error, ${res.status_code})`);
-		return;
-	}
-	captcha = res.json();
-	const s = document.getElementById(
-					`${e_id_prefix}-checkin-captcha-input`);
+async function chaoxingCheckinCaptcha(e_id_prefix) {
+	const res1 = await post("/chaoxing/captcha_get_captcha")
+	if (res1.status != 200)
+		return [false, res1.status];
+	captcha = res1.json();
 	const c = document.getElementById(
 				`${e_id_prefix}-checkin-captcha-container-div`);
-	const s_img = document.getElementById(
+	const s = document.getElementById(
+					`${e_id_prefix}-checkin-captcha-input`);
+	const si = document.getElementById(
 				    `${e_id_prefix}-checkin-captcha-small-img`);
-	s.oninput = () => s_img.style.left =
-		     `${(c.offsetWidth - s_img.offsetWidth) * s.value / 320}px`;
-	document.getElementById(`${e_id_prefix}-checkin-captcha-button`)
-		.onclick = () => {
-		captcha["vcode"] = parseInt(s_img.style.left.split("px")[0] *
-					    320 / c.offsetWidth);
-		post("/chaoxing/captcha_submit_captcha", data = {
-			"captcha": captcha
-		}).then(res => {
-			if (res.status_code != 200 &&
-			    e_id_prefix == "activities") {
-				alert(`Checkin error. (Backend or ` +
-				      `CAPTCHA error, ${res.status_code})`);
-				return;
-			}
-			captcha = res.json();
-			params.validate = captcha.validate;
-			post("/chaoxing/checkin_do_sign", data = {
-				"params": params
-			}).then(res => {
-				data = res.json();
-				if (res.status_code != 200 &&
-				    e_id_prefix == "activities") {
-					alert(`Checkin error. (Backend error,` +
-					` ${res.status_code})`);
-					return;
-				}
-				if (data.msg.includes("success"))
-					alert(unescapeUnicode(data.msg));
-				if (e_id_prefix != "activities")
-					document.getElementById(
-						`${e_id_prefix}-scanresult-div`)
-						.innerText =
-						      unescapeUnicode(data.msg);
-			});
-		});
-		displayTag(`${e_id_prefix}-checkin-captcha-div`);
-	};
-	const img = document.getElementById(
+	si.style.left = `${s.value = 0}px`;
+	si.src = captcha.small_img_src;
+	s.oninput = () => si.style.left =
+			`${(c.offsetWidth - si.offsetWidth) * s.value / 320}px`;
+	const bi = document.getElementById(
 					  `${e_id_prefix}-checkin-captcha-img`);
-	img.onload = () => displayTag(`${e_id_prefix}-checkin-captcha-div`);
-	s_img.style.left = `${s.value = 0}px`;
-	s_img.src = captcha.small_img_src;
-	img.src = captcha.big_img_src;
+	await new Promise(resolve => {
+		bi.onload = () => resolve();
+		bi.src = captcha.big_img_src;
+	});
+	displayTag(`${e_id_prefix}-checkin-captcha-div`);
+	const b = document.getElementById(
+				       `${e_id_prefix}-checkin-captcha-button`);
+	await new Promise(resolve => {
+		b.onclick = () => resolve();
+	});
+	vcode = parseInt((1 - si.offsetWidth / c.offsetWidth) * s.value);
+	displayTag(`${e_id_prefix}-checkin-captcha-div`);
+	res2 = await post("/chaoxing/captcha_submit_captcha", data = {
+		"captcha": {
+			"captcha_id": captcha["captcha_id"],
+			"token": captcha["token"], vcode
+		}
+	});
+	if (res2.status != 200)
+		return [false, res2.status];
+	return [true, res2.json().validate];
+}
+
+async function chaoxingCheckinSign(params, e_id_prefix) {
+	let result = null;
+	for (let i = 0; i < 3; ++i) {
+		result = await chaoxingCheckinCaptcha(e_id_prefix);
+		if (result[0])
+			break;
+	}
+	if (result[0])
+		params.validate = result[1]
+	else if (e_id_prefix == "activities") {
+		alert(`Checkin error. (CAPTCHA error, ${result[1]})`);
+		return;
+	}
+	const res = await post("/chaoxing/checkin_do_sign", data = {params});
+	data = res.json();
+	if (e_id_prefix != "activities")
+		document.getElementById(`${e_id_prefix}-scanresult-div`)
+					 .innerText = unescapeUnicode(data.msg);
+	else if (res.status != 200)
+			alert(`Checkin error. (Backend error, ${res.status})`);
+	if (data.msg.includes("success"))
+		alert(unescapeUnicode(data.msg));
 }
 
 async function chaoxingCheckinLocation(activity) {
 	document.getElementById(`activities-checkin-captcha-div`).style.display
 								       = "none";
 	const res = await post("/chaoxing/checkin_checkin_location", {
-		"location": globalThis.g_location, "activity": activity
+		"location": globalThis.g_location, activity
 	});
 	const data = res.json();
-	if (res.status_code != 200) {
-		alert(`Checkin error. (Backend error, ${res.status_code})`);
+	if (res.status != 200) {
+		alert(`Checkin error. (Backend error, ${res.status})`);
 		return;
 	}
 	alert(unescapeUnicode(data.msg));
 	if (data.msg.includes("validate"))
-		chaoxingCheckinCaptcha(data.params, "activities");
+		chaoxingCheckinSign(data.params, "activities");
 }
 
 async function chaoxingCheckinLocationWrapper(activity) {
@@ -125,28 +130,28 @@ async function chaoxingCheckinLocationWrapper(activity) {
 }
 
 async function chaoxingCheckinQrcode(url, result_div_id) {
-	const part = result_div_id.split('-')[0];
-	document.getElementById(`${part}-checkin-captcha-div`).style.display =
-									 "none";
+	const e_id_prefix = result_div_id.split('-')[0];
+	document.getElementById(
+		   `${e_id_prefix}-checkin-captcha-div`).style.display = "none";
 	const data = {
 		"location": globalThis.g_location, "video": "", "url": ""
 	};
-	if (globalThis.g_is_ios && part.startsWith("player"))
-		data["video"] = globalThis.g_player_sources[
-						  part.substr(part.length - 1)];
+	if (globalThis.g_is_ios && e_id_prefix.startsWith("player"))
+		data["video"] = globalThis.g_player_sources[e_id_prefix.substr(
+						       e_id_prefix.length - 1)];
 	else
 		data["url"] = url;
 	const res = await post("/chaoxing/checkin_checkin_qrcode_url", data);
 	const d = res.json();
 	document.getElementById(result_div_id).innerText =
 						       unescapeUnicode(d.msg) ||
-			   `Checkin error. (Backend error, ${res.status_code})`;
-	if (res.status_code != 200)
+				`Checkin error. (Backend error, ${res.status})`;
+	if (res.status != 200)
 		return;
 	if (d.msg.includes("success"))
 		alert(unescapeUnicode(d.msg));
 	else if (d.msg.includes("validate"))
-		chaoxingCheckinCaptcha(d.params, result_div_id.split("-")[0]);
+		chaoxingCheckinSign(d.params, result_div_id.split("-")[0]);
 };
 
 async function chaoxingCheckinQrcodeWrapper(video, result_div_id) {
