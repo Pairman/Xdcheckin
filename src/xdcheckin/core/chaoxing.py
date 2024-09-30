@@ -796,7 +796,7 @@ class Chaoxing:
 				if (
 					activity["activeType"] != 2 or
 					not activity["otherId"] in ("2", "4") or
-					not class_id in courses
+					courses and not class_id in courses
 				):
 					continue
 				activities.setdefault(class_id, []).append({
