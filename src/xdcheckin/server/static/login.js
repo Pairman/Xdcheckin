@@ -77,10 +77,10 @@ async function chaoxingLogin(username, password, force = false) {
 			"password": password,
 			"cookies": cookies
 		});
-		assert(res.status == 200, "Backend error.");
+		assert(res.status == 200, "Backend Chaoxing login error.");
 		const data = res.json();
 		assert(!data.err, data.err);
-		assert(data.cookies, "Backend login failed.");
+		assert(data.cookies, "Backend Chaoxing login failed.");
 		localStorage.setItem("login_method", "chaoxing");
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
@@ -125,7 +125,7 @@ async function idsLogin(username, password) {
 
 async function idsLoginPrepareCaptcha() {
 	const res = await post("/ids/login_prepare");
-	assert(res.status == 200, "Backend error.");
+	assert(res.status == 200, "Backend IDS login prepare error.");
 	const data = res.json();
 	assert(!data.err, data.err);
 	const l = document.getElementById("login-button");
@@ -148,9 +148,6 @@ async function idsLoginPrepareCaptcha() {
 		b.onclick = () => resolve();
 	});
 	vcode = parseInt((1 - si.offsetWidth / c.offsetWidth) * s.value);
-	console.log("c.offs", c.offsetWidth, "si.offs", 
-		si.offsetWidth, "s.val", s.value, "si.style.left", si.style.left)
-	console.log("vcode1", parseInt(si.style.left.split("px")[0] * 280 / c.offsetWidth), "vcode2", vcode)
 	displayTag("ids-login-captcha-div");
 	return vcode;
 }
@@ -161,10 +158,10 @@ async function idsLoginFinish(username, password, vcode) {
 		"password": password,
 		"vcode": vcode
 	});
-	assert(res.status == 200, "Backend error.");
+	assert(res.status == 200, "Backend IDS login finish error.");
 	const data = res.json();
 	assert(!data.err, data.err);
-	assert(data.cookies, "Backend login failed.");
+	assert(data.cookies, "Backend IDS login failed.");
 	localStorage.setItem("login_method", "ids");
 	localStorage.setItem("username", username);
 	localStorage.setItem("password", password);

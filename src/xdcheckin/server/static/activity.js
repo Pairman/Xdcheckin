@@ -10,7 +10,9 @@ async function getActivities() {
 	for (let class_id in activities) {
 		const course_activities = activities[class_id];
 		e.appendChild(newElement("div", {
-			innerText: `${globalThis.g_courses[class_id].name}: `
+			innerText: class_id in globalThis.g_courses ?
+				   `${globalThis.g_courses[class_id].name}: ` :
+				   `${class_id}: `
 		}));
 		course_activities.forEach(a => {
 			const type = a.type == "2" ? `Qrcode` : `Location`;
