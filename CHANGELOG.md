@@ -12,7 +12,7 @@ Changelog for Xdcheckin.
 
 ### Fixed
 
-- Fix activities is empty if hitting Chaoxing's anti-spam detection for courses listing.
+- Fix activities are empty if hitting Chaoxing's anti-spam detection for courses listing.
 
 ## [3.9.2] - 2024-09-30
 
