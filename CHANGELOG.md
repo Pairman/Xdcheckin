@@ -4,6 +4,16 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.3] - 2024-09-30
+
+### Added
+
+- (Webpage) Check-ins have up to three CAPTCHA trials now.
+
+### Fixed
+
+- Fix activities is empty if hitting Chaoxing's anti-spam detection for courses listing.
+
 ## [3.9.2] - 2024-09-30
 
 ### Fixed
@@ -775,7 +785,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.2...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.3...main
+[3.9.3]: https://github.com/Pairman/Xdcheckin/compare/3.9.2...3.9.3
 [3.9.2]: https://github.com/Pairman/Xdcheckin/compare/3.9.1...3.9.2
 [3.9.1]: https://github.com/Pairman/Xdcheckin/compare/3.8.2...3.9.1
 [3.8.2]: https://github.com/Pairman/Xdcheckin/compare/3.8.1...3.8.2
