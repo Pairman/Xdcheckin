@@ -80,8 +80,7 @@ def solve_captcha(big_img = None, small_img = None, border: int = 8):
 			next(cols_w_r) + next(cols_w_r)
 		)
 		mean_w = sum_w / len_w
-		sum_wt = 0
-		sum_ww = 0
+		sum_wt = sum_ww = 0
 		for w, t in zip(grayscale.crop((
 			x, y_t, x + width_w, y_b
 		)), template):
