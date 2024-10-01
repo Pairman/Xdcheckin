@@ -60,10 +60,10 @@ def solve_captcha(big_img = None, small_img = None, border: int = 8):
 	x_r -= border
 	y_b -= border
 	template = small_img.im.crop((x_l, y_t, x_r, y_b)).convert("L", 3)
-	mean_t = sum(template) / len(template)
-	template = [v - mean_t for v in template]
 	width_w = x_r - x_l
 	len_w = width_w * (y_b - y_t)
+	mean_t = sum(template) / len_w
+	template = [v - mean_t for v in template]
 	width_g = big_img.width - small_img.width + width_w - 1
 	grayscale = big_img.im.convert("L", 3)
 	cols_w = [
