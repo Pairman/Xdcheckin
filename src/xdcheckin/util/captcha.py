@@ -25,7 +25,7 @@ def chaoxing_captcha_get_checksum(
 	).hexdigest()
 	return key, token, iv
 
-def solve_captcha(big_img: None = None, small_img: None = None, border: int = 8):
+def solve_captcha(big_img = None, small_img = None, border: int = 8):
 	"""Slider CAPTCHA solver based on normalized cross-correlation.
 
 	:param big_img: Background image with slider piece embedded.
