@@ -25,7 +25,7 @@ jobs:
 
     - name: Build package
       run: |
-        python -m build
+        python -m build -w
       working-directory: ${{ github.workspace }}
 
     - name: Upload package
@@ -35,4 +35,3 @@ jobs:
         name: dist_wheel
         path: |
           dist/*.whl
-          dist/*.tar.gz
