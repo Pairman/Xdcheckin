@@ -1,7 +1,10 @@
 __all__ = ("video_get_img", "img_scan")
 
+from asyncio.subprocess import (
+	create_subprocess_exec as _create_subprocess_exec,
+	PIPE as _PIPE
+)
 from io import BytesIO as _BytesIO
-from subprocess import Popen as _Popen, PIPE as _PIPE
 from aiohttp import request as _request
 
 try:
@@ -30,41 +33,64 @@ except ImportError:
 	except ImportError:
 		_ffmpeg = None
 
+async def _video_m3u8_get_ts_url(url: str, ses = None, len_limit = 256):
+	if ses:
+		res = await ses.get(url, headers = {})
+		assert (
+			res.status == 200 and
+			res.content_length < len_limit
+		)
+		text = await res.text()
+	else:
+		async with _request("GET", url) as res:
+			assert (
+				res.status == 200 and
+				res.content_length < len_limit
+			)
+			text = await res.text()
+	ts = text.split()[-1]
+	assert ts.endswith(".ts")
+	return ts
+
 if _ffmpeg:
 	async def video_get_img(url: str, ses = None, len_limit: int = 256):
-		"""Extract an frame from an M3U8 stream. \
+		"""Extract an frame from a video stream. \
 		Needs ``xdcheckin[image]`` to be installed.
 
 		:param url: URL of the stream.
 		:param ses: An ``aiohttp.ClientSession`` instance. Optional.
   		:param len_limit: \
-		Limit of length of the M3U8 data. Default is ``384``.
+		Limit of length of the M3U8 data. Default is ``256``.
 		:return: Frame in ``PIL.Image.Image`` on success.
 		"""
 		try:
-			if ses:
-				res = await ses.get(url, headers = {})
-				assert (
-					res.status == 200 and
-					res.content_length < len_limit
+			if url.endswith(".m3u8"):
+				ts = await _video_m3u8_get_ts_url(
+					url = url, ses = ses,
+					len_limit = len_limit
 				)
-				text = await res.text()
+				proc = await _create_subprocess_exec(
+					_ffmpeg, "-v", "quiet",
+					"-i", f"{url[: url.rfind('/')]}/{ts}",
+					"-vf", "select='eq(n\\,23)'",
+					"-vframes", "1", "-f", "image2", "-",
+					stdout = _PIPE
+				)
+			elif url.startswith("rtsp://"):
+				proc = await _create_subprocess_exec(
+					_ffmpeg, "-v", "quiet",
+					"-i", url, "-vf", "select='eq(n\\,23)'",
+					"-vframes", "1", "-f", "image2", "-",
+					"-rtsp_transport", "tcp", stdout = _PIPE
+				)
 			else:
-				async with _request("GET", url) as res:
-					assert (
-						res.status == 200 and
-						res.content_length < len_limit
-					)
-					text = await res.text()
-			ts = text.split()[-1]
-			assert ts.endswith(".ts")
-			proc = _Popen((
-				_ffmpeg, "-v", "quiet",
-				"-i", f"{url[: url.rfind('/')]}/{ts}",
-				"-vf", "select='eq(n\\,23)'", "-vframes", "1",
-				"-f", "image2", "-"
-			), stdout = _PIPE)
-			return _open(_BytesIO(proc.communicate()[0]))
+				proc = await _create_subprocess_exec(
+					_ffmpeg, "-v", "quiet",
+					"-i", url, "-vf", "select='eq(n\\,23)'",
+					"-vframes", "1", "-f", "image2", "-",
+					stdout = _PIPE
+				)
+			return _open(_BytesIO((await proc.communicate())[0]))
 		except Exception:
 			return _Image()
 else:
