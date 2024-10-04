@@ -21,10 +21,14 @@ except ImportError:
 		return _Image()
 
 try:
-	from imageio_ffmpeg import get_ffmpeg_exe as _get_ffmpeg_exe
-	_ffmpeg = _get_ffmpeg_exe()
+	from xdcheckin_ffmpeg import ffmpeg as _get_ffmpeg
+	_ffmpeg = _get_ffmpeg()
 except ImportError:
-	_ffmpeg = None
+	try:
+		from imageio_ffmpeg import get_ffmpeg_exe as _get_ffmpeg
+		_ffmpeg = _get_ffmpeg()
+	except ImportError:
+		_ffmpeg = None
 
 if _ffmpeg:
 	async def video_get_img(url: str, ses = None, len_limit: int = 256):
