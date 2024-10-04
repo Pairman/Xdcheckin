@@ -27,8 +27,8 @@ dependencies = [
 
 [project.optional-dependencies]
 image = [
-	"imageio-ffmpeg>=0.4.4",
 	"pyzbar>=0.1.8",
+ 	"xdcheckin-ffmpeg>=1.0.0",
 ]
 
 [project.urls]
