@@ -72,21 +72,18 @@ if _ffmpeg:
 				proc = await _create_subprocess_exec(
 					_ffmpeg, "-v", "quiet",
 					"-i", f"{url[: url.rfind('/')]}/{ts}",
-					"-vf", "select='eq(n\\,23)'",
 					"-vframes", "1", "-f", "image2", "-",
 					stdout = _PIPE
 				)
 			elif url.startswith("rtsp://"):
 				proc = await _create_subprocess_exec(
-					_ffmpeg, "-v", "quiet",
-					"-i", url, "-vf", "select='eq(n\\,23)'",
+					_ffmpeg, "-v", "quiet", "-i", url,
 					"-vframes", "1", "-f", "image2", "-",
 					"-rtsp_transport", "tcp", stdout = _PIPE
 				)
 			else:
 				proc = await _create_subprocess_exec(
-					_ffmpeg, "-v", "quiet",
-					"-i", url, "-vf", "select='eq(n\\,23)'",
+					_ffmpeg, "-v", "quiet", "-i", url,
 					"-vframes", "1", "-f", "image2", "-",
 					stdout = _PIPE
 				)
