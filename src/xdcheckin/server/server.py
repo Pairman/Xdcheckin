@@ -346,7 +346,7 @@ async def _chaoxing_checkin_checkin_qrcode_url(req):
 			) as img:
 				assert (
 					img.height and img.width
-				), f"Zero-sized image. ({img.info.get("msg")})"
+				), f"Zero-sized image. ({img.info.get('msg')})"
 				urls = _img_scan(img)
 			assert urls, "No Qrcode detected."
 			qr_urls = [s for s in urls if "widget/sign/e" in s]
