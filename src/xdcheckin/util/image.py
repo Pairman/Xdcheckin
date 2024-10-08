@@ -8,30 +8,16 @@ from io import BytesIO as _BytesIO
 from aiohttp import request as _request
 
 try:
-	from PIL.Image import open as _open, Image as _Image
-except ImportError:
-	class _Image:
-		"""Dummy fallback for ``PIL.Image.Image``.
-		"""
-		height = width = 0
-		def __enter__(self):
-			return self
-		def __exit__(self, *args):
-			pass
-	def _open(fp, mode = None, formats = None):
-		"""Dummy fallback for ``PIL.Image.open()``.
-		"""
-		return _Image()
-
-try:
 	from xdcheckin_ffmpeg import ffmpeg as _get_ffmpeg
 	_ffmpeg = _get_ffmpeg()
 except ImportError:
-	try:
-		from imageio_ffmpeg import get_ffmpeg_exe as _get_ffmpeg
-		_ffmpeg = _get_ffmpeg()
-	except ImportError:
-		_ffmpeg = None
+	_ffmpeg = None
+
+try:
+	from PIL.Image import open as _open
+	_is_has_pil = True
+except ImportError:
+	_is_has_pil = False
 
 async def _video_m3u8_get_ts_url(url: str, ses = None, len_limit = 256):
 	if ses:
@@ -52,7 +38,7 @@ async def _video_m3u8_get_ts_url(url: str, ses = None, len_limit = 256):
 	assert ts.endswith(".ts")
 	return ts
 
-if _ffmpeg:
+if _ffmpeg and _is_has_pil:
 	async def video_get_img(url: str, ses = None, len_limit: int = 256):
 		"""Extract an frame from a video stream. \
 		Needs ``xdcheckin[image]`` to be installed.
@@ -82,8 +68,21 @@ if _ffmpeg:
 				"-vframes", "1", "-f", "image2", "-",
 				stdout = _PIPE
 			)
-		return _open(_BytesIO((await proc.communicate())[0]))
+		img = _open(_BytesIO((await proc.communicate())[0]))
+		return img
 else:
+	class _Image:
+		"""Dummy fallback for ``PIL.Image.Image``.
+		"""
+		info = {"msg": (
+			"Please install ``xdcheckin[image]``. "
+			f"FFmpeg: {not not _ffmpeg}, PIL: {_is_has_pil}"
+		)}
+		height = width = 0
+		def __enter__(self):
+			return self
+		def __exit__(self, *args):
+			pass
 	async def video_get_img(url: str, ses = None, len_limit: int = 384):
 		"""Dummy fallback for ``video_get_img()``. \
 		Please install ``xdcheckin[image]``.

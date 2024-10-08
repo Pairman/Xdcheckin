@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.6] - 2024-10-08
+
+### Fixed
+
+- Add missing dependency on ```pillow``` for ```xdcheckin[image]```.
+
 ## [3.9.5] - 2024-10-08
 
 ### Changed
@@ -797,7 +803,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.6...main
+[3.9.6]: https://github.com/Pairman/Xdcheckin/compare/3.9.5...3.9.6
 [3.9.5]: https://github.com/Pairman/Xdcheckin/compare/3.9.4...3.9.5
 [3.9.4]: https://github.com/Pairman/Xdcheckin/compare/3.9.3...3.9.4
 [3.9.3]: https://github.com/Pairman/Xdcheckin/compare/3.9.2...3.9.3

@@ -90,7 +90,7 @@ class IDSSession:
 		url = "https://ids.xidian.edu.cn/authserver/common/verifySliderCaptcha.htl"
 		data = {"canvasLength": 280, "moveLength": captcha["vcode"]}
 		res = await self.__session.post(url, data = data)
-		return bool(res.status == 200 and (
+		return not not (res.status == 200 and (
 			await res.json()
 		)["errorMsg"] == "success")
 
@@ -165,7 +165,7 @@ class IDSSession:
 		url = "https://ids.xidian.edu.cn/authserver/dynamicCode/getDynamicCode.htl"
 		data = {"mobile": account["username"], "captcha": ""}
 		res = await self.__session.post(url, data = data)
-		return bool(res.status == 200 and (
+		return not not (res.status == 200 and (
 			await res.json(content_type = None)
 		)["code"] in ("success", "timeExpire"))
 
