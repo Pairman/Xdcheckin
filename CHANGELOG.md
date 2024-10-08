@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.5] - 2024-10-08
+
+### Changed
+
+- Expose error message for qrcode scanning on iOS.
+
 ## [3.9.4] - 2024-10-04
 
 ### Changed
@@ -791,7 +797,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.4...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.5...main
+[3.9.5]: https://github.com/Pairman/Xdcheckin/compare/3.9.4...3.9.5
 [3.9.4]: https://github.com/Pairman/Xdcheckin/compare/3.9.3...3.9.4
 [3.9.3]: https://github.com/Pairman/Xdcheckin/compare/3.9.2...3.9.3
 [3.9.2]: https://github.com/Pairman/Xdcheckin/compare/3.9.1...3.9.2

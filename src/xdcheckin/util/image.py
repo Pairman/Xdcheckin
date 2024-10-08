@@ -63,33 +63,26 @@ if _ffmpeg:
 		Limit of length of the M3U8 data. Default is ``256``.
 		:return: Frame in ``PIL.Image.Image`` on success.
 		"""
-		try:
+		url = url.strip()
+		if url.startswith("rtsp://"):
+			proc = await _create_subprocess_exec(
+				_ffmpeg, "-v", "quiet", "-i", url, "-an",
+				"-vframes", "1", "-rtsp_transport", "tcp",
+				"-f", "image2", "-", stdout = _PIPE
+			)
+		else:
 			if url.endswith(".m3u8"):
 				ts = await _video_m3u8_get_ts_url(
 					url = url, ses = ses,
 					len_limit = len_limit
 				)
-				proc = await _create_subprocess_exec(
-					_ffmpeg, "-v", "quiet",
-					"-i", f"{url[: url.rfind('/')]}/{ts}",
-					"-vframes", "1", "-f", "image2", "-",
-					stdout = _PIPE
-				)
-			elif url.startswith("rtsp://"):
-				proc = await _create_subprocess_exec(
-					_ffmpeg, "-v", "quiet", "-i", url,
-					"-vframes", "1", "-f", "image2", "-",
-					"-rtsp_transport", "tcp", stdout = _PIPE
-				)
-			else:
-				proc = await _create_subprocess_exec(
-					_ffmpeg, "-v", "quiet", "-i", url,
-					"-vframes", "1", "-f", "image2", "-",
-					stdout = _PIPE
-				)
-			return _open(_BytesIO((await proc.communicate())[0]))
-		except Exception:
-			return _Image()
+				url = f"{url[: url.rfind('/')]}/{ts}"
+			proc = await _create_subprocess_exec(
+				_ffmpeg, "-v", "quiet", "-i", url, "-an",
+				"-vframes", "1", "-f", "image2", "-",
+				stdout = _PIPE
+			)
+		return _open(_BytesIO((await proc.communicate())[0]))
 else:
 	async def video_get_img(url: str, ses = None, len_limit: int = 384):
 		"""Dummy fallback for ``video_get_img()``. \
