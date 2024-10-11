@@ -41,7 +41,7 @@ Due to signature change, if you upgrade from version 1.3.2 (or older) to 1.3.3 (
 The APP doesn't use WebView on Linux, therefore it will open ```http://localhost:5001``` in your browser automatically.
 
 ### For Windows
-The APP needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784) to work on Windows. Please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
+Version 3.1.1 (or older) needs [Visual C++ Redistributable Packages for Visual Studio 2013](https://www.microsoft.com/en-US/download/details.aspx?id=40784) to work on Windows. Please install [vcredist_x64.exe](https://download.microsoft.com/download/c/c/2/cc2df5f8-4454-44b4-802d-5ea68d086676/vcredist_x64.exe).
 
 ### For server-side
 Due to cross origin problems on Safari, qrcode scanning on iOS devices are not supported on older versions. You must use version 3.6.1 (or newer) and run ```pip install xdcheckin[image]``` to make qrcode decoding work on iOS.
