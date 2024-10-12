@@ -52,9 +52,10 @@ if _ffmpeg and _is_has_pil:
 		url = url.strip()
 		if url.startswith("rtsp://"):
 			proc = await _create_subprocess_exec(
-				_ffmpeg, "-v", "quiet", "-i", url, "-an",
-				"-vframes", "1", "-rtsp_transport", "tcp",
-				"-f", "image2", "-", stdout = _PIPE
+				_ffmpeg, "-rtsp_transport", "tcp",
+				"-v", "quiet", "-i", url, "-an",
+				"-vframes", "1", "-f", "image2", "-",
+				stdout = _PIPE
 			)
 		else:
 			if url.endswith(".m3u8"):
