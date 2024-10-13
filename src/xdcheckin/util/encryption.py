@@ -2,7 +2,6 @@ __all__ = ("encrypt_aes", "chaoxing_get_identifier", "chaoxing_get_devicecode")
 
 from base64 import b64encode as _b64encode
 from hashlib import md5 as _md5
-from uuid import getnode as _getnode
 from Crypto.Cipher.AES import (
 	new as _new, block_size as _block_size, MODE_CBC as _MODE_CBC,
 	MODE_ECB as _MODE_ECB
@@ -31,7 +30,7 @@ def chaoxing_get_identifier(seed: str = ""):
 	:param seed: Seed.
 	:return: Device identifier.
 	"""
-	return _md5(f"{_getnode()}{seed}".encode("utf-8")).hexdigest()
+	return _md5(seed.encode("utf-8")).hexdigest()
 
 def chaoxing_get_devicecode(ident: str = ""):
 	"""Get device code for Chaoxing's checking-in.
