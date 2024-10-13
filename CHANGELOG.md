@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.9.9] - 2024-10-13
+
+### Added
+
+- Fallback URLs for courses fetching.
+
 ## [3.9.8] - 2024-10-12
 
 ### Fixed
@@ -815,7 +821,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.8...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.9...main
+[3.9.9]: https://github.com/Pairman/Xdcheckin/compare/3.9.8...3.9.9
 [3.9.8]: https://github.com/Pairman/Xdcheckin/compare/3.9.7...3.9.8
 [3.9.7]: https://github.com/Pairman/Xdcheckin/compare/3.9.6...3.9.7
 [3.9.6]: https://github.com/Pairman/Xdcheckin/compare/3.9.5...3.9.6
