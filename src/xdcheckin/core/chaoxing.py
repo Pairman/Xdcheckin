@@ -7,7 +7,7 @@ from asyncio import (
 )
 from json import loads as _loads, dumps as _dumps
 from math import trunc as _trunc
-from random import random as _random, uniform as _uniform
+from random import choice as _choice, random as _random, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
 from xdcheckin.util.captcha import (
@@ -599,10 +599,28 @@ class Chaoxing:
 		:return: Dictionary of class IDs to course containing \
 		course IDs, names, teachers, status, start and end time.
 		"""
-		url = "https://mooc2-ans.chaoxing.com/visit/courselistdata"
+		url = _choice((
+			"https://mooc1-4.chaoxing.com/visit/courselistdata",
+			"https://mooc1-4.chaoxing.com/mooc-ans/visit/courselistdata",
+			"https://mooc1-api.chaoxing.com/visit/courselistdata",
+			"https://mooc1-api.chaoxing.com/mooc-ans/visit/courselistdata",
+			"https://mooc2-ans.chaoxing.com/visit/courselistdata",
+			"https://mooc2-ans.chaoxing.com/mooc2-ans/visit/courselistdata",
+			"https://mooc2-gray.chaoxing.com/visit/courselistdata",
+			"https://mooc2-gray.chaoxing.com/mooc2-ans/visit/courselistdata"
+		))
+		headers = {**self.__session.headers, **({
+			"Host": "mooc2-ans.chaoxing.com"
+		} if url.startswith("https://mooc1") else {
+			"Origin": "https://mooc2-gray.chaoxing.com",
+			"Referer": "https://mooc2-gray.chaoxing.com",
+			"X-Requested-With": "XMLHttpRequest",
+			"Accept-Encoding": "gzip"
+		} if url.startswith("https://mooc2-gray") else {
+		})}
 		params = {"courseType": 1}
 		res = await self.__session.get(
-			url, params = params, ttl = 86400
+			url, params = params, headers = headers, ttl = 86400
 		)
 		matches = _Chaoxing_course_get_courses_regex1.findall(
 			await res.text()
