@@ -24,7 +24,7 @@
 		<div id="xdcheckin-update-div" style="text-align: center; font-weight: bold"></div>
 
 		<div id="chaoxing-buttons" class="div-center">
-			<button id="login-button" onclick="promptLogin()">Login</button>
+			<button id="accounts-button" onclick="listAccounts()">Accounts</button>
 			<button id="logout-button" onclick="promptLogout()" style="display: none">Logout</button>
 			<button id="curriculum-button" onclick="hideOtherLists('curriculum-list-div')" style="display: none">Curriculum</button>
 			<button id="locations-button" onclick="hideOtherLists('locations-list-div')" style="display: none">Location</button>
@@ -35,17 +35,7 @@
 					displayTag('activities-list-div');
 			" style="display: none">Activities</button>
 		</div>
-		<div id="activities-checkin-captcha-div" style="display: none">
-			<div id="activities-checkin-captcha-container-div" class="captcha-container-div">
-				<img id="activities-checkin-captcha-img" class="captcha-img" alt="activities-checkin-captcha-img" src="#">
-				<img id="activities-checkin-captcha-small-img" class="captcha-small-img" alt="activities-checkin-captcha-small-img" src="#">
-			</div>
-			<div class="div-center">
-				<input id="activities-checkin-captcha-input" class="captcha-input" type="range" min="0" max="320" step="1" value="0">
-				&emsp;
-				<button id="activities-checkin-captcha-button">Verify</button>
-			</div>
-		</div>
+		<div id="accounts-list-div" style="display: none"></div>
 		<div id="ids-login-captcha-div" style="display: none">
 			<div id="ids-login-captcha-container-div" class="captcha-container-div">
 				<img id="ids-login-captcha-img" class="captcha-img" alt="ids-login-captcha-img" src="#">
@@ -55,6 +45,17 @@
 				<input id="ids-login-captcha-input" class="captcha-input" type="range" min="0" max="280" step="1" value="0">
 				&emsp;
 				<button id="ids-login-captcha-button">Verify</button>
+			</div>
+		</div>
+		<div id="activities-checkin-captcha-div" style="display: none">
+			<div id="activities-checkin-captcha-container-div" class="captcha-container-div">
+				<img id="activities-checkin-captcha-img" class="captcha-img" alt="activities-checkin-captcha-img" src="#">
+				<img id="activities-checkin-captcha-small-img" class="captcha-small-img" alt="activities-checkin-captcha-small-img" src="#">
+			</div>
+			<div class="div-center">
+				<input id="activities-checkin-captcha-input" class="captcha-input" type="range" min="0" max="320" step="1" value="0">
+				&emsp;
+				<button id="activities-checkin-captcha-button">Verify</button>
 			</div>
 		</div>
 		<div id="curriculum-list-div" style="display: none"></div>

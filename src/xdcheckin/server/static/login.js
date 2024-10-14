@@ -1,23 +1,99 @@
+async function setAccount(username) {
+	const account = JSON.parse(
+			    localStorage.getItem("accounts") || "{}")[username];
+	if (!account) {
+		alert("No such account.");
+		return;
+	}
+	localStorage.setItem("username", username);
+	localStorage.setItem("password", account.password);
+	localStorage.setItem("cookies", account.cookies);
+	localStorage.setItem("login_method", account.login_method);
+}
+
+async function deleteAccount() {
+	const username = prompt("Input username to delete:");
+	if (username === null)
+		return;
+	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+	if (Object.keys(accounts).length < 2) {
+		alert("Cannot delete the only account.");
+	}
+	delete accounts[username];
+	localStorage.setItem("accounts", JSON.stringify(accounts));
+	const b = document.getElementById(`accounts-${username}-button`);
+	b.parentElement.removeChild(b);
+	if (localStorage.getItem("username") == username) {
+		setAccount(Object.keys(accounts)[0]);
+		alert("Deleted the active one. Logging in with another.");
+		promptLogin(auto = 2);
+	}
+}
+
+async function listAccounts() {
+	if (listAccounts.calling)
+		return;
+	listAccounts.calling = true;
+	document.getElementById("accounts-button").style.display = "none";
+	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+	const e = document.getElementById("accounts-list-div");
+	e.replaceChildren();
+	if (Object.keys(accounts).length < 4)
+		e.appendChild(newElement("button", {
+			innerText: "New", onclick: () => promptLogin()
+		}));
+	if (Object.keys(accounts).length)
+		e.appendChild(newElement("button", {
+			innerText: "Delete", onclick: () => deleteAccount()
+		}));
+	e.appendChild(document.createElement("br"));
+	for (let username in accounts) {
+		const login_method = accounts[username].login_method;
+		e.appendChild(newElement("button", {
+			id: `accounts-${username}-button`,
+			innerText: `${username} (${login_method})`,
+			onclick: () => {
+				setAccount(username);
+				promptLogin(auto = 2);
+			}
+		}));
+	}
+	hideOtherLists('accounts-list-div');
+	listAccounts.calling = false;
+}
+
 async function afterLoginDuties(auto = false) {
 	enablePlayers();
 	getCurriculum(false).then(() => {
 		if (localStorage.getItem("fid") == "16820")
 			getCurriculum(true);
 	});
+	const username = localStorage.getItem("username");
+	document.getElementById("logout-button").innerText =
+			    `Logout (*${username.substr(username.length - 4)})`;
+	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+	accounts[username] = {
+		"password": localStorage.getItem("password"),
+		"cookies": localStorage.getItem("cookies"),
+		"login_method": localStorage.getItem("login_method")
+	}
+	localStorage.setItem("accounts", JSON.stringify(accounts));
 	[
-		"login-button", "logout-button",
+		"logout-button",
 		"player0-scan-button", "player2-scan-button",
 		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
 	].forEach(displayTag);
-	if (!auto)
+	document.getElementById("accounts-button").style.display = "none";
+	document.getElementById("accounts-list-div").style.display = "none";
+	if (auto != 1)
 		alert("Logged in successfully.");
 }
 
 async function afterLogoutDuties() {
 	hideOtherLists();
 	[
-		"login-button", "logout-button",
+		"accounts-button", "logout-button",
 		"player0-scan-button", "player2-scan-button",
 		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
@@ -30,8 +106,7 @@ async function promptLogin(auto = false) {
 	let username = localStorage.getItem("username");
 	let password = localStorage.getItem("password");
 	let method = (localStorage.getItem("login_method") === "ids");
-	if (!username ||
-	   (!auto && !confirm(`Use previously entered account ${username}?`))) {
+	if (!username || !auto) {
 		method = !confirm("Login?\nChoose account type: " +
 				 "confirm for Chaoxing, else IDS.");
 		username = prompt("Input username:");
@@ -73,8 +148,7 @@ async function chaoxingLogin(username, password, force = false) {
 				 "" : localStorage.getItem("cookies"));
 	try {
 		const res = await post("/chaoxing/login", {
-			"username": username,
-			"password": password,
+			"username": username, "password": password,
 			"cookies": cookies
 		});
 		assert(res.status == 200, "Backend Chaoxing login error.");
@@ -100,7 +174,7 @@ async function idsLogin(username, password) {
 	const cookies = username != localStorage.getItem("username") ||
 			password != localStorage.getItem("password") ?
 			"" : localStorage.getItem("cookies");
-	const l = document.getElementById("login-button");
+	const l = document.getElementById("accounts-button");
 	try {
 		if (cookies) {
 			ret = await chaoxingLogin("", "", true);
@@ -128,7 +202,7 @@ async function idsLoginPrepareCaptcha() {
 	assert(res.status == 200, "Backend IDS login prepare error.");
 	const data = res.json();
 	assert(!data.err, data.err);
-	const l = document.getElementById("login-button");
+	const l = document.getElementById("accounts-button");
 	l.disabled = true;
 	const c = document.getElementById("ids-login-captcha-container-div");
 	const s = document.getElementById("ids-login-captcha-input");
@@ -154,9 +228,7 @@ async function idsLoginPrepareCaptcha() {
 
 async function idsLoginFinish(username, password, vcode) {
 	const res = await post("/ids/login_finish", {
-		"username": username,
-		"password": password,
-		"vcode": vcode
+		"username": username, "password": password, "vcode": vcode
 	});
 	assert(res.status == 200, "Backend IDS login finish error.");
 	const data = res.json();

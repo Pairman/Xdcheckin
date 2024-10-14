@@ -9,7 +9,8 @@ async function getCurriculum(live = false) {
 			   `semester ${curriculum.details.semester}, ` +
 			   `week ${curriculum.details.week}.`
 	});
-	document.getElementById("curriculum-list-div").replaceChildren(d);
+	const e = document.getElementById("curriculum-list-div");
+	e.replaceChildren(d);
 	if (!Object.keys(curriculum.lessons).length) {
 		d.innerText += " No curriculum.";
 		return getCurriculum.calling = false;
@@ -56,6 +57,6 @@ async function getCurriculum(live = false) {
 				}));
 			});
 	}
-	document.getElementById("curriculum-list-div").appendChild(table);
+	e.appendChild(table);
 	getCurriculum.calling = false;
 }

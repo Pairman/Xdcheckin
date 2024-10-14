@@ -46,8 +46,9 @@ async function displayTag(e_id) {
 
 async function hideOtherLists(e_id) {
 	const e_ids = [
-		"curriculum-list-div", "locations-list-div",
-		"activities-list-div", "classrooms-list-div"
+		"accounts-list-div", "curriculum-list-div",
+		"locations-list-div", "activities-list-div",
+		"classrooms-list-div"
 	];
 	for (let i in e_ids) {
 		if (e_ids[i] == e_id)

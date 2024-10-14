@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.1] - 2024-10-14
+
+### Added
+
+- (Webpage) Multi-account support with 4 accounts max.
+
 ## [3.9.10] - 2024-10-13
 
 ### Changed
@@ -827,7 +833,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.9.10...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.1...main
+[3.10.1]: https://github.com/Pairman/Xdcheckin/compare/3.9.10...3.10.1
 [3.9.10]: https://github.com/Pairman/Xdcheckin/compare/3.9.9...3.9.10
 [3.9.9]: https://github.com/Pairman/Xdcheckin/compare/3.9.8...3.9.9
 [3.9.8]: https://github.com/Pairman/Xdcheckin/compare/3.9.7...3.9.8

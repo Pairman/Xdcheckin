@@ -36,7 +36,6 @@ async function getActivities() {
 			ts += ts_hm;
 			te += te_hm;
 			const b = newElement("button", {
-				id: `chaoxing-activity-${a.active_id}-button`,
 				disabled: a.type == "2",
 				innerText: `${a.name} (${type}, ${ts} ~ ${te})`,
 				onclick: () => chaoxingCheckinLocationWrapper(a)
