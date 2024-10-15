@@ -8,7 +8,7 @@ async function setAccount(username) {
 	localStorage.setItem("username", username);
 	localStorage.setItem("password", account.password);
 	localStorage.setItem("cookies", account.cookies);
-	localStorage.setItem("chaoxing_config", account.chaoxing_config);
+	localStorage.setItem("chaoxing_config", account.chaoxing_config || "{}");
 	localStorage.setItem("login_method", account.login_method);
 }
 
