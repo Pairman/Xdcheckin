@@ -177,10 +177,7 @@ async def _chaoxing_login(req, data = None):
 			"chaoxing_checkin_location_address_override_maxlen": 13
 		}
 		if "chaoxing_config" in data:
-			try:
-				config.update(_loads(data["chaoxing_config"]))
-			excpet Exception:
-				pass
+			config.update(_loads(data["chaoxing_config"]))
 		cx = await _Chaoxing(
 			username = username, password = password,
 			cookies = _loads(cookies) if cookies else None,
