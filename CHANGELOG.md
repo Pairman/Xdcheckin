@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.5] - 2024-10-16
+
+### Fixed
+
+- Login failure caused by uninitialized Chaixing configurations.
+
 ## [3.10.4] - 2024-10-15
 
 ### Added
@@ -852,7 +858,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.4...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.5...main
+[3.10.5]: https://github.com/Pairman/Xdcheckin/compare/3.10.4...3.10.5
 [3.10.4]: https://github.com/Pairman/Xdcheckin/compare/3.10.3...3.10.4
 [3.10.3]: https://github.com/Pairman/Xdcheckin/compare/3.10.2...3.10.3
 [3.10.2]: https://github.com/Pairman/Xdcheckin/compare/3.10.1...3.10.2
