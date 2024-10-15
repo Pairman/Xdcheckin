@@ -7,7 +7,7 @@ from asyncio import (
 )
 from json import loads as _loads, dumps as _dumps
 from math import trunc as _trunc
-from random import random as _random, shuffle as _shuffle, uniform as _uniform
+from random import shuffle as _shuffle, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
 from xdcheckin.util.captcha import (
@@ -54,15 +54,10 @@ class Chaoxing:
 	__config = {
 		"requests_headers": {
 			"User-Agent":
-				"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit"
-				"/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 M"
-				"obile Safari/537.36 com.chaoxing.mobile.xuezai"
-				"xidian/ChaoXingStudy_1000149_6.2_android_phone"
-				"_6001_234",
-			"X-Forwarded-For":
-				f"113.200.{_trunc(_random() * 228) + 16}."
-				f"{_trunc(_random() * 256)}"
-				
+			"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
+			"(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537"
+			".36 com.chaoxing.mobile.xuezaixidian/ChaoXingStudy_100"
+			"0149_6.2_android_phone_6001_234"
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_course_get_activities_courses_limit": 32,
