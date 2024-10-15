@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.2] - 2024-10-15
+
+### Fixed
+
+- Course fetching is now more robust.
+
 ## [3.10.1] - 2024-10-14
 
 ### Added
@@ -833,7 +839,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.1...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.2...main
+[3.10.2]: https://github.com/Pairman/Xdcheckin/compare/3.10.1...3.10.2
 [3.10.1]: https://github.com/Pairman/Xdcheckin/compare/3.9.10...3.10.1
 [3.9.10]: https://github.com/Pairman/Xdcheckin/compare/3.9.9...3.9.10
 [3.9.9]: https://github.com/Pairman/Xdcheckin/compare/3.9.8...3.9.9

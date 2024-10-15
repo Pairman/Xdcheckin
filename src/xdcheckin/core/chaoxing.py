@@ -7,7 +7,7 @@ from asyncio import (
 )
 from json import loads as _loads, dumps as _dumps
 from math import trunc as _trunc
-from random import choice as _choice, random as _random, uniform as _uniform
+from random import random as _random, shuffle as _shuffle, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
 from xdcheckin.util.captcha import (
@@ -599,32 +599,42 @@ class Chaoxing:
 		:return: Dictionary of class IDs to course containing \
 		course IDs, names, teachers, status, start and end time.
 		"""
-		url = _choice((
+		urls = [
+			"https://mooc1-1.chaoxing.com/visit/courselistdata",
+			"https://mooc1-2.chaoxing.com/visit/courselistdata",
+			"https://mooc1-3.chaoxing.com/visit/courselistdata",
 			"https://mooc1-4.chaoxing.com/visit/courselistdata",
-			"https://mooc1-4.chaoxing.com/mooc-ans/visit/courselistdata",
 			"https://mooc1-api.chaoxing.com/visit/courselistdata",
-			"https://mooc1-api.chaoxing.com/mooc-ans/visit/courselistdata",
+			"https://mooc1-gray.chaoxing.com/visit/courselistdata",
 			"https://mooc2-ans.chaoxing.com/visit/courselistdata",
-			"https://mooc2-ans.chaoxing.com/mooc2-ans/visit/courselistdata",
-			"https://mooc2-gray.chaoxing.com/visit/courselistdata",
-			"https://mooc2-gray.chaoxing.com/mooc2-ans/visit/courselistdata"
-		))
-		headers = {**self.__session.headers, **({
-			"Host": "mooc2-ans.chaoxing.com"
-		} if url.startswith("https://mooc1") else {
-			"Origin": "https://mooc2-gray.chaoxing.com",
-			"Referer": "https://mooc2-gray.chaoxing.com",
-			"X-Requested-With": "XMLHttpRequest",
-			"Accept-Encoding": "gzip"
-		} if url.startswith("https://mooc2-gray") else {
-		})}
+			"https://mooc2-gray.chaoxing.com/visit/courselistdata"
+		]
+		_shuffle(urls)
 		params = {"courseType": 1}
-		res = await self.__session.get(
-			url, params = params, headers = headers, ttl = 86400
-		)
-		matches = _Chaoxing_course_get_courses_regex1.findall(
-			await res.text()
-		)
+		matches = None
+		for url in urls:
+			headers = self.__session.headers.copy()
+			if url.startswith("https://mooc1"):
+				headers.update({
+					"Host": "mooc2-ans.chaoxing.com"
+				})
+			elif url.startswith("https://mooc2-gray"):
+				headers.update({
+					"Origin":
+					"https://mooc2-gray.chaoxing.com",
+					"Referer":
+					"https://mooc2-gray.chaoxing.com",
+					"X-Requested-With": "XMLHttpRequest"
+				})
+			res = await self.__session.get(
+				url, params = params, headers = headers,
+				ttl = 86400
+			)
+			matches = _Chaoxing_course_get_courses_regex1.findall(
+				await res.text()
+			)
+			if matches:
+				break
 		courses = {}
 		status = 1
 		for match in matches:
