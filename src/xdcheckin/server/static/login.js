@@ -123,7 +123,7 @@ async function afterLoginDuties(auto = false) {
 		return;
 	alert(`Logged in successfully with ${username}.\n\n` +
 	      `Configurations for Chaoxing:\n` +
-	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '\t')}`);
+	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '    ')}`);
 }
 
 async function afterLogoutDuties() {
