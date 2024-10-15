@@ -121,7 +121,7 @@ async function afterLoginDuties(auto = false) {
 	].forEach(e_id => displayTag(e_id, 1));
 	if (auto == 1)
 		return;
-	alert(`Logged in successfully with ${username}.\n\n` +
+	alert(`Logged in successfully as ${username}.\n\n` +
 	      `Configurations for Chaoxing:\n` +
 	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '    ')}`);
 }
