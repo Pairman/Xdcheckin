@@ -39,9 +39,12 @@ function newElement(tag, properties = {}) {
 	return Object.assign(e, properties);
 }
 
-async function displayTag(e_id) {
+async function displayTag(e_id, display) {
 	const e = document.getElementById(e_id);
-	e.style.display = e.style.display == "none" ? "" : "none";
+	if (display === undefined)
+		e.style.display = e.style.display == "none" ? "" : "none";
+	else
+		e.style.display = display ? "" : "none";
 }
 
 async function hideOtherLists(e_id) {
@@ -50,18 +53,16 @@ async function hideOtherLists(e_id) {
 		"locations-list-div", "activities-list-div",
 		"classrooms-list-div"
 	];
-	for (let i in e_ids) {
-		if (e_ids[i] == e_id)
-			continue;
-		document.getElementById(e_ids[i]).style.display = "none";
-	}
+	for (let id of e_ids)
+		if (id != e_id)
+			document.getElementById(id).style.display = "none";
 	if (e_id)
 		displayTag(e_id);
 }
 
 function unescapeUnicode(s) {
-	return s.replace(/\\u[\dA-Fa-f]{4}/g, match => String.fromCharCode(
-						parseInt(match.substr(2), 16)));
+	return s.replace(/\\u[\dA-Fa-f]{4}/g, match =>
+			 String.fromCharCode(parseInt(match.substring(2), 16)));
 }
 
 function isPlatformIOS() {

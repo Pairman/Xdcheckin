@@ -13,6 +13,16 @@ async function setClassroom(url, name = "Unknown") {
 	initPlayers();
 }
 
+function getClassroomUrl(name) {
+	[["Ⅰ", "I"], ["Ⅱ", "II"], ["Ⅲ", "III"], ["信远", "信"]].forEach(
+		r => name = name.replace(...r)
+	);
+	for (building of Object.values(globalThis.g_classroom_urls))
+		if (name in building)
+			return building[name];
+	return "";
+}
+
 async function randClassroom() {
 	const b = Math.floor(Math.random() * globalThis.g_buildings.length);
 	const c = Math.floor(Math.random() * globalThis.g_buildings[b].length);

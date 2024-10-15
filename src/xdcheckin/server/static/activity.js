@@ -138,8 +138,8 @@ async function chaoxingCheckinQrcode(url, result_div_id) {
 		"location": globalThis.g_location, "video": "", "url": ""
 	};
 	if (globalThis.g_is_ios && e_id_prefix.startsWith("player"))
-		data["video"] = globalThis.g_player_sources[e_id_prefix.substr(
-						       e_id_prefix.length - 1)];
+		data["video"] = globalThis.g_player_sources[
+				 e_id_prefix.substring(e_id_prefix.length - 1)];
 	else
 		data["url"] = url;
 	const res = await post("/chaoxing/checkin_checkin_qrcode_url", data);

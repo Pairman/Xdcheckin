@@ -10,12 +10,10 @@ async function enableCamera() {
 
 async function cameraOn() {
 	navigator.mediaDevices.getUserMedia({
-		video: {
+		audio: false, video: {
 			facingMode: {exact: "environment"},
-			height: {ideal: 1536},
-			width: {ideal: 2048}
-		},
-		audio: false
+			height: {ideal: 1536}, width: {ideal: 2048}
+		}
 	}).then(stream => {
 		const e = document.getElementById("camera-video");
 		e.srcObject = stream;
@@ -62,14 +60,11 @@ async function initPlayers() {
 			player.dispose();
 		if (isValidUrl(globalThis.g_player_sources[i])) {
 			player = globalThis.g_players[i] = new Aliplayer({
-				id: `player${i}-div`,
-				isLive: true,
+				id: `player${i}-div`, isLive: true,
 				width: globalThis.g_player_width,
 				height: globalThis.g_player_height,
 				source: globalThis.g_player_sources[i],
-				playsinline: true,
-				autoplay: i == 0,
-				mute: true
+				playsinline: true, autoplay: i == 0, mute: true
 			});
 			player._player._monitor._logService._report = () => {};
 		}

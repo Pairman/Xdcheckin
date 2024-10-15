@@ -1,7 +1,4 @@
 async function getCurriculum(live = false) {
-	if (getCurriculum.calling)
-		return;
-	getCurriculum.calling = true;
 	const curriculum = (await post("/chaoxing/get_curriculum",
 				       live)).json();
 	const d = newElement("div", {
@@ -10,16 +7,15 @@ async function getCurriculum(live = false) {
 			   `week ${curriculum.details.week}.`
 	});
 	const e = document.getElementById("curriculum-list-div");
-	e.replaceChildren(d);
+	e.replaceChildren();
 	if (!Object.keys(curriculum.lessons).length) {
 		d.innerText += " No curriculum.";
-		return getCurriculum.calling = false;
+		return;
 	}
 	const table = newElement("table", {"style": "border = 1"});
 	const tb = table.appendChild(newElement("tbody"));
 	const timetable = curriculum.details.time.timetable;
-	for (let class_id in curriculum.lessons) {
-		const lesson = curriculum.lessons[class_id];
+	for (let lesson of Object.values(curriculum.lessons)) {
 		const tr = tb.appendChild(newElement("tr"));
 		let td = tr.appendChild(newElement("td"));
 		td.appendChild(document.createTextNode(lesson.name));
@@ -40,13 +36,7 @@ async function getCurriculum(live = false) {
 
 		});
 		td = tr.appendChild(newElement("td"));
-		if (!lesson.livestreams)
-			lesson.locations.forEach((v, i) => {
-				if (i)
-					td.appendChild(newElement("br"));
-				td.appendChild(document.createTextNode(v));
-			});
-		else
+		if (lesson.livestreams) {
 			lesson.livestreams.forEach((v, i) => {
 				if (i)
 					td.appendChild(newElement("br"));
@@ -56,7 +46,18 @@ async function getCurriculum(live = false) {
 								    v.location)
 				}));
 			});
+			continue;
+		}
+		lesson.locations.forEach((v, i) => {
+			if (i)
+				td.appendChild(newElement("br"));
+			const url = getClassroomUrl(v);
+			td.appendChild(url ? newElement("button", {
+				innerText: v,
+				onclick: () => setClassroom(url, v)
+			}) : document.createTextNode(v));
+		});
 	}
+	e.appendChild(d);
 	e.appendChild(table);
-	getCurriculum.calling = false;
 }

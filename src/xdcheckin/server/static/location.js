@@ -31,7 +31,7 @@ async function listLocations() {
 		e.appendChild(newElement("button", {
 			innerText: buildingName, onclick: () =>
 			setLocation(globalThis.g_locations[buildingName],
-				    buildingName),
+				    buildingName)
 		}));
 	}
 	const loc = localStorage.getItem('location_');

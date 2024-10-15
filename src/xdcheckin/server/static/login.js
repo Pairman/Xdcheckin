@@ -26,7 +26,7 @@ async function deleteAccount() {
 	if (localStorage.getItem("username") == username) {
 		setAccount(Object.keys(accounts)[0]);
 		alert("Deleted the active one. Logging in with another.");
-		promptLogin(auto = 2);
+		promptLogin(2);
 	}
 }
 
@@ -54,7 +54,7 @@ async function listAccounts() {
 			innerText: `${username} (${login_method})`,
 			onclick: () => {
 				setAccount(username);
-				promptLogin(auto = 2);
+				promptLogin(2);
 			}
 		}));
 	}
@@ -64,13 +64,12 @@ async function listAccounts() {
 
 async function afterLoginDuties(auto = false) {
 	enablePlayers();
-	getCurriculum(false).then(() => {
-		if (localStorage.getItem("fid") == "16820")
-			getCurriculum(true);
-	});
+	getCurriculum();
+	if (localStorage.getItem("fid") == "16820")
+		getCurriculum(true);
 	const username = localStorage.getItem("username");
 	document.getElementById("logout-button").innerText =
-			    `Logout (*${username.substr(username.length - 4)})`;
+			 `Logout (*${username.substring(username.length - 4)})`;
 	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
 	accounts[username] = {
 		"password": localStorage.getItem("password"),
@@ -78,14 +77,14 @@ async function afterLoginDuties(auto = false) {
 		"login_method": localStorage.getItem("login_method")
 	}
 	localStorage.setItem("accounts", JSON.stringify(accounts));
+	["accounts-button", "accounts-list-div"].forEach(
+						   e_id => displayTag(e_id, 0));
 	[
 		"logout-button",
 		"player0-scan-button", "player2-scan-button",
 		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
-	].forEach(displayTag);
-	document.getElementById("accounts-button").style.display = "none";
-	document.getElementById("accounts-list-div").style.display = "none";
+	].forEach(e_id => displayTag(e_id, 1));
 	if (auto != 1)
 		alert("Logged in successfully.");
 }
@@ -93,11 +92,12 @@ async function afterLoginDuties(auto = false) {
 async function afterLogoutDuties() {
 	hideOtherLists();
 	[
-		"accounts-button", "logout-button",
+		"logout-button",
 		"player0-scan-button", "player2-scan-button",
 		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
-	].forEach(displayTag);
+	].forEach(e_id => displayTag(e_id, 0));
+	displayTag("accounts-button", 1);
 }
 
 async function promptLogin(auto = false) {
