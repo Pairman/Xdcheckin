@@ -39,6 +39,6 @@ def chaoxing_get_devicecode(ident: str = ""):
 	:return: Device code.
 	"""
 	return encrypt_aes(
-		msg = ident, key = b"QrCbNY@MuK1X8HGw", iv = None,
+		msg = f"{ident}", key = b"QrCbNY@MuK1X8HGw", iv = None,
 		mode = _MODE_ECB
 	).strip()

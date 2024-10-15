@@ -60,6 +60,7 @@ class Chaoxing:
 			"0149_6.2_android_phone_6001_234"
 		},
 		"requests_cache_enabled": True,
+		"chaoxing_device_identifier": "",
 		"chaoxing_course_get_activities_courses_limit": 32,
 		"chaoxing_course_get_activities_workers": 16,
 		"chaoxing_checkin_location_address_override_maxlen": 0,
@@ -131,7 +132,9 @@ class Chaoxing:
 			self.__fid = cookies["fid"].value
 		self.__cookies = self.__session.cookies = cookies
 		self.__uid = cookies["UID"].value
-		ident = _chaoxing_get_identifier(self.__uid)
+		ident = self.__config[
+			"chaoxing_device_identifier"
+		] or _chaoxing_get_identifier(self.__uid)
 		self.__secrets["device_code"] = _chaoxing_get_devicecode(ident)
 		self.__courses = await self.course_get_courses()
 		return self
@@ -208,8 +211,7 @@ class Chaoxing:
 		url3 = "https://captcha.chaoxing.com/captcha/get/verification/image"
 		params3 = {
 			"callback": "cx_captcha_function",
-			"captchaId": captcha_id,
-			"captchaKey": captcha_key,
+			"captchaId": captcha_id, "captchaKey": captcha_key,
 			"token": token, "type": "slide", "version": "1.1.20",
 			"referer": "https://mobilelearn.chaoxing.com",
 			"_": _trunc(_time() * 1000), "iv": iv
@@ -217,8 +219,7 @@ class Chaoxing:
 		res3 = await self.__session.get(url3, params = params3)
 		data3 = _loads((await res3.text())[20 : -1])
 		captcha.update({
-			"token": data3["token"],
-			"big_img_src":
+			"token": data3["token"], "big_img_src":
 			data3["imageVerificationVo"]["shadeImage"],
 			"small_img_src":
 			data3["imageVerificationVo"]["cutoutImage"]
@@ -637,16 +638,12 @@ class Chaoxing:
 				status = 0
 				continue
 			courses[match[2]] = {
-				"class_id": match[2],
-				"course_id": match[0],
-				"name": match[1],
-				"teachers": 
+				"class_id": match[2], "course_id": match[0],
+				"name": match[1], "teachers": 
 				_Chaoxing_course_get_courses_regex2.split(
 					match[3]
-				),
-				"status": status,
-				"time_start": match[4],
-				"time_end": match[5]
+				), "status": status,
+				"time_start": match[4], "time_end": match[5]
 			}
 		return courses
 

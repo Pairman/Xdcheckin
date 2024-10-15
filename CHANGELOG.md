@@ -4,6 +4,13 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.4] - 2024-10-15
+
+### Added
+
+- (Webpage) Add option to configure and reconfigure for Chaoxing.
+- (Module) Add config option ```"chaoxing_device_identifier"``` for ```xdcheckin.Chaoxing```.
+
 ## [3.10.3] - 2024-10-15
 
 ### Changed
@@ -845,7 +852,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.3...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.4...main
+[3.10.4]: https://github.com/Pairman/Xdcheckin/compare/3.10.3...3.10.4
 [3.10.3]: https://github.com/Pairman/Xdcheckin/compare/3.10.2...3.10.3
 [3.10.2]: https://github.com/Pairman/Xdcheckin/compare/3.10.1...3.10.2
 [3.10.1]: https://github.com/Pairman/Xdcheckin/compare/3.9.10...3.10.1

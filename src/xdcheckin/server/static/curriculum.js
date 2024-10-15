@@ -1,12 +1,16 @@
 async function getCurriculum(live = false) {
 	const curriculum = (await post("/chaoxing/get_curriculum",
 				       live)).json();
+	const e = document.getElementById("curriculum-list-div");
+	if (!Object.keys(curriculum).length && !e.children.length) {
+		d.innerText += "Error fetching curriculum.";
+		return;
+	}
 	const d = newElement("div", {
 		innerText: `Current year ${curriculum.details.year}, ` +
 			   `semester ${curriculum.details.semester}, ` +
 			   `week ${curriculum.details.week}.`
 	});
-	const e = document.getElementById("curriculum-list-div");
 	e.replaceChildren();
 	if (!Object.keys(curriculum.lessons).length) {
 		d.innerText += " No curriculum.";

@@ -8,6 +8,7 @@ async function setAccount(username) {
 	localStorage.setItem("username", username);
 	localStorage.setItem("password", account.password);
 	localStorage.setItem("cookies", account.cookies);
+	localStorage.setItem("chaoxing_config", account.chaoxing_config);
 	localStorage.setItem("login_method", account.login_method);
 }
 
@@ -26,8 +27,32 @@ async function deleteAccount() {
 	if (localStorage.getItem("username") == username) {
 		setAccount(Object.keys(accounts)[0]);
 		alert("Deleted the active one. Logging in with another.");
-		promptLogin(2);
+		promptLogin(auto = 2);
 	}
+}
+
+async function reconfAccount() {
+	const username = prompt("Input username to reconfigure for Chaoxing:");
+	if (username === null)
+		return;
+	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
+	if (!(username in accounts)) {
+		alert("No such account.");
+		return;
+	}
+	const chaoxing_config = prompt("Modify configurations for Chaoxing:",
+				       accounts[username].chaoxing_config ||
+				       "{}");
+	try {
+		assert(JSON.parse(chaoxing_config).constructor == Object);
+	}
+	catch (err) {
+		alert("Invalid configurations.");
+		return;
+	}
+	accounts[username].chaoxing_config = chaoxing_config;
+	localStorage.setItem("accounts", JSON.stringify(accounts));
+	alert("Configuration updated.");
 }
 
 async function listAccounts() {
@@ -42,19 +67,26 @@ async function listAccounts() {
 		e.appendChild(newElement("button", {
 			innerText: "New", onclick: () => promptLogin()
 		}));
-	if (Object.keys(accounts).length)
+	if (Object.keys(accounts).length) {
 		e.appendChild(newElement("button", {
 			innerText: "Delete", onclick: () => deleteAccount()
 		}));
+		e.appendChild(newElement("button", {
+			innerText: "Reconfigure", onclick: () => reconfAccount()
+		}));
+	}
 	e.appendChild(document.createElement("br"));
 	for (let username in accounts) {
-		const login_method = accounts[username].login_method;
+		const account = accounts[username];
+		const login_method = account.login_method;
+		const config_len = Object.keys(JSON.parse(
+				       account.chaoxing_config || "{}")).length;
 		e.appendChild(newElement("button", {
-			id: `accounts-${username}-button`,
-			innerText: `${username} (${login_method})`,
+			id: `accounts-${username}-button`, innerText:
+			`${username} (${login_method}, ${config_len} configs)`,
 			onclick: () => {
 				setAccount(username);
-				promptLogin(2);
+				promptLogin(auto = 2);
 			}
 		}));
 	}
@@ -68,13 +100,15 @@ async function afterLoginDuties(auto = false) {
 	if (localStorage.getItem("fid") == "16820")
 		getCurriculum(true);
 	const username = localStorage.getItem("username");
+	const chaoxing_config = localStorage.getItem("chaoxing_config");
 	document.getElementById("logout-button").innerText =
 			 `Logout (*${username.substring(username.length - 4)})`;
 	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
 	accounts[username] = {
 		"password": localStorage.getItem("password"),
 		"cookies": localStorage.getItem("cookies"),
-		"login_method": localStorage.getItem("login_method")
+		"login_method": localStorage.getItem("login_method"),
+		chaoxing_config
 	}
 	localStorage.setItem("accounts", JSON.stringify(accounts));
 	["accounts-button", "accounts-list-div"].forEach(
@@ -85,8 +119,11 @@ async function afterLoginDuties(auto = false) {
 		"camera-scan-button",
 		"locations-button", "activities-button", "curriculum-button"
 	].forEach(e_id => displayTag(e_id, 1));
-	if (auto != 1)
-		alert("Logged in successfully.");
+	if (auto == 1)
+		return;
+	alert(`Logged in successfully with ${username}.\n\n` +
+	      `Configurations for Chaoxing:\n` +
+	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '\t')}`);
 }
 
 async function afterLogoutDuties() {
@@ -105,6 +142,7 @@ async function promptLogin(auto = false) {
 		return;
 	let username = localStorage.getItem("username");
 	let password = localStorage.getItem("password");
+	let chaoxing_config = localStorage.getItem("chaoxing_config") || "{}";
 	let method = (localStorage.getItem("login_method") === "ids");
 	if (!username || !auto) {
 		method = !confirm("Login?\nChoose account type: " +
@@ -116,13 +154,29 @@ async function promptLogin(auto = false) {
 		password = prompt("Input password:");
 		if (password === null)
 			return;
+		assert(password, "Invalid password.");
+		chaoxing_config = prompt("(Optional)" +
+					 "Input configurations for Chaoxing " +
+					 "(in JSON string):") || "{}";
+		try {
+			assert(JSON.parse(chaoxing_config).constructor ==
+			       Object);
+		}
+		catch (err) {
+			throw new Error("Invalid configurations.");
+		}
 	}
 	try {
-		const ret = await (method ? idsLogin(username, password) :
-					    chaoxingLogin(username, password));
+		const ret = await (method ? idsLogin(username, password,
+						     chaoxing_config =
+						     chaoxing_config) :
+					    chaoxingLogin(username, password,
+							  force = false,
+							  chaoxing_config =
+							  chaoxing_config));
 		assert(ret === true, ret);
 		globalThis.g_logged_in = true;
-		afterLoginDuties(auto);
+		afterLoginDuties(auto = auto);
 	}
 	catch (err) {
 		globalThis.g_logged_in = false;
@@ -140,7 +194,8 @@ async function promptLogout() {
 	}
 }
 
-async function chaoxingLogin(username, password, force = false) {
+async function chaoxingLogin(username, password, force = false,
+			     chaoxing_config = "{}") {
 	let ret = false;
 	const cookies = force ? localStorage.getItem("cookies") :
 				(username != localStorage.getItem("username") ||
@@ -149,7 +204,7 @@ async function chaoxingLogin(username, password, force = false) {
 	try {
 		const res = await post("/chaoxing/login", {
 			"username": username, "password": password,
-			"cookies": cookies
+			"cookies": cookies, "chaoxing_config": chaoxing_config
 		});
 		assert(res.status == 200, "Backend Chaoxing login error.");
 		const data = res.json();
@@ -159,6 +214,7 @@ async function chaoxingLogin(username, password, force = false) {
 		localStorage.setItem("username", username);
 		localStorage.setItem("password", password);
 		localStorage.setItem("cookies", data.cookies);
+		localStorage.setItem("chaoxing_config", chaoxing_config);
 		localStorage.setItem("fid", data.fid);
 		globalThis.g_courses = data.courses;
 		ret = true;
@@ -169,7 +225,7 @@ async function chaoxingLogin(username, password, force = false) {
 	return ret;
 }
 
-async function idsLogin(username, password) {
+async function idsLogin(username, password, chaoxing_config = "{}") {
 	let ret = false;
 	const cookies = username != localStorage.getItem("username") ||
 			password != localStorage.getItem("password") ?
@@ -177,7 +233,9 @@ async function idsLogin(username, password) {
 	const l = document.getElementById("accounts-button");
 	try {
 		if (cookies) {
-			ret = await chaoxingLogin("", "", true);
+			ret = await chaoxingLogin("", "", force = true,
+						  chaoxing_config =
+						  chaoxing_config);
 			if (ret === true) {
 				localStorage.setItem("login_method", "ids");
 				localStorage.setItem("username", username);
@@ -187,7 +245,8 @@ async function idsLogin(username, password) {
 		}
 		l.disabled = true;
 		await idsLoginFinish(username, password,
-				     await idsLoginPrepareCaptcha());
+				     await idsLoginPrepareCaptcha(),
+				     chaoxing_config = chaoxing_config);
 		ret = true;
 	}
 	catch (err) {
@@ -226,9 +285,11 @@ async function idsLoginPrepareCaptcha() {
 	return vcode;
 }
 
-async function idsLoginFinish(username, password, vcode) {
+async function idsLoginFinish(username, password, vcode,
+			      chaoxing_config = "{}") {
 	const res = await post("/ids/login_finish", {
-		"username": username, "password": password, "vcode": vcode
+		"username": username, "password": password, "vcode": vcode,
+		"chaoxing_config": chaoxing_config
 	});
 	assert(res.status == 200, "Backend IDS login finish error.");
 	const data = res.json();
@@ -238,6 +299,7 @@ async function idsLoginFinish(username, password, vcode) {
 	localStorage.setItem("username", username);
 	localStorage.setItem("password", password);
 	localStorage.setItem("cookies", data.cookies);
+	localStorage.setItem("chaoxing_config", chaoxing_config);
 	localStorage.setItem("fid", data.fid);
 	globalThis.g_courses = data.courses;
 	return true;

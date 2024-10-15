@@ -302,8 +302,7 @@ class Newesxidian:
 				"class_id": class_id,
 				"course_id": f"{lesson['courseId']}",
 				"name": lesson["courseName"],
-				"locations": [location],
-				"invite_code": "",
+				"locations": [location], "invite_code": "",
 				"teachers": self.__cx.courses.get(
 					class_id, {}
 				).get("teachers", []),

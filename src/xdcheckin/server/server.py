@@ -148,10 +148,13 @@ async def _ids_login_finish(req):
 		_create_task(ids.__aexit__(None, None, None))
 		assert ret["logged_in"], "IDS login failed."
 		cookies = ret["cookies"].filter_cookies("https://chaoxing.com")
-		return await _chaoxing_login(req = req, data = {
+		_data = {
 			"username": "", "password": "", "cookies":
 			_dumps({k: v.value for k, v in cookies.items()})
-		})
+		}
+		if "chaoxing_config" in data:
+			_data["chaoxing_config"] = data["chaoxing_config"]
+		return await _chaoxing_login(req = req, data = _data)
 	except Exception as e:
 		return _Response(
 			text = _dumps({"err": f"{e}"}),
@@ -173,6 +176,8 @@ async def _chaoxing_login(req, data = None):
 			"chaoxing_course_get_activities_courses_limit": 36,
 			"chaoxing_checkin_location_address_override_maxlen": 13
 		}
+		if "chaoxing_config" in data:
+			config.update(_loads(data["chaoxing_config"]))
 		cx = await _Chaoxing(
 			username = username, password = password,
 			cookies = _loads(cookies) if cookies else None,
@@ -193,8 +198,6 @@ async def _chaoxing_login(req, data = None):
 			_dumps({k: v.value for k, v in cx.cookies.items()})
 		}
 	except Exception as e:
-		from traceback import print_exc
-		print_exc()
 		data = {"err": f"{e}"}
 	finally:
 		return _Response(
@@ -213,7 +216,7 @@ async def _newesxidian_extract_url(req):
 		)
 		return _Response(text = livestream["url"])
 	except Exception as e:
-		return _Response(text = "")
+		return _Response(text = f"{e}")
 
 @server_routes.post("/chaoxing/get_curriculum")
 async def _chaoxing_get_curriculum(req):
