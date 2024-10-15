@@ -57,7 +57,7 @@ class Chaoxing:
 			"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
 			"(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537"
 			".36 com.chaoxing.mobile.xuezaixidian/ChaoXingStudy_100"
-			"0149_6.2_android_phone_6001_234"
+			"0149_6.3.7_android_phone_6005_249"
 		},
 		"requests_cache_enabled": True,
 		"chaoxing_device_identifier": "",
