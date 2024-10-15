@@ -155,7 +155,7 @@ async function promptLogin(auto = false) {
 		if (password === null)
 			return;
 		assert(password, "Invalid password.");
-		chaoxing_config = prompt("(Optional)" +
+		chaoxing_config = prompt("(Optional) " +
 					 "Input configurations for Chaoxing " +
 					 "(in JSON string):") || "{}";
 		try {
