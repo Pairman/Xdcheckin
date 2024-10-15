@@ -55,7 +55,7 @@ class Chaoxing:
 		"requests_headers": {
 			"User-Agent":
 			"Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 "
-			"(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537"
+			"(KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537"
 			".36 com.chaoxing.mobile.xuezaixidian/ChaoXingStudy_100"
 			"0149_6.3.7_android_phone_6005_249"
 		},
