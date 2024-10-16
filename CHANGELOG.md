@@ -4,6 +4,12 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.6] - 2024-10-16
+
+### Fixed
+
+- Fix checkin failure caused by miscalculated device identifier when some user information is missing.
+
 ## [3.10.5] - 2024-10-16
 
 ### Fixed
@@ -858,7 +864,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.5...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.6...main
+[3.10.6]: https://github.com/Pairman/Xdcheckin/compare/3.10.5...3.10.6
 [3.10.5]: https://github.com/Pairman/Xdcheckin/compare/3.10.4...3.10.5
 [3.10.4]: https://github.com/Pairman/Xdcheckin/compare/3.10.3...3.10.4
 [3.10.3]: https://github.com/Pairman/Xdcheckin/compare/3.10.2...3.10.3

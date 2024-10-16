@@ -112,7 +112,7 @@ class Chaoxing:
 					account = self.__secrets
 				)
 			).values()
-		funcs = (
+		_logins = (
 			self.login_username_fanya, self.login_username_v3,
 			self.login_username_v25, self.login_username_xxk,
 			self.login_username_xxt, self.login_username_v2,
@@ -120,7 +120,7 @@ class Chaoxing:
 			self.login_username_mylogin1, self.login_username_yz
 		)
 		if not self.__logged_in and username and password:
-			for f in funcs:
+			for f in _logins:
 				self.__name, cookies, self.__logged_in = (
 					await f(account = self.__secrets)
 				).values()
@@ -130,8 +130,8 @@ class Chaoxing:
 			return self
 		if "fid" in cookies:
 			self.__fid = cookies["fid"].value
+		self.__uid = cookies["_uid"].value
 		self.__cookies = self.__session.cookies = cookies
-		self.__uid = cookies["UID"].value
 		ident = self.__config[
 			"chaoxing_device_identifier"
 		] or _chaoxing_get_identifier(self.__uid)
@@ -376,17 +376,23 @@ class Chaoxing:
 		:param account: Same as ``login_username_v2()``.
 		:return: Same as ``login_username_v3()``.
 		"""
-		url = "http://xxk.chaoxing.com/api/front/user/login"
-		data = {
+		url1 = "http://xxk.chaoxing.com/api/front/user/login"
+		data1 = {
 			"username": account["username"], 
 			"password": account["password"], "numcode": 0
 		}
-		ret = {"name": "", "cookies": None, "logged_in": False}
-		res = await self.__session.post(
-			url = url, data = data, allow_redirects = False
+		res1 = await self.__session.post(
+			url = url1, data = data1, allow_redirects = False
 		)
-		if "p_auth_token" in res.cookies:
-			ret.update({"cookies": res.cookies, "logged_in": True})
+		ret = {"name": "", "cookies": None, "logged_in": False}
+		if "p_auth_token" in res1.cookies:
+			res1.cookies["UID"] = res1.cookies["_uid"]
+			url2 = "https://contactsyd.chaoxing.com/pc/contacts/getUnits"
+			res2 = await self.get(url2, allow_redirects = False)
+			d = (await res2.json())["msg"]
+			if d:
+				res1.cookies["fid"] = f"{d[0]['fid']}"
+			ret.update({"cookies": res1.cookies, "logged_in": True})
 		return ret
 
 	async def login_username_xxt(
@@ -657,8 +663,7 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/class/getClassDetail"
 		params = {
-			"fid": self.__fid, "courseId": "",
-			"classId": course["class_id"]
+			"courseId": "", "classId": course["class_id"]
 		}
 		course_id = course.get("course_id") or self.__courses.get(
 			course["class_id"], {}
@@ -710,9 +715,9 @@ class Chaoxing:
 		"""
 		url = "https://mobilelearn.chaoxing.com/v2/apis/active/student/activelist"
 		params = {
-			"classId": course["class_id"], "courseId":
+			"fid": "1", "classId": course["class_id"], "courseId":
 			await self.course_get_course_id(course = course),
-			"showNotStartedActive": 0, "fid": self.__fid
+			"showNotStartedActive": 0
 		}
 		res = await self.__session.get(url, params = params, ttl = 60)
 		data = ((await res.json()).get("data") or {}).get(
