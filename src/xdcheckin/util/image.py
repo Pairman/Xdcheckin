@@ -52,10 +52,12 @@ if _ffmpeg and _is_has_pil:
 		url = url.strip()
 		if url.startswith("rtsp://"):
 			proc = await _create_subprocess_exec(
-				_ffmpeg, "-rtsp_transport", "tcp",
-				"-v", "quiet", "-i", url, "-an",
-				"-vframes", "1", "-f", "image2", "-",
-				stdout = _PIPE
+				_ffmpeg, "-v", "quiet", "-flags", "low_delay",
+				"-fflags", "discardcorrupt+flush_packets",
+				"-probesize", "2048",
+				"-rtsp_transport", "tcp", "-i", url,
+				"-an", "-pix_fmt", "yuvj420p", "-vframes", "1",
+				"-f", "image2", "-", stdout = _PIPE
 			)
 		else:
 			if url.endswith(".m3u8"):
@@ -65,9 +67,11 @@ if _ffmpeg and _is_has_pil:
 				)
 				url = f"{url[: url.rfind('/')]}/{ts}"
 			proc = await _create_subprocess_exec(
-				_ffmpeg, "-v", "quiet", "-i", url, "-an",
-				"-vframes", "1", "-f", "image2", "-",
-				stdout = _PIPE
+				_ffmpeg, "-v", "quiet", "-flags", "low_delay",
+				"-fflags", "discardcorrupt+flush_packets",
+				"-probesize", "2048", "-i", url,
+				"-an", "-pix_fmt", "yuvj420p", "-vframes", "1",
+				"-f", "image2", "-", stdout = _PIPE
 			)
 		img = _open(_BytesIO((await proc.communicate())[0]))
 		return img
