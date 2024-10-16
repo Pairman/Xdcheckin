@@ -8,7 +8,8 @@ async function setAccount(username) {
 	localStorage.setItem("username", username);
 	localStorage.setItem("password", account.password);
 	localStorage.setItem("cookies", account.cookies);
-	localStorage.setItem("chaoxing_config", account.chaoxing_config || "{}");
+	localStorage.setItem("chaoxing_config",
+			     account.chaoxing_config || "{}");
 	localStorage.setItem("login_method", account.login_method);
 }
 
@@ -40,9 +41,11 @@ async function reconfAccount() {
 		alert("No such account.");
 		return;
 	}
+	const account = accounts[username];
 	const chaoxing_config = prompt("Modify configurations for Chaoxing:",
-				       accounts[username].chaoxing_config ||
-				       "{}");
+				       account.chaoxing_config || "{}");
+	if (chaoxing_config === null)
+		return;
 	try {
 		assert(JSON.parse(chaoxing_config).constructor == Object);
 	}
@@ -50,9 +53,15 @@ async function reconfAccount() {
 		alert("Invalid configurations.");
 		return;
 	}
-	accounts[username].chaoxing_config = chaoxing_config;
+	account.chaoxing_config = chaoxing_config;
 	localStorage.setItem("accounts", JSON.stringify(accounts));
-	alert("Configuration updated.");
+	if (localStorage.getItem("username") == username)
+		localStorage.setItem("chaoxing_config", chaoxing_config);
+	config_len = Object.keys(JSON.parse(chaoxing_config)).length;
+	document.getElementById(`accounts-${username}-button`).innerText =
+		 `${username} (${account.login_method}, ${config_len} configs)`;
+	alert(`Configurations updated for ${username}:\n` +
+	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '    ')}`);
 }
 
 async function listAccounts() {
