@@ -602,6 +602,8 @@ class Chaoxing:
 		course IDs, names, teachers, status, start and end time.
 		"""
 		urls = [
+			"https://mooc-res1.chaoxing.com/visit/courselistdata",
+			"https://mooc-res2.chaoxing.com/visit/courselistdata",
 			"https://mooc1-1.chaoxing.com/visit/courselistdata",
 			"https://mooc1-2.chaoxing.com/visit/courselistdata",
 			"https://mooc1-3.chaoxing.com/visit/courselistdata",
