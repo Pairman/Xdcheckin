@@ -5,11 +5,13 @@ __all__ = ("Chaoxing", )
 from asyncio import (
 	create_task as _create_task, gather as _gather, Semaphore as _Semaphore
 )
+from io import BytesIO as _BytesIO
 from json import loads as _loads, dumps as _dumps
 from math import trunc as _trunc
 from random import shuffle as _shuffle, uniform as _uniform
 from re import compile as _compile, DOTALL as _DOTALL
 from time import time as _time
+from aiohttp import FormData as _FormData
 from xdcheckin.util.captcha import (
 	chaoxing_captcha_get_checksum as _chaoxing_captcha_get_checksum
 )
@@ -46,6 +48,9 @@ _Chaoxing_checkin_do_presign_regex = _compile(
 _Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
 _Chaoxing_checkin_checkin_qrcode_url_regex = _compile(
 	r"id=(\d+).*?([0-9A-F]{32})"
+)
+_Chaoxing_pan_file_upload_regex = _compile(
+	r"const _token = \"([0-9a-f]{32})\";"
 )
 
 class Chaoxing:
@@ -609,8 +614,10 @@ class Chaoxing:
 			"https://mooc1-3.chaoxing.com/visit/courselistdata",
 			"https://mooc1-4.chaoxing.com/visit/courselistdata",
 			"https://mooc1-api.chaoxing.com/visit/courselistdata",
+			"https://mooc1.emooc.xidian.edu.cn/visit/courselistdata",
 			"https://mooc1-gray.chaoxing.com/visit/courselistdata",
 			"https://mooc2-ans.chaoxing.com/visit/courselistdata",
+			"https://mooc2-ans.emooc.xidian.edu.cn/visit/courselistdata",
 			"https://mooc2-gray.chaoxing.com/visit/courselistdata"
 		]
 		_shuffle(urls)
@@ -1259,3 +1266,55 @@ class Chaoxing:
 			}, location = location)
 		except Exception as e:
 			return False, {"msg": f"{e}", "params": {}}
+
+	async def pan_file_upload(
+		self, file: dict = {"file": None, "name": ""}
+	):
+		"""Upload file to cloud disk.
+
+		:param file: The file and its name.
+		:return: File information including upload state and object ID.
+		"""
+		url1 = "https://pan-yz.chaoxing.com/pcuserpan/upload"
+		res1 = await self.get(url1, ttl = 86400)
+		url2 = "https://pan-yz.chaoxing.com/upload"
+		data = _FormData({"puid": self.uid, "_token":
+			_Chaoxing_pan_file_upload_regex.search(
+				await res1.text()
+			)[1]
+		})
+		data.add_field(
+			"file", file["file"],
+			filename = file["name"] or f"{_time()}.txt"
+		)
+		res2 = await self.post(url2, data = data)
+		d = await res2.json(content_type = None)
+		ret = {"result": d["result"], "msg": d["msg"]}
+		if ret["result"]:
+			ret.update({
+				"name": d["data"]["name"],
+				"size": d["data"]["size"],
+				"upload_time": d["data"]["uploadDate"],
+				"modify_time": d["data"]["modifyDate"],
+				"crc": d["crc"], "object_id": d["objectId"],
+				"res_id": d["data"]["residstr"],
+				"encrypted_id": d["data"]["encryptedId"]
+			})
+		return ret
+
+	async def pan_file_download(self, file: dict = {"object_id": ""}):
+		"""Download file from cloud disk.
+
+		:param file: Object ID in dictionary.
+		:return: File information including download state and the file.
+		"""
+		url1 = f"https://im.chaoxing.com/webim/file/status/{file['object_id']}"
+		res1 = await self.get(url1, ttl = 1800)
+		d = await res1.json()
+		ret = {**file, "result": not d["status"], "msg": d["msg"]}
+		if not ret["result"]:
+			return ret
+		url2 = d["download"]
+		res2 = await self.get(url2)
+		ret["file"] = _BytesIO(await res2.read())
+		return ret
