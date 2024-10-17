@@ -1270,7 +1270,7 @@ class Chaoxing:
 	async def pan_file_upload(
 		self, file: dict = {"file": None, "name": ""}
 	):
-		"""Upload file to cloud disk.
+		"""Upload file to clouddisk.
 
 		:param file: The file and its name.
 		:return: File information including upload state and object ID.
@@ -1303,7 +1303,7 @@ class Chaoxing:
 		return ret
 
 	async def pan_file_download(self, file: dict = {"object_id": ""}):
-		"""Download file from cloud disk.
+		"""Download file from clouddisk.
 
 		:param file: Object ID in dictionary.
 		:return: File information including download state and the file.
