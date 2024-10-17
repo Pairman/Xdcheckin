@@ -49,9 +49,6 @@ _Chaoxing_checkin_do_sign_regex = _compile(r"validate_([0-9A-Fa-f]{32})")
 _Chaoxing_checkin_checkin_qrcode_url_regex = _compile(
 	r"id=(\d+).*?([0-9A-F]{32})"
 )
-_Chaoxing_pan_file_upload_regex = _compile(
-	r"const _token = \"([0-9a-f]{32})\";"
-)
 
 class Chaoxing:
 	"""Common Chaoxing APIs.
@@ -1275,13 +1272,11 @@ class Chaoxing:
 		:param file: The file and its name.
 		:return: File information including upload state and object ID.
 		"""
-		url1 = "https://pan-yz.chaoxing.com/pcuserpan/upload"
+		url1 = "https://pan-yz.chaoxing.com/api/token/uservalid"
 		res1 = await self.get(url1, ttl = 86400)
 		url2 = "https://pan-yz.chaoxing.com/upload"
 		data = _FormData({"puid": self.uid, "_token":
-			_Chaoxing_pan_file_upload_regex.search(
-				await res1.text()
-			)[1]
+			(await res1.json(content_type = None))["_token"]
 		})
 		data.add_field(
 			"file", file["file"],
