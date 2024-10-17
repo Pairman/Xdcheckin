@@ -4,6 +4,13 @@ Changelog for Xdcheckin.
 
 ## [Unreleased]
 
+## [3.10.7] - 2024-10-18
+
+### Added
+
+- (Webpage) Add ability to dump debug information.
+- (Webpage) Optimize account reconfiguration logic.
+
 ## [3.10.6] - 2024-10-16
 
 ### Fixed
@@ -864,7 +871,8 @@ Changelog for Xdcheckin.
 
 - Activities checking is now multithreaded for quicker responses.
 
-[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.6...main
+[unreleased]: https://github.com/Pairman/Xdcheckin/compare/3.10.7...main
+[3.10.7]: https://github.com/Pairman/Xdcheckin/compare/3.10.6...3.10.7
 [3.10.6]: https://github.com/Pairman/Xdcheckin/compare/3.10.5...3.10.6
 [3.10.5]: https://github.com/Pairman/Xdcheckin/compare/3.10.4...3.10.5
 [3.10.4]: https://github.com/Pairman/Xdcheckin/compare/3.10.3...3.10.4

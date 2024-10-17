@@ -236,15 +236,21 @@ class Newesxidian:
 	def logged_in(self):
 		return self.__logged_in
 
-	async def livestream_get_url(self, livestream: dict = {"live_id": ""}):
+	async def livestream_get_url(
+		self, livestream: dict = {"live_id": ""}, mode = "hls"
+	):
 		"""Get livestream URL.
 
 		:param livesteam: Live ID in dictionary.
+		:param mode: Mode of the stream URLs. 'hls', 'rtmp' or 'src'.
 		:return: Livestream URL, live ID, device ID and \
 		classroom location (``""``).
 		URL will fallback to replay URL for non-ongoing live IDs.
 		"""
-		url = "https://newesxidian.chaoxing.com/live/getViewUrlHls"
+		url = f"""https://newesxidian.chaoxing.com/live/{
+			'getYuanViewUrl' if mode == 'src' else
+			'getViewUrl' if mode == "rtmp" else 'getViewUrlHls'
+		}"""
 		live_id = livestream["live_id"]
 		params = {"liveId": live_id}
 		res = await self.__cx.get(url, params = params, ttl = 86400)

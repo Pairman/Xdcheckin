@@ -99,6 +99,11 @@ async function listAccounts() {
 		e.appendChild(newElement("button", {
 			innerText: "Reconfigure", onclick: () => reconfAccount()
 		}));
+		e.appendChild(newElement("button", {
+			innerText: "Debug", onclick: () =>
+			prompt("Debug information (Share with caution!): ",
+			       dumpsLocalStorage())
+		}));
 	}
 	e.appendChild(document.createElement("br"));
 	for (let username in accounts) {

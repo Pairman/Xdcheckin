@@ -84,6 +84,23 @@ async function screenshot_scan(video) {
 	return (await zbarWasm.scanImageData(data)).map(s => s.decode());
 }
 
+function dumpsLocalStorage() {
+	const d = {};
+	for (let i = 0; i < localStorage.length; ++i) {
+		const k = localStorage.key(i);
+		if (!/account|password|cookie|aliplayer/.test(k))
+			d[k] = localStorage.getItem(k);
+	}
+	const c = JSON.parse(localStorage.getItem("cookies") || "{}");
+	for (let k of [
+		"uf", "_d", "vc", "vc2", "vc3", "cx_p_token", "p_auth_token",
+		"xxtenc", "KI4SO_SERVER_EC"
+	])
+		delete c[k];
+	d["cookies"] = JSON.stringify(c);
+	return JSON.stringify(d);
+}
+
 async function checkEula() {
 	const msg = "This APP provides utilities for Chaoxing check-ins " +
 		  "and classroom livestreams exclusively for XDUers.\n\n" +
