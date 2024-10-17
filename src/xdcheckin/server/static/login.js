@@ -101,7 +101,7 @@ async function listAccounts() {
 		}));
 		e.appendChild(newElement("button", {
 			innerText: "Debug", onclick: () =>
-			prompt("Debug information (Share with caution!): ",
+			prompt("Debug information (share with caution!):",
 			       dumpsLocalStorage())
 		}));
 	}
