@@ -14,35 +14,50 @@ async function setAccount(username) {
 }
 
 async function deleteAccount() {
-	const username = prompt("Input username to delete:");
-	if (username === null)
-		return;
 	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
-	if (Object.keys(accounts).length < 2) {
+	let username;
+	if (Object.keys(accounts).length <= 1) {
 		alert("Cannot delete the only account.");
+		return;
+	}
+	else {
+		username = prompt("Input username to delete:");
+		if (username === null)
+			return;
+		else if (!(username in accounts)) {
+			alert("No such account.");
+			return;
+		}
 	}
 	delete accounts[username];
 	localStorage.setItem("accounts", JSON.stringify(accounts));
 	const b = document.getElementById(`accounts-${username}-button`);
 	b.parentElement.removeChild(b);
 	if (localStorage.getItem("username") == username) {
-		setAccount(Object.keys(accounts)[0]);
 		alert("Deleted the active one. Logging in with another.");
+		setAccount(Object.keys(accounts)[0]);
 		promptLogin(auto = 2);
 	}
 }
 
 async function reconfAccount() {
-	const username = prompt("Input username to reconfigure for Chaoxing:");
-	if (username === null)
-		return;
 	const accounts = JSON.parse(localStorage.getItem("accounts") || "{}");
-	if (!(username in accounts)) {
-		alert("No such account.");
-		return;
+	let username;
+	if (Object.keys(accounts).length == 1)
+		username = localStorage.getItem("username");
+	else {
+		username = prompt(
+				 "Input username to reconfigure for Chaoxing:");
+		if (username === null)
+			return;
+		else if (!(username in accounts)) {
+			alert("No such account.");
+			return;
+		}
 	}
 	const account = accounts[username];
-	const chaoxing_config = prompt("Modify configurations for Chaoxing:",
+	const chaoxing_config = prompt(`Modify Chaoxing configurations for ` +
+				       `${username}:`,
 				       account.chaoxing_config || "{}");
 	if (chaoxing_config === null)
 		return;
@@ -76,10 +91,11 @@ async function listAccounts() {
 		e.appendChild(newElement("button", {
 			innerText: "New", onclick: () => promptLogin()
 		}));
-	if (Object.keys(accounts).length) {
+	if (Object.keys(accounts).length > 1)
 		e.appendChild(newElement("button", {
 			innerText: "Delete", onclick: () => deleteAccount()
 		}));
+	if (Object.keys(accounts).length) {
 		e.appendChild(newElement("button", {
 			innerText: "Reconfigure", onclick: () => reconfAccount()
 		}));
@@ -131,7 +147,7 @@ async function afterLoginDuties(auto = false) {
 	if (auto == 1)
 		return;
 	alert(`Logged in successfully as ${username}.\n\n` +
-	      `Configurations for Chaoxing:\n` +
+	      `Chaoxing Configurations :\n` +
 	      `${JSON.stringify(JSON.parse(chaoxing_config), null, '    ')}`);
 }
 

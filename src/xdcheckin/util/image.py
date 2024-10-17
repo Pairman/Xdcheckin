@@ -22,10 +22,7 @@ except ImportError:
 async def _video_m3u8_get_ts_url(url: str, ses = None, len_limit = 256):
 	if ses:
 		res = await ses.get(url, headers = {})
-		assert (
-			res.status == 200 and
-			res.content_length < len_limit
-		)
+		assert res.status == 200 and res.content_length < len_limit
 		text = await res.text()
 	else:
 		async with _request("GET", url) as res:
@@ -49,7 +46,6 @@ if _ffmpeg and _is_has_pil:
 		Limit of length of the M3U8 data. Default is ``256``.
 		:return: Frame in ``PIL.Image.Image`` on success.
 		"""
-		url = url.strip()
 		if url.startswith("rtsp://"):
 			proc = await _create_subprocess_exec(
 				_ffmpeg, "-v", "quiet", "-flags", "low_delay",
@@ -57,7 +53,7 @@ if _ffmpeg and _is_has_pil:
 				"-probesize", "2048",
 				"-rtsp_transport", "tcp", "-i", url,
 				"-an", "-pix_fmt", "yuvj420p", "-vframes", "1",
-				"-f", "image2", "-", stdout = _PIPE
+				"-f", "image2", "-g", "1", "-", stdout = _PIPE
 			)
 		else:
 			if url.endswith(".m3u8"):
@@ -71,10 +67,9 @@ if _ffmpeg and _is_has_pil:
 				"-fflags", "discardcorrupt+flush_packets",
 				"-probesize", "2048", "-i", url,
 				"-an", "-pix_fmt", "yuvj420p", "-vframes", "1",
-				"-f", "image2", "-", stdout = _PIPE
+				"-f", "image2", "-g", "1", "-", stdout = _PIPE
 			)
-		img = _open(_BytesIO((await proc.communicate())[0]))
-		return img
+		return _open(_BytesIO((await proc.communicate())[0]))
 else:
 	class _Image:
 		"""Dummy fallback for ``PIL.Image.Image``.
